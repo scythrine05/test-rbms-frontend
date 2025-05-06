@@ -46,6 +46,8 @@ export default function CreateBlockRequestPage() {
     elementarySection: "",
     requestremarks: "",
     selectedDepo: "",
+    routeFrom: "",
+    routeTo: "",
     powerBlockRequirements: [],
     sntDisconnectionRequired: null,
     sntDisconnectionRequirements: [],
@@ -209,20 +211,14 @@ export default function CreateBlockRequestPage() {
     return streamDataTyped[streamKey] || [];
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    setSuccess(null);
-
-    // Basic validation
+  const handleFormValidation = () => {
     if (!formData.date) {
       setErrors({
         date: "Please select a date for the block request",
       });
-      return;
+      return false;
     }
 
-    // Validate time fields
     if (!formData.demandTimeFrom || !formData.demandTimeTo) {
       const newErrors: Record<string, string> = {};
       if (!formData.demandTimeFrom) {
@@ -232,7 +228,7 @@ export default function CreateBlockRequestPage() {
         newErrors.demandTimeTo = "Demand Time To is required";
       }
       setErrors(newErrors);
-      return;
+      return false;
     }
 
     let newErrors: Record<string, string> = {};
@@ -309,69 +305,63 @@ export default function CreateBlockRequestPage() {
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      return;
+      return false;
     }
 
-    // Continue with validation and submission
-    try {
-      // Prepare form data for submission
-      const completeFormData = {
-        ...formData,
-        date: formatDateToISO(formData.date || ""),
-        selectedDepartment: session?.user.department || "",
-        activity:
-          formData.activity === "others" ? customActivity : formData.activity,
-        demandTimeFrom: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeFrom || ""
-        ),
-        demandTimeTo: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeTo || ""
-        ),
-        powerBlockRequirements: [...powerBlockRequirements],
-        sntDisconnectionRequirements: [...sntDisconnectionRequirements],
-        missionBlock:
-          blockSectionValue.length > 0 ? blockSectionValue.join(",") : "",
-      };
+    return true;
+  };
 
-      // Filter processed sections to only include selected block sections
-      const validProcessedSections = (
-        formData.processedLineSections || []
-      ).filter((section) => blockSectionValue.includes(section.block));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setSuccess(null);
+    if (!handleFormValidation()) {
+      return;
+    }
+    const validProcessedSections = (
+      formData.processedLineSections || []
+    ).filter((section) => blockSectionValue.includes(section.block));
 
-      // Ensure all required fields are present in each processed section
-      const processedSectionsWithDefaults = validProcessedSections.map(
-        (section) => {
-          if (section.type === "yard") {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: section.stream || "",
-              road: section.road || "",
-              otherRoads: section.otherRoads || "",
-            };
-          } else {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: "",
-              road: "",
-              otherRoads: "",
-            };
-          }
+    // Ensure all required fields are present in each processed section
+    const processedSectionsWithDefaults = validProcessedSections.map(
+      (section) => {
+        if (section.type === "yard") {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: section.stream || "",
+            road: section.road || "",
+            otherRoads: section.otherRoads || "",
+          };
+        } else {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: "",
+            road: "",
+            otherRoads: "",
+          };
         }
-      );
+      }
+    );
 
-      completeFormData.processedLineSections = processedSectionsWithDefaults;
-
-      // Submit the data
-      setFormSubmitting(true);
-      console.log("Submitting data:", completeFormData);
-
-      mutation.mutate(completeFormData as UserRequestInput, {
+    const processedFormData = {
+      ...formData,
+      date: formatDateToISO(formData.date || ""),
+      demandTimeFrom: formatTimeToDatetime(
+        formData.date || "",
+        formData.demandTimeFrom || ""
+      ),
+      demandTimeTo: formatTimeToDatetime(
+        formData.date || "",
+        formData.demandTimeTo || ""
+      ),
+      processedLineSections: processedSectionsWithDefaults,
+    };
+    try {
+      mutation.mutate(processedFormData as UserRequestInput, {
         onSuccess: (data) => {
           console.log("Success:", data);
           setSuccess("Block request created successfully!");
@@ -385,9 +375,9 @@ export default function CreateBlockRequestPage() {
             activity: "",
             corridorTypeSelection: "",
             cautionRequired: false,
-            cautionSpeed: 10,
+            cautionSpeed: 0,
             freshCautionRequired: false,
-            freshCautionSpeed: 10,
+            freshCautionSpeed: 0,
             processedLineSections: [],
             selectedStream: "",
           });
@@ -410,6 +400,7 @@ export default function CreateBlockRequestPage() {
       );
       setFormSubmitting(false);
     }
+    return;
   };
 
   // Responsive layout

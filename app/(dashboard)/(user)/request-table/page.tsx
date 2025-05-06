@@ -293,7 +293,9 @@ export default function RequestTablePage() {
         /* Compact Table View */
         <div className="overflow-x-auto">
           {isPaginatedLoading ? (
-            <div className="text-center py-3 text-sm">Loading requests...</div>
+            <div className="text-center py-3 text-sm text-black">
+              Loading requests...
+            </div>
           ) : paginatedError ? (
             <div className="text-center py-3 text-sm text-red-600">
               Error loading requests. Please try again.
