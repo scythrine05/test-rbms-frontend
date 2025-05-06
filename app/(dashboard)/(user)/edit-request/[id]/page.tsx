@@ -118,7 +118,7 @@ export default function EditRequestPage() {
 
   useEffect(() => {
     if (userDataById?.data) {
-      setFormData(userDataById?.data);
+      setFormData(userDataById?.data as any);
     }
   }, [userDataById?.data]);
 
@@ -396,7 +396,7 @@ export default function EditRequestPage() {
             missionBlock: "",
             workType: "",
             activity: "",
-            corridorTypeSelection: "",
+            corridorTypeSelection: null,
             cautionRequired: false,
             cautionSpeed: 10,
             freshCautionRequired: false,
@@ -445,7 +445,7 @@ export default function EditRequestPage() {
       // Clear any previously selected value
       setFormData({
         ...formData,
-        corridorTypeSelection: "",
+        corridorTypeSelection: null,
       });
     } else {
       // Date is selected, check if it's within the restricted period

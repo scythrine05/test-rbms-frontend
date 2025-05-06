@@ -31,7 +31,7 @@ export default function CreateBlockRequestPage() {
     missionBlock: "",
     workType: "",
     activity: "",
-    corridorTypeSelection: "",
+    corridorTypeSelection: null,
     cautionRequired: false,
     cautionSpeed: 0,
     freshCautionRequired: null,
@@ -373,7 +373,7 @@ export default function CreateBlockRequestPage() {
             missionBlock: "",
             workType: "",
             activity: "",
-            corridorTypeSelection: "",
+            corridorTypeSelection: null,
             cautionRequired: false,
             cautionSpeed: 0,
             freshCautionRequired: false,
@@ -423,7 +423,7 @@ export default function CreateBlockRequestPage() {
       // Clear any previously selected value
       setFormData({
         ...formData,
-        corridorTypeSelection: "",
+        corridorTypeSelection: null,
       });
     } else {
       // Date is selected, check if it's within the restricted period
