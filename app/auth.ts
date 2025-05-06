@@ -8,6 +8,7 @@ const debug = (message: string, data?: any) => {
     console.log(`[NextAuth] ${message}`, data ? data : '');
 };
 
+//auth options
 export const authOptions: AuthOptions = {
     providers: [
         CredentialsProvider({
