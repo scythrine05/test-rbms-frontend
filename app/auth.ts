@@ -23,12 +23,14 @@ export const authOptions: AuthOptions = {
 
                 try {
                     const user = JSON.parse(credentials.user);
+
                     return {
                         id: user.id,
                         name: user.name,
                         email: user.email,
                         role: user.role,
                         department: user.department,
+                        depot: user.depot,
                         phone: user.phone,
                         accessToken: credentials.accessToken,
                         refreshToken: credentials.refreshToken,
@@ -44,7 +46,7 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async jwt({ token, user }: { token: JWT; user: any }) {
             debug('JWT Callback', { tokenBefore: { ...token }, user });
-
+            console.log("user-+-=-+-=-", user);
             if (user) {
                 debug('Setting user data in token');
                 token.accessToken = user.accessToken;
@@ -52,6 +54,7 @@ export const authOptions: AuthOptions = {
                 token.role = user.role;
                 token.department = user.department;
                 token.phone = user.phone;
+                token.depot = user.depot;
                 token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
@@ -71,6 +74,7 @@ export const authOptions: AuthOptions = {
                         email: token.email as string,
                         id: token.id as string,
                         role: token.role as string,
+                        depot: token.depot as string,
                         department: token.department as string,
                         phone: token.phone as string,
                         accessToken: token.accessToken as string,
@@ -86,6 +90,7 @@ export const authOptions: AuthOptions = {
                 session.user.department = token.department as string;
                 session.user.phone = token.phone as string;
                 session.user.location = token.location as string;
+                session.user.depot = token.depot as string;
             }
 
             debug('Session Callback result', { sessionAfter: { ...session } });

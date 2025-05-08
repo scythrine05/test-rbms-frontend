@@ -11,6 +11,7 @@ declare module 'next-auth' {
         accessToken: string;
         refreshToken: string;
         location: string;
+        depot: string;
     }
 
     interface Session {
@@ -27,5 +28,6 @@ declare module 'next-auth/jwt' {
         department: string;
         phone: string;
         location: string;
+        depot: string;
     }
 }

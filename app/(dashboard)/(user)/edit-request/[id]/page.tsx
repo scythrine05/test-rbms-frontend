@@ -62,6 +62,7 @@ export default function CreateBlockRequestPage() {
     freshCautionSpeed: 0,
     freshCautionLocationFrom: "",
     freshCautionLocationTo: "",
+    adjacentLinesAffected: "",
     workLocationFrom: "",
     workLocationTo: "",
     trdWorkLocation: "",
@@ -1805,32 +1806,7 @@ export default function CreateBlockRequestPage() {
               </div>
 
               {formData.freshCautionRequired === true && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                  <div>
-                    <label className="block text-xs font-medium text-black mb-1">
-                      Fresh Caution Speed{" "}
-                      <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="freshCautionSpeed"
-                      value={formData.freshCautionSpeed || 0}
-                      onChange={handleInputChange}
-                      className="input gov-input"
-                      style={{
-                        color: "black",
-                        borderColor: errors.freshCautionSpeed
-                          ? "#dc2626"
-                          : "#45526c",
-                        fontSize: "14px",
-                      }}
-                    />
-                    {errors.freshCautionSpeed && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionSpeed}
-                      </span>
-                    )}
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                   <div>
                     <label className="block text-xs font-medium text-black mb-1">
                       Fresh Caution Location From{" "}
@@ -1876,6 +1852,56 @@ export default function CreateBlockRequestPage() {
                     {errors.freshCautionLocationTo && (
                       <span className="text-xs text-red-700 font-medium mt-1 block">
                         {errors.freshCautionLocationTo}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Fresh Caution Speed{" "}
+                      <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="freshCautionSpeed"
+                      value={formData.freshCautionSpeed || 0}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.freshCautionSpeed
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {errors.freshCautionSpeed && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.freshCautionSpeed}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Adjacent lines affected
+                      <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="adjacentLinesAffected"
+                      value={formData.adjacentLinesAffected || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.adjacentLinesAffected
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {errors.adjacentLinesAffected && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.adjacentLinesAffected}
                       </span>
                     )}
                   </div>

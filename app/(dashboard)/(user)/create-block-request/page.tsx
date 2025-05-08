@@ -46,6 +46,7 @@ export default function CreateBlockRequestPage() {
     freshCautionSpeed: 0,
     freshCautionLocationFrom: "",
     freshCautionLocationTo: "",
+    adjacentLinesAffected: "",
     workLocationFrom: "",
     workLocationTo: "",
     trdWorkLocation: "",
@@ -1685,14 +1686,14 @@ export default function CreateBlockRequestPage() {
             })}
           </div>
         )}
-        <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
+        <div className="bg-gray-50 p-2 rounded-md border border-black text-black mb-3">
           <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
             Caution Requirements
           </h2>
           {(session?.user.department === "S&T" ||
             session?.user.department === "ENGG") && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1  gap-2">
                 <div>
                   <label className="block text-sm font-medium text-black mb-1">
                     Whether Fresh Caution will be imposed after block{" "}
@@ -1731,6 +1732,109 @@ export default function CreateBlockRequestPage() {
                     </span>
                   )}
                 </div>
+
+                {formData.freshCautionRequired === true && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Fresh Caution Location From{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        name="freshCautionLocationFrom"
+                        value={formData.freshCautionLocationFrom || ""}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        style={{
+                          color: "black",
+                          borderColor: errors.freshCautionLocationFrom
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.freshCautionLocationFrom && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.freshCautionLocationFrom}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Fresh Caution Location To{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        name="freshCautionLocationTo"
+                        value={formData.freshCautionLocationTo || ""}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        style={{
+                          color: "black",
+                          borderColor: errors.freshCautionLocationTo
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.freshCautionLocationTo && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.freshCautionLocationTo}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Fresh Caution Speed{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="freshCautionSpeed"
+                        value={formData.freshCautionSpeed || 0}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        style={{
+                          color: "black",
+                          borderColor: errors.freshCautionSpeed
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.freshCautionSpeed && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.freshCautionSpeed}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Adjacent lines affected
+                        {/* <span className="text-red-600">*</span> */}
+                      </label>
+                      <input
+                        type="text"
+                        name="adjacentLinesAffected"
+                        value={formData.adjacentLinesAffected || ""}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        style={{
+                          color: "black",
+                          borderColor: errors.adjacentLinesAffected
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.adjacentLinesAffected && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.adjacentLinesAffected}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-black mb-1">
@@ -1771,84 +1875,6 @@ export default function CreateBlockRequestPage() {
                   )}
                 </div>
               </div>
-
-              {formData.freshCautionRequired === true && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                  <div>
-                    <label className="block text-xs font-medium text-black mb-1">
-                      Fresh Caution Speed{" "}
-                      <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="freshCautionSpeed"
-                      value={formData.freshCautionSpeed || 0}
-                      onChange={handleInputChange}
-                      className="input gov-input"
-                      style={{
-                        color: "black",
-                        borderColor: errors.freshCautionSpeed
-                          ? "#dc2626"
-                          : "#45526c",
-                        fontSize: "14px",
-                      }}
-                    />
-                    {errors.freshCautionSpeed && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionSpeed}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-black mb-1">
-                      Fresh Caution Location From{" "}
-                      <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      name="freshCautionLocationFrom"
-                      value={formData.freshCautionLocationFrom || ""}
-                      onChange={handleInputChange}
-                      className="input gov-input"
-                      style={{
-                        color: "black",
-                        borderColor: errors.freshCautionLocationFrom
-                          ? "#dc2626"
-                          : "#45526c",
-                        fontSize: "14px",
-                      }}
-                    />
-                    {errors.freshCautionLocationFrom && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionLocationFrom}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-black mb-1">
-                      Fresh Caution Location To{" "}
-                      <span className="text-red-600">*</span>
-                    </label>
-                    <input
-                      name="freshCautionLocationTo"
-                      value={formData.freshCautionLocationTo || ""}
-                      onChange={handleInputChange}
-                      className="input gov-input"
-                      style={{
-                        color: "black",
-                        borderColor: errors.freshCautionLocationTo
-                          ? "#dc2626"
-                          : "#45526c",
-                        fontSize: "14px",
-                      }}
-                    />
-                    {errors.freshCautionLocationTo && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionLocationTo}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {formData.powerBlockRequired === true && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">

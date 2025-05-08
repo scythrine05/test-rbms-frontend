@@ -23,6 +23,7 @@ export const userRequestSchema = z.object({
     freshCautionRequired: z.boolean().nullable(),
     freshCautionSpeed: z.number().optional(),
     freshCautionLocationFrom: z.string().optional(),
+    adjacentLinesAffected: z.string().optional(),
     sigElementarySectionFrom: z.string().optional(),
     sigElementarySectionTo: z.string().optional(),
     sntDisconnectionLineFrom: z.string().optional(),
