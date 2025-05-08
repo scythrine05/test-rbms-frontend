@@ -1,3 +1,10 @@
+type Department = 'TRD' | 'S&T' | 'ENGG'; // add more if needed
+
+type DepotStructure = {
+  [section: string]: {
+    [department in Department]: string[];
+  };
+};
 export let MajorSection = {
   MAS: ["MAS-AJJ", "AJJ-RU", "MAS-GDR"],
   PGT: ["MAS-AJJ", "AJJ-RU", "MAS-GDR"],
@@ -40,9 +47,10 @@ export let Activity = {
 }
 
 
-export let depot = {
-  "MAS-AJJ": ["AJJ", "AJJN"],
-}
+export const depot: DepotStructure = {
+  "MAS-AJJ": { 'TRD': ["AJJ", "AJJN"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },
+  "AJJ-RU": { 'TRD': ["SRS", "JHJ"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },
+};
 
 export let machine = [
   "BCM",

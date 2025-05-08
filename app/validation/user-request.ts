@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const userRequestSchema = z.object({
+    id: z.string().optional(),
     date: z.string(),  // present in both
     selectedDepartment: z.string(),  // present in both
     selectedSection: z.string(),  // present in both
@@ -45,6 +46,7 @@ export const userRequestSchema = z.object({
     sigActionsNeeded: z.boolean().optional(),
     trdActionsNeeded: z.boolean().optional(),
     powerBlockRequired: z.boolean().optional(),
+    trdWorkLocation: z.string().optional(),
     processedLineSections: z.array(z.object({  // present in both
         block: z.string(),
         type: z.string(),

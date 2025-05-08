@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { useCreateUserRequest } from "@/app/service/mutation/user-request";
-import { useGetUserRequestById } from "@/app/service/query/user-request";
+import {
+  useCreateUserRequest,
+  useUpdateUserRequest,
+} from "@/app/service/mutation/user-request";
 import { useSession } from "next-auth/react";
 import {
   MajorSection,
@@ -19,27 +20,42 @@ import {
   userRequestSchema,
   UserRequestInput,
 } from "@/app/validation/user-request";
+import {
+  formatDateToISO,
+  formatTimeToDatetime,
+  isDateAfterThursdayCutoff,
+  extractTimeFromDatetime,
+  filterRequestData,
+  normalizeToDateOnly,
+} from "@/app/lib/helper";
+import { useParams } from "next/navigation";
+import { useGetUserRequestById } from "@/app/service/query/user-request";
+import { Loader } from "@/app/components/ui/Loader";
 
-export default function EditRequestPage() {
-  const { id } = useParams();
+type Department = "TRD" | "S&T" | "ENGG";
+
+export default function CreateBlockRequestPage() {
+  const params = useParams();
   const {
     data: userDataById,
     isLoading,
     error,
-  } = useGetUserRequestById(id as string);
+  } = useGetUserRequestById(params.id as string);
+
   const [formData, setFormData] = useState<
     Partial<UserRequestInput> & {
       selectedStreams?: Record<string, string>;
       selectedRoads?: Record<string, string[]>;
     }
   >({
+    id: "",
     date: "",
     selectedDepartment: "",
     selectedSection: "",
     missionBlock: "",
     workType: "",
     activity: "",
-    corridorType: null,
+    corridorTypeSelection: null,
     cautionRequired: false,
     cautionSpeed: 0,
     freshCautionRequired: null,
@@ -48,20 +64,22 @@ export default function EditRequestPage() {
     freshCautionLocationTo: "",
     workLocationFrom: "",
     workLocationTo: "",
+    trdWorkLocation: "",
     demandTimeFrom: "",
     demandTimeTo: "",
     sigDisconnection: false,
     elementarySection: "",
     requestremarks: "",
     selectedDepo: "",
+    routeFrom: "",
+    routeTo: "",
     powerBlockRequirements: [],
     sntDisconnectionRequired: null,
     sntDisconnectionRequirements: [],
     sntDisconnectionLineFrom: "",
     sntDisconnectionLineTo: "",
     processedLineSections: [],
-    routeFrom: "",
-    routeTo: "",
+    repercussions: "",
     selectedStream: "",
   });
 
@@ -88,29 +106,29 @@ export default function EditRequestPage() {
     },
   });
 
-  const mutation = useCreateUserRequest();
+  const mutation = useUpdateUserRequest(params.id as string);
   const userLocation = session?.user.location;
   const majorSectionOptions =
     userLocation && MajorSection[userLocation as keyof typeof MajorSection]
       ? MajorSection[userLocation as keyof typeof MajorSection]
       : [];
+  const selectedMajorSection = formData.selectedSection;
   const blockSectionOptions =
-    formData.selectedSection &&
-    blockSection[formData.selectedSection as keyof typeof blockSection]
-      ? blockSection[formData.selectedSection as keyof typeof blockSection]
+    selectedMajorSection &&
+    blockSection[selectedMajorSection as keyof typeof blockSection]
+      ? blockSection[selectedMajorSection as keyof typeof blockSection]
       : [];
+  const userDepartment = session?.user.department;
   const workTypeOptions =
-    session?.user.department &&
-    workType[session?.user.department as keyof typeof workType]
-      ? workType[session?.user.department as keyof typeof workType]
+    userDepartment && workType[userDepartment as keyof typeof workType]
+      ? workType[userDepartment as keyof typeof workType]
       : [];
+  const selectedWorkType = formData.workType;
   const activityOptions =
-    formData.workType && Activity[formData.workType as keyof typeof Activity]
-      ? Activity[formData.workType as keyof typeof Activity]
+    selectedWorkType && Activity[selectedWorkType as keyof typeof Activity]
+      ? Activity[selectedWorkType as keyof typeof Activity]
       : [];
-  const [selectedActivity, setSelectedActivity] = useState(
-    formData.activity || ""
-  );
+
   const blockSectionOptionsList = blockSectionOptions.map((block: string) => ({
     value: block,
     label: block,
@@ -119,6 +137,14 @@ export default function EditRequestPage() {
   useEffect(() => {
     if (userDataById?.data) {
       setFormData(userDataById?.data as any);
+
+      if (userDataById?.data?.processedLineSections) {
+        setBlockSectionValue(
+          userDataById?.data?.processedLineSections.map(
+            (section: any) => section.block
+          )
+        );
+      }
     }
   }, [userDataById?.data]);
 
@@ -160,82 +186,30 @@ export default function EditRequestPage() {
     }
   };
 
-  const parseDate = (dateStr: string) => {
-    if (!dateStr) return null;
-    const [year, month, day] = dateStr.split("-");
-    return new Date(+year, +month - 1, +day);
-  };
-  const isDateAfterThursdayCutoff = (dateStr: string) => {
-    const selectedDate = parseDate(dateStr);
-    if (!selectedDate) return false;
-    selectedDate.setHours(0, 0, 0, 0);
-    const now = new Date();
-    const day = now.getDay();
-    const diffToThursday = (day + 7 - 4) % 7;
-    const thursdayThisWeek = new Date(now);
-    thursdayThisWeek.setDate(now.getDate() - diffToThursday);
-    thursdayThisWeek.setHours(16, 0, 0, 0);
-    let cycleStart = new Date(thursdayThisWeek);
-    if (now > thursdayThisWeek) {
-      cycleStart = thursdayThisWeek;
-    } else {
-      cycleStart.setDate(cycleStart.getDate() - 7);
-    }
-    const cycleEnd = new Date(cycleStart);
-    const daysToSunday = (7 - cycleStart.getDay()) % 7;
-    cycleEnd.setDate(cycleStart.getDate() + daysToSunday + 7);
-    cycleEnd.setHours(23, 59, 59, 999);
-    return selectedDate >= cycleStart && selectedDate <= cycleEnd;
-  };
-
-  const formatTimeToDatetime = (date: string, time: string): string => {
-    if (!date || !time) return "";
-    return `${date}T${time}:00.000Z`;
-  };
-  const formatDateToISO = (date: string): string => {
-    if (!date) return "";
-    if (date.includes("T")) return date;
-    return `${date}T00:00:00.000Z`;
-  };
-
-  // Fix TypeScript errors for streamData indexing
-  // Add type assertion helper function
   const getStreamDataSafely = (
     blockKey: string,
     streamKey: string
   ): string[] => {
-    // Check if block exists in streamData
     if (!(blockKey in streamData)) {
       return [];
     }
 
-    // Type assertion to access streamData safely
     const blockData = streamData[blockKey as keyof typeof streamData];
-
-    // Check if stream exists in the blockData
     if (typeof blockData !== "object" || !(streamKey in blockData)) {
       return [];
     }
-
-    // Access stream data safely with type assertion
     const streamDataTyped = blockData as Record<string, string[]>;
     return streamDataTyped[streamKey] || [];
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    setSuccess(null);
-
-    // Basic validation
+  const handleFormValidation = () => {
     if (!formData.date) {
       setErrors({
         date: "Please select a date for the block request",
       });
-      return;
+      return false;
     }
 
-    // Validate time fields
     if (!formData.demandTimeFrom || !formData.demandTimeTo) {
       const newErrors: Record<string, string> = {};
       if (!formData.demandTimeFrom) {
@@ -245,7 +219,7 @@ export default function EditRequestPage() {
         newErrors.demandTimeTo = "Demand Time To is required";
       }
       setErrors(newErrors);
-      return;
+      return false;
     }
 
     let newErrors: Record<string, string> = {};
@@ -254,7 +228,7 @@ export default function EditRequestPage() {
     // Required fields validation
     const requiredFields = [
       "date",
-      "corridorTypeSelection",
+      "corridorType",
       "selectedSection",
       "selectedDepo",
       "demandTimeFrom",
@@ -311,6 +285,7 @@ export default function EditRequestPage() {
     }
 
     // Set validation errors if any
+    console.log(newErrors);
     if (hasError) {
       setErrors(newErrors);
       // Scroll to first error
@@ -322,72 +297,66 @@ export default function EditRequestPage() {
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      return;
+      return false;
     }
 
-    // Continue with validation and submission
-    try {
-      // Prepare form data for submission
-      const completeFormData = {
-        ...formData,
-        date: formatDateToISO(formData.date || ""),
-        selectedDepartment: session?.user.department || "",
-        activity:
-          formData.activity === "others" ? customActivity : formData.activity,
-        demandTimeFrom: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeFrom || ""
-        ),
-        demandTimeTo: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeTo || ""
-        ),
-        powerBlockRequirements: [...powerBlockRequirements],
-        sntDisconnectionRequirements: [...sntDisconnectionRequirements],
-        missionBlock:
-          blockSectionValue.length > 0 ? blockSectionValue.join(",") : "",
-      };
+    return true;
+  };
 
-      // Filter processed sections to only include selected block sections
-      const validProcessedSections = (
-        formData.processedLineSections || []
-      ).filter((section) => blockSectionValue.includes(section.block));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setSuccess(null);
+    if (!handleFormValidation()) {
+      return;
+    }
+    const validProcessedSections = (
+      formData.processedLineSections || []
+    ).filter((section) => blockSectionValue.includes(section.block));
 
-      // Ensure all required fields are present in each processed section
-      const processedSectionsWithDefaults = validProcessedSections.map(
-        (section) => {
-          if (section.type === "yard") {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: section.stream || "",
-              road: section.road || "",
-              otherRoads: section.otherRoads || "",
-            };
-          } else {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: "",
-              road: "",
-              otherRoads: "",
-            };
-          }
+    // Ensure all required fields are present in each processed section
+    const processedSectionsWithDefaults = validProcessedSections.map(
+      (section) => {
+        if (section.type === "yard") {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: section.stream || "",
+            road: section.road || "",
+            otherRoads: section.otherRoads || "",
+          };
+        } else {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: "",
+            road: "",
+            otherRoads: "",
+          };
         }
-      );
+      }
+    );
 
-      completeFormData.processedLineSections = processedSectionsWithDefaults;
-
-      // Submit the data
-      setFormSubmitting(true);
-      console.log("Submitting data:", completeFormData);
-
-      mutation.mutate(completeFormData as UserRequestInput, {
+    const processedFormData = {
+      ...formData,
+      date: formatDateToISO(formData.date || ""),
+      demandTimeFrom: formatTimeToDatetime(
+        formData.date || "",
+        formData.demandTimeFrom || ""
+      ),
+      demandTimeTo: formatTimeToDatetime(
+        formData.date || "",
+        formData.demandTimeTo || ""
+      ),
+      processedLineSections: processedSectionsWithDefaults,
+    };
+    const filteredFormData = filterRequestData(processedFormData);
+    try {
+      mutation.mutate(filteredFormData as UserRequestInput, {
         onSuccess: (data) => {
-          console.log("Success:", data);
-          setSuccess("Block request created successfully!");
+          setSuccess("Block request updated successfully!");
           // Reset form
           setFormData({
             date: "",
@@ -398,9 +367,9 @@ export default function EditRequestPage() {
             activity: "",
             corridorTypeSelection: null,
             cautionRequired: false,
-            cautionSpeed: 10,
+            cautionSpeed: 0,
             freshCautionRequired: false,
-            freshCautionSpeed: 10,
+            freshCautionSpeed: 0,
             processedLineSections: [],
             selectedStream: "",
           });
@@ -411,16 +380,14 @@ export default function EditRequestPage() {
           setFormSubmitting(false);
         },
         onError: (error) => {
-          console.error("Error submitting form:", error);
-          setFormError("Failed to create block request. Please try again.");
+          console.error("Error updating form:", error);
+          setFormError("Failed to update block request. Please try again.");
           setFormSubmitting(false);
         },
       });
     } catch (error) {
-      console.error("Error in form submission:", error);
-      setFormError(
-        "An error occurred during form submission. Please try again."
-      );
+      console.error("Error processing form:", error);
+      setFormError("An error occurred while processing the form.");
       setFormSubmitting(false);
     }
   };
@@ -430,28 +397,18 @@ export default function EditRequestPage() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    // Initial check
     handleResize();
-    // Add event listener
     window.addEventListener("resize", handleResize);
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // Handle date change and corridor type selection logic
+
   useEffect(() => {
     if (!formData.date) {
-      // If no date is selected, disable all options
       setIsDisabled(true);
-      // Clear any previously selected value
-      setFormData({
-        ...formData,
-        corridorTypeSelection: null,
-      });
+      setFormData({ ...formData, corridorTypeSelection: null });
     } else {
-      // Date is selected, check if it's within the restricted period
       const shouldDisable = isDateAfterThursdayCutoff(formData.date);
       setIsDisabled(shouldDisable);
-      // If options should be disabled, auto-select "Urgent Block"
       if (shouldDisable) {
         setFormData({
           ...formData,
@@ -460,14 +417,13 @@ export default function EditRequestPage() {
       }
     }
   }, [formData.date]);
-  // Watch for S&T Disconnection Required changes
+
   useEffect(() => {
     setSntDisconnectionChecked(
       String(formData.sntDisconnectionRequired) === "true"
     );
   }, [formData.sntDisconnectionRequired]);
 
-  // Handle checkbox for power block requirements
   const handlePowerBlockRequirementsChange = (
     value: string,
     checked: boolean
@@ -479,13 +435,11 @@ export default function EditRequestPage() {
       newRequirements = newRequirements.filter((item) => item !== value);
     }
 
-    // Update both state variables to ensure they are in sync
     setPowerBlockRequirements(newRequirements);
     setFormData((prevData) => ({
       ...prevData,
       powerBlockRequirements: newRequirements,
     }));
-    // Also update validation errors
     if (checked && errors.powerBlockRequirements) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -494,7 +448,7 @@ export default function EditRequestPage() {
       });
     }
   };
-  // Handle checkbox for S&T disconnection requirements
+
   const handleSntDisconnectionRequirementsChange = (
     value: string,
     checked: boolean
@@ -506,7 +460,6 @@ export default function EditRequestPage() {
       newRequirements = newRequirements.filter((item) => item !== value);
     }
 
-    // Update both state variables to ensure they are in sync
     setSntDisconnectionRequirements(newRequirements);
     setFormData((prevData) => ({
       ...prevData,
@@ -695,6 +648,15 @@ export default function EditRequestPage() {
       };
     });
   };
+
+  if (isLoading) {
+    return (
+      <div>
+        <Loader name="Editing Block Request" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white p-3 border border-black mb-3">
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
@@ -712,7 +674,7 @@ export default function EditRequestPage() {
             <input
               type="date"
               name="date"
-              value={formData.date || ""}
+              value={normalizeToDateOnly(formData.date || "")}
               onChange={handleInputChange}
               className="input gov-input"
               style={{ color: "black", fontSize: "14px" }}
@@ -751,7 +713,7 @@ export default function EditRequestPage() {
                   value="Outside Corridor"
                   checked={
                     formData.corridorType?.toLocaleLowerCase() ===
-                    "Outside Corridor"
+                    "outside corridor"
                   }
                   onChange={handleInputChange}
                   disabled={isDisabled}
@@ -766,7 +728,7 @@ export default function EditRequestPage() {
                   value="Urgent Block"
                   checked={
                     formData.corridorType?.toLocaleLowerCase() ===
-                    "Urgent Block"
+                    "urgent block"
                   }
                   onChange={handleInputChange}
                   disabled={!formData.date}
@@ -796,47 +758,90 @@ export default function EditRequestPage() {
             />
           </div>
 
-          <div className="form-group col-span-3">
-            <label className="block text-sm font-medium text-black mb-1">
-              Route <span className="text-red-600">*</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label
-                  className="block text-xs font-medium text-black mb-1"
-                  htmlFor="routeFrom"
-                >
-                  From Location
-                </label>
-                <input
-                  id="routeFrom"
-                  name="routeFrom"
-                  value={formData.routeFrom || ""}
-                  onChange={handleInputChange}
-                  className="input gov-input"
-                  style={{ color: "black", fontSize: "14px" }}
-                  aria-label="Route from location"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-xs font-medium text-black mb-1"
-                  htmlFor="routeTo"
-                >
-                  To Location
-                </label>
-                <input
-                  id="routeTo"
-                  name="routeTo"
-                  value={formData.routeTo || ""}
-                  onChange={handleInputChange}
-                  className="input gov-input"
-                  style={{ color: "black", fontSize: "14px" }}
-                  aria-label="Route to location"
-                />
+          {session?.user.department === "S&T" && (
+            <div className="form-group col-span-3">
+              <label className="block text-sm font-medium text-black mb-1">
+                Route <span className="text-red-600">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeFrom"
+                  >
+                    From Location
+                  </label>
+                  <input
+                    id="routeFrom"
+                    name="routeFrom"
+                    value={formData.routeFrom || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route from location"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeTo"
+                  >
+                    To Location
+                  </label>
+                  <input
+                    id="routeTo"
+                    name="routeTo"
+                    value={formData.routeTo || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route to location"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {session?.user.department === "TRD" && (
+            <div className="form-group col-span-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label
+                    className="block text-sm font-medium text-black mb-1"
+                    htmlFor="elementarySection"
+                  >
+                    Elementary Section
+                  </label>
+                  <input
+                    id="elementarySection"
+                    name="elementarySection"
+                    value={formData.elementarySection || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route from location"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-sm font-medium text-black mb-1"
+                    htmlFor="trdWorkLocation"
+                  >
+                    Work Location
+                  </label>
+                  <input
+                    id="trdWorkLocation"
+                    name="trdWorkLocation"
+                    value={formData.trdWorkLocation || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route to location"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="form-group col-span-1">
             <label className="block text-sm font-medium text-black mb-1">
@@ -881,15 +886,19 @@ export default function EditRequestPage() {
               <option value="" disabled>
                 Select Depot
               </option>
-              {formData.selectedSection &&
-              depot[formData.selectedSection as keyof typeof depot] ? (
-                depot[formData.selectedSection as keyof typeof depot].map(
-                  (depotOption: string) => (
-                    <option key={depotOption} value={depotOption}>
-                      {depotOption}
-                    </option>
-                  )
-                )
+              {selectedMajorSection &&
+              session?.user.department &&
+              depot[selectedMajorSection] &&
+              depot[selectedMajorSection][
+                session.user.department as Department
+              ] ? (
+                depot[selectedMajorSection][
+                  session.user.department as Department
+                ].map((depotOption: string) => (
+                  <option key={depotOption} value={depotOption}>
+                    {depotOption}
+                  </option>
+                ))
               ) : (
                 <option value="" disabled>
                   Select Major Section first
@@ -902,6 +911,28 @@ export default function EditRequestPage() {
               </span>
             )}
           </div>
+
+          {session?.user.department === "ENGG" && (
+            <div className="form-group col-span-1">
+              <div>
+                <label
+                  className="block text-sm font-medium text-black "
+                  htmlFor="workLocationFrom"
+                >
+                  Work Location
+                </label>
+                <input
+                  id="workLocationFrom"
+                  name="workLocationFrom"
+                  value={formData.workLocationFrom || ""}
+                  onChange={handleInputChange}
+                  className="input gov-input"
+                  style={{ color: "black", fontSize: "14px" }}
+                  aria-label="Route from location"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Block Section and Work Details */}
@@ -931,11 +962,11 @@ export default function EditRequestPage() {
                     });
                   }
                 }}
-                isDisabled={!formData.selectedSection}
+                isDisabled={!selectedMajorSection}
                 className="basic-multi-select"
                 classNamePrefix="select"
                 placeholder={
-                  formData.selectedSection
+                  selectedMajorSection
                     ? "Select Block Section"
                     : "Select Major Section first"
                 }
@@ -1021,10 +1052,10 @@ export default function EditRequestPage() {
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}
-                disabled={!session?.user.department}
+                disabled={!userDepartment}
               >
                 <option value="" disabled>
-                  {session?.user.department
+                  {userDepartment
                     ? "Select Work Type"
                     : "Select Department first"}
                 </option>
@@ -1050,10 +1081,10 @@ export default function EditRequestPage() {
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}
-                disabled={!formData.workType}
+                disabled={!selectedWorkType}
               >
                 <option value="" disabled>
-                  {formData.workType
+                  {selectedWorkType
                     ? "Select Activity"
                     : "Select Work Type first"}
                 </option>
@@ -1102,7 +1133,7 @@ export default function EditRequestPage() {
             </div>
           </div>
         </div>
-        {formData.processedLineSections?.length === 1 && (
+        {blockSectionValue.length === 1 && (
           <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
             {blockSectionValue[0].includes("-YD") ? (
               // For yard sections (containing -YD)
@@ -2069,25 +2100,25 @@ export default function EditRequestPage() {
           {session?.user.department === "TRD" && (
             <div>
               <label className="block text-sm font-medium text-black mb-1">
-                Work Location To{" "}
+                Coaching Repurcussions{" "}
                 {session?.user.department === "TRD" && (
                   <span className="text-red-600">*</span>
                 )}
               </label>
               <input
-                name="workLocationTo"
-                value={formData.workLocationTo || ""}
+                name="repercussions"
+                value={formData.repercussions || ""}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{
                   color: "black",
-                  borderColor: errors.workLocationTo ? "#dc2626" : "#45526c",
+                  borderColor: errors.repercussions ? "#dc2626" : "#45526c",
                   fontSize: "14px",
                 }}
               />
-              {errors.workLocationTo && (
+              {errors.repercussions && (
                 <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.workLocationTo}
+                  {errors.repercussions}
                 </span>
               )}
             </div>
@@ -2106,7 +2137,7 @@ export default function EditRequestPage() {
               <input
                 type="time"
                 name="demandTimeFrom"
-                value={formData.demandTimeFrom || ""}
+                value={extractTimeFromDatetime(formData.demandTimeFrom || "")}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}
@@ -2128,7 +2159,7 @@ export default function EditRequestPage() {
               <input
                 type="time"
                 name="demandTimeTo"
-                value={formData.demandTimeTo || ""}
+                value={extractTimeFromDatetime(formData.demandTimeTo || "")}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}

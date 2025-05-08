@@ -17,6 +17,14 @@ import {
   userRequestSchema,
   UserRequestInput,
 } from "@/app/validation/user-request";
+import {
+  formatDateToISO,
+  formatTimeToDatetime,
+  isDateAfterThursdayCutoff,
+  extractTimeFromDatetime,
+} from "@/app/lib/helper";
+
+type Department = "TRD" | "S&T" | "ENGG";
 
 export default function CreateBlockRequestPage() {
   const [formData, setFormData] = useState<
@@ -40,6 +48,7 @@ export default function CreateBlockRequestPage() {
     freshCautionLocationTo: "",
     workLocationFrom: "",
     workLocationTo: "",
+    trdWorkLocation: "",
     demandTimeFrom: "",
     demandTimeTo: "",
     sigDisconnection: false,
@@ -54,7 +63,7 @@ export default function CreateBlockRequestPage() {
     sntDisconnectionLineFrom: "",
     sntDisconnectionLineTo: "",
     processedLineSections: [],
-
+    repercussions: "",
     selectedStream: "",
   });
 
@@ -103,9 +112,7 @@ export default function CreateBlockRequestPage() {
     selectedWorkType && Activity[selectedWorkType as keyof typeof Activity]
       ? Activity[selectedWorkType as keyof typeof Activity]
       : [];
-  const [selectedActivity, setSelectedActivity] = useState(
-    formData.activity || ""
-  );
+
   const blockSectionOptionsList = blockSectionOptions.map((block: string) => ({
     value: block,
     label: block,
@@ -149,64 +156,18 @@ export default function CreateBlockRequestPage() {
     }
   };
 
-  const parseDate = (dateStr: string) => {
-    if (!dateStr) return null;
-    const [year, month, day] = dateStr.split("-");
-    return new Date(+year, +month - 1, +day);
-  };
-  const isDateAfterThursdayCutoff = (dateStr: string) => {
-    const selectedDate = parseDate(dateStr);
-    if (!selectedDate) return false;
-    selectedDate.setHours(0, 0, 0, 0);
-    const now = new Date();
-    const day = now.getDay();
-    const diffToThursday = (day + 7 - 4) % 7;
-    const thursdayThisWeek = new Date(now);
-    thursdayThisWeek.setDate(now.getDate() - diffToThursday);
-    thursdayThisWeek.setHours(16, 0, 0, 0);
-    let cycleStart = new Date(thursdayThisWeek);
-    if (now > thursdayThisWeek) {
-      cycleStart = thursdayThisWeek;
-    } else {
-      cycleStart.setDate(cycleStart.getDate() - 7);
-    }
-    const cycleEnd = new Date(cycleStart);
-    const daysToSunday = (7 - cycleStart.getDay()) % 7;
-    cycleEnd.setDate(cycleStart.getDate() + daysToSunday + 7);
-    cycleEnd.setHours(23, 59, 59, 999);
-    return selectedDate >= cycleStart && selectedDate <= cycleEnd;
-  };
-
-  const formatTimeToDatetime = (date: string, time: string): string => {
-    if (!date || !time) return "";
-    return `${date}T${time}:00.000Z`;
-  };
-  const formatDateToISO = (date: string): string => {
-    if (!date) return "";
-    if (date.includes("T")) return date;
-    return `${date}T00:00:00.000Z`;
-  };
-
-  // Fix TypeScript errors for streamData indexing
-  // Add type assertion helper function
   const getStreamDataSafely = (
     blockKey: string,
     streamKey: string
   ): string[] => {
-    // Check if block exists in streamData
     if (!(blockKey in streamData)) {
       return [];
     }
 
-    // Type assertion to access streamData safely
     const blockData = streamData[blockKey as keyof typeof streamData];
-
-    // Check if stream exists in the blockData
     if (typeof blockData !== "object" || !(streamKey in blockData)) {
       return [];
     }
-
-    // Access stream data safely with type assertion
     const streamDataTyped = blockData as Record<string, string[]>;
     return streamDataTyped[streamKey] || [];
   };
@@ -244,11 +205,22 @@ export default function CreateBlockRequestPage() {
       "demandTimeTo",
       "workType",
       "activity",
+      "repercussions",
     ];
 
     // Check required fields
     requiredFields.forEach((field) => {
-      if (!formData[field as keyof typeof formData]) {
+      if (
+        field === "repercussions" &&
+        !formData[field as keyof typeof formData]
+      ) {
+        if (session?.user.department === "TRD") {
+          newErrors[field] = `${field
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())} is required`;
+          hasError = true;
+        }
+      } else if (!formData[field as keyof typeof formData]) {
         newErrors[field] = `${field
           .replace(/([A-Z])/g, " $1")
           .replace(/^./, (str) => str.toUpperCase())} is required`;
@@ -408,28 +380,18 @@ export default function CreateBlockRequestPage() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    // Initial check
     handleResize();
-    // Add event listener
     window.addEventListener("resize", handleResize);
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // Handle date change and corridor type selection logic
+
   useEffect(() => {
     if (!formData.date) {
-      // If no date is selected, disable all options
       setIsDisabled(true);
-      // Clear any previously selected value
-      setFormData({
-        ...formData,
-        corridorTypeSelection: null,
-      });
+      setFormData({ ...formData, corridorTypeSelection: null });
     } else {
-      // Date is selected, check if it's within the restricted period
       const shouldDisable = isDateAfterThursdayCutoff(formData.date);
       setIsDisabled(shouldDisable);
-      // If options should be disabled, auto-select "Urgent Block"
       if (shouldDisable) {
         setFormData({
           ...formData,
@@ -438,14 +400,13 @@ export default function CreateBlockRequestPage() {
       }
     }
   }, [formData.date]);
-  // Watch for S&T Disconnection Required changes
+
   useEffect(() => {
     setSntDisconnectionChecked(
       String(formData.sntDisconnectionRequired) === "true"
     );
   }, [formData.sntDisconnectionRequired]);
 
-  // Handle checkbox for power block requirements
   const handlePowerBlockRequirementsChange = (
     value: string,
     checked: boolean
@@ -457,13 +418,11 @@ export default function CreateBlockRequestPage() {
       newRequirements = newRequirements.filter((item) => item !== value);
     }
 
-    // Update both state variables to ensure they are in sync
     setPowerBlockRequirements(newRequirements);
     setFormData((prevData) => ({
       ...prevData,
       powerBlockRequirements: newRequirements,
     }));
-    // Also update validation errors
     if (checked && errors.powerBlockRequirements) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -472,7 +431,7 @@ export default function CreateBlockRequestPage() {
       });
     }
   };
-  // Handle checkbox for S&T disconnection requirements
+
   const handleSntDisconnectionRequirementsChange = (
     value: string,
     checked: boolean
@@ -484,7 +443,6 @@ export default function CreateBlockRequestPage() {
       newRequirements = newRequirements.filter((item) => item !== value);
     }
 
-    // Update both state variables to ensure they are in sync
     setSntDisconnectionRequirements(newRequirements);
     setFormData((prevData) => ({
       ...prevData,
@@ -768,47 +726,90 @@ export default function CreateBlockRequestPage() {
             />
           </div>
 
-          <div className="form-group col-span-3">
-            <label className="block text-sm font-medium text-black mb-1">
-              Route <span className="text-red-600">*</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label
-                  className="block text-xs font-medium text-black mb-1"
-                  htmlFor="routeFrom"
-                >
-                  From Location
-                </label>
-                <input
-                  id="routeFrom"
-                  name="routeFrom"
-                  value={formData.routeFrom || ""}
-                  onChange={handleInputChange}
-                  className="input gov-input"
-                  style={{ color: "black", fontSize: "14px" }}
-                  aria-label="Route from location"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-xs font-medium text-black mb-1"
-                  htmlFor="routeTo"
-                >
-                  To Location
-                </label>
-                <input
-                  id="routeTo"
-                  name="routeTo"
-                  value={formData.routeTo || ""}
-                  onChange={handleInputChange}
-                  className="input gov-input"
-                  style={{ color: "black", fontSize: "14px" }}
-                  aria-label="Route to location"
-                />
+          {session?.user.department === "S&T" && (
+            <div className="form-group col-span-3">
+              <label className="block text-sm font-medium text-black mb-1">
+                Route <span className="text-red-600">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeFrom"
+                  >
+                    From Location
+                  </label>
+                  <input
+                    id="routeFrom"
+                    name="routeFrom"
+                    value={formData.routeFrom || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route from location"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeTo"
+                  >
+                    To Location
+                  </label>
+                  <input
+                    id="routeTo"
+                    name="routeTo"
+                    value={formData.routeTo || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route to location"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {session?.user.department === "TRD" && (
+            <div className="form-group col-span-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label
+                    className="block text-sm font-medium text-black mb-1"
+                    htmlFor="elementarySection"
+                  >
+                    Elementary Section
+                  </label>
+                  <input
+                    id="elementarySection"
+                    name="elementarySection"
+                    value={formData.elementarySection || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route from location"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-sm font-medium text-black mb-1"
+                    htmlFor="trdWorkLocation"
+                  >
+                    Work Location
+                  </label>
+                  <input
+                    id="trdWorkLocation"
+                    name="trdWorkLocation"
+                    value={formData.trdWorkLocation || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{ color: "black", fontSize: "14px" }}
+                    aria-label="Route to location"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="form-group col-span-1">
             <label className="block text-sm font-medium text-black mb-1">
@@ -854,14 +855,18 @@ export default function CreateBlockRequestPage() {
                 Select Depot
               </option>
               {selectedMajorSection &&
-              depot[selectedMajorSection as keyof typeof depot] ? (
-                depot[selectedMajorSection as keyof typeof depot].map(
-                  (depotOption: string) => (
-                    <option key={depotOption} value={depotOption}>
-                      {depotOption}
-                    </option>
-                  )
-                )
+              session?.user.department &&
+              depot[selectedMajorSection] &&
+              depot[selectedMajorSection][
+                session.user.department as Department
+              ] ? (
+                depot[selectedMajorSection][
+                  session.user.department as Department
+                ].map((depotOption: string) => (
+                  <option key={depotOption} value={depotOption}>
+                    {depotOption}
+                  </option>
+                ))
               ) : (
                 <option value="" disabled>
                   Select Major Section first
@@ -874,6 +879,28 @@ export default function CreateBlockRequestPage() {
               </span>
             )}
           </div>
+
+          {session?.user.department === "ENGG" && (
+            <div className="form-group col-span-1">
+              <div>
+                <label
+                  className="block text-sm font-medium text-black "
+                  htmlFor="workLocationFrom"
+                >
+                  Work Location
+                </label>
+                <input
+                  id="workLocationFrom"
+                  name="workLocationFrom"
+                  value={formData.workLocationFrom || ""}
+                  onChange={handleInputChange}
+                  className="input gov-input"
+                  style={{ color: "black", fontSize: "14px" }}
+                  aria-label="Route from location"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Block Section and Work Details */}
@@ -2041,25 +2068,25 @@ export default function CreateBlockRequestPage() {
           {session?.user.department === "TRD" && (
             <div>
               <label className="block text-sm font-medium text-black mb-1">
-                Work Location To{" "}
+                Coaching Repurcussions{" "}
                 {session?.user.department === "TRD" && (
                   <span className="text-red-600">*</span>
                 )}
               </label>
               <input
-                name="workLocationTo"
-                value={formData.workLocationTo || ""}
+                name="repercussions"
+                value={formData.repercussions || ""}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{
                   color: "black",
-                  borderColor: errors.workLocationTo ? "#dc2626" : "#45526c",
+                  borderColor: errors.repercussions ? "#dc2626" : "#45526c",
                   fontSize: "14px",
                 }}
               />
-              {errors.workLocationTo && (
+              {errors.repercussions && (
                 <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.workLocationTo}
+                  {errors.repercussions}
                 </span>
               )}
             </div>
@@ -2078,7 +2105,7 @@ export default function CreateBlockRequestPage() {
               <input
                 type="time"
                 name="demandTimeFrom"
-                value={formData.demandTimeFrom || ""}
+                value={extractTimeFromDatetime(formData.demandTimeFrom || "")}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}
@@ -2100,7 +2127,7 @@ export default function CreateBlockRequestPage() {
               <input
                 type="time"
                 name="demandTimeTo"
-                value={formData.demandTimeTo || ""}
+                value={extractTimeFromDatetime(formData.demandTimeTo || "")}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{ color: "black", fontSize: "14px" }}
