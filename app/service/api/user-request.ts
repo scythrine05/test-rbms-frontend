@@ -58,6 +58,28 @@ export const userRequestService = {
     delete: async (id: string): Promise<UserRequestResponse> => {
         const response = await axiosInstance.delete<UserRequestResponse>(`/api/user-request/${id}`);
         return response.data;
+    },
+
+    /**
+     * Get other requests by depo
+     * @param selectedDepo - The selected depo
+     * @param page - Page number for pagination
+     * @param limit - Number of items per page
+     * @returns Promise with the response
+     */
+    getOtherRequests: async (selectedDepo: string, page: number = 1, limit: number = 10): Promise<RequestResponse> => {
+        const response = await axiosInstance.get<RequestResponse>(`/api/user-request/other/${selectedDepo}?page=${page}&limit=${limit}`);
+        return response.data;
+    },
+
+    /**
+     * Update other request status
+     * @param id - The request ID
+     * @returns Promise with the response
+     */
+    updateOtherRequest: async (id: string): Promise<UserRequestResponse> => {
+        const response = await axiosInstance.put<UserRequestResponse>(`/api/user-request/other/${id}`);
+        return response.data;
     }
 };
 

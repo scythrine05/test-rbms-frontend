@@ -29,3 +29,13 @@ export function useDeleteUserRequest() {
         mutationFn: (id: string) => userRequestService.delete(id),
     });
 }
+
+/**
+ * Hook for updating other request status
+ */
+export function useUpdateOtherRequest() {
+    return useMutation({
+        mutationFn: ({ id, accept }: { id: string; accept: boolean }) =>
+            userRequestService.updateOtherRequest(id, accept),
+    });
+}

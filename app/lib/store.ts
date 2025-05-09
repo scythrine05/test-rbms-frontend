@@ -46,6 +46,17 @@ export let Activity = {
   'Lt': ['AOH', 'POH', 'IOH', 'RE POH', 'RD WORK', 'TURN OUT CHECKING', 'CROSS OVER CHECKING', 'CROSS TRACK FEEDERS CHECKING', 'GANTRY MAINTENANCE', 'CONTACT WIRE RENEWAL WORK', 'CATENARY WIRE RENEWAL WORK', 'CANTILEVER ERECTION/REPLACEMENT(2x25KV WORK)', 'MAST ERECTION(2x25KV WORK)', 'FEEDERS ERECTION(2x25KV WORK)', 'OHE PROFILING', 'OHE/CN WORK', 'OTHER SPECIAL WORKS'],
 }
 
+export const depotOnLocation = {
+  "MAS": ["AJJ", "AJJN", "AJP", "AJJN"],
+  "AJJ": ["AJJ", "AJJN", "AJP", "AJJN"],
+}
+
+export const location = {
+  "MAS": "MADRAS",
+  "AJJ": "AINSDFD",
+  "AJJN": "DFSDFAJJN",
+  "AJP": "DSFSD",
+}
 
 export const depot: DepotStructure = {
   "MAS-AJJ": { 'TRD': ["AJJ", "AJJN"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },

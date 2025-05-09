@@ -30,7 +30,7 @@ export default function DashboardPage() {
       window.location.href = "/auth/login";
     },
   });
-
+  console.log(session);
   if (status === "loading") {
     return <Loader name="dashboard" />;
   }
@@ -61,12 +61,19 @@ export default function DashboardPage() {
               <span className="text-gray-600 text-xs">Employee ID:</span>
               <p className="font-medium">{session?.user?.id || "N/A"}</p>
             </div>
-            <div className="border border-gray-300 bg-gray-50 p-2">
-              <span className="text-gray-600 text-xs">Department:</span>
-              <p className="font-medium">
-                {session?.user?.department || "N/A"}
-              </p>
-            </div>
+            {session?.user?.role === "USER" ? (
+              <div className="border border-gray-300 bg-gray-50 p-2">
+                <span className="text-gray-600 text-xs">Department :</span>
+                <p className="font-medium">
+                  {session?.user?.department || "N/A"}
+                </p>
+              </div>
+            ) : (
+              <div className="border border-gray-300 bg-gray-50 p-2">
+                <span className="text-gray-600 text-xs">Role :</span>
+                <p className="font-medium">{session?.user?.role || "N/A"}</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -80,6 +80,8 @@ export interface RequestItem {
     routeFrom: string | null;
     routeTo: string | null;
     userId: string;
+    managerAcceptance: boolean;
+    DisconnAcceptance: string | null;
     managerId: string | null;
     user: {
         id: string;
@@ -87,7 +89,6 @@ export interface RequestItem {
         email: string;
         role: string;
     };
-    manager: any;
 }
 
 export type DateRangeFilter = {
@@ -129,6 +130,21 @@ export function useGetUserRequests(page = 1, limit = 10, dateRange?: DateRangeFi
 
 export function useGetWeeklyUserRequests(weekRange: DateRangeFilter) {
     return useGetUserRequests(1, 100, weekRange);
+}
+
+/**
+ * Hook to get other requests by depo
+ * @param selectedDepo - The selected depo
+ * @param page - Page number for pagination
+ * @param limit - Number of items per page
+ * @returns Query result with the other requests data
+ */
+export function useGetOtherRequests(selectedDepo: string, page = 1, limit = 10) {
+    return useQuery({
+        queryKey: ['other-requests', selectedDepo, page, limit],
+        queryFn: () => userRequestService.getOtherRequests(selectedDepo, page, limit),
+        enabled: !!selectedDepo,
+    });
 }
 
 /**
