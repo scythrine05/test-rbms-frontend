@@ -15,6 +15,18 @@ export interface SingleRequestResponse {
     data: RequestItem;
 }
 
+export interface RequestResponse {
+    status: boolean;
+    message: string;
+    data: {
+        requests: RequestItem[];
+        total: number;
+        page: number;
+        totalPages: number;
+    };
+}
+
+
 /**
  * Service for interacting with user request API endpoints
  */
@@ -77,8 +89,8 @@ export const userRequestService = {
      * @param id - The request ID
      * @returns Promise with the response
      */
-    updateOtherRequest: async (id: string): Promise<UserRequestResponse> => {
-        const response = await axiosInstance.put<UserRequestResponse>(`/api/user-request/other/${id}`);
+    updateOtherRequest: async (id: string, accept: boolean): Promise<UserRequestResponse> => {
+        const response = await axiosInstance.put<UserRequestResponse>(`/api/user-request/other/${id}?accept=${accept}`);
         return response.data;
     }
 };

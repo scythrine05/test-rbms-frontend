@@ -180,7 +180,7 @@ export default function OtherRequestsPage() {
                 </tr>
               </thead>
               <tbody>
-                {otherRequestsData?.data.requests.map((request) => (
+                {otherRequestsData?.data.requests.map((request: any) => (
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="border border-black p-1">
                       {request.id.substring(0, 8)}
