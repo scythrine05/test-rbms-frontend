@@ -357,7 +357,10 @@ export default function RequestTablePage() {
                 </thead>
                 <tbody>
                   {paginatedData?.data.requests.map((request) => (
-                    <tr key={request.id} className="hover:bg-gray-50">
+                    <tr
+                      key={`compact-${request.id}-${request.date}`}
+                      className="hover:bg-gray-50"
+                    >
                       <td className="border border-black p-1">
                         {request.id.substring(0, 8)}
                       </td>
@@ -459,7 +462,7 @@ export default function RequestTablePage() {
                 </div>
                 {weekDates.map((dateInfo) => (
                   <div
-                    key={dateInfo.formattedDate}
+                    key={`date-${dateInfo.formattedDate}`}
                     className="w-14 flex-shrink-0 p-1 text-center border-r border-black bg-gray-100"
                   >
                     <div>{dateInfo.dayOfWeek}</div>
@@ -502,7 +505,7 @@ export default function RequestTablePage() {
                   }, {} as Record<string, RequestItem[]>) || {}
                 ).map(([blockSection, requests]) => (
                   <div
-                    key={blockSection}
+                    key={`gantt-section-${blockSection}`}
                     className="flex border-b border-black"
                   >
                     <div className="w-40 flex-shrink-0 p-1 font-medium text-xs border-r border-black">
@@ -520,12 +523,12 @@ export default function RequestTablePage() {
 
                       return (
                         <div
-                          key={dateInfo.formattedDate}
+                          key={`gantt-cell-${blockSection}-${dateInfo.formattedDate}`}
                           className="w-14 flex-shrink-0 p-0.5 border-r border-black relative min-h-8"
                         >
                           {requestsForDay.map((request) => (
                             <Link
-                              key={request.id}
+                              key={`gantt-request-${request.id}-${dateInfo.formattedDate}`}
                               href={`/view-request/${request.id}`}
                               className={`block text-[8px] p-0.5 mb-0.5 border border-black overflow-hidden text-white
                                 ${
@@ -615,7 +618,10 @@ ${request.missionBlock} - ${getLineName(request)}`}
                 </thead>
                 <tbody>
                   {weeklyData.data.requests.map((request) => (
-                    <tr key={request.id} className="hover:bg-gray-50">
+                    <tr
+                      key={`detailed-${request.id}-${request.date}`}
+                      className="hover:bg-gray-50"
+                    >
                       <td className="border border-black p-1">
                         {request.id.substring(0, 8)}
                       </td>

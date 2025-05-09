@@ -1,38 +1,25 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useState } from "react";
+import { useAcceptUserRequest } from "@/app/service/mutation/admin";
 
 export default function ViewRequestPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const id = params.id as string;
-  const [isAccepting, setIsAccepting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const acceptMutation = useAcceptUserRequest();
 
   // Fetch request data
   const { data, isLoading, error } = useQuery({
     queryKey: ["request", id],
     queryFn: () => managerService.getUserRequestById(id),
-  });
-
-  // Accept request mutation
-  const acceptMutation = useMutation({
-    mutationFn: () => managerService.acceptUserRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["request", id] });
-      queryClient.invalidateQueries({ queryKey: ["requests"] });
-      alert("Request accepted successfully");
-      router.push("/manage/request-table");
-    },
-    onError: (error) => {
-      console.error("Failed to accept request:", error);
-      alert("Failed to accept request. Please try again.");
-    },
   });
 
   // Format date and time
@@ -52,14 +39,25 @@ export default function ViewRequestPage() {
     }
   };
 
-  // Handle accept request
-  const handleAccept = async () => {
-    if (confirm("Are you sure you want to accept this request?")) {
-      setIsAccepting(true);
+  // Handle accept/reject request
+  const handleRequestAction = async (accept: boolean) => {
+    if (
+      confirm(
+        `Are you sure you want to ${
+          accept ? "approve" : "reject"
+        } this request?`
+      )
+    ) {
+      setIsProcessing(true);
       try {
-        await acceptMutation.mutateAsync();
+        await acceptMutation.mutateAsync({ id, accept });
+        alert(`Request ${accept ? "approved" : "rejected"} successfully`);
+        router.push("/admin/request-table");
+      } catch (error) {
+        console.error("Failed to process request:", error);
+        alert("Failed to process request. Please try again.");
       } finally {
-        setIsAccepting(false);
+        setIsProcessing(false);
       }
     }
   };
@@ -67,7 +65,7 @@ export default function ViewRequestPage() {
   // Status badge class
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "APPROVED":
+      case "ACCEPTED":
         return "bg-green-100 text-green-800 border border-black";
       case "REJECTED":
         return "bg-red-100 text-red-800 border border-black";
@@ -115,19 +113,28 @@ export default function ViewRequestPage() {
         </h1>
         <div className="flex gap-2">
           <Link
-            href="/manage/request-table"
+            href="/admin/request-table"
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
             Back to List
           </Link>
-          {request.status === "PENDING" && (
-            <button
-              onClick={handleAccept}
-              disabled={isAccepting}
-              className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-            >
-              {isAccepting ? "Accepting..." : "Accept Request"}
-            </button>
+          {request.adminAcceptance === "PENDING" && (
+            <>
+              <button
+                onClick={() => handleRequestAction(true)}
+                disabled={isProcessing}
+                className="px-3 py-1 text-sm bg-green-600 text-white border border-black disabled:opacity-50"
+              >
+                {isProcessing ? "Processing..." : "Accept Request"}
+              </button>
+              <button
+                onClick={() => handleRequestAction(false)}
+                disabled={isProcessing}
+                className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
+              >
+                {isProcessing ? "Processing..." : "Reject Request"}
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -135,10 +142,10 @@ export default function ViewRequestPage() {
       <div className="mb-4 px-2 py-1 inline-block">
         <span
           className={`px-2 py-0.5 text-sm ${getStatusBadgeClass(
-            request.managerAcceptance ? "APPROVED" : "PENDING"
+            request.adminAcceptance || "PENDING"
           )}`}
         >
-          Status: {request.managerAcceptance ? "APPROVED" : "PENDING"}
+          Manager Approval: {request.adminAcceptance || "PENDING"}
         </span>
       </div>
 

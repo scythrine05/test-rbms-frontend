@@ -1,23 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO } from "date-fns";
+import { adminService } from "@/app/service/api/admin";
+import {
+  format,
+  parseISO,
+  addDays,
+  subDays,
+  startOfWeek,
+  endOfWeek,
+} from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAcceptUserRequest } from "@/app/service/mutation/admin";
+import { UserRequest } from "@/app/service/api/manager";
 
-export default function RequestTablePage() {
+export default function OptimiseTablePage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const acceptMutation = useAcceptUserRequest();
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    // Set initial week start to last Saturday
+    const today = new Date();
+    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
+    return startOfWeek(lastSaturday, { weekStartsOn: 6 }); // 6 is Saturday
+  });
 
-  // Fetch requests data with pagination
+  // Calculate week range
+  const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+
+  // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter],
-    queryFn: () => managerService.getUserRequests(page),
+    queryKey: ["approved-requests", page, currentWeekStart],
+    queryFn: () =>
+      adminService.getApprovedRequests(
+        format(weekStart, "yyyy-MM-dd"),
+        format(weekEnd, "yyyy-MM-dd"),
+        page
+      ),
   });
 
   // Format date
@@ -38,54 +58,20 @@ export default function RequestTablePage() {
     }
   };
 
-  // Status badge class
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "ACCEPTED":
-        return "bg-green-100 text-green-800 border border-black";
-      case "REJECTED":
-        return "bg-red-100 text-red-800 border border-black";
-      case "PENDING":
-      default:
-        return "bg-yellow-100 text-yellow-800 border border-black";
+  // Handle week navigation
+  const handleWeekChange = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setCurrentWeekStart((prev) => subDays(prev, 7));
+    } else {
+      setCurrentWeekStart((prev) => addDays(prev, 7));
     }
+    setPage(1); // Reset to first page when changing weeks
   };
-
-  // Handle accept/reject request
-  const handleRequestAction = async (id: string, accept: boolean) => {
-    if (
-      confirm(
-        `Are you sure you want to ${
-          accept ? "approve" : "reject"
-        } this request?`
-      )
-    ) {
-      try {
-        await acceptMutation.mutateAsync({ id, accept });
-        alert(`Request ${accept ? "approved" : "rejected"} successfully`);
-      } catch (error) {
-        console.error("Failed to process request:", error);
-        alert("Failed to process request. Please try again.");
-      }
-    }
-  };
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  // Filter requests based on status
-  const filteredRequests =
-    data?.data?.requests?.filter((request: UserRequest) => {
-      if (statusFilter === "ALL") return true;
-      return request.status === statusFilter;
-    }) || [];
 
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5">Loading requests...</div>
+        <div className="text-center py-5">Loading approved requests...</div>
       </div>
     );
   }
@@ -94,7 +80,7 @@ export default function RequestTablePage() {
     return (
       <div className="bg-white p-3 border border-black mb-3">
         <div className="text-center py-5 text-red-600">
-          Error loading requests. Please try again.
+          Error loading approved requests. Please try again.
         </div>
       </div>
     );
@@ -105,18 +91,23 @@ export default function RequestTablePage() {
   return (
     <div className="bg-white p-3 border border-black mb-3">
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">Block Requests</h1>
+        <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
         <div className="flex gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="gov-input text-sm"
+          <button
+            onClick={() => handleWeekChange("prev")}
+            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
+            Previous Week
+          </button>
+          <span className="px-3 py-1 text-sm">
+            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
+          </span>
+          <button
+            onClick={() => handleWeekChange("next")}
+            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+          >
+            Next Week
+          </button>
         </div>
       </div>
 
@@ -143,16 +134,10 @@ export default function RequestTablePage() {
                 Time
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Corridor Type
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Work Type
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Activity
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Manager Approval
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Actions
@@ -160,8 +145,11 @@ export default function RequestTablePage() {
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map((request: UserRequest) => (
-              <tr key={request.id} className="hover:bg-gray-50">
+            {data?.data?.requests?.map((request: UserRequest) => (
+              <tr
+                key={`request-${request.id}-${request.date}`}
+                className="hover:bg-gray-50"
+              >
                 <td className="border border-black p-1 text-sm">
                   {formatDate(request.date)}
                 </td>
@@ -182,24 +170,10 @@ export default function RequestTablePage() {
                   {formatTime(request.demandTimeTo)}
                 </td>
                 <td className="border border-black p-1 text-sm">
-                  {request.corridorTypeSelection ||
-                    request.corridorType ||
-                    "N/A"}
-                </td>
-                <td className="border border-black p-1 text-sm">
                   {request.workType}
                 </td>
                 <td className="border border-black p-1 text-sm">
                   {request.activity}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <span
-                    className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.adminAcceptance || "PENDING"
-                    )}`}
-                  >
-                    {request.adminAcceptance || "PENDING"}
-                  </span>
                 </td>
                 <td className="border border-black p-1 text-sm">
                   <div className="flex gap-2">
@@ -209,22 +183,6 @@ export default function RequestTablePage() {
                     >
                       View
                     </Link>
-                    {request.adminAcceptance === "PENDING" && (
-                      <>
-                        <button
-                          onClick={() => handleRequestAction(request.id, true)}
-                          className="px-2 py-1 text-xs bg-green-600 text-white border border-black"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleRequestAction(request.id, false)}
-                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
                   </div>
                 </td>
               </tr>
@@ -237,7 +195,7 @@ export default function RequestTablePage() {
       {totalPages > 1 && (
         <div className="mt-4 flex justify-center gap-2">
           <button
-            onClick={() => handlePageChange(page - 1)}
+            onClick={() => setPage(page - 1)}
             disabled={page === 1}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
           >
@@ -247,7 +205,7 @@ export default function RequestTablePage() {
             Page {page} of {totalPages}
           </span>
           <button
-            onClick={() => handlePageChange(page + 1)}
+            onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
           >

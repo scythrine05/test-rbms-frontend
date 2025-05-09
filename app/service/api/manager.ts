@@ -32,7 +32,7 @@ export interface UsersResponse {
     };
 }
 
-export interface UserRequest {
+export type UserRequest = {
     id: string;
     date: string;
     selectedDepartment: string;
@@ -40,8 +40,8 @@ export interface UserRequest {
     missionBlock: string;
     workType: string;
     activity: string;
-    corridorTypeSelection: string;
-    corridorType: string;
+    corridorTypeSelection?: string;
+    corridorType?: string;
     cautionRequired: boolean;
     cautionSpeed: number;
     freshCautionRequired: boolean;
@@ -65,18 +65,19 @@ export interface UserRequest {
     sntDisconnectionRequirements: string[];
     sntDisconnectionLineFrom: string;
     sntDisconnectionLineTo: string;
-    processedLineSections: Array<{
-        road: string;
-        type: string;
+    processedLineSections?: Array<{
         block: string;
-        stream: string;
-        lineName: string;
-        otherLines: string;
-        otherRoads: string;
+        type: string;
+        lineName?: string;
+        otherLines?: string;
+        stream?: string;
+        road?: string;
+        otherRoads?: string;
     }>;
     repercussions: string;
     selectedStream: string;
     managerAcceptance: boolean;
+    adminAcceptance: "PENDING" | "ACCEPTED" | "REJECTED";
     powerBlockRequired: boolean;
     status: string;
     createdAt: string;
@@ -88,7 +89,7 @@ export interface UserRequest {
         depot: string;
         department: string;
     };
-}
+};
 
 export interface UserRequestsResponse {
     status: boolean;
@@ -107,6 +108,11 @@ export const managerService = {
      */
     getAllUsers: async (page: number = 1): Promise<UsersResponse> => {
         const response = await axiosInstance.get<UsersResponse>(`/api/auth/users/manager?page=${page}`);
+        return response.data;
+    },
+
+    getAllManagers: async (page: number = 1): Promise<UsersResponse> => {
+        const response = await axiosInstance.get<UsersResponse>(`/api/auth/manager/admin?page=${page}`);
         return response.data;
     },
 
