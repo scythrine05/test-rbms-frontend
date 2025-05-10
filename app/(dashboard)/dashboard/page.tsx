@@ -30,7 +30,6 @@ export default function DashboardPage() {
       window.location.href = "/auth/login";
     },
   });
-  console.log(session);
   if (status === "loading") {
     return <Loader name="dashboard" />;
   }

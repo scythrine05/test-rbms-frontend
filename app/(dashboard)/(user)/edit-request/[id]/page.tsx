@@ -285,8 +285,6 @@ export default function CreateBlockRequestPage() {
       }
     }
 
-    // Set validation errors if any
-    console.log(newErrors);
     if (hasError) {
       setErrors(newErrors);
       // Scroll to first error

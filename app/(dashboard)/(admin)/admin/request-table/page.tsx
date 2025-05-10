@@ -17,7 +17,7 @@ export default function RequestTablePage() {
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
     queryKey: ["requests", page, statusFilter],
-    queryFn: () => managerService.getUserRequests(page),
+    queryFn: () => managerService.getUserRequestsByAdmin(page),
   });
 
   // Format date

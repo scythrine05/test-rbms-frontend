@@ -124,6 +124,11 @@ export const managerService = {
         return response.data;
     },
 
+    createUserManager: async (data: CreateUserInput): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post("/api/auth/register-manager", data);
+        return response.data;
+    },
+
     /**
      * Delete a user
      */
@@ -137,6 +142,11 @@ export const managerService = {
      */
     getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
         const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
+        return response.data;
+    },
+
+    getUserRequestsByAdmin: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
+        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}`);
         return response.data;
     },
 

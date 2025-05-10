@@ -336,7 +336,6 @@ export default function CreateBlockRequestPage() {
     try {
       mutation.mutate(processedFormData as UserRequestInput, {
         onSuccess: (data) => {
-          console.log("Success:", data);
           setSuccess("Block request created successfully!");
           // Reset form
           setFormData({

@@ -39,11 +39,7 @@ export default function LoginForm() {
     setAuthError(null);
 
     try {
-      console.log("Login attempt with:", data.email);
-
       const responseData = await authService.login(data);
-
-      console.log("Login API response:", responseData);
 
       const { access_token, refresh_token, user } = responseData.data;
 
@@ -54,21 +50,15 @@ export default function LoginForm() {
         user: JSON.stringify(user),
       });
 
-      console.log("SignIn result:", result);
-
       if (result?.error) {
         console.error("SignIn error:", result.error);
         setAuthError(result.error);
       } else {
-        console.log("Login successful, redirecting to dashboard");
-
-        // Force a hard navigation to the dashboard
         window.location.href = "/dashboard";
 
         // As a fallback, also use the router
         setTimeout(() => {
           if (window.location.pathname !== "/dashboard") {
-            console.log("Fallback redirect using router");
             router.push("/dashboard");
           }
         }, 1000);

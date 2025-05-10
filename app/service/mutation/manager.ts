@@ -16,6 +16,18 @@ export function useCreateUser() {
     });
 }
 
+export function useCreateManager() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CreateUserInput) => managerService.createUserManager(data),
+        onSuccess: () => {
+            // Invalidate users query to refetch the list
+            queryClient.invalidateQueries({ queryKey: ["users"] });
+        },
+    });
+}
+
 /**
  * Hook for deleting a user
  */

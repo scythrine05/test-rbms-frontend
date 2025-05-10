@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
-import { useCreateUser, useDeleteUser } from "@/app/service/mutation/manager";
+import {
+  useCreateManager,
+  useDeleteUser,
+} from "@/app/service/mutation/manager";
 import { Loader } from "@/app/components/ui/Loader";
 import { useSession } from "next-auth/react";
 import { location } from "@/app/lib/store";
@@ -28,6 +31,7 @@ const CreateUserModal = ({
     department: "",
     phone: "",
     location: "",
+    depot: "OVERALL",
     role: "BRANCH_OFFICER",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -44,17 +48,20 @@ const CreateUserModal = ({
       department: "",
       phone: "",
       location: "",
+      depot: "OVERALL",
       role: "BRANCH_OFFICER",
     });
     setShowPassword(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 w-full max-w-md border border-black">
-        <h2 className="text-lg font-bold text-black mb-4 border-b border-gray-300 pb-2">
-          Create New Branch Officer
-        </h2>
+        <div className="border-b-2 border-[#13529e] pb-3 mb-4">
+          <h2 className="text-lg font-bold text-[#13529e]">
+            Create New Branch Officer
+          </h2>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-black mb-1">
@@ -66,7 +73,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -80,7 +87,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -95,7 +102,7 @@ const CreateUserModal = ({
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="gov-input text-black pr-10"
+                className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e] pr-10"
                 required
               />
               <button
@@ -151,7 +158,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, department: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             >
               <option value="">Select Department</option>
@@ -170,7 +177,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -183,7 +190,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             >
               <option value="">Select Location</option>
@@ -194,17 +201,17 @@ const CreateUserModal = ({
               ))}
             </select>
           </div>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex justify-end gap-2 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1 text-sm bg-gray-100 text-black border border-black"
+              className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black"
+              className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black hover:bg-[#0d3d7a]"
             >
               Create Branch Officer
             </button>
@@ -253,6 +260,7 @@ type User = {
   department: string;
   phone: string;
   location: string;
+  depot: string;
   role:
     | "USER"
     | "JUNIOR_OFFICER"
@@ -293,11 +301,11 @@ export default function ManageUsersPage() {
   // Fetch users data
   const { data, isLoading, error } = useQuery({
     queryKey: ["users", page],
-    queryFn: () => managerService.getAllUsers(page),
+    queryFn: () => managerService.getAllManagers(page),
   });
 
   // Mutations
-  const createUser = useCreateUser();
+  const createUser = useCreateManager();
   const deleteUser = useDeleteUser();
 
   const handleCreateUser = async (userData: any) => {

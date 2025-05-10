@@ -59,7 +59,7 @@ export const location = {
 }
 
 export const depot: DepotStructure = {
-  "MAS-AJJ": { 'TRD': ["AJJ", "AJJN"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },
+  "MAS-AJJ": { 'TRD': ["AJJ", "AJJN",], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJP"] },
   "AJJ-RU": { 'TRD': ["SRS", "JHJ"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },
 };
 

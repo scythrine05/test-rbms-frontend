@@ -45,10 +45,9 @@ export const authOptions: AuthOptions = {
     ],
     callbacks: {
         async jwt({ token, user }: { token: JWT; user: any }) {
-            debug('JWT Callback', { tokenBefore: { ...token }, user });
-            console.log("user-+-=-+-=-", user);
+            // debug('JWT Callback', { tokenBefore: { ...token }, user });
             if (user) {
-                debug('Setting user data in token');
+                // debug('Setting user data in token');
                 token.accessToken = user.accessToken;
                 token.refreshToken = user.refreshToken;
                 token.role = user.role;
@@ -61,11 +60,11 @@ export const authOptions: AuthOptions = {
                 token.location = user.location;
             }
 
-            debug('JWT Callback result', { tokenAfter: { ...token } });
+            // debug('JWT Callback result', { tokenAfter: { ...token } });
             return token;
         },
         async session({ session, token }: { session: Session; token: JWT }) {
-            debug('Session Callback', { sessionBefore: { ...session }, token });
+            // debug('Session Callback', { sessionBefore: { ...session }, token });
 
             if (token) {
                 if (!session.user) {
@@ -93,7 +92,7 @@ export const authOptions: AuthOptions = {
                 session.user.depot = token.depot as string;
             }
 
-            debug('Session Callback result', { sessionAfter: { ...session } });
+            // debug('Session Callback result', { sessionAfter: { ...session } });
             return session;
         },
     },
