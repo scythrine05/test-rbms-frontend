@@ -5,47 +5,57 @@ export const parseDate = (dateStr: string) => {
 };
 
 export const isDateAfterThursdayCutoff = (dateStr: string) => {
-    const selectedDate = parseDate(dateStr);
-    if (!selectedDate) return false;
-    selectedDate.setHours(0, 0, 0, 0);
-    const now = new Date();
-    const day = now.getDay();
-    const diffToThursday = (day + 7 - 4) % 7;
-    const thursdayThisWeek = new Date(now);
-    thursdayThisWeek.setDate(now.getDate() - diffToThursday);
-    thursdayThisWeek.setHours(16, 0, 0, 0);
-    let cycleStart = new Date(thursdayThisWeek);
-    if (now > thursdayThisWeek) {
-        cycleStart = thursdayThisWeek;
-    } else {
-        cycleStart.setDate(cycleStart.getDate() - 7);
-    }
-    const cycleEnd = new Date(cycleStart);
-    const daysToSunday = (7 - cycleStart.getDay()) % 7;
-    cycleEnd.setDate(cycleStart.getDate() + daysToSunday + 7);
-    cycleEnd.setHours(23, 59, 59, 999);
-    return selectedDate >= cycleStart && selectedDate <= cycleEnd;
+  const selectedDate = parseDate(dateStr);
+  if (!selectedDate) return false;
+  
+  selectedDate.setHours(0, 0, 0, 0);
+  const now = new Date();
+
+  // Calculate the most recent Thursday at 16:00 (4 PM)
+  const day = now.getDay();
+  const diffToThursday = (day + 7 - 4) % 7;
+  const thursdayThisWeek = new Date(now);
+  thursdayThisWeek.setDate(now.getDate() - diffToThursday);
+  thursdayThisWeek.setHours(16, 0, 0, 0);
+
+  // Adjust to previous Thursday if it's not yet 16:00 today
+  if (now < thursdayThisWeek) {
+    thursdayThisWeek.setDate(thursdayThisWeek.getDate() - 7);
+  }
+
+  // Calculate the upcoming Sunday at 23:59:59
+  const cycleEnd = new Date(thursdayThisWeek);
+  cycleEnd.setDate(thursdayThisWeek.getDate() + (7 - thursdayThisWeek.getDay()) % 7);
+  cycleEnd.setHours(23, 59, 59, 999);
+
+  // Check if selected date is within the range
+  return selectedDate >= thursdayThisWeek && selectedDate <= cycleEnd;
 };
 
 export function formatTimeToDatetime(date: string, time: string): string {
     if (!date || !time) return "";
 
+    // If time is already in ISO format, return it as-is
     const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{3}Z)?$/;
-
-    const isDateISO = isoRegex.test(date);
-    const isTimeISO = isoRegex.test(time);
-
-    if (isDateISO && isTimeISO) {
+    if (isoRegex.test(time)) {
         return time;
     }
-    if (isDateISO) {
-        const convertedDate = new Date(date).toISOString().split("T")[0];
-        return `${convertedDate}T${time}:00.000Z`;
+
+    // Normalize the date to YYYY-MM-DD format if it's not already
+    let normalizedDate = date;
+    if (date.includes("T")) {
+        normalizedDate = new Date(date).toISOString().split("T")[0];
     }
-    if (isTimeISO) {
-        return time;
+
+    // Normalize the time to HH:MM format
+    let normalizedTime = time;
+    if (time.includes(":")) {
+        const [hours, minutes] = time.split(":");
+        normalizedTime = `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
     }
-    return `${date}T${time}:00.000Z`;
+
+    // Combine them into ISO format
+    return `${normalizedDate}T${normalizedTime}:00.000Z`;
 }
 
 
@@ -111,4 +121,3 @@ export const filterRequestData = (data: AnyObject): AnyObject => {
 
     return filter(data);
 };
-

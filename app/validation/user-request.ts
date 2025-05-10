@@ -37,7 +37,8 @@ export const userRequestSchema = z.object({
     selectedStream: z.string(),  // present in both
     routeFrom: z.string(),  // present in both
     routeTo: z.string(),  // present in both
-    sntDisconnectionRequired: z.boolean().nullable(),  // Added missing field
+    powerBlockRequired: z.boolean().nullable().optional(),
+    sntDisconnectionRequired: z.boolean().nullable().optional(),
     sntDisconnectionRequirements: z.array(z.string().optional()).optional(),  // present in both
     powerBlockRequirements: z.array(z.string().optional()).optional(),  // present in both
     sigResponse: z.string().optional(),
@@ -46,7 +47,6 @@ export const userRequestSchema = z.object({
     oheResponse: z.string().optional(),
     sigActionsNeeded: z.boolean().optional(),
     trdActionsNeeded: z.boolean().optional(),
-    powerBlockRequired: z.boolean().optional(),
     trdWorkLocation: z.string().optional(),
     processedLineSections: z.array(z.object({  // present in both
         block: z.string(),

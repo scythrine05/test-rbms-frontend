@@ -31,6 +31,9 @@ export default function CreateBlockRequestPage() {
     Partial<UserRequestInput> & {
       selectedStreams?: Record<string, string>;
       selectedRoads?: Record<string, string[]>;
+      sntDisconnectionRequired?: boolean | null;
+      powerBlockRequired?: boolean | null;
+      freshCautionRequired?: boolean | null;
     }
   >({
     date: "",
@@ -42,10 +45,7 @@ export default function CreateBlockRequestPage() {
     corridorTypeSelection: null,
     cautionRequired: false,
     cautionSpeed: 0,
-    freshCautionRequired: null,
     freshCautionSpeed: 0,
-    freshCautionLocationFrom: "",
-    freshCautionLocationTo: "",
     adjacentLinesAffected: "",
     workLocationFrom: "",
     workLocationTo: "",
@@ -60,6 +60,10 @@ export default function CreateBlockRequestPage() {
     routeTo: "",
     powerBlockRequirements: [],
     sntDisconnectionRequired: null,
+    powerBlockRequired: null,
+    freshCautionRequired: null,
+    freshCautionLocationFrom: "",
+    freshCautionLocationTo: "",
     sntDisconnectionRequirements: [],
     sntDisconnectionLineFrom: "",
     sntDisconnectionLineTo: "",
@@ -75,6 +79,7 @@ export default function CreateBlockRequestPage() {
   const [blockSectionValue, setBlockSectionValue] = useState<string[]>([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [sntDisconnectionChecked, setSntDisconnectionChecked] = useState(false);
+  // const[powerBlockChecked,setPowerBlockChecked]=useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -119,6 +124,13 @@ export default function CreateBlockRequestPage() {
     label: block,
   }));
 
+  // Helper function to get tomorrow's date in YYYY-MM-DD format
+  const getTomorrowDateString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day
+    return tomorrow.toISOString().split("T")[0]; // Format: "2025-05-10"
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -132,9 +144,11 @@ export default function CreateBlockRequestPage() {
         [name]: checkbox.checked,
       });
     } else if (type === "radio") {
+      const newValue =
+        value === "true" ? true : value === "false" ? false : value;
       setFormData({
         ...formData,
-        [name]: value === "true" ? true : value === "false" ? false : value,
+        [name]: newValue,
       });
     } else if (type === "number") {
       setFormData({
@@ -177,6 +191,17 @@ export default function CreateBlockRequestPage() {
     if (!formData.date) {
       setErrors({
         date: "Please select a date for the block request",
+      });
+      return false;
+    }
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
+
+    if (selectedDate <= today) {
+      // Rejects today & past dates
+      setErrors({
+        date: "Block date must be in the future. Please select a date starting from tomorrow.",
       });
       return false;
     }
@@ -228,6 +253,12 @@ export default function CreateBlockRequestPage() {
         hasError = true;
       }
     });
+
+    // Add custom activity validation when "others" is selected
+    if (formData.activity === "others" && !customActivity.trim()) {
+      newErrors.activity = "Please specify the custom activity";
+      hasError = true;
+    }
 
     // Validate block section
     if (blockSectionValue.length === 0) {
@@ -283,14 +314,18 @@ export default function CreateBlockRequestPage() {
 
     return true;
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     setSuccess(null);
+
+    const finalActivity =
+      formData.activity === "others" ? customActivity : formData.activity;
+
     if (!handleFormValidation()) {
       return;
     }
+
     const validProcessedSections = (
       formData.processedLineSections || []
     ).filter((section) => blockSectionValue.includes(section.block));
@@ -322,17 +357,30 @@ export default function CreateBlockRequestPage() {
 
     const processedFormData = {
       ...formData,
-      date: formatDateToISO(formData.date || ""),
-      demandTimeFrom: formatTimeToDatetime(
-        formData.date || "",
-        formData.demandTimeFrom || ""
-      ),
-      demandTimeTo: formatTimeToDatetime(
-        formData.date || "",
-        formData.demandTimeTo || ""
-      ),
+      corridorType: formData.corridorTypeSelection,
+      activity: finalActivity,
+      date: formData.date ? formatDateToISO(formData.date) : "",
+      demandTimeFrom: formData.demandTimeFrom
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeFrom)
+        : "",
+      demandTimeTo: formData.demandTimeTo
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeTo)
+        : "",
       processedLineSections: processedSectionsWithDefaults,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired,
+      powerBlockRequired: formData.powerBlockRequired,
+      freshCautionRequired: formData.freshCautionRequired,
+      freshCautionLocationFrom: formData.freshCautionLocationFrom,
+      freshCautionLocationTo: formData.freshCautionLocationTo,
+      freshCautionSpeed: formData.freshCautionSpeed,
+      adjacentLinesAffected: formData.adjacentLinesAffected,
+      sntDisconnectionLineFrom: formData.sntDisconnectionLineFrom,
+      sntDisconnectionLineTo: formData.sntDisconnectionLineTo,
+      powerBlockRequirements: formData.powerBlockRequirements,
+      elementarySection: formData.elementarySection,
+      sntDisconnectionRequirements: formData.sntDisconnectionRequirements,
     };
+
     try {
       mutation.mutate(processedFormData as UserRequestInput, {
         onSuccess: (data) => {
@@ -340,6 +388,17 @@ export default function CreateBlockRequestPage() {
           setSuccess("Block request created successfully!");
           // Reset form
           setFormData({
+            ...formData,
+            sntDisconnectionRequired: null,
+            powerBlockRequired: null,
+            freshCautionRequired: null,
+            freshCautionLocationFrom: "",
+            freshCautionLocationTo: "",
+            sntDisconnectionRequirements: [],
+            sntDisconnectionLineFrom: "",
+            elementarySection: "",
+            sntDisconnectionLineTo: "",
+            powerBlockRequirements: [],
             date: "",
             selectedDepartment: session?.user.department || "",
             selectedSection: "",
@@ -349,10 +408,12 @@ export default function CreateBlockRequestPage() {
             corridorTypeSelection: null,
             cautionRequired: false,
             cautionSpeed: 0,
-            freshCautionRequired: false,
             freshCautionSpeed: 0,
+            adjacentLinesAffected: "",
             processedLineSections: [],
             selectedStream: "",
+            demandTimeFrom: "",
+            demandTimeTo: "",
           });
           setBlockSectionValue([]);
           setCustomActivity("");
@@ -387,6 +448,13 @@ export default function CreateBlockRequestPage() {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "Current powerBlockRequired state:",
+      formData.powerBlockRequired
+    );
+  }, [formData.powerBlockRequired]);
+
+  useEffect(() => {
     if (!formData.date) {
       setIsDisabled(true);
       setFormData({ ...formData, corridorTypeSelection: null });
@@ -407,6 +475,12 @@ export default function CreateBlockRequestPage() {
       String(formData.sntDisconnectionRequired) === "true"
     );
   }, [formData.sntDisconnectionRequired]);
+
+  // useEffect(()=>{
+  //   setPowerBlockChecked(
+  //     String(formData.powerBlockRequired)==="true"
+  //   )
+  // },[formData.powerBlockRequired])
 
   const handlePowerBlockRequirementsChange = (
     value: string,
@@ -655,6 +729,7 @@ export default function CreateBlockRequestPage() {
               style={{ color: "black", fontSize: "14px" }}
               aria-required="true"
               aria-label="Select date of block"
+              min={getTomorrowDateString()}
             />
             {errors.date && (
               <span className="text-xs text-red-700 font-medium mt-1 block">
@@ -1965,7 +2040,12 @@ export default function CreateBlockRequestPage() {
                       name="sntDisconnectionRequired"
                       value="true"
                       checked={formData.sntDisconnectionRequired === true}
-                      onChange={handleInputChange}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: true,
+                        })
+                      }
                       className="form-radio h-4 w-4"
                     />
                     <span className="ml-2 text-sm">Yes</span>
@@ -1976,7 +2056,12 @@ export default function CreateBlockRequestPage() {
                       name="sntDisconnectionRequired"
                       value="false"
                       checked={formData.sntDisconnectionRequired === false}
-                      onChange={handleInputChange}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: false,
+                        })
+                      }
                       className="form-radio h-4 w-4"
                     />
                     <span className="ml-2 text-sm">No</span>
