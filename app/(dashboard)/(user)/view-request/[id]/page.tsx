@@ -304,6 +304,12 @@ export default function ViewRequestPage() {
                   </td>
                 </tr>
               )}
+               <tr>
+                  <td className="py-1 font-medium">Elementary Section:</td>
+                  <td className="py-1">
+                    {request.elementarySection}
+                  </td>
+                </tr>
               <tr>
                 <td className="py-1 font-medium">
                   S&T Disconnection Required:
@@ -324,6 +330,13 @@ export default function ViewRequestPage() {
                     </td>
                   </tr>
                 )}
+                <tr>
+                      <td className="py-1 font-medium">S&T Lines:</td>
+                      <td className="py-1">
+                        {request.sntDisconnectionLineFrom} to{" "}
+                        {request.sntDisconnectionLineTo}
+                      </td>
+                    </tr>
               {/* <tr>
                 <td className="py-1 font-medium">Caution Required :</td>
                 <td className="py-1">
@@ -372,6 +385,13 @@ export default function ViewRequestPage() {
                       </td>
                     </tr>
                   )}
+                   <tr>
+                      <td className="py-1 font-medium">Adjacent lines affected:</td>
+                      <td className="py-1">
+                        {request.adjacentLinesAffected} 
+                        
+                      </td>
+                    </tr>
                 </>
               )}
               {request.repercussions && (
