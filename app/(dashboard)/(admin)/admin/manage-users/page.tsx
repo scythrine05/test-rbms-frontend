@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
 import {
   useCreateManager,
@@ -270,20 +270,33 @@ type User = {
 };
 
 export default function ManageUsersPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const { data: session } = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Call all hooks unconditionally
+  const managersData = useQuery({
+    queryKey: ["managers", page],
+    queryFn: () => managerService.getAllManagers(page),
+    enabled: session?.user?.role === "ADMIN",
+  });
+
+  const createManager = useCreateManager();
+  const deleteUser = useDeleteUser();
 
   // Check if user is authorized
   useEffect(() => {
-    if (session?.user?.role !== "ADMIN") {
+    if (!session?.user?.role || session.user.role !== "ADMIN") {
       router.push("/unauthorized");
     }
   }, [session, router]);
 
   // If not authorized, show unauthorized message
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user?.role || session.user.role !== "ADMIN") {
     return (
       <div className="bg-white p-3 border border-black mb-3">
         <div className="text-center py-5">
@@ -298,23 +311,21 @@ export default function ManageUsersPage() {
     );
   }
 
-  // Fetch users data
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["users", page],
-    queryFn: () => managerService.getAllManagers(page),
-  });
+  const isLoading = managersData.isLoading;
+  const error = managersData.error;
 
-  // Mutations
-  const createUser = useCreateManager();
-  const deleteUser = useDeleteUser();
+  // Extract data with proper typing
+  const users = managersData.data?.data?.users || [];
+  const totalPages = managersData.data?.data?.totalPages || 0;
 
   const handleCreateUser = async (userData: any) => {
     try {
-      const response = await createUser.mutateAsync(userData);
+      const response = await createManager.mutateAsync(userData);
       if (!response.status) {
         throw new Error(response.message);
       }
-      setIsCreateModalOpen(false);
+      setIsCreateUserModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["managers"] });
     } catch (error: any) {
       throw error;
     }
@@ -324,6 +335,7 @@ export default function ManageUsersPage() {
     if (confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUser.mutateAsync(id);
+        queryClient.invalidateQueries({ queryKey: ["managers"] });
       } catch (error) {
         console.error("Failed to delete user:", error);
       }
@@ -333,9 +345,10 @@ export default function ManageUsersPage() {
   if (isLoading) return <Loader name="users" />;
   if (error) return <div>Error loading users</div>;
 
-  const branchOfficers =
-    data?.data.users.filter((user: User) => user.role === "BRANCH_OFFICER") ||
-    [];
+  // Filter users based on role
+  const branchOfficers = users.filter(
+    (user: User) => user.role === "BRANCH_OFFICER"
+  );
 
   return (
     <div className="bg-white p-3 border border-black mb-3">
@@ -345,7 +358,7 @@ export default function ManageUsersPage() {
         </h1>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsCreateUserModalOpen(true)}
             className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
           >
             Add Branch Officer
@@ -416,8 +429,8 @@ export default function ManageUsersPage() {
       </div>
 
       <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
         onSubmit={handleCreateUser}
       />
 

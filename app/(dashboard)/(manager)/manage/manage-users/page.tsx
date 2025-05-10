@@ -564,6 +564,13 @@ export default function ManageUsersPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  // Call all hooks unconditionally
+  const branchOfficersData = useBranchOfficers(page, limit);
+  const seniorOfficersData = useSeniorOfficers(page, limit);
+  const juniorOfficersData = useJuniorOfficers(page, limit);
+  const createOfficer = useCreateOfficer();
+  const deleteOfficer = useDeleteOfficer();
+
   // Check if user is authorized (must be one of the officer roles)
   useEffect(() => {
     if (
@@ -597,24 +604,21 @@ export default function ManageUsersPage() {
     );
   }
 
-  const {
-    data: officersData,
-    isLoading: isDataLoading,
-    error: dataError,
-  } = session?.user?.role === "BRANCH_OFFICER"
-    ? useBranchOfficers(page, limit)
-    : session?.user?.role === "SENIOR_OFFICER"
-    ? useSeniorOfficers(page, limit)
-    : session?.user?.role === "JUNIOR_OFFICER"
-    ? useJuniorOfficers(page, limit)
-    : { data: undefined, isLoading: false, error: undefined };
+  // Select the appropriate data based on role
+  const officersData =
+    session?.user?.role === "BRANCH_OFFICER"
+      ? branchOfficersData
+      : session?.user?.role === "SENIOR_OFFICER"
+      ? seniorOfficersData
+      : juniorOfficersData;
 
-  const isLoading = isDataLoading;
-  const error = dataError;
+  const isLoading = officersData.isLoading;
+  const error = officersData.error;
 
-  // Mutations
-  const createOfficer = useCreateOfficer();
-  const deleteOfficer = useDeleteOfficer();
+  // Extract data with proper typing
+  const officers = officersData.data?.data?.officers || [];
+  const users = officersData.data?.data?.users || [];
+  const totalPages = officersData.data?.data?.totalPages || 0;
 
   const handleCreateOfficer = async (userData: any) => {
     try {
@@ -658,10 +662,6 @@ export default function ManageUsersPage() {
 
   if (isLoading) return <Loader name="users" />;
   if (error) return <div>Error loading users</div>;
-
-  // Get the appropriate data based on user role
-  const officers = officersData?.data?.officers || [];
-  const users = officersData?.data?.users || [];
 
   // Filter data based on role
   const seniorOfficers =
@@ -906,7 +906,7 @@ export default function ManageUsersPage() {
       )}
 
       {/* Pagination */}
-      {officersData?.data?.totalPages && officersData.data.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-4">
           <button
             onClick={() => setPage(page - 1)}
@@ -916,11 +916,11 @@ export default function ManageUsersPage() {
             Previous
           </button>
           <span className="px-3 py-1 text-sm">
-            Page {page} of {officersData.data.totalPages}
+            Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage(page + 1)}
-            disabled={page === officersData.data.totalPages}
+            disabled={page === totalPages}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
           >
             Next
