@@ -23,7 +23,7 @@ export let workType = {
 
 
 export let streamData = {
-  'POI-YD': { "up stream": ['rd 1', 'rd 2', 'rd 3', 'rd 4', 'rd 5', 'rd 6', 'rd 7', 'rd 8', 'rd 9', 'rd 10'], "down stream": ['rd 1', 'rd 2', 'rd 3'], 'both stream': [] },
+  'POI-YD': { "up direction": ['rd 1', 'rd 2', 'rd 3', 'rd 4', 'rd 5', 'rd 6', 'rd 7', 'rd 8', 'rd 9', 'rd 10'], "down direction": ['rd 1', 'rd 2', 'rd 3'], 'Both direction affected': [] },
   "TRT-YD": {}
 }
 
