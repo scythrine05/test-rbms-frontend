@@ -31,6 +31,9 @@ export default function CreateBlockRequestPage() {
     Partial<UserRequestInput> & {
       selectedStreams?: Record<string, string>;
       selectedRoads?: Record<string, string[]>;
+      sntDisconnectionRequired?: boolean | null;
+      powerBlockRequired?: boolean | null;
+      freshCautionRequired?: boolean | null;
     }
   >({
     date: "",
@@ -42,10 +45,7 @@ export default function CreateBlockRequestPage() {
     corridorTypeSelection: null,
     cautionRequired: false,
     cautionSpeed: 0,
-    freshCautionRequired: null,
     freshCautionSpeed: 0,
-    freshCautionLocationFrom: "",
-    freshCautionLocationTo: "",
     adjacentLinesAffected: "",
     workLocationFrom: "",
     workLocationTo: "",
@@ -60,6 +60,10 @@ export default function CreateBlockRequestPage() {
     routeTo: "",
     powerBlockRequirements: [],
     sntDisconnectionRequired: null,
+    powerBlockRequired: null,
+    freshCautionRequired: null,
+    freshCautionLocationFrom: "",
+    freshCautionLocationTo: "",
     sntDisconnectionRequirements: [],
     sntDisconnectionLineFrom: "",
     sntDisconnectionLineTo: "",
@@ -75,6 +79,7 @@ export default function CreateBlockRequestPage() {
   const [blockSectionValue, setBlockSectionValue] = useState<string[]>([]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [sntDisconnectionChecked, setSntDisconnectionChecked] = useState(false);
+  // const[powerBlockChecked,setPowerBlockChecked]=useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -119,6 +124,13 @@ export default function CreateBlockRequestPage() {
     label: block,
   }));
 
+  // Helper function to get tomorrow's date in YYYY-MM-DD format
+  const getTomorrowDateString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1); // Add 1 day
+    return tomorrow.toISOString().split("T")[0]; // Format: "2025-05-10"
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -132,9 +144,11 @@ export default function CreateBlockRequestPage() {
         [name]: checkbox.checked,
       });
     } else if (type === "radio") {
+      const newValue =
+        value === "true" ? true : value === "false" ? false : value;
       setFormData({
         ...formData,
-        [name]: value === "true" ? true : value === "false" ? false : value,
+        [name]: newValue,
       });
     } else if (type === "number") {
       setFormData({
@@ -177,6 +191,17 @@ export default function CreateBlockRequestPage() {
     if (!formData.date) {
       setErrors({
         date: "Please select a date for the block request",
+      });
+      return false;
+    }
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
+
+    if (selectedDate <= today) {
+      // Rejects today & past dates
+      setErrors({
+        date: "Block date must be in the future. Please select a date starting from tomorrow.",
       });
       return false;
     }
@@ -228,6 +253,12 @@ export default function CreateBlockRequestPage() {
         hasError = true;
       }
     });
+
+    // Add custom activity validation when "others" is selected
+    if (formData.activity === "others" && !customActivity.trim()) {
+      newErrors.activity = "Please specify the custom activity";
+      hasError = true;
+    }
 
     // Validate block section
     if (blockSectionValue.length === 0) {
@@ -283,14 +314,18 @@ export default function CreateBlockRequestPage() {
 
     return true;
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
     setSuccess(null);
+
+    const finalActivity =
+      formData.activity === "others" ? customActivity : formData.activity;
+
     if (!handleFormValidation()) {
       return;
     }
+
     const validProcessedSections = (
       formData.processedLineSections || []
     ).filter((section) => blockSectionValue.includes(section.block));
@@ -322,23 +357,47 @@ export default function CreateBlockRequestPage() {
 
     const processedFormData = {
       ...formData,
-      date: formatDateToISO(formData.date || ""),
-      demandTimeFrom: formatTimeToDatetime(
-        formData.date || "",
-        formData.demandTimeFrom || ""
-      ),
-      demandTimeTo: formatTimeToDatetime(
-        formData.date || "",
-        formData.demandTimeTo || ""
-      ),
+      corridorType: formData.corridorTypeSelection,
+      activity: finalActivity,
+      date: formData.date ? formatDateToISO(formData.date) : "",
+      demandTimeFrom: formData.demandTimeFrom
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeFrom)
+        : "",
+      demandTimeTo: formData.demandTimeTo
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeTo)
+        : "",
       processedLineSections: processedSectionsWithDefaults,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired,
+      powerBlockRequired: formData.powerBlockRequired,
+      freshCautionRequired: formData.freshCautionRequired,
+      freshCautionLocationFrom: formData.freshCautionLocationFrom,
+      freshCautionLocationTo: formData.freshCautionLocationTo,
+      freshCautionSpeed: formData.freshCautionSpeed,
+      adjacentLinesAffected: formData.adjacentLinesAffected,
+      sntDisconnectionLineFrom: formData.sntDisconnectionLineFrom,
+      sntDisconnectionLineTo: formData.sntDisconnectionLineTo,
+      powerBlockRequirements: formData.powerBlockRequirements,
+      elementarySection: formData.elementarySection,
+      sntDisconnectionRequirements: formData.sntDisconnectionRequirements,
     };
+
     try {
       mutation.mutate(processedFormData as UserRequestInput, {
         onSuccess: (data) => {
           setSuccess("Block request created successfully!");
           // Reset form
           setFormData({
+            ...formData,
+            sntDisconnectionRequired: null,
+            powerBlockRequired: null,
+            freshCautionRequired: null,
+            freshCautionLocationFrom: "",
+            freshCautionLocationTo: "",
+            sntDisconnectionRequirements: [],
+            sntDisconnectionLineFrom: "",
+            elementarySection: "",
+            sntDisconnectionLineTo: "",
+            powerBlockRequirements: [],
             date: "",
             selectedDepartment: session?.user.department || "",
             selectedSection: "",
@@ -348,10 +407,12 @@ export default function CreateBlockRequestPage() {
             corridorTypeSelection: null,
             cautionRequired: false,
             cautionSpeed: 0,
-            freshCautionRequired: false,
             freshCautionSpeed: 0,
+            adjacentLinesAffected: "",
             processedLineSections: [],
             selectedStream: "",
+            demandTimeFrom: "",
+            demandTimeTo: "",
           });
           setBlockSectionValue([]);
           setCustomActivity("");
@@ -386,6 +447,13 @@ export default function CreateBlockRequestPage() {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "Current powerBlockRequired state:",
+      formData.powerBlockRequired
+    );
+  }, [formData.powerBlockRequired]);
+
+  useEffect(() => {
     if (!formData.date) {
       setIsDisabled(true);
       setFormData({ ...formData, corridorTypeSelection: null });
@@ -406,6 +474,12 @@ export default function CreateBlockRequestPage() {
       String(formData.sntDisconnectionRequired) === "true"
     );
   }, [formData.sntDisconnectionRequired]);
+
+  // useEffect(()=>{
+  //   setPowerBlockChecked(
+  //     String(formData.powerBlockRequired)==="true"
+  //   )
+  // },[formData.powerBlockRequired])
 
   const handlePowerBlockRequirementsChange = (
     value: string,
@@ -654,6 +728,7 @@ export default function CreateBlockRequestPage() {
               style={{ color: "black", fontSize: "14px" }}
               aria-required="true"
               aria-label="Select date of block"
+              min={getTomorrowDateString()}
             />
             {errors.date && (
               <span className="text-xs text-red-700 font-medium mt-1 block">
@@ -841,7 +916,7 @@ export default function CreateBlockRequestPage() {
 
           <div className="form-group col-span-1">
             <label className="block text-sm font-medium text-black mb-1">
-              Depot <span className="text-red-600">*</span>
+              Depot / SSE <span className="text-red-600">*</span>
             </label>
             <select
               name="selectedDepo"
@@ -852,7 +927,7 @@ export default function CreateBlockRequestPage() {
               aria-required="true"
             >
               <option value="" disabled>
-                Select Depot
+                Select Depot / SSE
               </option>
               {selectedMajorSection &&
               session?.user.department &&
@@ -911,7 +986,7 @@ export default function CreateBlockRequestPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
             <div className="form-group col-span-2">
               <label className="block text-sm font-medium text-black mb-1">
-                Block Section <span className="text-red-600">*</span>
+                Block Section / Yard <span className="text-red-600">*</span>
               </label>
               <Select
                 isMulti
@@ -1009,10 +1084,636 @@ export default function CreateBlockRequestPage() {
                   {errors.missionBlock}
                 </span>
               )}
+
+              <div>
+                {" "}
+                {blockSectionValue.length === 1 && (
+                  <div className="mt-4">
+                    {blockSectionValue[0].includes("-YD") ? (
+                      // For yard sections (containing -YD)
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Direction of traffic affected for{" "}
+                          {blockSectionValue[0]}{" "}
+                          <span className="text-red-600">*</span>
+                        </label>
+                        {(() => {
+                          // Find the section in processedLineSections for this block
+                          const sectionEntry =
+                            formData.processedLineSections?.find(
+                              (section) =>
+                                section.block === blockSectionValue[0]
+                            );
+                          const streamValue = sectionEntry?.stream || "";
+
+                          // Check if we have error
+                          const hasStreamError =
+                            errors[
+                              `processedLineSections.${blockSectionValue[0]}.stream`
+                            ];
+
+                          return (
+                            <>
+                              <select
+                                className="input gov-input"
+                                style={{
+                                  color: "black",
+                                  borderColor: hasStreamError
+                                    ? "#dc2626"
+                                    : streamValue
+                                    ? "#45526c"
+                                    : "#dc2626",
+                                  fontSize: "14px",
+                                }}
+                                value={streamValue}
+                                onChange={(e) =>
+                                  handleStreamSelection(
+                                    blockSectionValue[0],
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="" disabled>
+                                  Select Stream
+                                </option>
+                                {streamData &&
+                                blockSectionValue[0] in streamData ? (
+                                  Object.keys(
+                                    streamData[
+                                      blockSectionValue[0] as keyof typeof streamData
+                                    ]
+                                  ).map((stream) => (
+                                    <option key={stream} value={stream}>
+                                      {stream}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="up stream">up stream</option>
+                                )}
+                              </select>
+                              {hasStreamError && (
+                                <span className="text-xs text-red-700 font-medium mb-2 block">
+                                  Stream selection is required
+                                </span>
+                              )}
+                              {streamValue &&
+                                streamData &&
+                                blockSectionValue[0] in streamData && (
+                                  <div className="mt-2">
+                                    <label className="block text-sm font-medium text-black mb-1">
+                                      Road {blockSectionValue[0]}
+                                    </label>
+                                    <select
+                                      className="input gov-input"
+                                      value={sectionEntry?.road || ""}
+                                      onChange={(e) =>
+                                        handleRoadSelection(
+                                          blockSectionValue[0],
+                                          e.target.value
+                                        )
+                                      }
+                                      style={{
+                                        color: "black",
+                                        borderColor: errors[
+                                          `processedLineSections.${blockSectionValue[0]}.road`
+                                        ]
+                                          ? "#dc2626"
+                                          : "#45526c",
+                                        fontSize: "14px",
+                                      }}
+                                    >
+                                      <option value="" disabled>
+                                        Select Road
+                                      </option>
+                                      {getStreamDataSafely(
+                                        blockSectionValue[0],
+                                        streamValue
+                                      ).map((road: string) => (
+                                        <option key={road} value={road}>
+                                          {road}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    {errors[
+                                      `processedLineSections.${blockSectionValue[0]}.road`
+                                    ] && (
+                                      <span className="text-xs text-red-700 font-medium mb-2 block">
+                                        Road selection is required
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              {sectionEntry?.road &&
+                                streamValue &&
+                                streamData &&
+                                blockSectionValue[0] in streamData && (
+                                  <div className="mt-2">
+                                    <label className="block text-sm font-medium text-black mb-1">
+                                      Other affected Road {blockSectionValue[0]}
+                                    </label>
+                                    <Select
+                                      isMulti
+                                      options={getStreamDataSafely(
+                                        blockSectionValue[0],
+                                        streamValue
+                                      )
+                                        .filter(
+                                          (road: string) =>
+                                            road !== sectionEntry.road
+                                        )
+                                        .map((road: string) => ({
+                                          value: road,
+                                          label: road,
+                                        }))}
+                                      value={
+                                        sectionEntry.otherRoads
+                                          ? sectionEntry.otherRoads
+                                              .split(",")
+                                              .filter(Boolean)
+                                              .map((road: string) => ({
+                                                value: road,
+                                                label: road,
+                                              }))
+                                          : []
+                                      }
+                                      onChange={(opts) =>
+                                        handleOtherAffectedLinesChange(
+                                          blockSectionValue[0],
+                                          opts as any
+                                        )
+                                      }
+                                      className="basic-multi-select"
+                                      classNamePrefix="select"
+                                      placeholder="Select other affected roads"
+                                      styles={{
+                                        control: (base) => ({
+                                          ...base,
+                                          fontSize: "14px",
+                                          minHeight: "36px",
+                                          padding: "2px",
+                                        }),
+                                        option: (base) => ({
+                                          ...base,
+                                          fontSize: "14px",
+                                          padding: "6px 12px",
+                                        }),
+                                        multiValueLabel: (base) => ({
+                                          ...base,
+                                          fontSize: "12px",
+                                        }),
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      // For regular sections (without -YD)
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Line {blockSectionValue[0]}{" "}
+                          <span className="text-red-600">*</span>
+                        </label>
+                        {(() => {
+                          // Find the section in processedLineSections for this block
+                          const sectionEntry =
+                            formData.processedLineSections?.find(
+                              (section) =>
+                                section.block === blockSectionValue[0]
+                            );
+                          const lineValue = sectionEntry?.lineName || "";
+
+                          // Check if we have error
+                          const hasLineError =
+                            errors[
+                              `processedLineSections.${blockSectionValue[0]}.lineName`
+                            ];
+
+                          return (
+                            <>
+                              <select
+                                className="input gov-input"
+                                style={{
+                                  color: "black",
+                                  borderColor: hasLineError
+                                    ? "#dc2626"
+                                    : lineValue
+                                    ? "#45526c"
+                                    : "#dc2626",
+                                  fontSize: "14px",
+                                }}
+                                value={lineValue}
+                                onChange={(e) =>
+                                  handleLineNameSelection(
+                                    blockSectionValue[0],
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="" disabled>
+                                  Select Line
+                                </option>
+                                {lineData[
+                                  blockSectionValue[0] as keyof typeof lineData
+                                ]?.map((line: string) => (
+                                  <option key={line} value={line}>
+                                    {line}
+                                  </option>
+                                ))}
+                              </select>
+                              {hasLineError && (
+                                <span className="text-xs text-red-700 font-medium mb-2 block">
+                                  Line selection is required
+                                </span>
+                              )}
+                              {lineValue && (
+                                <div className="mt-2">
+                                  <label className="block text-sm font-medium text-black mb-1">
+                                    Other affected Line for{" "}
+                                    {blockSectionValue[0]}
+                                  </label>
+                                  <Select
+                                    isMulti
+                                    options={(
+                                      lineData[
+                                        blockSectionValue[0] as keyof typeof lineData
+                                      ] || []
+                                    )
+                                      .filter((l: string) => l !== lineValue)
+                                      .map((l: string) => ({
+                                        value: l,
+                                        label: l,
+                                      }))}
+                                    value={
+                                      sectionEntry?.otherLines
+                                        ? sectionEntry.otherLines
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((line: string) => ({
+                                              value: line,
+                                              label: line,
+                                            }))
+                                        : []
+                                    }
+                                    onChange={(opts) =>
+                                      handleOtherAffectedLinesChange(
+                                        blockSectionValue[0],
+                                        opts as any
+                                      )
+                                    }
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    placeholder="Select other affected lines"
+                                    styles={{
+                                      control: (base) => ({
+                                        ...base,
+                                        fontSize: "14px",
+                                        minHeight: "36px",
+                                        padding: "2px",
+                                      }),
+                                      option: (base) => ({
+                                        ...base,
+                                        fontSize: "14px",
+                                        padding: "6px 12px",
+                                      }),
+                                      multiValueLabel: (base) => ({
+                                        ...base,
+                                        fontSize: "12px",
+                                      }),
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {blockSectionValue.length > 1 && (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-medium text-black mb-4">
+                      Line Selections
+                    </h3>
+                    {blockSectionValue.map((block) => {
+                      // Find the section in processedLineSections for this block
+                      const sectionEntry = formData.processedLineSections?.find(
+                        (section) => section.block === block
+                      );
+
+                      return (
+                        <div
+                          key={block}
+                          className="mb-4 pb-4 border-b border-gray-200"
+                        >
+                          {block.includes("-YD") ? (
+                            // For yard sections in multiple selection
+                            <>
+                              <label className="block text-base font-medium text-black mb-2">
+                                Stream for {block}{" "}
+                                <span className="text-red-600">*</span>
+                              </label>
+                              <select
+                                className="input gov-input mb-3"
+                                style={{
+                                  color: "black",
+                                  borderColor: errors[
+                                    `processedLineSections.${block}.stream`
+                                  ]
+                                    ? "#dc2626"
+                                    : sectionEntry?.stream
+                                    ? "#45526c"
+                                    : "#dc2626",
+                                }}
+                                value={sectionEntry?.stream || ""}
+                                onChange={(e) =>
+                                  handleStreamSelection(block, e.target.value)
+                                }
+                              >
+                                <option value="" disabled>
+                                  Select Stream
+                                </option>
+                                {streamData[
+                                  block as keyof typeof streamData
+                                ] ? (
+                                  Object.keys(
+                                    streamData[block as keyof typeof streamData]
+                                  ).map((stream) => (
+                                    <option key={stream} value={stream}>
+                                      {stream}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="up stream">up stream</option>
+                                )}
+                              </select>
+                              {errors[
+                                `processedLineSections.${block}.stream`
+                              ] && (
+                                <span className="text-base text-red-700 font-medium mb-3 block">
+                                  Stream selection is required
+                                </span>
+                              )}
+                              {sectionEntry?.stream &&
+                                streamData[
+                                  block as keyof typeof streamData
+                                ] && (
+                                  <div className="mt-2 mb-3">
+                                    <label className="block text-base font-medium text-black mb-2">
+                                      Road {block}
+                                    </label>
+                                    <select
+                                      className="input gov-input"
+                                      value={sectionEntry?.road || ""}
+                                      onChange={(e) =>
+                                        handleRoadSelection(
+                                          block,
+                                          e.target.value
+                                        )
+                                      }
+                                      style={{
+                                        color: "black",
+                                        borderColor: errors[
+                                          `processedLineSections.${block}.road`
+                                        ]
+                                          ? "#dc2626"
+                                          : "#45526c",
+                                      }}
+                                    >
+                                      <option value="" disabled>
+                                        Select Road
+                                      </option>
+                                      {getStreamDataSafely(
+                                        block,
+                                        sectionEntry?.stream || ""
+                                      ).map((road: string) => (
+                                        <option key={road} value={road}>
+                                          {road}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    {errors[
+                                      `processedLineSections.${block}.road`
+                                    ] && (
+                                      <span className="text-base text-red-700 font-medium mb-3 block">
+                                        Road selection is required
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              {sectionEntry?.road &&
+                                sectionEntry?.stream &&
+                                block in streamData && (
+                                  <div className="mt-2 mb-2">
+                                    <label className="block text-base font-medium text-black mb-2">
+                                      Other affected Road for {block}
+                                    </label>
+                                    <Select
+                                      isMulti
+                                      options={(() => {
+                                        // Type assertion for streamData index access
+                                        const blockKey =
+                                          block as keyof typeof streamData;
+                                        const blockData = streamData[blockKey];
+
+                                        // Check if blockData exists and is an object
+                                        if (
+                                          !blockData ||
+                                          typeof blockData !== "object"
+                                        ) {
+                                          return [];
+                                        }
+
+                                        // Get the stream key and check if it exists in blockData
+                                        const streamKey = sectionEntry.stream;
+                                        if (!streamKey) {
+                                          return [];
+                                        }
+
+                                        // Use safer approach with type assertion
+                                        // Converting to Record<string, any> to handle dynamic access safely
+                                        const typedBlockData =
+                                          blockData as Record<string, any>;
+
+                                        if (!(streamKey in typedBlockData)) {
+                                          return [];
+                                        }
+
+                                        const roadArray =
+                                          typedBlockData[streamKey];
+                                        if (!Array.isArray(roadArray)) {
+                                          return [];
+                                        }
+
+                                        return roadArray
+                                          .filter(
+                                            (road: string) =>
+                                              road !== sectionEntry.road
+                                          )
+                                          .map((road: string) => ({
+                                            value: road,
+                                            label: road,
+                                          }));
+                                      })()}
+                                      value={
+                                        sectionEntry?.otherRoads
+                                          ? sectionEntry.otherRoads
+                                              .split(",")
+                                              .filter(Boolean)
+                                              .map((road: string) => ({
+                                                value: road,
+                                                label: road,
+                                              }))
+                                          : []
+                                      }
+                                      onChange={(opts) =>
+                                        handleOtherAffectedLinesChange(
+                                          block,
+                                          opts as any
+                                        )
+                                      }
+                                      className="basic-multi-select"
+                                      classNamePrefix="select"
+                                      placeholder="Select other affected roads"
+                                      styles={{
+                                        control: (base) => ({
+                                          ...base,
+                                          fontSize: "14px",
+                                          minHeight: "36px",
+                                          padding: "2px",
+                                        }),
+                                        option: (base) => ({
+                                          ...base,
+                                          fontSize: "14px",
+                                          padding: "6px 12px",
+                                        }),
+                                        multiValueLabel: (base) => ({
+                                          ...base,
+                                          fontSize: "12px",
+                                        }),
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                            </>
+                          ) : (
+                            // For regular sections in multiple selection
+                            <>
+                              <label className="block text-base font-medium text-black mb-2">
+                                Line {block}{" "}
+                                <span className="text-red-600">*</span>
+                              </label>
+                              <select
+                                className="input gov-input mb-3"
+                                style={{
+                                  color: "black",
+                                  borderColor: errors[
+                                    `processedLineSections.${block}.lineName`
+                                  ]
+                                    ? "#dc2626"
+                                    : sectionEntry?.lineName
+                                    ? "#45526c"
+                                    : "#dc2626",
+                                }}
+                                value={sectionEntry?.lineName || ""}
+                                onChange={(e) =>
+                                  handleLineNameSelection(block, e.target.value)
+                                }
+                              >
+                                <option value="" disabled>
+                                  Select Line
+                                </option>
+                                {lineData[block as keyof typeof lineData]?.map(
+                                  (line: string) => (
+                                    <option key={line} value={line}>
+                                      {line}
+                                    </option>
+                                  )
+                                )}
+                              </select>
+                              {errors[
+                                `processedLineSections.${block}.lineName`
+                              ] && (
+                                <span className="text-base text-red-700 font-medium mb-3 block">
+                                  Line selection is required
+                                </span>
+                              )}
+                              {sectionEntry?.lineName && (
+                                <div className="mt-2 mb-2">
+                                  <label className="block text-base font-medium text-black mb-2">
+                                    Other affected Line for {block}
+                                  </label>
+                                  <Select
+                                    isMulti
+                                    options={(
+                                      lineData[
+                                        block as keyof typeof lineData
+                                      ] || []
+                                    )
+                                      .filter(
+                                        (l: string) =>
+                                          l !== sectionEntry.lineName
+                                      )
+                                      .map((l: string) => ({
+                                        value: l,
+                                        label: l,
+                                      }))}
+                                    value={
+                                      sectionEntry?.otherLines
+                                        ? sectionEntry.otherLines
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((line: string) => ({
+                                              value: line,
+                                              label: line,
+                                            }))
+                                        : []
+                                    }
+                                    onChange={(opts) =>
+                                      handleOtherAffectedLinesChange(
+                                        block,
+                                        opts as any
+                                      )
+                                    }
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    placeholder="Select other affected lines"
+                                    styles={{
+                                      control: (base) => ({
+                                        ...base,
+                                        fontSize: "14px",
+                                        minHeight: "36px",
+                                        padding: "2px",
+                                      }),
+                                      option: (base) => ({
+                                        ...base,
+                                        fontSize: "14px",
+                                        padding: "6px 12px",
+                                      }),
+                                      multiValueLabel: (base) => ({
+                                        ...base,
+                                        fontSize: "12px",
+                                      }),
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="form-group col-span-1">
               <label className="block text-sm font-medium text-black mb-1">
-                Work Type <span className="text-red-600">*</span>
+                Type of Work <span className="text-red-600">*</span>
               </label>
               <select
                 name="workType"
@@ -1024,7 +1725,7 @@ export default function CreateBlockRequestPage() {
               >
                 <option value="" disabled>
                   {userDepartment
-                    ? "Select Work Type"
+                    ? "Select Type of Work"
                     : "Select Department first"}
                 </option>
                 {workTypeOptions.map((type: string) => (
@@ -1080,611 +1781,60 @@ export default function CreateBlockRequestPage() {
                 </span>
               )}
             </div>
-            <div className="form-group col-span-2">
+          </div>
+        </div>
+        <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
+          <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
+            Preferred Time (Click On the Clock To Select)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
+            <div className="form-group col-span-1">
               <label className="block text-sm font-medium text-black mb-1">
-                Remarks
+                From (Hrs) <span className="text-red-600">*</span>
               </label>
-              <textarea
-                name="requestremarks"
-                value={formData.requestremarks || ""}
+              <input
+                type="time"
+                name="demandTimeFrom"
+                value={extractTimeFromDatetime(formData.demandTimeFrom || "")}
                 onChange={handleInputChange}
-                className="gov-input"
-                style={{
-                  color: "black",
-                  minHeight: "80px",
-                  width: "100%",
-                  fontSize: "14px",
-                }}
-                placeholder="Enter any additional remarks"
-                aria-label="Request remarks"
-              ></textarea>
+                className="input gov-input"
+                style={{ color: "black", fontSize: "14px" }}
+                aria-required="true"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">
+                24-hour railway timing (e.g., 23:30)
+              </span>
+              {errors.demandTimeFrom && (
+                <span className="text-xs text-red-700 font-medium mt-1 block">
+                  {errors.demandTimeFrom}
+                </span>
+              )}
+            </div>
+            <div className="form-group col-span-1">
+              <label className="block text-sm font-medium text-black mb-1">
+                To (Hrs) <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="time"
+                name="demandTimeTo"
+                value={extractTimeFromDatetime(formData.demandTimeTo || "")}
+                onChange={handleInputChange}
+                className="input gov-input"
+                style={{ color: "black", fontSize: "14px" }}
+                aria-required="true"
+              />
+              <span className="text-xs text-gray-500 mt-1 block">
+                24-hour railway timing (e.g., 23:30)
+              </span>
+              {errors.demandTimeTo && (
+                <span className="text-xs text-red-700 font-medium mt-1 block">
+                  {errors.demandTimeTo}
+                </span>
+              )}
             </div>
           </div>
         </div>
-        {blockSectionValue.length === 1 && (
-          <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
-            {blockSectionValue[0].includes("-YD") ? (
-              // For yard sections (containing -YD)
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">
-                  Stream for {blockSectionValue[0]}{" "}
-                  <span className="text-red-600">*</span>
-                </label>
-                {(() => {
-                  // Find the section in processedLineSections for this block
-                  const sectionEntry = formData.processedLineSections?.find(
-                    (section) => section.block === blockSectionValue[0]
-                  );
-                  const streamValue = sectionEntry?.stream || "";
 
-                  // Check if we have error
-                  const hasStreamError =
-                    errors[
-                      `processedLineSections.${blockSectionValue[0]}.stream`
-                    ];
-
-                  return (
-                    <>
-                      <select
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: hasStreamError
-                            ? "#dc2626"
-                            : streamValue
-                            ? "#45526c"
-                            : "#dc2626",
-                          fontSize: "14px",
-                        }}
-                        value={streamValue}
-                        onChange={(e) =>
-                          handleStreamSelection(
-                            blockSectionValue[0],
-                            e.target.value
-                          )
-                        }
-                      >
-                        <option value="" disabled>
-                          Select Stream
-                        </option>
-                        {streamData && blockSectionValue[0] in streamData ? (
-                          Object.keys(
-                            streamData[
-                              blockSectionValue[0] as keyof typeof streamData
-                            ]
-                          ).map((stream) => (
-                            <option key={stream} value={stream}>
-                              {stream}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="up stream">up stream</option>
-                        )}
-                      </select>
-                      {hasStreamError && (
-                        <span className="text-xs text-red-700 font-medium mb-2 block">
-                          Stream selection is required
-                        </span>
-                      )}
-                      {streamValue &&
-                        streamData &&
-                        blockSectionValue[0] in streamData && (
-                          <div className="mt-2">
-                            <label className="block text-sm font-medium text-black mb-1">
-                              Road {blockSectionValue[0]}
-                            </label>
-                            <select
-                              className="input gov-input"
-                              value={sectionEntry?.road || ""}
-                              onChange={(e) =>
-                                handleRoadSelection(
-                                  blockSectionValue[0],
-                                  e.target.value
-                                )
-                              }
-                              style={{
-                                color: "black",
-                                borderColor: errors[
-                                  `processedLineSections.${blockSectionValue[0]}.road`
-                                ]
-                                  ? "#dc2626"
-                                  : "#45526c",
-                                fontSize: "14px",
-                              }}
-                            >
-                              <option value="" disabled>
-                                Select Road
-                              </option>
-                              {getStreamDataSafely(
-                                blockSectionValue[0],
-                                streamValue
-                              ).map((road: string) => (
-                                <option key={road} value={road}>
-                                  {road}
-                                </option>
-                              ))}
-                            </select>
-                            {errors[
-                              `processedLineSections.${blockSectionValue[0]}.road`
-                            ] && (
-                              <span className="text-xs text-red-700 font-medium mb-2 block">
-                                Road selection is required
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      {sectionEntry?.road &&
-                        streamValue &&
-                        streamData &&
-                        blockSectionValue[0] in streamData && (
-                          <div className="mt-2">
-                            <label className="block text-sm font-medium text-black mb-1">
-                              Other affected Road {blockSectionValue[0]}
-                            </label>
-                            <Select
-                              isMulti
-                              options={getStreamDataSafely(
-                                blockSectionValue[0],
-                                streamValue
-                              )
-                                .filter(
-                                  (road: string) => road !== sectionEntry.road
-                                )
-                                .map((road: string) => ({
-                                  value: road,
-                                  label: road,
-                                }))}
-                              value={
-                                sectionEntry.otherRoads
-                                  ? sectionEntry.otherRoads
-                                      .split(",")
-                                      .filter(Boolean)
-                                      .map((road: string) => ({
-                                        value: road,
-                                        label: road,
-                                      }))
-                                  : []
-                              }
-                              onChange={(opts) =>
-                                handleOtherAffectedLinesChange(
-                                  blockSectionValue[0],
-                                  opts as any
-                                )
-                              }
-                              className="basic-multi-select"
-                              classNamePrefix="select"
-                              placeholder="Select other affected roads"
-                              styles={{
-                                control: (base) => ({
-                                  ...base,
-                                  fontSize: "14px",
-                                  minHeight: "36px",
-                                  padding: "2px",
-                                }),
-                                option: (base) => ({
-                                  ...base,
-                                  fontSize: "14px",
-                                  padding: "6px 12px",
-                                }),
-                                multiValueLabel: (base) => ({
-                                  ...base,
-                                  fontSize: "12px",
-                                }),
-                              }}
-                            />
-                          </div>
-                        )}
-                    </>
-                  );
-                })()}
-              </div>
-            ) : (
-              // For regular sections (without -YD)
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">
-                  Line {blockSectionValue[0]}{" "}
-                  <span className="text-red-600">*</span>
-                </label>
-                {(() => {
-                  // Find the section in processedLineSections for this block
-                  const sectionEntry = formData.processedLineSections?.find(
-                    (section) => section.block === blockSectionValue[0]
-                  );
-                  const lineValue = sectionEntry?.lineName || "";
-
-                  // Check if we have error
-                  const hasLineError =
-                    errors[
-                      `processedLineSections.${blockSectionValue[0]}.lineName`
-                    ];
-
-                  return (
-                    <>
-                      <select
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: hasLineError
-                            ? "#dc2626"
-                            : lineValue
-                            ? "#45526c"
-                            : "#dc2626",
-                          fontSize: "14px",
-                        }}
-                        value={lineValue}
-                        onChange={(e) =>
-                          handleLineNameSelection(
-                            blockSectionValue[0],
-                            e.target.value
-                          )
-                        }
-                      >
-                        <option value="" disabled>
-                          Select Line
-                        </option>
-                        {lineData[
-                          blockSectionValue[0] as keyof typeof lineData
-                        ]?.map((line: string) => (
-                          <option key={line} value={line}>
-                            {line}
-                          </option>
-                        ))}
-                      </select>
-                      {hasLineError && (
-                        <span className="text-xs text-red-700 font-medium mb-2 block">
-                          Line selection is required
-                        </span>
-                      )}
-                      {lineValue && (
-                        <div className="mt-2">
-                          <label className="block text-sm font-medium text-black mb-1">
-                            Other affected Line for {blockSectionValue[0]}
-                          </label>
-                          <Select
-                            isMulti
-                            options={(
-                              lineData[
-                                blockSectionValue[0] as keyof typeof lineData
-                              ] || []
-                            )
-                              .filter((l: string) => l !== lineValue)
-                              .map((l: string) => ({ value: l, label: l }))}
-                            value={
-                              sectionEntry?.otherLines
-                                ? sectionEntry.otherLines
-                                    .split(",")
-                                    .filter(Boolean)
-                                    .map((line: string) => ({
-                                      value: line,
-                                      label: line,
-                                    }))
-                                : []
-                            }
-                            onChange={(opts) =>
-                              handleOtherAffectedLinesChange(
-                                blockSectionValue[0],
-                                opts as any
-                              )
-                            }
-                            className="basic-multi-select"
-                            classNamePrefix="select"
-                            placeholder="Select other affected lines"
-                            styles={{
-                              control: (base) => ({
-                                ...base,
-                                fontSize: "14px",
-                                minHeight: "36px",
-                                padding: "2px",
-                              }),
-                              option: (base) => ({
-                                ...base,
-                                fontSize: "14px",
-                                padding: "6px 12px",
-                              }),
-                              multiValueLabel: (base) => ({
-                                ...base,
-                                fontSize: "12px",
-                              }),
-                            }}
-                          />
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            )}
-          </div>
-        )}
-        {blockSectionValue.length > 1 && (
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4">
-            <h3 className="text-lg font-medium text-black mb-4">
-              Line Selections
-            </h3>
-            {blockSectionValue.map((block) => {
-              // Find the section in processedLineSections for this block
-              const sectionEntry = formData.processedLineSections?.find(
-                (section) => section.block === block
-              );
-
-              return (
-                <div key={block} className="mb-4 pb-4 border-b border-gray-200">
-                  {block.includes("-YD") ? (
-                    // For yard sections in multiple selection
-                    <>
-                      <label className="block text-base font-medium text-black mb-2">
-                        Stream for {block}{" "}
-                        <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        className="input gov-input mb-3"
-                        style={{
-                          color: "black",
-                          borderColor: errors[
-                            `processedLineSections.${block}.stream`
-                          ]
-                            ? "#dc2626"
-                            : sectionEntry?.stream
-                            ? "#45526c"
-                            : "#dc2626",
-                        }}
-                        value={sectionEntry?.stream || ""}
-                        onChange={(e) =>
-                          handleStreamSelection(block, e.target.value)
-                        }
-                      >
-                        <option value="" disabled>
-                          Select Stream
-                        </option>
-                        {streamData[block as keyof typeof streamData] ? (
-                          Object.keys(
-                            streamData[block as keyof typeof streamData]
-                          ).map((stream) => (
-                            <option key={stream} value={stream}>
-                              {stream}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="up stream">up stream</option>
-                        )}
-                      </select>
-                      {errors[`processedLineSections.${block}.stream`] && (
-                        <span className="text-base text-red-700 font-medium mb-3 block">
-                          Stream selection is required
-                        </span>
-                      )}
-                      {sectionEntry?.stream &&
-                        streamData[block as keyof typeof streamData] && (
-                          <div className="mt-2 mb-3">
-                            <label className="block text-base font-medium text-black mb-2">
-                              Road {block}
-                            </label>
-                            <select
-                              className="input gov-input"
-                              value={sectionEntry?.road || ""}
-                              onChange={(e) =>
-                                handleRoadSelection(block, e.target.value)
-                              }
-                              style={{
-                                color: "black",
-                                borderColor: errors[
-                                  `processedLineSections.${block}.road`
-                                ]
-                                  ? "#dc2626"
-                                  : "#45526c",
-                              }}
-                            >
-                              <option value="" disabled>
-                                Select Road
-                              </option>
-                              {getStreamDataSafely(
-                                block,
-                                sectionEntry?.stream || ""
-                              ).map((road: string) => (
-                                <option key={road} value={road}>
-                                  {road}
-                                </option>
-                              ))}
-                            </select>
-                            {errors[`processedLineSections.${block}.road`] && (
-                              <span className="text-base text-red-700 font-medium mb-3 block">
-                                Road selection is required
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      {sectionEntry?.road &&
-                        sectionEntry?.stream &&
-                        block in streamData && (
-                          <div className="mt-2 mb-2">
-                            <label className="block text-base font-medium text-black mb-2">
-                              Other affected Road for {block}
-                            </label>
-                            <Select
-                              isMulti
-                              options={(() => {
-                                // Type assertion for streamData index access
-                                const blockKey =
-                                  block as keyof typeof streamData;
-                                const blockData = streamData[blockKey];
-
-                                // Check if blockData exists and is an object
-                                if (
-                                  !blockData ||
-                                  typeof blockData !== "object"
-                                ) {
-                                  return [];
-                                }
-
-                                // Get the stream key and check if it exists in blockData
-                                const streamKey = sectionEntry.stream;
-                                if (!streamKey) {
-                                  return [];
-                                }
-
-                                // Use safer approach with type assertion
-                                // Converting to Record<string, any> to handle dynamic access safely
-                                const typedBlockData = blockData as Record<
-                                  string,
-                                  any
-                                >;
-
-                                if (!(streamKey in typedBlockData)) {
-                                  return [];
-                                }
-
-                                const roadArray = typedBlockData[streamKey];
-                                if (!Array.isArray(roadArray)) {
-                                  return [];
-                                }
-
-                                return roadArray
-                                  .filter(
-                                    (road: string) => road !== sectionEntry.road
-                                  )
-                                  .map((road: string) => ({
-                                    value: road,
-                                    label: road,
-                                  }));
-                              })()}
-                              value={
-                                sectionEntry?.otherRoads
-                                  ? sectionEntry.otherRoads
-                                      .split(",")
-                                      .filter(Boolean)
-                                      .map((road: string) => ({
-                                        value: road,
-                                        label: road,
-                                      }))
-                                  : []
-                              }
-                              onChange={(opts) =>
-                                handleOtherAffectedLinesChange(
-                                  block,
-                                  opts as any
-                                )
-                              }
-                              className="basic-multi-select"
-                              classNamePrefix="select"
-                              placeholder="Select other affected roads"
-                              styles={{
-                                control: (base) => ({
-                                  ...base,
-                                  fontSize: "14px",
-                                  minHeight: "36px",
-                                  padding: "2px",
-                                }),
-                                option: (base) => ({
-                                  ...base,
-                                  fontSize: "14px",
-                                  padding: "6px 12px",
-                                }),
-                                multiValueLabel: (base) => ({
-                                  ...base,
-                                  fontSize: "12px",
-                                }),
-                              }}
-                            />
-                          </div>
-                        )}
-                    </>
-                  ) : (
-                    // For regular sections in multiple selection
-                    <>
-                      <label className="block text-base font-medium text-black mb-2">
-                        Line {block} <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        className="input gov-input mb-3"
-                        style={{
-                          color: "black",
-                          borderColor: errors[
-                            `processedLineSections.${block}.lineName`
-                          ]
-                            ? "#dc2626"
-                            : sectionEntry?.lineName
-                            ? "#45526c"
-                            : "#dc2626",
-                        }}
-                        value={sectionEntry?.lineName || ""}
-                        onChange={(e) =>
-                          handleLineNameSelection(block, e.target.value)
-                        }
-                      >
-                        <option value="" disabled>
-                          Select Line
-                        </option>
-                        {lineData[block as keyof typeof lineData]?.map(
-                          (line: string) => (
-                            <option key={line} value={line}>
-                              {line}
-                            </option>
-                          )
-                        )}
-                      </select>
-                      {errors[`processedLineSections.${block}.lineName`] && (
-                        <span className="text-base text-red-700 font-medium mb-3 block">
-                          Line selection is required
-                        </span>
-                      )}
-                      {sectionEntry?.lineName && (
-                        <div className="mt-2 mb-2">
-                          <label className="block text-base font-medium text-black mb-2">
-                            Other affected Line for {block}
-                          </label>
-                          <Select
-                            isMulti
-                            options={(
-                              lineData[block as keyof typeof lineData] || []
-                            )
-                              .filter(
-                                (l: string) => l !== sectionEntry.lineName
-                              )
-                              .map((l: string) => ({ value: l, label: l }))}
-                            value={
-                              sectionEntry?.otherLines
-                                ? sectionEntry.otherLines
-                                    .split(",")
-                                    .filter(Boolean)
-                                    .map((line: string) => ({
-                                      value: line,
-                                      label: line,
-                                    }))
-                                : []
-                            }
-                            onChange={(opts) =>
-                              handleOtherAffectedLinesChange(block, opts as any)
-                            }
-                            className="basic-multi-select"
-                            classNamePrefix="select"
-                            placeholder="Select other affected lines"
-                            styles={{
-                              control: (base) => ({
-                                ...base,
-                                fontSize: "14px",
-                                minHeight: "36px",
-                                padding: "2px",
-                              }),
-                              option: (base) => ({
-                                ...base,
-                                fontSize: "14px",
-                                padding: "6px 12px",
-                              }),
-                              multiValueLabel: (base) => ({
-                                ...base,
-                                fontSize: "12px",
-                              }),
-                            }}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
         <div className="bg-gray-50 p-2 rounded-md border border-black text-black mb-3">
           <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
             Caution Requirements
@@ -1736,7 +1886,7 @@ export default function CreateBlockRequestPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                     <div>
                       <label className="block text-xs font-medium text-black mb-1">
-                        Fresh Caution Location From{" "}
+                        Caution Location From{" "}
                         <span className="text-red-600">*</span>
                       </label>
                       <input
@@ -1744,6 +1894,7 @@ export default function CreateBlockRequestPage() {
                         value={formData.freshCautionLocationFrom || ""}
                         onChange={handleInputChange}
                         className="input gov-input"
+                        placeholder="Approximately from"
                         style={{
                           color: "black",
                           borderColor: errors.freshCautionLocationFrom
@@ -1760,7 +1911,7 @@ export default function CreateBlockRequestPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-black mb-1">
-                        Fresh Caution Location To{" "}
+                        Caution Location To{" "}
                         <span className="text-red-600">*</span>
                       </label>
                       <input
@@ -1768,6 +1919,7 @@ export default function CreateBlockRequestPage() {
                         value={formData.freshCautionLocationTo || ""}
                         onChange={handleInputChange}
                         className="input gov-input"
+                        placeholder="Approximately to"
                         style={{
                           color: "black",
                           borderColor: errors.freshCautionLocationTo
@@ -1784,7 +1936,7 @@ export default function CreateBlockRequestPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-black mb-1">
-                        Fresh Caution Speed{" "}
+                        Caution Speed (km/hr){" "}
                         <span className="text-red-600">*</span>
                       </label>
                       <input
@@ -1818,6 +1970,7 @@ export default function CreateBlockRequestPage() {
                         value={formData.adjacentLinesAffected || ""}
                         onChange={handleInputChange}
                         className="input gov-input"
+                        placeholder="Lines Affected"
                         style={{
                           color: "black",
                           borderColor: errors.adjacentLinesAffected
@@ -1964,7 +2117,12 @@ export default function CreateBlockRequestPage() {
                       name="sntDisconnectionRequired"
                       value="true"
                       checked={formData.sntDisconnectionRequired === true}
-                      onChange={handleInputChange}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: true,
+                        })
+                      }
                       className="form-radio h-4 w-4"
                     />
                     <span className="ml-2 text-sm">Yes</span>
@@ -1975,7 +2133,12 @@ export default function CreateBlockRequestPage() {
                       name="sntDisconnectionRequired"
                       value="false"
                       checked={formData.sntDisconnectionRequired === false}
-                      onChange={handleInputChange}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: false,
+                        })
+                      }
                       className="form-radio h-4 w-4"
                     />
                     <span className="ml-2 text-sm">No</span>
@@ -2088,6 +2251,35 @@ export default function CreateBlockRequestPage() {
                   </div>
                 </div>
               )}
+              <div className="form-group col-span-2 mt-5">
+                <label className="block text-sm font-medium text-black mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  name="requestremarks"
+                  value={formData.requestremarks || ""}
+                  onChange={handleInputChange}
+                  className="gov-input"
+                  style={{
+                    color: "black",
+                    minHeight: "80px",
+                    width: "100%",
+                    fontSize: "14px",
+                  }}
+                  placeholder="Enter any additional remarks"
+                  aria-label="Request remarks"
+                ></textarea>
+              </div>
+              <div className="flex justify-center mt-5">
+                <button
+                  type="submit"
+                  className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
+                  disabled={formSubmitting}
+                  aria-label="Submit block request form"
+                >
+                  {formSubmitting ? "Submitting..." : "Submit Block Request"}
+                </button>
+              </div>
             </>
           )}
           {session?.user.department === "TRD" && (
@@ -2117,69 +2309,6 @@ export default function CreateBlockRequestPage() {
             </div>
           )}
         </div>
-
-        <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
-          <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
-            Time Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                Demand Time From <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="time"
-                name="demandTimeFrom"
-                value={extractTimeFromDatetime(formData.demandTimeFrom || "")}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                aria-required="true"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                24-hour railway timing (e.g., 23:30)
-              </span>
-              {errors.demandTimeFrom && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.demandTimeFrom}
-                </span>
-              )}
-            </div>
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                Demand Time To <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="time"
-                name="demandTimeTo"
-                value={extractTimeFromDatetime(formData.demandTimeTo || "")}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                aria-required="true"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                24-hour railway timing (e.g., 23:30)
-              </span>
-              {errors.demandTimeTo && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.demandTimeTo}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex justify-center mt-5">
-            <button
-              type="submit"
-              className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
-              disabled={formSubmitting}
-              aria-label="Submit block request form"
-            >
-              {formSubmitting ? "Submitting..." : "Submit Block Request"}
-            </button>
-          </div>
-        </div>
-
         {success && (
           <div className="text-green-700 text-xs mt-2 text-center">
             {success}

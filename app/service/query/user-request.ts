@@ -17,6 +17,7 @@ export interface RequestResponse {
 }
 
 export interface RequestItem {
+    adjacentLinesAffected: string;
     id: string;
     date: string;
     selectedDepartment: string;
