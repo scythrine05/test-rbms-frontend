@@ -6,50 +6,1064 @@ type DepotStructure = {
   };
 };
 export let MajorSection = {
-  MAS: ["MAS-AJJ", "AJJ-RU", "MAS-GDR"],
-  PGT: ["MAS-AJJ", "AJJ-RU", "MAS-GDR"],
-};
+  "MAS": ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
+  "TPJ": ["MAS-AJJ", "AJJ-RU", "MAS-GDR"]
+}
 
 export let blockSection = {
-  'MAS-AJJ': ["AJJ-AJJN", "MLPM-AJJN", "AJJN-TRT", "TRT-POI", "POI-NG", "POI-YD", "TRT-YD"]
+  'MAS-GDR': ["MASS-BBQ", "MAS-BBQ", "MMC-BBQ",
+    "VPY-KOK", "BBQ-KOK", "VPY-KOK", "WST-KOK",
+    "KOK-TNP", "TNP-TVT", "TVT-ENR", "ENR-AIPP",
+    "AIPP-AIP", "AIP-MJR", "MJR-PON", "PON-KVP",
+    "KVP-GPD", "GPD-ELR", "ELR-AKM", "AKM-TAD",
+    "TAD-AKAT", "TAD-SPE", "AKAT-SPE", "SPE-PEL",
+    "PEL-DVR", "DVR-NYP", "NYP-PYA", "PYA-ODR",
+    "ODR-GDR", "MMC-YD", "MAS-YD", "BBQ-YD",
+    "KOK-YD", "TNP-YD", "TVT-YD", "ENR-YD",
+    "AIP-YD", "AIPP-YD", "MJR-YD", "PON-YD",
+    "KVP-YD", "GPD-YD", "ELR-YD", "AKM-YD",
+    "TAD-YD", "SPE-YD", "PEL-YD", "DVR-YD",
+    "NYP-YD", "PYA-YD", "ODR-YD", "GDR-YD"],
+  'AJJ-CGL': ["CGL-RDY", "RDY-VB", "CGL-PALR", "VB-PALR", "PALR-PYV", "PALR-WJ",
+    "PYV-WJ", "WJ-NTT", "WJ-CJ", "NTT-CJ(O)", "CJ(O)-CJ(E)", "CJ(E)-TMLP",
+    "TMLP-TKO", "TMLP-MLPM",
+    "TKO-MLPM", "MLPM-AJJ",
+    "CGL-YD", "PALR-YD",
+    "WJ-YD", "CJ(O)-YD",
+    "CJ(E)-YD",
+    "TMLP-YD",
+    "MLPM-YD",
+    "AJJ-YD"],
+  'KPD-JTJ': ["KPD-LTI",
+    "LTI-KVN",
+    "KVN-GYM",
+    "GYM-VLT",
+    "VLT-MPI",
+    "MPI-PCKM",
+    "PCKM-AB",
+    "AB-VGM",
+    "VGM-VN",
+    "VN-KDY",
+    "KDY-JTJ",
+    "JTJ-SKPT",
+    "JTJ-TPT",
+    "JTJ AUX-TPT",
+    "AJJ-YD",
+    "MLPM-YD",
+    "CTRE-YD",
+    "MDVE-YD",
+    "SHU-YD",
+    "TUG-YD",
+    "WJR-YD",
+    "MCN-YD",
+    "THL-YD",
+    "SVUR-YD",
+    "KPD-YD",
+    "LTI-YD",
+    "KVN-YD",
+    "GYM-YD",
+    "VLT-YD",
+    "MPI-YD",
+    "PCKM-YD",
+    "AB-YD",
+    "VGM-YD",
+    "VN-YD",
+    "KDY-YD",
+    "JTJ-YD"
+  ],
+
+  'AJJ-KPD': ["AJJ-MLPM",
+    "MLPM-CTRE",
+    "CTRE-MDVE",
+    "MDVE-SHU",
+    "SHU-TUG",
+    "TUG-WJR",
+    "WJR-MCN",
+    "MCN-THL",
+    "THL-SVUR",
+    "SVUR-KPD",
+    "KPD-RAM",
+    "KPD-VLR",
+    "AJJ-YD",
+    "MLPM-YD",
+    "CTRE-YD",
+    "MDVE-YD",
+    "SHU-YD",
+    "TUG-YD",
+    "WJR-YD",
+    "MCN-YD",
+    "THL-YD",
+    "SVUR-YD",
+    "KPD-YD"
+  ],
+  'MSB-VM': [
+    "MSB-MS",
+    "MS-MKK",
+    "MKK-MBM",
+    "MBM-STM",
+    "STM-PV",
+    "PV-TBM",
+    "TBM-PRGL",
+    "TBM-VDR",
+    "PRGL-VDR",
+    "VDR-UPM",
+    "VDR-GI",
+    "UPM-GI",
+    "POTI-CTM",
+    "GI-CTM",
+    "CTM-MMNK",
+    "CTM-SKL",
+    "MMNK-SKL",
+    "SKL-PWU",
+    "SKL-CGL",
+    "PWU-CGL",
+    "CGL-OV",
+    "OV-PTM",
+    "OV-KGZ",
+    "PTM-KGZ",
+    "KGZ-MMK",
+    "MMK-MLMR",
+    "MLMR-ACK",
+    "MLMR-TZD",
+    "ACK-TZD",
+    "TZD-OLA",
+    "OLA-TMV",
+    "TMV-MTL",
+    "MTL-PEI",
+    "PEI-VVN",
+    "VVN-MYP",
+    "MYP-VM",
+    "MS-YD",
+    "MKK-YD",
+    "MBM-YD",
+    "STM-YD",
+    "PV-YD",
+    "TBM-YD",
+    "VDR-YD",
+    "GI-YD",
+    "CTM-YD",
+    "SKL-YD",
+    "CGL-YD",
+    "OV-YD",
+    "KGZ-YD",
+    "MMK-YD",
+    "MLMR-YD",
+    "TZD-YD",
+    "OLA-YD",
+    "TMV-YD",
+    "MTL-YD",
+    "PEI-YD",
+    "VVN-YD",
+    "MYP-YD",
+    "VM-YD"
+  ],
+  'MAS-AJJ': [
+    "MAS-BBQ",
+    "MASS-BBQ",
+    "MMCC-BBQ",
+    "BBQ-VPY",
+    "VPY-VLK",
+    "VLK-ABU",
+    "ABU-AVD",
+    "AVD-PAB",
+    "PAB-PTMS",
+    "PTMS-TI",
+    "PAB-TI",
+    "TI-TRL",
+    "TRL-KBT",
+    "KBT-TO",
+    "TO-AJJ",
+    "MAS-YD",
+    "BBQ-YD",
+    "MMCC-YD",
+    "MASS-YD",
+    "VPY-YD",
+    "VLK-YD",
+    "ABU-YD",
+    "AVD-YD",
+    "PAB-YD",
+    "PTMS-YD",
+    "TI-YD",
+    "TRL-YD",
+    "KBT-YD",
+    "TO-YD",
+    "AJJ-YD"],
+
+  'AJJ-RU': ["AJJ-AJJN",
+    "MLPM-AJJN",
+    "AJJN-TRT",
+    "TRT-POI",
+    "POI-VKZ",
+    "POI-NG",
+    "VKZ-NG",
+    "NG-EKM",
+    "NG-VGA",
+    "EKM-VGA",
+    "VGA-PUT",
+    "PUT-TDK",
+    "TDK-PUDI",
+    "PUDI-RU",
+    "AJJ-YD",
+    "MLPM-YD",
+    "AJJN-YD",
+    "TRT-YD",
+    "POI-YD",
+    "NG-YD",
+    "VAG-YD",
+    "PUT-YD",
+    "TDK-YD",
+    "PUDI-YD",
+    "RU-YD"
+  ],
 };
+
+
 
 export let workType = {
   'S&T': ['Gear', 'Tw', 'Lt'],
   'ENGG': ['Machine', 'Non-Machine'],
-  'SIG': ['Gear', 'Tw', 'Lt'],
-  'TRD': ['Gear', 'Tw', 'Lt'],
-}
+  'TRD': ['Tw', 'Lt'],
+};
+
 
 
 export let streamData = {
-  'POI-YD': { "up direction": ['rd 1', 'rd 2', 'rd 3', 'rd 4', 'rd 5', 'rd 6', 'rd 7', 'rd 8', 'rd 9', 'rd 10'], "down direction": ['rd 1', 'rd 2', 'rd 3'], 'Both direction affected': [] },
-  "TRT-YD": {}
-}
+  'MAS': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 2A", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11"]
+  },
+  'AJJ': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 1A", "Rd 10", "Rd 11"]
+  },
+  'KBT': {
+    "up": ["Rd 3", "Rd 6"],
+    "down": ["Rd 1", "Rd 2", "Rd 5"],
+    "both": ["Rd 4"]
+  },
+  'TO': {
+    "up": ["Rd 3", "Rd 6", "Rd 7"],
+    "down": ["Rd 2", "Rd 5"],
+    "both": ["Rd 1", "Rd 4"]
+  },
+  'CTRE': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'AJJN': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 3"]
+  },
+  'MLPM': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"]
+  },
+  'MASS': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 12", "Rd 13", "Rd 14", "Rd 15", "Rd 16"]
+  },
+  'BBQ': {
+    "up": ["Rd 2", "Rd 4"],
+    "down": ["Rd 1", "Rd 3"],
+    "both": ["Rd 5", "Rd 6", "Rd 7"]
+  },
+  'VPY': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": []
+  },
+  'VLK': {
+    "up": ["Rd 2", "Rd 4"],
+    "down": ["Rd 3"],
+    "both": ["Rd 1"]
+  },
+  'ABU': {
+    "up": ["Rd 3", "Rd 4", "Rd 6"],
+    "down": ["Rd 2", "Rd 5"],
+    "both": ["Rd 1", "Rd 7"]
+  },
+  'AVD': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'PAB': {
+    "up": ["Rd 2", "Rd 4"],
+    "down": ["Rd 1", "Rd 3"],
+    "both": ["Rd 5"]
+  },
+  'PTMS': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2"]
+  },
+  'TI': {
+    "up": ["Rd 3", "Rd 6", "Rd 7"],
+    "down": ["Rd 1", "Rd 2", "Rd 5"],
+    "both": ["Rd 4"]
+  },
+  'TRL': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6"]
+  },
+  'MDVE': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 2"],
+    "both": ["Rd 1"]
+  },
+  'SHU': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 2"],
+    "both": ["Rd 1"]
+  },
+  'TUG': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 1"],
+    "both": ["Rd 2"]
+  },
+  'WJR': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3"],
+    "both": ["Rd 4"]
+  },
+  'MCN': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4", "Rd 5", "Rd 6"]
+  },
+  'THL': {
+    "up": ["Rd 1"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": ["Rd 2"]
+  },
+  'SVUR': {
+    "up": ["Rd 4", "Rd 5"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 3"]
+  },
+  'KPD': {
+    "up": ["Rd 4"],
+    "down": ["Rd 2"],
+    "both": ["Rd 1", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10"]
+  },
+  'LTI': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'KVN': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'GYM': {
+    "up": ["Rd 2"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": ["Rd 1"]
+  },
+  'VLT': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'MPI': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": []
+  },
+  'PCKM': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3"],
+    "both": ["Rd 4"]
+  },
+  'AB': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": []
+  },
+  'VGM': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1"],
+    "both": ["Rd 2"]
+  },
+  'VN': {
+    "up": ["Rd 2"],
+    "down": ["Rd 3", "Rd 4"],
+    "both": ["Rd 1"]
+  },
+  'KDY': {
+    "up": ["Rd 1"],
+    "down": ["Rd 2", "Rd 3"],
+    "both": []
+  },
+  'JTJ': {
+    "up": [],
+    "down": [],
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11", "Rd 12", "Rd 13", "Rd 14"]
+  },
+  'KOK': {
+    "up": ["Rd 1", "Rd 3", "Rd 5"],
+    "down": ["Rd 2", "Rd 4", "Rd 6"],
+    "both": []
+  },
+  'TNP': {
+    "up": ["Rd 1", "Rd 3", "Rd 5"],
+    "down": ["Rd 2", "Rd 4", "Rd 6"],
+    "both": []
+  },
+  'TVT': {
+    "up": ["Rd 2"],
+    "down": ["Rd 3"],
+    "both": ["Rd 1A", "Rd 1", "Rd 4", "Rd 5"]
+  },
+  'ENR': {
+    "up": ["Rd 3"],
+    "down": ["Rd 2"],
+    "both": ["Rd 1", "Rd 4", "Rd 5", "Rd 6", "Rd 7"]
+  },
+  'AIPP': {
+    "up": ["Rd 2", "Rd 4"],
+    "down": ["Rd 1", "Rd 3"],
+    "both": []
+  },
+  'AIP': {
+    "up": ["Rd 2", "Rd 4"],
+    "down": ["Rd 1", "Rd 3"],
+    "both": ["Rd 5", "Rd 6"]
+  },
+  'MJR': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1"],
+    "both": ["Rd 2"]
+  },
+  'PON': {
+    "up": ["Rd 4", "Rd 5"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 3"]
+  },
+  'KVP': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": []
+  },
+  'GPD': {
+    "up": ["Rd 1", "Rd 2"],
+    "down": ["Rd 3"],
+    "both": ["Rd 4", "Rd 5", "Rd 6"]
+  },
+  'ELR': {
+    "up": ["Rd 1", "Rd 2", "Rd 3"],
+    "down": ["Rd 4", "Rd 5", "Rd 6"],
+    "both": []
+  },
+  'AKM': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": []
+  },
+  'TAD': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'SPE': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'PEL': {
+    "up": ["Rd 3", "Rd 4"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": []
+  },
+  'DVR': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'NYP': {
+    "up": ["Rd 3"],
+    "down": ["Rd 1", "Rd 2"],
+    "both": ["Rd 4"]
+  },
+  'PYA': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'ODR': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'WST': {
+    "upstream": ['Rd 2', 'Rd 4'],
+    "downstream": ['Rd 1', 'Rd 3'],
+    "both": []
+  },
+  'RPM': {
+    "upstream": ['Rd 3', 'Rd 5'],
+    "downstream": ['Rd 2', 'Rd 4', 'Rd 6'],
+    "both": ['Rd 1', 'Rd 7', 'Rd 8']
+  },
+  'MSB': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3', 'Rd 4', 'Rd 5', 'Rd 6', 'Rd 7', 'Rd 8', 'Rd 9']
+  },
+  'MPK': {
+    "upstream": [],
+    "downstream": ['Rd 2'],
+    "both": ['Rd 1']
+  },
+  'MS': {
+    "upstream": [],
+    "downstream": ['Rd 10'],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3', 'Rd 4', 'Rd 5', 'Rd 6', 'Rd 7', 'Rd 8', 'Rd 9', 'Rd 11']
+  },
+  'MKK': {
+    "upstream": ['Rd 5'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3']
+  },
+  'STM': {
+    "upstream": ['Rd 5'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3']
+  },
+  'PV': {
+    "upstream": ['Rd 5'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3']
+  },
+  'TBM': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3', 'Rd 4', 'Rd 5', 'Rd 6', 'Rd 7', 'Rd 8', 'Rd 9', 'Rd 10', 'Rd 11']
+  },
+  'VDR': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 1', 'Rd 3']
+  },
+  'GI': {
+    "upstream": ['Rd 3'],
+    "downstream": ['Rd 1'],
+    "both": ['Rd 2', 'Rd 4', 'Rd 5']
+  },
+  'CTM': {
+    "upstream": ['Rd 3'],
+    "downstream": ['Rd 2'],
+    "both": ['Rd 1', 'Rd 4']
+  },
+  'SKL': {
+    "upstream": ['Rd 3'],
+    "downstream": ['Rd 2'],
+    "both": ['Rd 1', 'Rd 4', 'Rd 5']
+  },
+  'CGL': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3', 'Rd 4', 'Rd 5', 'Rd 6', 'Rd 7', 'Rd 8']
+  },
+  'OV': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'KGZ': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'MMK': {
+    "upstream": ['Rd 2', 'Rd 4'],
+    "downstream": ['Rd 3'],
+    "both": ['Rd 1']
+  },
+  'MLMR': {
+    "upstream": ['Rd 1'],
+    "downstream": [],
+    "both": ['Rd 2', 'Rd 3', 'Rd 4']
+  },
+  'TZD': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'OLA': {
+    "upstream": ['Rd 4'],
+    "downstream": ['Rd 1', 'Rd 2'],
+    "both": ['Rd 3']
+  },
+  'TMV': {
+    "upstream": ['Rd 3'],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2']
+  },
+  'MTL': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1', 'Rd 2'],
+    "both": []
+  },
+  'PEI': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 3', 'Rd 4'],
+    "both": ['Rd 1']
+  },
+  'VVN': {
+    "upstream": ['Rd 3'],
+    "downstream": ['Rd 1', 'Rd 2'],
+    "both": ['Rd 4']
+  },
+  'MYP': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3', 'Rd 4', 'Rd 5']
+  },
+  'TRT': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1'],
+    "both": ['Rd 2']
+  },
+  'POI': {
+    "upstream": ['Rd 1', 'Rd 2'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 3']
+  },
+  'NG': {
+    "upstream": ['Rd 1', 'Rd 2'],
+    "downstream": ['Rd 4'],
+    "both": ['Rd 3']
+  },
+  'VGA': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1'],
+    "both": ['Rd 2']
+  },
+  'PUT': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1'],
+    "both": ['Rd 2']
+  },
+  'TDK': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1', 'Rd 2'],
+    "both": []
+  },
+  'SVF': {
+    "upstream": ['Rd 1', 'Rd 2'],
+    "downstream": [],
+    "both": []
+  },
+  'PUDI': {
+    "upstream": ['Rd 3', 'Rd 4'],
+    "downstream": ['Rd 1'],
+    "both": ['Rd 2']
+  },
+  'PALR': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2']
+  },
+  'WJ': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2']
+  },
+  'CJ(E)': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3']
+  },
+  'CJ(O)': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2', 'Rd 3']
+  },
+  'TMLP': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2']
+  },
+  'MCPK': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 1'],
+    "both": []
+  },
+  'MTMY': {
+    "upstream": ['Rd 2'],
+    "downstream": ['Rd 1'],
+    "both": []
+  },
+  'VLCY': {
+    "upstream": [],
+    "downstream": [],
+    "both": ['Rd 1', 'Rd 2']
+  },
+};
+
 
 export let lineData = {
-  'MLPM-AJJN': ["UP", "DN"],
-  "AJJ-AJJN": ["UP", "DN", "up line", "down line"],
-  'AJJN-TRT': ["UP", "DN"],
-  'TRT-POI': ["UP", "DN"],
-  'POI-NG': ["UP", "DN"],
-  'NG-VGA': ["UP", "DN"],
-  'VGA-PUT': ["UP", "DN"],
-  'PUT-TDK': ["UP", "DN"],
-  'TDK-PUDI': ["UP", "DN"],
-  'PUDI-RU': ["UP", "DN"],
-}
+  // AJJ-RU Section
+  'AJJ-AJJN': ['UP', 'DN'],
+  'MLPM-AJJN': ['UP', 'DN'],
+  'AJJN-TRT': ['UP', 'DN'],
+  'TRT-POI': ['UP', 'DN'],
+  'POI-NG': ['UP', 'DN'],
+  'NG-VGA': ['UP', 'DN'],
+  'POI-VKZ': ['UP', 'DN'],
+  'VKZ-NG': ['UP', 'DN'],
+  'NG-EKM': ['UP', 'DN'],
+  'EKM-VGA': ['UP', 'DN'],
+  'VGA-PUT': ['UP', 'DN'],
+  'PUT-TDK': ['UP', 'DN'],
+  'TDK-PUDI': ['UP', 'DN'],
+  'PUDI-RU': ['UP', 'DN'],
+  'AJJ-YD': ['UP', 'DN'],
+  'MLPM-YD': ['UP', 'DN'],
+  'AJJN-YD': ['UP', 'DN'],
+  'TRT-YD': ['UP', 'DN'],
+  'POI-YD': ['UP', 'DN'],
+  'NG-YD': ['UP', 'DN'],
+  'VGA-YD': ['UP', 'DN'],
+  'PUT-YD': ['UP', 'DN'],
+  'TDK-YD': ['UP', 'DN'],
+  'PUDI-YD': ['UP', 'DN'],
+  'RU-YD': ['UP', 'DN'],
+
+  // MAS-AJJ Section
+  'MAS-BBQ': ['Up SW', 'Down SW', 'Up NE', 'Down NE'],
+  'MASS-BBQ': ['Up SW Sub', 'Down SW Sub'],
+  'MMCC-BBQ': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'BBQ-VPY': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'VPY-VLK': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'VLK-ABU': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'ABU-AVD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'AVD-PAB': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'PAB-PTMS': ['Up and Down Single'],
+  'PTMS-TI': ['Up and Down Single'],
+  'PAB-TI': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TI-TRL': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TRL-KBT': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'KBT-TO': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TO-AJJ': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'MAS-YD': ['Up SW', 'Down SW', 'Up NE', 'Down NE'],
+  'BBQ-YD': ['Up SW', 'Down SW', 'Up SW Sub', 'Down SW Sub'],
+  'MASS-YD': ['Up SW Sub', 'Down SW Sub'],
+  'MMCC-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'VPY-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'VLK-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'ABU-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'AVD-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'PAB-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'PTMS-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TI-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TRL-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'KBT-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+  'TO-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
+
+  // MSB-VM Section
+  'MSB-MS': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'MS-MKK': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'MKK-MBM': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'MBM-STM': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'STM-PV': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'PV-TBM': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'TBM-PRGL': ['UP line', 'Down line'],
+  'TBM-VDR': ['UP line', 'Down line', '3rd line'],
+  'PRGL-VDR': ['UP line', 'Down line'],
+  'VDR-UPM': ['UP line', 'Down line'],
+  'VDR-GI': ['UP line', 'Down line', '3rd line'],
+  'UPM-GI': ['UP line', 'Down line'],
+  'POTI-CTM': ['UP line', 'Down line'],
+  'CTM-MMNK': ['UP line', 'Down line'],
+  'MMNK-SKL': ['UP line', 'Down line'],
+  'SKL-PWU': ['UP line', 'Down line'],
+  'GI-CTM': ['UP line', 'Down line', '3rd line'],
+  'CTM-SKL': ['UP line', 'Down line', '3rd line'],
+  'SKL-CGL': ['UP line', 'Down line', '3rd line'],
+  'PWU-CGL': ['UP line', 'Down line'],
+  'CGL-OV': ['UP line', 'Down line'],
+  'OV-PTM': ['UP line', 'Down line'],
+  'PTM-KGZ': ['UP line', 'Down line'],
+  'OV-KGZ': ['UP line', 'Down line'],
+  'KGZ-MMK': ['UP line', 'Down line'],
+  'MMK-MLMR': ['UP line', 'Down line'],
+  'MLMR-ACK': ['UP line', 'Down line'],
+  'ACK-TZD': ['UP line', 'Down line'],
+  'MLMR-TZD': ['UP line', 'Down line'],
+  'TZD-OLA': ['UP line', 'Down line'],
+  'OLA-TMV': ['UP line', 'Down line'],
+  'TMV-MTL': ['UP line', 'Down line'],
+  'MTL-PEI': ['UP line', 'Down line'],
+  'PEI-VVN': ['UP line', 'Down line'],
+  'VVN-MYP': ['UP line', 'Down line'],
+  'MYP-VM': ['UP line', 'Down line'],
+  'MS-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'MKK-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'MBM-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'STM-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'PV-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'TBM-YD': ['A line', 'B line', 'Down Sub urban', 'Up sub urban'],
+  'VDR-YD': ['UP line', 'Down line'],
+  'GI-YD': ['UP line', 'Down line'],
+  'CTM-YD': ['UP line', 'Down line'],
+  'SKL-YD': ['UP line', 'Down line'],
+  'CGL-YD': ['UP line', 'Down line'],
+  'OV-YD': ['UP line', 'Down line'],
+  'KGZ-YD': ['UP line', 'Down line'],
+  'MMK-YD': ['UP line', 'Down line'],
+  'MLMR-YD': ['UP line', 'Down line'],
+  'TZD-YD': ['UP line', 'Down line'],
+  'OLA-YD': ['UP line', 'Down line'],
+  'TMV-YD': ['UP line', 'Down line'],
+  'MTL-YD': ['UP line', 'Down line'],
+  'PEI-YD': ['UP line', 'Down line'],
+  'VVN-YD': ['UP line', 'Down line'],
+  'MYP-YD': ['UP line', 'Down line'],
+  'VM-YD': ['UP line', 'Down line'],
+
+  // AJJ-KPD Section
+  'AJJ-MLPM': ['UP line', 'Down line'],
+  'MLPM-CTRE': ['UP line', 'Down line'],
+  'CTRE-MDVE': ['UP line', 'Down line'],
+  'MDVE-SHU': ['UP line', 'Down line'],
+  'SHU-TUG': ['UP line', 'Down line'],
+  'TUG-WJR': ['UP line', 'Down line'],
+  'WJR-MCN': ['UP line', 'Down line'],
+  'MCN-THL': ['UP line', 'Down line'],
+  'THL-SVUR': ['UP line', 'Down line'],
+  'SVUR-KPD': ['UP line', 'Down line'],
+  'KPD-RAM': ['UP line', 'Down line'],
+  'KPD-VLR': ['UP line', 'Down line'],
+  'CTRE-YD': ['UP line', 'Down line'],
+  'MDVE-YD': ['UP line', 'Down line'],
+  'SHU-YD': ['UP line', 'Down line'],
+  'TUG-YD': ['UP line', 'Down line'],
+  'WJR-YD': ['UP line', 'Down line'],
+  'MCN-YD': ['UP line', 'Down line'],
+  'THL-YD': ['UP line', 'Down line'],
+  'SVUR-YD': ['UP line', 'Down line'],
+  'KPD-YD': ['UP line', 'Down line'],
+
+  // KPD-JTJ Section
+  'KPD-LTI': ['UP line', 'Down line'],
+  'LTI-KVN': ['UP line', 'Down line'],
+  'KVN-GYM': ['UP line', 'Down line'],
+  'GYM-VLT': ['UP line', 'Down line'],
+  'VLT-MPI': ['UP line', 'Down line'],
+  'MPI-PCKM': ['UP line', 'Down line'],
+  'PCKM-AB': ['UP line', 'Down line'],
+  'AB-VGM': ['UP line', 'Down line'],
+  'VGM-VN': ['UP line', 'Down line'],
+  'VN-KDY': ['UP line', 'Down line'],
+  'KDY-JTJ': ['UP line', 'Down line'],
+  'JTJ-SKPT': ['UP line', 'Down line'],
+  'JTJ-TPT': ['UP line', 'Down line'],
+  'JTJ AUX-TPT': ['UP line', 'Down line'],
+  'LTI-YD': ['UP line', 'Down line'],
+  'KVN-YD': ['UP line', 'Down line'],
+  'GYM-YD': ['UP line', 'Down line'],
+  'VLT-YD': ['UP line', 'Down line'],
+  'MPI-YD': ['UP line', 'Down line'],
+  'PCKM-YD': ['UP line', 'Down line'],
+  'AB-YD': ['UP line', 'Down line'],
+  'VGM-YD': ['UP line', 'Down line'],
+  'VN-YD': ['UP line', 'Down line'],
+  'KDY-YD': ['UP line', 'Down line'],
+  'JTJ-YD': ['UP line', 'Down line'],
+
+  // AJJ-CGL Section
+  'CGL-RDY': ['SINGLE LINE'],
+  'CGL-PALR': ['SINGLE LINE'],
+  'RDY-VB': ['SINGLE LINE'],
+  'VB-PALR': ['SINGLE LINE'],
+  'PALR-PYV': ['SINGLE LINE'],
+  'PALR-WJ': ['SINGLE LINE'],
+  'PYV-WJ': ['SINGLE LINE'],
+  'WJ-NTT': ['SINGLE LINE'],
+  'WJ-CJ': ['SINGLE LINE'],
+  'NTT-CJ(O)': ['SINGLE LINE'],
+  'CJ(O)-CJ(E)': ['SINGLE LINE'],
+  'CJ(E)-TMLP': ['SINGLE LINE'],
+  'TMLP-TKO': ['SINGLE LINE'],
+  'TMLP-MLPM': ['SINGLE LINE'],
+  'TKO-MLPM': ['SINGLE LINE'],
+  'MLPM-AJJ': ['SINGLE LINE'],
+  'PALR-YD': ['SINGLE LINE'],
+  'WJ-YD': ['SINGLE LINE'],
+  'CJ(O)-YD': ['SINGLE LINE'],
+  'CJ(E)-YD': ['SINGLE LINE'],
+  'TMLP-YD': ['SINGLE LINE'],
+
+  // MAS-GDR Section
+  // 'MASS-BBQ': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'MMC-BBQ': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'BBQ-KOK': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'VPY-KOK': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'WST-KOK': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'KOK-TNP': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'TNP-TVT': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'TVT-ENR': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'ENR-AIPP': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'AIPP-AIP': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'AIP-MJR': ['UP line', 'Down line'],
+  'MJR-PON': ['UP line', 'Down line'],
+  'PON-KVP': ['UP line', 'Down line'],
+  'KVP-GPD': ['UP line', 'Down line'],
+  'GPD-ELR': ['UP line', 'Down line'],
+  'ELR-AKM': ['UP line', 'Down line'],
+  'AKM-TAD': ['UP line', 'Down line'],
+  'TAD-SPE': ['UP line', 'Down line'],
+  'TAD-AKAT': ['UP line', 'Down line'],
+  'AKAT-SPE': ['UP line', 'Down line'],
+  'SPE-PEL': ['UP line', 'Down line'],
+  'PEL-DVR': ['UP line', 'Down line'],
+  'DVR-NYP': ['UP line', 'Down line'],
+  'NYP-PYA': ['UP line', 'Down line'],
+  'PYA-ODR': ['UP line', 'Down line'],
+  'ODR-GDR': ['UP line', 'Down line'],
+  'MMC-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  // 'MAS-YD': ['UP NE', 'Down NE'],
+  'KOK-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'TNP-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'TVT-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'ENR-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'AIP-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'AIPP-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'MJR-YD': ['UP line', 'Down line'],
+  'PON-YD': ['UP line', 'Down line'],
+  'KVP-YD': ['UP line', 'Down line'],
+  'GPD-YD': ['UP line', 'Down line'],
+  'ELR-YD': ['UP line', 'Down line'],
+  'AKM-YD': ['UP line', 'Down line'],
+  'TAD-YD': ['UP line', 'Down line'],
+  'SPE-YD': ['UP line', 'Down line'],
+  'PEL-YD': ['UP line', 'Down line'],
+  'DVR-YD': ['UP line', 'Down line'],
+  'NYP-YD': ['UP line', 'Down line'],
+  'PYA-YD': ['UP line', 'Down line'],
+  'ODR-YD': ['UP line', 'Down line'],
+  'GDR-YD': ['UP line', 'Down line'],
+
+  // MSB-VLCY Section
+  'MSB-MCPK': ['UP line', 'Down line'],
+  'MCPK-MTMY': ['UP line', 'Down line'],
+  'MTMY-VLCY': ['UP line', 'Down line']
+};
+
+
 
 export let Activity = {
   'Gear': ['Point', 'EI', 'Signal', 'DC Track', 'AFTC', 'SSDAC', 'MSDAC', 'Panel', 'LC Gate Mechanical', 'LC Gate ELB', 'Emergency Sliding Boom', 'IPS', 'Conventional power supply equipment', 'System Integrity Test of each PI/EI/RRI stations', 'Cable Insulation testing (cable meggering) for one station.', 'DLBI- SGE', 'TLBI -FM Inst', 'UFSBI', 'Fuse', 'EKT'],
+
   'Tw': ['AOH', 'POH', 'IOH', 'RE POH', 'RD WORK', 'TURN OUT CHECKING', 'CROSS OVER CHECKING', 'CROSS TRACK FEEDERS CHECKING', 'GANTRY MAINTENANCE', 'CONTACT WIRE RENEWAL WORK', 'CATENARY WIRE RENEWAL WORK', 'CANTILEVER ERECTION/REPLACEMENT(2x25KV WORK)', 'MAST ERECTION(2x25KV WORK)', 'FEEDERS ERECTION(2x25KV WORK)', 'OHE PROFILING', 'OHE/CN WORK', 'OTHER SPECIAL WORKS'],
+
   'Lt': ['AOH', 'POH', 'IOH', 'RE POH', 'RD WORK', 'TURN OUT CHECKING', 'CROSS OVER CHECKING', 'CROSS TRACK FEEDERS CHECKING', 'GANTRY MAINTENANCE', 'CONTACT WIRE RENEWAL WORK', 'CATENARY WIRE RENEWAL WORK', 'CANTILEVER ERECTION/REPLACEMENT(2x25KV WORK)', 'MAST ERECTION(2x25KV WORK)', 'FEEDERS ERECTION(2x25KV WORK)', 'OHE PROFILING', 'OHE/CN WORK', 'OTHER SPECIAL WORKS'],
-}
+
+  'Machine': ['BCM ', 'DTE ', 'CSM ', 'DUOMAT', 'UNIMAT', 'MFI', 'MPT',
+    'MDU', 'BRM',
+    'FRM ', 'TRT ',
+    'UTV', 'DTS',
+    'T28', 'SQRS',
+    'RGM working'],
+  'Non-Machine': ['Rail renewal',
+    'Welding work',
+    'Destressing work',
+    'Switch renewal',
+    'CMS Crossing renewal',
+    'SEJ Renewal',
+    'Glued Joint renewal',
+    'Dummy Glued Joint removal',
+    'TRR P 60 Kg',
+    'TRR S 60 Kg',
+    'TRR S 60 kg',
+    'TRR S 52 kg',
+    'Interchanging',
+    'Trucking out/Shifting materials',
+    'TWR with MFBW',
+    'TBTR (Br sleeper renewal)',
+    'TSR P 60 Kg',
+    'TSR S 60 Kg',
+    'TSR S 52 Kg',
+    'TTSR work',
+    'Jt Insp Notes Attn',
+    'Stretcherbar renewal',
+    'TFR Work',
+    'Ballast Unloading',
+    'Rail unloading',
+    'Lifting and packing',
+    'Gauge tie plate renewal',
+    'Sleeper renewal',
+    'Fish Plates O&E',
+    'Preliminary/Post works',
+    'Trucking out materials',
+    'Cutting Widening work',
+    'JCB working',
+    'Earth work/Muck removal',
+    'Crane Moving/Working',
+    'Attention to Track',
+    'Attention to Fittings',
+    'Attention to Bridge',
+    'Attention to Guard rail',
+    'Attention to Points & Xing',
+    'Attention to LC',
+    'Attention to Curve check rail',
+    'Sheet Piling work',
+    'Platform work',
+    'Platform Shelter work',
+    'ABSS work',
+    'Erection of Platform shelter purlins work',
+    'Erection of FOB Girders',
+    'Other FOB works',
+    'Other Track works',
+    'Other Bridge work',
+  ],
+};
+
+
 
 export const depotOnLocation = {
-  "MAS": ["AJJ", "AJJN", "AJP", "AJJN"],
-  "AJJ": ["AJJ", "AJJN", "AJP", "AJJN"],
-}
+  "MAS": ["TVT",
+    "PON",
+    "SPE",
+    "GDR",
+    "WSTA",
+    "WSTB",
+    "AVD",
+    "TRLA",
+    "TRLB",
+    "AJJ",
+    "WJR",
+    "KPD",
+    "AB",
+    "JTJ",
+    "TRT",
+    "PUT",
+    "CJ",
+    "MS",
+    "TBM",
+    "CGL",
+    "ACK",
+    "TMV",
+    "MSB",
+    "MAS",
+    "BBQ",
+    "GPD",
+    "NYP",
+    "TRL",
+    "AJJE",
+    "KPDW", "VM"]
+};
+
 
 export const location = {
   "MAS": "MADRAS",
@@ -59,9 +1073,48 @@ export const location = {
 }
 
 export const depot: DepotStructure = {
-  "MAS-AJJ": { 'TRD': ["AJJ", "AJJN",], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJP"] },
-  "AJJ-RU": { 'TRD': ["SRS", "JHJ"], 'S&T': ["AJP", "AJJN"], 'ENGG': ["AJJ", "AJJN"] },
+  "MAS-GDR": {
+    'TRD': ["BBQ", "TVT", "PON", "SPE", "GDR", "ADEE/PON"],
+    'S&T': ["MAS", "BBQ", "TVT", "GPD", "SPE", "NYP"],
+    'ENGG': ["TVT", "PON", "SPE", "GDR"]
+  },
+  "MAS-AJJ": {
+    'TRD': ["BBQ", "AVD", "TRL", "AJJ"],
+    'S&T': ["BBQ", "TRL", "AJJE"],
+    'ENGG': ["WSTA", "WSTB", "AVD", "TRLA", "TRLB", "AJJ"]
+  },
+  "AJJ-KPD": {
+    'TRD': ["AJJ", "WJR", "KPD"],
+    'S&T': ["AJJ", "WJR", "KPD"],
+    'ENGG': ["AJJ", "WJR", "KPD"]
+  },
+  "KPD-JTJ": {
+    'TRD': ["KPD", "AB", "JTJ"],
+    'S&T': ["KPDW", "AB", "JTJ"],
+    'ENGG': ["KPD", "AB", "JTJ"]
+  },
+  "AJJ-RU": {
+    'TRD': ["AJJ", "PUT"],
+    'S&T': ["TRT", "AJJ", "PUT"],
+    'ENGG': ["TRT", "AJJ", "PUT"]
+  },
+  "AJJ-CGL": {
+    'TRD': ["AJJ", "CGL"],
+    'S&T': ["CGL"],
+    'ENGG': ["CJ"]
+  },
+  "MSB-VM": {
+    'TRD': ["MS", "TBM", "CGL", "ACK", "VM"],
+    'S&T': ["MSB", "MS", "TBM", "CGL", "TMV"],
+    'ENGG': ["MS", "TBM", "CGL", "ACK", "TMV"]
+  },
+  "MSB-VLCY": {
+    'TRD': ["MSB", "MS"],
+    'S&T': ["MSB", "MS"],
+    'ENGG': ["MSB", "MS"]
+  }
 };
+
 
 export let machine = [
   "BCM",

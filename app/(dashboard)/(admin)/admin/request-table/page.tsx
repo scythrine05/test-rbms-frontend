@@ -47,7 +47,7 @@ export default function RequestTablePage() {
         return "bg-red-100 text-red-800 border border-black";
       case "PENDING":
       default:
-        return "bg-yellow-100 text-yellow-800 border border-black";
+        return "";
     }
   };
 
@@ -152,7 +152,10 @@ export default function RequestTablePage() {
                 Activity
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Manager Approval
+                S&T Approval
+              </th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                Status
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Actions
@@ -195,10 +198,29 @@ export default function RequestTablePage() {
                 <td className="border border-black p-1 text-sm">
                   <span
                     className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.adminAcceptance || "PENDING"
+                      request.sntDisconnectionRequired === undefined
+                        ? "NAN"
+                        : request.sntDisconnectionRequired
+                        ? request.DisconnAcceptance || "PENDING"
+                        : "NAN"
                     )}`}
                   >
-                    {request.adminAcceptance || "PENDING"}
+                    {request.sntDisconnectionRequired === undefined
+                      ? "NAN"
+                      : request.sntDisconnectionRequired
+                      ? request.DisconnAcceptance || "PENDING"
+                      : "NAN"}
+                  </span>
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  <span
+                    className={`px-2 py-0.5 text-xs ${
+                      request.adminAcceptance
+                        ? "bg-green-100 text-green-800 border border-black"
+                        : "bg-red-100 text-red-800 border border-black"
+                    }`}
+                  >
+                    {request.adminAcceptance ? "Approved" : "Rejected"}
                   </span>
                 </td>
                 <td className="border border-black p-1 text-sm">
@@ -209,21 +231,13 @@ export default function RequestTablePage() {
                     >
                       View
                     </Link>
-                    {request.adminAcceptance === "PENDING" && (
-                      <>
-                        <button
-                          onClick={() => handleRequestAction(request.id, true)}
-                          className="px-2 py-1 text-xs bg-green-600 text-white border border-black"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleRequestAction(request.id, false)}
-                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
-                        >
-                          Reject
-                        </button>
-                      </>
+                    {request.adminAcceptance === true && (
+                      <button
+                        onClick={() => handleRequestAction(request.id, false)}
+                        className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                      >
+                        Reject
+                      </button>
                     )}
                   </div>
                 </td>

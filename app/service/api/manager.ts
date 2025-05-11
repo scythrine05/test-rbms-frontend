@@ -32,55 +32,72 @@ export interface UsersResponse {
     };
 }
 
-export type UserRequest = {
+export interface UserRequest {
     id: string;
     date: string;
     selectedDepartment: string;
     selectedSection: string;
+    stationID: string | null;
     missionBlock: string;
     workType: string;
     activity: string;
-    corridorTypeSelection?: string;
-    corridorType?: string;
-    cautionRequired: boolean;
-    cautionSpeed: number;
     freshCautionRequired: boolean;
-    freshCautionSpeed: number;
-    freshCautionLocationFrom: string;
-    freshCautionLocationTo: string;
+    freshCautionSpeed: number | null;
+    freshCautionLocationFrom: string | null;
+    freshCautionLocationTo: string | null;
     adjacentLinesAffected: string;
     workLocationFrom: string;
     workLocationTo: string;
-    trdWorkLocation: string;
     demandTimeFrom: string;
     demandTimeTo: string;
+    optimisedTimeFrom?: string;
+    optimisedTimeTo?: string;
     sigDisconnection: boolean;
     elementarySection: string;
-    requestremarks: string;
-    selectedDepo: string;
-    routeFrom: string;
-    routeTo: string;
-    powerBlockRequirements: string[];
-    sntDisconnectionRequired: boolean;
-    sntDisconnectionRequirements: string[];
-    sntDisconnectionLineFrom: string;
-    sntDisconnectionLineTo: string;
-    processedLineSections?: Array<{
-        block: string;
-        type: string;
-        lineName?: string;
-        otherLines?: string;
-        stream?: string;
-        road?: string;
-        otherRoads?: string;
-    }>;
+    elementarySectionTo: string | null;
+    sigElementarySectionFrom: string | null;
+    sigElementarySectionTo: string | null;
     repercussions: string;
-    selectedStream: string;
-    managerAcceptance: boolean;
-    adminAcceptance: "PENDING" | "ACCEPTED" | "REJECTED";
-    powerBlockRequired: boolean;
-    status: string;
+    trdWorkLocation: string;
+    requestremarks: string;
     createdAt: string;
+    status: string;
+    selectedDepo: string;
+    sigResponse: string;
+    ohDisconnection: boolean | null;
+    oheDisconnection: boolean | null;
+    oheResponse: string;
+    corridorType: string;
+    corridorTypeSelection: string | null;
+    sigActionsNeeded: boolean;
+    trdActionsNeeded: boolean;
+    ManagerResponse: string | null;
+    sigDisconnectionRequirements: string | null;
+    sntDisconnectionRequirements: string[] | null;
+    sntDisconnectionLine: string | null;
+    sntDisconnectionLineFrom: string | null;
+    sntDisconnectionLineTo: string | null;
+    trdDisconnectionRequirements: string | null;
+    powerBlockRequirements: string[] | null;
+    powerBlockRequired: boolean;
+    sntDisconnectionRequired: boolean | undefined;
+    processedLineSections: Array<{
+        road: string;
+        type: string;
+        block: string;
+        stream: string;
+        lineName: string;
+        otherLines: string;
+        otherRoads: string;
+    }>;
+    routeFrom: string | null;
+    routeTo: string | null;
+    DisconnAcceptance: string;
+    userId: string;
+    managerAcceptanceId: string;
+    managerAcceptance: boolean;
+    adminAcceptanceId: string;
+    adminAcceptance: boolean;
     user: {
         id: string;
         name: string;
@@ -89,7 +106,7 @@ export type UserRequest = {
         depot: string;
         department: string;
     };
-};
+}
 
 export interface UserRequestsResponse {
     status: boolean;

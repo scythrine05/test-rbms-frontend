@@ -118,23 +118,14 @@ export default function ViewRequestPage() {
           >
             Back to List
           </Link>
-          {request.adminAcceptance === "PENDING" && (
-            <>
-              <button
-                onClick={() => handleRequestAction(true)}
-                disabled={isProcessing}
-                className="px-3 py-1 text-sm bg-green-600 text-white border border-black disabled:opacity-50"
-              >
-                {isProcessing ? "Processing..." : "Accept Request"}
-              </button>
-              <button
-                onClick={() => handleRequestAction(false)}
-                disabled={isProcessing}
-                className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
-              >
-                {isProcessing ? "Processing..." : "Reject Request"}
-              </button>
-            </>
+          {request.adminAcceptance === true && (
+            <button
+              onClick={() => handleRequestAction(false)}
+              disabled={isProcessing}
+              className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
+            >
+              {isProcessing ? "Processing..." : "Reject Request"}
+            </button>
           )}
         </div>
       </div>
@@ -142,10 +133,19 @@ export default function ViewRequestPage() {
       <div className="mb-4 px-2 py-1 inline-block">
         <span
           className={`px-2 py-0.5 text-sm ${getStatusBadgeClass(
-            request.adminAcceptance || "PENDING"
+            request.sntDisconnectionRequired === undefined
+              ? "NAN"
+              : request.sntDisconnectionRequired
+              ? request.DisconnAcceptance || "PENDING"
+              : "NAN"
           )}`}
         >
-          Manager Approval: {request.adminAcceptance || "PENDING"}
+          S&T Approval:{" "}
+          {request.sntDisconnectionRequired === undefined
+            ? "NAN"
+            : request.sntDisconnectionRequired
+            ? request.DisconnAcceptance || "PENDING"
+            : "NAN"}
         </span>
       </div>
 
@@ -298,7 +298,7 @@ export default function ViewRequestPage() {
                 <tr>
                   <td className="py-1 font-medium">Power Block Details:</td>
                   <td className="py-1">
-                    {request.powerBlockRequirements?.join(", ") || "N/A"}
+                    {request.powerBlockRequirements || "N/A"}
                   </td>
                 </tr>
               )}
@@ -317,8 +317,7 @@ export default function ViewRequestPage() {
                       S&T Disconnection Details:
                     </td>
                     <td className="py-1">
-                      {request.sntDisconnectionRequirements?.join(", ") ||
-                        "N/A"}
+                      {request.sntDisconnectionRequirements || "N/A"}
                     </td>
                   </tr>
                 )}
