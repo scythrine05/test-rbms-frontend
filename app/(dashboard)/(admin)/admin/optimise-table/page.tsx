@@ -62,7 +62,7 @@ export default function OptimiseTablePage() {
     try {
       return format(parseISO(dateString), "HH:mm");
     } catch {
-      return "Invalid time";
+      return dateString;
     }
   };
 
@@ -318,7 +318,9 @@ export default function OptimiseTablePage() {
                     {request.missionBlock}
                   </td>
                   <td className="border border-black p-1 text-sm">
-                    {request.processedLineSections?.[0]?.lineName || "N/A"}
+                    {optimizedData
+                      ? request.selectedLine
+                      : request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {formatTime(request.demandTimeFrom)} -{" "}

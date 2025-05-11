@@ -50,6 +50,7 @@ export interface UserRequest {
     workLocationTo: string;
     demandTimeFrom: string;
     demandTimeTo: string;
+    selectedLine: string | null;
     optimisedTimeFrom?: string;
     optimisedTimeTo?: string;
     sigDisconnection: boolean;

@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { format, parseISO } from 'date-fns';
 
 export interface ProcessedLineSection {
     road?: string;
@@ -77,6 +78,7 @@ export interface OriginalRecord {
 
 export interface FlatRecord {
     id: string;
+    date: string;
     combinationId: string | null;
     selectedSection: string;
     demandTimeFrom: string;
@@ -86,6 +88,7 @@ export interface FlatRecord {
     otherAffectedLine: string | null;
     missionBlock: string;
     selectedStream: string | null;
+    selectedDepo: string;
     // Extra fields coming through flatten
     optimisedTimeFrom?: string;
     optimisedTimeTo?: string;
@@ -102,6 +105,13 @@ export function flattenRecords(records: OriginalRecord[]): FlatRecord[] {
         const sections = record.processedLineSections ?? [];
         const comboId = sections.length > 1 ? uuidv4() : null;
 
+        // Convert date format
+        const formattedDate = format(parseISO(record.date), 'yyyy-MM-dd');
+
+        // Convert time formats
+        const formattedTimeFrom = format(parseISO(record.demandTimeFrom), 'HH:mm');
+        const formattedTimeTo = format(parseISO(record.demandTimeTo), 'HH:mm');
+
         if (sections.length > 0) {
             sections.forEach((sec) => {
                 const hasLine = Boolean(sec.lineName && sec.lineName.trim());
@@ -111,10 +121,12 @@ export function flattenRecords(records: OriginalRecord[]): FlatRecord[] {
 
                 result.push({
                     id: record.id,
+                    date: formattedDate,
+                    selectedDepo: record.selectedDepo,
                     combinationId: comboId,
                     selectedSection: record.selectedSection,
-                    demandTimeFrom: record.demandTimeFrom,
-                    demandTimeTo: record.demandTimeTo,
+                    demandTimeFrom: formattedTimeFrom,
+                    demandTimeTo: formattedTimeTo,
                     selectedDepartment: record.selectedDepartment,
                     selectedLine: sec.lineName ?? null,
                     otherAffectedLine: otherAffected,
@@ -125,10 +137,12 @@ export function flattenRecords(records: OriginalRecord[]): FlatRecord[] {
         } else {
             result.push({
                 id: record.id,
+                date: formattedDate,
+                selectedDepo: record.selectedDepo,
                 combinationId: null,
                 selectedSection: record.selectedSection,
-                demandTimeFrom: record.demandTimeFrom,
-                demandTimeTo: record.demandTimeTo,
+                demandTimeFrom: formattedTimeFrom,
+                demandTimeTo: formattedTimeTo,
                 selectedDepartment: record.selectedDepartment,
                 selectedLine: null,
                 otherAffectedLine: null,
@@ -157,13 +171,20 @@ export function reconstructRecords(flatRecords: FlatRecord[]): OriginalRecord[] 
         const isCombo = Boolean(flat.combinationId);
 
         if (!groups[key]) {
-            // Initialize group, copying core and extra fields
+            // Convert date back to ISO format
+            const isoDate = new Date(flat.date).toISOString();
+
+            // Convert times back to ISO format
+            const isoTimeFrom = new Date(`2000-01-01T${flat.demandTimeFrom}`).toISOString();
+            const isoTimeTo = new Date(`2000-01-01T${flat.demandTimeTo}`).toISOString();
+
             const base: Group = {
                 id: flat.id,
-                date: '', // preserve or assign as needed
+                date: isoDate,
                 selectedDepartment: flat.selectedDepartment,
                 selectedSection: flat.selectedSection,
                 stationID: null,
+                selectedDepo: flat.selectedDepo,
                 missionBlock: flat.missionBlock,
                 workType: '',
                 activity: '',
@@ -174,8 +195,8 @@ export function reconstructRecords(flatRecords: FlatRecord[]): OriginalRecord[] 
                 adjacentLinesAffected: '',
                 workLocationFrom: '',
                 workLocationTo: '',
-                demandTimeFrom: flat.demandTimeFrom,
-                demandTimeTo: flat.demandTimeTo,
+                demandTimeFrom: isoTimeFrom,
+                demandTimeTo: isoTimeTo,
                 sigDisconnection: false,
                 elementarySection: '',
                 elementarySectionTo: null,
@@ -186,7 +207,6 @@ export function reconstructRecords(flatRecords: FlatRecord[]): OriginalRecord[] 
                 requestremarks: '',
                 createdAt: '',
                 status: '',
-                selectedDepo: '',
                 sigResponse: '',
                 ohDisconnection: null,
                 oheDisconnection: null,
