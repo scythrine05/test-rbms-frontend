@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const userRequestSchema = z.object({
     id: z.string().optional(),
+    adminAcceptance: z.boolean().optional().default(false),
     date: z.string(),  // present in both
     selectedDepartment: z.string(),  // present in both
     selectedSection: z.string(),  // present in both
