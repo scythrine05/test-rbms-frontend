@@ -30,7 +30,7 @@ const CreateUserModal = ({
     password: "",
     department: "",
     phone: "",
-    location: "",
+    location: session?.user?.location || "",
     depot: "OVERALL",
     role: "BRANCH_OFFICER",
   });
@@ -47,7 +47,7 @@ const CreateUserModal = ({
       password: "",
       department: "",
       phone: "",
-      location: "",
+      location: session?.user?.location || "",
       depot: "OVERALL",
       role: "BRANCH_OFFICER",
     });
@@ -181,26 +181,6 @@ const CreateUserModal = ({
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              Location <span className="text-red-600">*</span>
-            </label>
-            <select
-              value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
-              required
-            >
-              <option value="">Select Location</option>
-              {Object.entries(location).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value} - {key}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className="flex justify-end gap-2 mt-6">
             <button
               type="button"
@@ -320,7 +300,13 @@ export default function ManageUsersPage() {
 
   const handleCreateUser = async (userData: any) => {
     try {
-      const response = await createManager.mutateAsync(userData);
+      // Ensure depot is set to 'OVERALL' before sending to database
+      const userDataWithDepot = {
+        ...userData,
+        depot: "OVERALL",
+      };
+
+      const response = await createManager.mutateAsync(userDataWithDepot);
       if (!response.status) {
         throw new Error(response.message);
       }

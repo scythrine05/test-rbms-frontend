@@ -5,9 +5,9 @@ type DepotStructure = {
     [department in Department]: string[];
   };
 };
-export let MajorSection ={
-"MAS":["MAS-GDR","MAS-AJJ","AJJ-KPD","KPD-JTJ","AJJ-RU","AJJ-CGL","MSB-VM","MSB-VLCY"],
-"TPJ":["TPJ-VM","VM-MV","TPJ-MV","TJ-KIK","MV-TVR","NMJ-MQ","VM-PDY","KPD-VM","CUPJ-VRI","TPJ-TP","NGT-VLNK","TVR-KKDI","TTP-AGX"]
+export let MajorSection = {
+  "MAS": ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
+  "TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ-MQ", "VM-PDY", "KPD-VM", "CUPJ-VRI", "TPJ-TP", "NGT-VLNK", "TVR-KKDI", "TTP-AGX"]
 }
 
 
@@ -113,64 +113,64 @@ export let Activity = {
 
   'Lt': ['AOH', 'POH', 'IOH', 'RE POH', 'RD WORK', 'TURN OUT CHECKING', 'CROSS OVER CHECKING', 'CROSS TRACK FEEDERS CHECKING', 'GANTRY MAINTENANCE', 'CONTACT WIRE RENEWAL WORK', 'CATENARY WIRE RENEWAL WORK', 'CANTILEVER ERECTION/REPLACEMENT(2x25KV WORK)', 'MAST ERECTION(2x25KV WORK)', 'FEEDERS ERECTION(2x25KV WORK)', 'OHE PROFILING', 'OHE/CN WORK', 'OTHER SPECIAL WORKS'],
 
-'Machine' :[  'BCM ', 'DTE ',  'CSM ', 'DUOMAT', 'UNIMAT',  'MFI',   'MPT',
-      'MDU', 'BRM',
-      'FRM ',  'TRT ',
-      'UTV', 'DTS',
-      'T28','SQRS',
-      'RGM working'],
-'Non-Machine':[ 'Rail renewal',
-      'Welding work',
-      'Destressing work',
-      'Switch renewal',
-      'CMS Crossing renewal',
-      'SEJ Renewal',
-      'Glued Joint renewal',
-      'Dummy Glued Joint removal',
-      'TRR P 60 Kg',
-      'TRR S 60 Kg',
-      'TRR S 60 kg',
-      'TRR S 52 kg',
-      'Interchanging',
-      'Trucking out/Shifting materials',
-      'TWR with MFBW',
-      'TBTR (Br sleeper renewal)',
-      'TSR P 60 Kg',
-      'TSR S 60 Kg',
-      'TSR S 52 Kg',
-      'TTSR work',
-      'Jt Insp Notes Attn',
-      'Stretcherbar renewal',
-      'TFR Work',
-      'Ballast Unloading',
-      'Rail unloading',
-      'Lifting and packing',
-      'Gauge tie plate renewal',
-      'Sleeper renewal',
-      'Fish Plates O&E',
-      'Preliminary/Post works',
-      'Trucking out materials',
-      'Cutting Widening work',
-      'JCB working',
-      'Earth work/Muck removal',
-      'Crane Moving/Working',
-      'Attention to Track',
-      'Attention to Fittings',
-      'Attention to Bridge',
-      'Attention to Guard rail',
-      'Attention to Points & Xing',
-      'Attention to LC',
-      'Attention to Curve check rail',
-      'Sheet Piling work',
-      'Platform work',
-      'Platform Shelter work',
-      'ABSS work',
-      'Erection of Platform shelter purlins work',
-      'Erection of FOB Girders',
-      'Other FOB works',
-      'Other Track works',
-      'Other Bridge work',
-],
+  'Machine': ['BCM ', 'DTE ', 'CSM ', 'DUOMAT', 'UNIMAT', 'MFI', 'MPT',
+    'MDU', 'BRM',
+    'FRM ', 'TRT ',
+    'UTV', 'DTS',
+    'T28', 'SQRS',
+    'RGM working'],
+  'Non-Machine': ['Rail renewal',
+    'Welding work',
+    'Destressing work',
+    'Switch renewal',
+    'CMS Crossing renewal',
+    'SEJ Renewal',
+    'Glued Joint renewal',
+    'Dummy Glued Joint removal',
+    'TRR P 60 Kg',
+    'TRR S 60 Kg',
+    'TRR S 60 kg',
+    'TRR S 52 kg',
+    'Interchanging',
+    'Trucking out/Shifting materials',
+    'TWR with MFBW',
+    'TBTR (Br sleeper renewal)',
+    'TSR P 60 Kg',
+    'TSR S 60 Kg',
+    'TSR S 52 Kg',
+    'TTSR work',
+    'Jt Insp Notes Attn',
+    'Stretcherbar renewal',
+    'TFR Work',
+    'Ballast Unloading',
+    'Rail unloading',
+    'Lifting and packing',
+    'Gauge tie plate renewal',
+    'Sleeper renewal',
+    'Fish Plates O&E',
+    'Preliminary/Post works',
+    'Trucking out materials',
+    'Cutting Widening work',
+    'JCB working',
+    'Earth work/Muck removal',
+    'Crane Moving/Working',
+    'Attention to Track',
+    'Attention to Fittings',
+    'Attention to Bridge',
+    'Attention to Guard rail',
+    'Attention to Points & Xing',
+    'Attention to LC',
+    'Attention to Curve check rail',
+    'Sheet Piling work',
+    'Platform work',
+    'Platform Shelter work',
+    'ABSS work',
+    'Erection of Platform shelter purlins work',
+    'Erection of FOB Girders',
+    'Other FOB works',
+    'Other Track works',
+    'Other Bridge work',
+  ],
 };
 
 
@@ -270,7 +270,7 @@ export const streamData = {
     "down": [],
     "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
   },
-  
+
   'VLNK-YD': {
     "up": [],
     "down": [],
@@ -725,7 +725,7 @@ export const streamData = {
 
 
 
-  
+
 export let lineData = {
   // TPJ-VM Section- All are UP and DN lines
   'TPJ-GOC': ['UP', 'DN'],
@@ -757,7 +757,7 @@ export let lineData = {
   'PRKL-TVNL': ['UP', 'DN'],
   'TVNL-KDMD': ['UP', 'DN'],
   'KDMD-VM': ['UP', 'DN'],
-  
+
   // Yard connections for TPJ-VM
   'TPJ-YD': ['UP', 'DN'],
   'GOC-YD': ['UP', 'DN'],
@@ -783,7 +783,7 @@ export let lineData = {
   'TVNL-YD': ['UP', 'DN'],
   'KDMD-YD': ['UP', 'DN'],
   'VM-YD': ['UP', 'DN'],
-  
+
   // TPJ-MV Section- Single line (represented as same string in array)
   // Already defined above, this is a junction
   'GOC-MCJ': ['SINGLE'],
@@ -809,7 +809,7 @@ export let lineData = {
   'ADT-NPT': ['SINGLE'],
   'NPT-KTM': ['SINGLE'],
   'KTM-MV': ['SINGLE'],
-  
+
   // Yard connections for TPJ-MV (Single line)
   'MCJ-YD': ['SINGLE'],
   'TRB-YD': ['SINGLE'],
@@ -834,7 +834,7 @@ export let lineData = {
   'NPT-YD': ['SINGLE'],
   'KTM-YD': ['SINGLE'],
   'MV-YD': ['SINGLE'],
-  
+
   // TPJ-TP Section (Single line)
   'TPJ-TPE': ['SINGLE'],
   'TPE-TP': ['SINGLE'],
