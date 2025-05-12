@@ -851,37 +851,84 @@ export let Activity = {
 
 
 
-export const depotOnLocation = {
-  "MAS": ["TVT",
-    "PON",
-    "SPE",
-    "GDR",
-    "WSTA",
-    "WSTB",
-    "AVD",
-    "TRLA",
-    "TRLB",
-    "AJJ",
-    "WJR",
-    "KPD",
-    "AB",
-    "JTJ",
-    "TRT",
-    "PUT",
-    "CJ",
-    "MS",
-    "TBM",
-    "CGL",
-    "ACK",
-    "TMV",
-    "MSB",
-    "MAS",
-    "BBQ",
-    "GPD",
-    "NYP",
-    "TRL",
-    "AJJE",
-    "KPDW", "VM"]
+export const depot: DepotStructure = {
+  "TPJ-VM": {
+    'TRD': ["TPJ", "VM"],
+    'S&T': ["TPJ", "VM"],
+    'ENGG': ["TPJ", "VM"]
+  },
+
+  "VM-MV": {
+    'TRD': ["VM", "MV"],
+    'S&T': ["VM", "MV"],
+    'ENGG': ["VM", "MV"]
+  },
+
+  "TPJ-MV": {
+    'TRD': ["TPJ", "MV"],
+    'S&T': ["TPJ", "MV"],
+    'ENGG': ["TPJ", "KTM", "MV"]
+  },
+
+  "TJ-KIK": {
+    'TRD': ["TJ", "KIK"],
+    'S&T': ["TJ", "KIK"],
+    'ENGG': ["TJ", "KIK"]
+  },
+
+  "MV-TVR": {
+    'TRD': ["MV", "PEM", "POM", "NNM", "TVR"],
+    'S&T': ["MV", "PEM", "POM", "NNM", "TVR"],
+    'ENGG': ["MV", "PEM", "POM", "NNM", "TVR"]
+  },
+
+  "NMJ-MQ": {
+    'TRD': ["NMJ", "MQ"],
+    'S&T': ["NMJ", "MQ"],
+    'ENGG': ["NMJ", "MQ"]
+  },
+
+  "VM-PDY": {
+    'TRD': ["VM", "VRA", "CBU", "VI", "PDY"],
+    'S&T': ["VM", "VRA", "CBU", "VI", "PDY"],
+    'ENGG': ["VM", "VRA", "CBU", "VI", "PDY"]
+  },
+
+  "KPD-VM": {
+    'TRD': ["KPD"],
+    'S&T': ["KPD", "VT"],
+    'ENGG': ["KPD", "VT"]
+  },
+
+  "CUPJ-VRI": {
+    'TRD': ["CUP J", "KJKPD"],
+    'S&T': ["CUP J", "KJKPD"],
+    'ENGG': ["CUP J", "KJKPD"]
+  },
+
+  "TPJ-TP": {
+    'TRD': ["TPJ"],
+    'S&T': ["TPJ"],
+    'ENGG': ["TPJ"]
+  },
+
+  "NGT-VLNK": {
+    'TRD': ["NGT"],
+    'S&T': ["NGT"],
+    'ENGG': ["NGT"]
+  },
+
+  "TVR-KKDI": {
+    'TRD': ["TVR", "KKDI"],
+    'S&T': ["TVR", "KKDI"],
+    'ENGG': ["TVR", "KKDI"]
+  },
+
+  "TTP-AGX": {
+    'TRD': ["TTP", "AGX"],
+    'S&T': ["TTP", "AGX"],
+    'ENGG': ["TTP", "AGX"]
+  }
 };
 
 
@@ -892,47 +939,15 @@ export const location = {
   "AJP": "DSFSD",
 }
 
-export const depot: DepotStructure = {
-  "MAS-GDR": {
-    'TRD': ["BBQ", "TVT", "PON", "SPE", "GDR", "ADEE/PON"],
-    'S&T': ["MAS", "BBQ", "TVT", "GPD", "SPE", "NYP"],
-    'ENGG': ["TVT", "PON", "SPE", "GDR"]
-  },
-  "MAS-AJJ": {
-    'TRD': ["BBQ", "AVD", "TRL", "AJJ"],
-    'S&T': ["BBQ", "TRL", "AJJE"],
-    'ENGG': ["WSTA", "WSTB", "AVD", "TRLA", "TRLB", "AJJ"]
-  },
-  "AJJ-KPD": {
-    'TRD': ["AJJ", "WJR", "KPD"],
-    'S&T': ["AJJ", "WJR", "KPD"],
-    'ENGG': ["AJJ", "WJR", "KPD"]
-  },
-  "KPD-JTJ": {
-    'TRD': ["KPD", "AB", "JTJ"],
-    'S&T': ["KPDW", "AB", "JTJ"],
-    'ENGG': ["KPD", "AB", "JTJ"]
-  },
-  "AJJ-RU": {
-    'TRD': ["AJJ", "PUT"],
-    'S&T': ["TRT", "AJJ", "PUT"],
-    'ENGG': ["TRT", "AJJ", "PUT"]
-  },
-  "AJJ-CGL": {
-    'TRD': ["AJJ", "CGL"],
-    'S&T': ["CGL"],
-    'ENGG': ["CJ"]
-  },
-  "MSB-VM": {
-    'TRD': ["MS", "TBM", "CGL", "ACK", "VM"],
-    'S&T': ["MSB", "MS", "TBM", "CGL", "TMV"],
-    'ENGG': ["MS", "TBM", "CGL", "ACK", "TMV"]
-  },
-  "MSB-VLCY": {
-    'TRD': ["MSB", "MS"],
-    'S&T': ["MSB", "MS"],
-    'ENGG': ["MSB", "MS"]
-  }
+export const depotOnLocation = {
+  "TPJ": [
+    "TPJ", "VM", "MV", "KTM", "TJ", "KIK", "PEM", "POM", "NNM", "TVR",
+    "NMJ", "MQ", "VRA", "CBU", "VI", "PDY", "KPD", "VT", "CUP J", "KJKPD",
+    "NGT", "KKDI", "TTP", "AGX", "TVT", "PON", "SPE", "GDR", "WSTA",
+    "WSTB", "AVD", "TRLA", "TRLB", "AJJ", "WJR", "AB", "JTJ", "TRT",
+    "PUT", "CJ", "MS", "TBM", "CGL", "ACK", "TMV", "MSB", "BBQ", "GPD",
+    "NYP", "TRL", "AJJE", "KPDW"
+  ]
 };
 
 
