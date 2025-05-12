@@ -11,7 +11,7 @@ export default function Footer({ variant = "login" }: FooterProps) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-2 md:mb-0">
-              © 2025 Government of India, Ministry of Railways
+            Copyright of Adrig AI Technologies Pvt. Ltd © 2025. All rights reserved.
             </div>
             <div className="flex space-x-4">
               <a href="#" className="hover:underline">
@@ -32,7 +32,7 @@ export default function Footer({ variant = "login" }: FooterProps) {
 
   return (
     <footer className="bg-white border-t border-gray-200 text-center py-4 text-xs text-black">
-      © 2025 Southern Railways Employee Portal. All rights reserved.
+      Copyright of Adrig AI Technologies Pvt. Ltd © 2025. All rights reserved.
     </footer>
   );
 }

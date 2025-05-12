@@ -83,10 +83,11 @@ export default function OtherRequestsPage() {
     data: otherRequestsData,
     isLoading,
     error,
+    refetch
   } = useGetOtherRequests(selectedDepo, currentPage, pageSize);
 
   // Update other request mutation
-  const { mutate: updateOtherRequest } = useUpdateOtherRequest();
+  const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -104,6 +105,22 @@ export default function OtherRequestsPage() {
       default:
         return "bg-yellow-100 text-yellow-800 border border-black";
     }
+  };
+
+  // Handle status update with refetch
+  const handleStatusUpdate = (id: string, accept: boolean) => {
+    updateOtherRequest(
+      {
+        id,
+        accept,
+      },
+      {
+        onSuccess: () => {
+          // Refetch the data after the mutation succeeds
+          refetch();
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -226,29 +243,24 @@ export default function OtherRequestsPage() {
                         View
                       </Link>
                       {request.DisconnAcceptance === "PENDING" && (
-                        <div className="inline-flex gap-2">
+                        <div className="inline-flex gap-2 items-center">
                           <button
-                            onClick={() =>
-                              updateOtherRequest({
-                                id: request.id,
-                                accept: true,
-                              })
-                            }
-                            className="text-green-700 hover:underline text-xs bg-green-50 px-2 py-1 rounded border border-green-700"
+                            onClick={() => handleStatusUpdate(request.id, true)}
+                            disabled={isMutating}
+                            className="text-green-700 hover:underline text-xs bg-green-50 px-2 py-1 rounded border border-green-700 disabled:opacity-50"
                           >
                             Accept
                           </button>
                           <button
-                            onClick={() =>
-                              updateOtherRequest({
-                                id: request.id,
-                                accept: false,
-                              })
-                            }
-                            className="text-red-700 hover:underline text-xs bg-red-50 px-2 py-1 rounded border border-red-700"
+                            onClick={() => handleStatusUpdate(request.id, false)}
+                            disabled={isMutating}
+                            className="text-red-700 hover:underline text-xs bg-red-50 px-2 py-1 rounded border border-red-700 disabled:opacity-50"
                           >
                             Reject
                           </button>
+                          {isMutating && (
+                            <span className="text-xs text-gray-500">Updating...</span>
+                          )}
                         </div>
                       )}
                     </td>

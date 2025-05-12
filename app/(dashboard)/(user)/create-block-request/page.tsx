@@ -27,6 +27,116 @@ import {
 
 type Department = "TRD" | "S&T" | "ENGG";
 
+// Add this after the helper functions and before the component function body
+// Shared styles for all react-select components with improved contrast
+const selectStyles = {
+  dropdownIndicator: (base: any) => ({
+    ...base,
+    color: "#13529e",
+  }),
+  placeholder: (base: any) => ({
+    ...base,
+    fontSize: "14px",
+    color: "#6b7280", // Medium gray for placeholder
+  }),
+  menu: (base: any) => ({
+    ...base,
+    zIndex: 10,
+    backgroundColor: "white",
+    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+  }),
+  control: (base: any, state: any) => ({
+    ...base,
+    backgroundColor: "white",
+    color: "black",
+    borderColor: state.isFocused ? "#2461aa" : "#45526c",
+    borderWidth: "1px",
+    borderRadius: "4px",
+    padding: "2px",
+    boxShadow: state.isFocused ? "0 0 0 1px rgba(37, 99, 176, 0.1)" : "none", 
+    fontSize: "14px",
+    minHeight: "36px",
+    "&:hover": {
+      borderColor: "#2461aa",
+    },
+  }),
+  multiValue: (base: any) => ({
+    ...base,
+    backgroundColor: "#f3f4f6",
+    color: "black",
+  }),
+  multiValueLabel: (base: any) => ({
+    ...base,
+    color: "black",
+    fontSize: "12px",
+    padding: "2px 4px",
+  }),
+  multiValueRemove: (base: any) => ({
+    ...base,
+    color: "#ef4444",
+    paddingLeft: "4px",
+    paddingRight: "4px",
+    ":hover": {
+      backgroundColor: "#fee2e2",
+      color: "#b91c1c",
+    },
+  }),
+  option: (base: any, state: any) => ({
+    ...base,
+    color: "black",
+    backgroundColor: state.isSelected ? "#e0e7ef" : state.isFocused ? "#f3f4f6" : "white",
+    fontSize: "14px",
+    padding: "6px 12px",
+    "&:hover": {
+      backgroundColor: "#f3f4f6",
+    },
+    "&:active": {
+      backgroundColor: "#e0e7ef",
+    },
+  }),
+  input: (base: any) => ({
+    ...base,
+    color: "black",
+  }),
+  singleValue: (base: any) => ({
+    ...base,
+    color: "black",
+  }),
+};
+
+// Generate select styles with error state
+const getSelectStyles = (hasError: boolean) => {
+  return {
+    ...selectStyles,
+    control: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: "white",
+      color: "black",
+      borderColor: hasError ? "#dc2626" : state.isFocused ? "#2461aa" : "#45526c",
+      borderWidth: hasError ? "2px" : "1px",
+      borderRadius: "4px",
+      padding: "2px",
+      boxShadow: hasError
+        ? "0 0 0 1px rgba(220, 38, 38, 0.2)"
+        : state.isFocused ? "0 0 0 1px rgba(37, 99, 176, 0.1)" : "none", 
+      fontSize: "14px",
+      minHeight: "36px",
+      "&:hover": {
+        borderColor: hasError ? "#dc2626" : "#2461aa",
+      },
+    })
+  };
+};
+
+// Add a constant for S&T Disconnection assignment emails near the top of the file with other constants
+const sntDisconnectionAssignToOptions = [
+  "snt.user@test.com",
+  "snt.officer2@railways.com",
+  "snt.supervisor@railways.com",
+  "snt.manager@railways.com",
+  "snt.engineer@railways.com"
+];
+
 export default function CreateBlockRequestPage() {
   const [formData, setFormData] = useState<
     Partial<UserRequestInput> & {
@@ -37,6 +147,7 @@ export default function CreateBlockRequestPage() {
       freshCautionRequired?: boolean | null;
       powerBlockRequirements: string[];
       sntDisconnectionRequirements: string[];
+      sntDisconnectionAssignTo?: string; // Add this new field
     }
   >({
     date: "",
@@ -72,6 +183,7 @@ export default function CreateBlockRequestPage() {
     processedLineSections: [],
     repercussions: "",
     selectedStream: "",
+    sntDisconnectionAssignTo: "", // Initialize with empty string
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -134,12 +246,174 @@ export default function CreateBlockRequestPage() {
     return tomorrow.toISOString().split("T")[0]; // Format: "2025-05-10"
   };
 
+  // Helper function to check if a date is in the current week
+  const isDateInCurrentWeek = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight
+    
+    const targetDate = new Date(dateString);
+    
+    // Get the current week's Monday and Sunday
+    const currentWeekMonday = new Date(today);
+    const daysSinceMonday = today.getDay() === 0 ? 6 : today.getDay() - 1; // Adjust for Sunday (0)
+    currentWeekMonday.setDate(today.getDate() - daysSinceMonday);
+    
+    const currentWeekSunday = new Date(currentWeekMonday);
+    currentWeekSunday.setDate(currentWeekMonday.getDate() + 6);
+    
+    // Check if the target date is between Monday and Sunday of current week
+    return targetDate >= currentWeekMonday && targetDate <= currentWeekSunday;
+  };
+
+  // Helper function to check if a date is today or within the next two days
+  const isWithinNextTwoDays = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight
+    
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    // Get date two days from today
+    const twoDaysFromNow = new Date(today);
+    twoDaysFromNow.setDate(today.getDate() + 2);
+    
+    // Check if the target date is today or within next two days
+    return targetDate >= today && targetDate <= twoDaysFromNow;
+  };
+
+  // Helper function to check if a date is in next week (Week 2)
+  const isDateInNextWeek = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight
+    
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    // Get the current week's Sunday
+    const currentWeekSunday = new Date(today);
+    const daysUntilSunday = today.getDay() === 0 ? 0 : 7 - today.getDay();
+    currentWeekSunday.setDate(today.getDate() + daysUntilSunday);
+    
+    // Get next week's Monday and Sunday
+    const nextWeekMonday = new Date(currentWeekSunday);
+    nextWeekMonday.setDate(currentWeekSunday.getDate() + 1);
+    
+    const nextWeekSunday = new Date(nextWeekMonday);
+    nextWeekSunday.setDate(nextWeekMonday.getDate() + 6);
+    
+    // Check if the target date is in next week
+    return targetDate >= nextWeekMonday && targetDate <= nextWeekSunday;
+  };
+
+  // Helper function to check if we're past Thursday 22:00 cutoff for Week 2 planning
+  const isPastThursdayCutoff = (): boolean => {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 4 = Thursday
+    const hour = now.getHours();
+    
+    // Return true if it's Thursday after 22:00 or if it's Friday/Saturday/Sunday
+    return (dayOfWeek === 4 && hour >= 22) || dayOfWeek > 4;
+  };
+
+  // Helper function to determine corridor type restrictions based on date
+  const getCorridorTypeRestrictions = (dateString: string): {
+    urgentOnly: boolean;
+    urgentAllowed: boolean;
+    message: string;
+  } => {
+    if (!dateString) {
+      return { urgentOnly: false, urgentAllowed: false, message: "" };
+    }
+    
+    // Check if date is within 2 days (today, tomorrow, day after)
+    const isUrgentTimeframe = isWithinNextTwoDays(dateString);
+    
+    // Check if date is in next week (Week 2)
+    const isNextWeek = isDateInNextWeek(dateString);
+    
+    // Check if we're past Thursday cutoff
+    const pastThursdayCutoff = isPastThursdayCutoff();
+    
+    // Urgent blocks are only allowed within next 2 days
+    const urgentAllowed = isUrgentTimeframe;
+    
+    // Urgent blocks are required for next 2 days, or for Week 2 if past Thursday cutoff
+    const urgentOnly = isUrgentTimeframe || (isNextWeek && pastThursdayCutoff);
+    
+    // Set appropriate message
+    let message = "";
+    if (isUrgentTimeframe) {
+      message = "Dates within today and next 2 days must be Urgent Block requests.";
+    } else if (isNextWeek && pastThursdayCutoff) {
+      message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+    }
+    
+    return { urgentOnly, urgentAllowed, message };
+  };
+
+  // Helper function to check if a date is in the current week but beyond the 2-day urgent window
+  const isBlockedCurrentWeekDate = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight
+    
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    // Get max allowed urgent date (day after tomorrow)
+    const maxUrgentDate = new Date(today);
+    maxUrgentDate.setDate(today.getDate() + 2);
+    
+    // Get the current week's Sunday
+    const currentWeekSunday = new Date(today);
+    const daysUntilSunday = today.getDay() === 0 ? 0 : 7 - today.getDay();
+    currentWeekSunday.setDate(today.getDate() + daysUntilSunday);
+    
+    // Check if date is in current week but beyond the urgent window
+    return targetDate > maxUrgentDate && targetDate <= currentWeekSunday;
+  };
+
+  // Helper function to determine if a date is selectable
+  const isDateSelectable = (dateString: string): boolean => {
+    if (!dateString) return false;
+    
+    // Don't allow selection of current week dates beyond the urgent window
+    return !isBlockedCurrentWeekDate(dateString);
+  };
+
+  // Helper function to get the min allowed date (today)
+  const getMinDateString = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // Format: "2025-05-10"
+  };
+
+  // Helper function to get the max date for current week excluding urgent window
+  const getMaxUrgentDateString = () => {
+    const today = new Date();
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+    return dayAfterTomorrow.toISOString().split("T")[0];
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value, type } = e.target;
+    
+    // Special handling for date field
+    if (name === 'date') {
+      // Check if the selected date is allowed
+      if (value && !isDateSelectable(value)) {
+        // If date is in current week but beyond urgent window, show error and don't update state
+        setErrors({
+          ...errors,
+          date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests."
+        });
+        return;
+      }
+    }
+    
     if (type === "checkbox") {
       const checkbox = e.target as HTMLInputElement;
       setFormData({
@@ -197,14 +471,49 @@ export default function CreateBlockRequestPage() {
       });
       return false;
     }
+    
     const selectedDate = new Date(formData.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
 
-    if (selectedDate <= today) {
-      // Rejects today & past dates
+    if (selectedDate < today) {
+      // Rejects past dates
       setErrors({
-        date: "Block date must be in the future. Please select a date starting from tomorrow.",
+        date: "Block date must be today or in the future.",
+      });
+      return false;
+    }
+    
+    // Check if date is in current week but beyond urgent window
+    if (isBlockedCurrentWeekDate(formData.date)) {
+      setErrors({
+        date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
+      });
+      return false;
+    }
+
+    // Validate corridor type selection
+    if (!formData.corridorTypeSelection) {
+      setErrors({
+        corridorTypeSelection: "Corridor type is required",
+      });
+      return false;
+    }
+
+    // Get corridor type restrictions based on selected date
+    const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
+    
+    // Validate based on restrictions
+    if (urgentOnly && formData.corridorTypeSelection !== "Urgent Block") {
+      setErrors({
+        corridorTypeSelection: message,
+      });
+      return false;
+    }
+    
+    if (!urgentAllowed && formData.corridorTypeSelection === "Urgent Block") {
+      setErrors({
+        corridorTypeSelection: "Urgent Block is only allowed for today and next 2 days",
       });
       return false;
     }
@@ -243,7 +552,7 @@ export default function CreateBlockRequestPage() {
         field === "repercussions" &&
         !formData[field as keyof typeof formData]
       ) {
-        if (session?.user.department === "TRD") {
+        if (session?.user.department === "TRD" || formData.corridorTypeSelection === "Outside Corridor") {
           newErrors[field] = `${field
             .replace(/([A-Z])/g, " $1")
             .replace(/^./, (str) => str.toUpperCase())} is required`;
@@ -256,6 +565,12 @@ export default function CreateBlockRequestPage() {
         hasError = true;
       }
     });
+
+    // Also make Remarks required for Outside Corridor
+    if (formData.corridorTypeSelection === "Outside Corridor" && !formData.requestremarks?.trim()) {
+      newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
+      hasError = true;
+    }
 
     // Add custom activity validation when "others" is selected
     if (formData.activity === "others" && !customActivity.trim()) {
@@ -298,6 +613,12 @@ export default function CreateBlockRequestPage() {
           hasError = true;
         }
       }
+    }
+
+    // Add validation for sntDisconnectionAssignTo when sntDisconnectionRequired is true
+    if (sntDisconnectionChecked && !formData.sntDisconnectionAssignTo) {
+      newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
+      hasError = true;
     }
 
     // Set validation errors if any
@@ -388,6 +709,7 @@ export default function CreateBlockRequestPage() {
       powerBlockRequirements: formData.powerBlockRequirements,
       elementarySection: formData.elementarySection,
       sntDisconnectionRequirements: formData.sntDisconnectionRequirements,
+      sntDisconnectionAssignTo: formData.sntDisconnectionAssignTo, // Include in form submission
     };
 
     try {
@@ -408,6 +730,7 @@ export default function CreateBlockRequestPage() {
             elementarySection: "",
             sntDisconnectionLineTo: "",
             powerBlockRequirements: [],
+            sntDisconnectionAssignTo: "", // Reset this field too
             date: "",
             selectedDepartment: session?.user.department || "",
             selectedSection: "",
@@ -466,13 +789,27 @@ export default function CreateBlockRequestPage() {
       setIsDisabled(true);
       setFormData({ ...formData, corridorTypeSelection: null });
     } else {
-      const shouldDisable = isDateAfterThursdayCutoff(formData.date);
-      setIsDisabled(shouldDisable);
-      if (shouldDisable) {
+      // Get corridor type restrictions based on selected date
+      const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
+      
+      if (urgentOnly) {
+        // If urgent block is required, disable other options and set to Urgent
+        setIsDisabled(true);
         setFormData({
           ...formData,
           corridorTypeSelection: "Urgent Block",
         });
+      } else {
+        // Otherwise, normal options are available
+        setIsDisabled(false);
+        
+        // If user had Urgent Block selected but it's not allowed, reset selection
+        if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
+          setFormData({
+            ...formData,
+            corridorTypeSelection: null,
+          });
+        }
       }
     }
   }, [formData.date]);
@@ -645,7 +982,7 @@ export default function CreateBlockRequestPage() {
       }));
     }
   }, [session]);
-  // Handle stream selection for yard sections
+  // Fix the handleStreamSelection function to preserve road value
   const handleStreamSelection = (block: string, value: string) => {
     // Update processedLineSections directly
     setFormData((prev) => {
@@ -657,20 +994,26 @@ export default function CreateBlockRequestPage() {
         (section) => section.block === block
       );
 
-      // Create the updated section - reset road when stream changes
-      const updatedSection = {
-        block,
-        type: "yard",
-        stream: value,
-        road: "",
-        otherRoads: "",
-      };
-
-      // Either update existing section or add new one
+      // Create the updated section - preserve road when stream changes
       if (sectionIndex >= 0) {
-        existingProcessedSections[sectionIndex] = updatedSection as any;
+        // Keep existing values and just update the stream
+        const updatedSection = {
+          ...existingProcessedSections[sectionIndex],
+          stream: value,
+          type: "yard" // Ensure type is set
+        };
+        existingProcessedSections[sectionIndex] = updatedSection;
       } else {
-        existingProcessedSections.push(updatedSection as any);
+        // If somehow there's no section yet (unlikely), create one
+        existingProcessedSections.push({
+          block,
+          type: "yard",
+          stream: value,
+          road: "",
+          otherRoads: "",
+          lineName: "", // Add required property
+          otherLines: "", // Add required property
+        });
       }
 
       // If only one block, also update selectedStream for backward compatibility
@@ -680,6 +1023,7 @@ export default function CreateBlockRequestPage() {
       // Also update selectedStreams object to make sure data is captured correctly
       const selectedStreams = { ...(prev.selectedStreams || {}) };
       selectedStreams[block] = value;
+      
       return {
         ...prev,
         processedLineSections: existingProcessedSections,
@@ -688,7 +1032,32 @@ export default function CreateBlockRequestPage() {
       };
     });
   };
-  // Handle road selection for yard sections
+  // Helper function to get all roads for a yard block regardless of stream
+  const getAllRoadsForYard = (blockKey: string): string[] => {
+    if (!blockKey || !blockKey.includes("-YD") || !(blockKey in streamData)) {
+      return [];
+    }
+    
+    const blockData = streamData[blockKey as keyof typeof streamData];
+    if (!blockData || typeof blockData !== "object") {
+      return [];
+    }
+    
+    // Flatten all roads from all streams into a single array
+    const allRoads: string[] = [];
+    
+    Object.keys(blockData).forEach(streamKey => {
+      const roads = (blockData as Record<string, string[]>)[streamKey] || [];
+      roads.forEach(road => {
+        if (!allRoads.includes(road)) {
+          allRoads.push(road);
+        }
+      });
+    });
+    
+    return allRoads;
+  };
+  // Update the handleRoadSelection function to not depend on stream
   const handleRoadSelection = (block: string, value: string) => {
     // Update processedLineSections directly
     setFormData((prev) => {
@@ -705,8 +1074,20 @@ export default function CreateBlockRequestPage() {
         const updatedSection = {
           ...existingProcessedSections[sectionIndex],
           road: value,
+          type: "yard", // Ensure type is set to yard
         };
         existingProcessedSections[sectionIndex] = updatedSection;
+      } else {
+        // Create new section if it doesn't exist
+        existingProcessedSections.push({
+          block,
+          type: "yard",
+          road: value,
+          stream: "",
+          otherRoads: "",
+          lineName: "", // Add required property
+          otherLines: "", // Add required property
+        });
       }
 
       return {
@@ -738,13 +1119,16 @@ export default function CreateBlockRequestPage() {
               style={{ color: "black", fontSize: "14px" }}
               aria-required="true"
               aria-label="Select date of block"
-              min={getTomorrowDateString()}
+              min={getMinDateString()}
             />
             {errors.date && (
               <span className="text-xs text-red-700 font-medium mt-1 block">
                 {errors.date}
               </span>
             )}
+            <span className="text-xs text-gray-600 mt-1 block">
+              Note: Only today, tomorrow, and day after tomorrow are available for urgent blocks. Dates in current week beyond these are not available. Week 2 block requests must be submitted before Thursday 22:00 of current week.
+            </span>
           </div>
           <div className="form-group col-span-1 text-black">
             <label className="block text-sm font-medium text-black mb-1">
@@ -784,12 +1168,22 @@ export default function CreateBlockRequestPage() {
                   value="Urgent Block"
                   checked={formData.corridorTypeSelection === "Urgent Block"}
                   onChange={handleInputChange}
-                  disabled={!formData.date}
+                  disabled={!formData.date || !getCorridorTypeRestrictions(formData.date).urgentAllowed}
                   className="form-radio h-4 w-4"
                 />
                 <span className="ml-2 text-sm">Urgent Block</span>
               </label>
             </div>
+            {isDisabled && formData.date && (
+              <span className="text-xs text-amber-700 mt-1 block">
+                {getCorridorTypeRestrictions(formData.date).message}
+              </span>
+            )}
+            {formData.date && !getCorridorTypeRestrictions(formData.date).urgentAllowed && (
+              <span className="text-xs text-gray-600 mt-1 block">
+                Urgent Block is only available for today and the next 2 days.
+              </span>
+            )}
             {errors.corridorTypeSelection && (
               <span className="text-xs text-red-700 font-medium mt-1 block">
                 {errors.corridorTypeSelection}
@@ -1023,71 +1417,7 @@ export default function CreateBlockRequestPage() {
                     ? "Select Block Section"
                     : "Select Major Section first"
                 }
-                styles={{
-                  dropdownIndicator: (base) => ({
-                    ...base,
-                    color: "#13529e",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    fontSize: "14px",
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    zIndex: 10,
-                  }),
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "white",
-                    color: "black",
-                    borderColor: errors.missionBlock ? "#dc2626" : "#45526c",
-                    borderWidth: errors.missionBlock ? "2px" : "1px",
-                    borderRadius: "4px",
-                    padding: "2px",
-                    boxShadow: errors.missionBlock
-                      ? "0 0 0 1px rgba(220, 38, 38, 0.2)"
-                      : "none",
-                    fontSize: "14px",
-                    minHeight: "36px",
-                    "&:hover": {
-                      borderColor: errors.missionBlock ? "#dc2626" : "#2461aa",
-                    },
-                    "&:focus": {
-                      borderColor: errors.missionBlock ? "#dc2626" : "#2461aa",
-                      boxShadow: errors.missionBlock
-                        ? "0 0 0 3px rgba(220, 38, 38, 0.3)"
-                        : "0 0 0 3px rgba(37, 99, 176, 0.3)",
-                    },
-                  }),
-                  multiValue: (base) => ({
-                    ...base,
-                    backgroundColor: "#f3f4f6",
-                    color: "black",
-                  }),
-                  multiValueLabel: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontSize: "12px",
-                    padding: "2px 4px",
-                  }),
-                  multiValueRemove: (base) => ({
-                    ...base,
-                    color: "#ef4444",
-                    paddingLeft: "4px",
-                    paddingRight: "4px",
-                    ":hover": {
-                      backgroundColor: "#fee2e2",
-                      color: "#b91c1c",
-                    },
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    color: "black",
-                    fontSize: "14px",
-                    padding: "6px 12px",
-                    backgroundColor: state.isSelected ? "#e0e7ef" : "white",
-                  }),
-                }}
+                styles={getSelectStyles(!!errors.missionBlock)}
               />
               {errors.missionBlock && blockSectionValue.length === 0 && (
                 <span className="text-xs text-red-700 font-medium mt-1 block">
@@ -1102,145 +1432,161 @@ export default function CreateBlockRequestPage() {
                     {blockSectionValue[0].includes("-YD") ? (
                       // For yard sections (containing -YD)
                       <div>
+                        {/* Road selection - shown first */}
                         <label className="block text-sm font-medium text-black mb-1">
-                          Direction of traffic affected for{" "}
-                          {blockSectionValue[0]}{" "}
-                          <span className="text-red-600">*</span>
+                          Road for {blockSectionValue[0]} <span className="text-red-600">*</span>
                         </label>
-                        {(() => {
-                          // Find the section in processedLineSections for this block
-                          const sectionEntry =
-                            formData.processedLineSections?.find(
-                              (section) =>
-                                section.block === blockSectionValue[0]
+                        <div>
+                          {(() => {
+                            // Find the section in processedLineSections for this block
+                            const sectionEntry = formData.processedLineSections?.find(
+                              (section) => section.block === blockSectionValue[0]
                             );
-                          const streamValue = sectionEntry?.stream || "";
+                            const roadValue = sectionEntry?.road || "";
 
-                          // Check if we have error
-                          const hasStreamError =
-                            errors[
-                              `processedLineSections.${blockSectionValue[0]}.stream`
+                            // Get all roads for this yard
+                            const allRoads = getAllRoadsForYard(blockSectionValue[0]);
+
+                            // Check if we have error
+                            const hasRoadError = errors[
+                              `processedLineSections.${blockSectionValue[0]}.road`
                             ];
 
-                          return (
-                            <>
-                              <select
-                                className="input gov-input"
-                                style={{
-                                  color: "black",
-                                  borderColor: hasStreamError
-                                    ? "#dc2626"
-                                    : streamValue
-                                    ? "#45526c"
-                                    : "#dc2626",
-                                  fontSize: "14px",
-                                }}
-                                value={streamValue}
-                                onChange={(e) =>
-                                  handleStreamSelection(
-                                    blockSectionValue[0],
-                                    e.target.value
-                                  )
-                                }
-                              >
-                                <option value="" disabled>
-                                  Select Stream
-                                </option>
-                                {streamData &&
-                                blockSectionValue[0] in streamData ? (
-                                  Object.keys(
-                                    streamData[
-                                      blockSectionValue[0] as keyof typeof streamData
-                                    ]
-                                  ).map((stream) => (
-                                    <option key={stream} value={stream}>
-                                      {stream}
+                            return (
+                              <>
+                                <select
+                                  className="input gov-input"
+                                  style={{
+                                    color: "black",
+                                    borderColor: hasRoadError
+                                      ? "#dc2626"
+                                      : roadValue
+                                      ? "#45526c"
+                                      : "#dc2626",
+                                    fontSize: "14px",
+                                  }}
+                                  value={roadValue}
+                                  onChange={(e) =>
+                                    handleRoadSelection(
+                                      blockSectionValue[0],
+                                      e.target.value
+                                    )
+                                  }
+                                >
+                                  <option value="" disabled>
+                                    Select Road
+                                  </option>
+                                  {allRoads.map((road: string) => (
+                                    <option key={road} value={road}>
+                                      {road}
                                     </option>
-                                  ))
-                                ) : (
-                                  <option value="up stream">up stream</option>
+                                  ))}
+                                </select>
+                                {hasRoadError && (
+                                  <span className="text-xs text-red-700 font-medium mb-2 block">
+                                    Road selection is required
+                                  </span>
                                 )}
-                              </select>
-                              {hasStreamError && (
-                                <span className="text-xs text-red-700 font-medium mb-2 block">
-                                  Stream selection is required
-                                </span>
-                              )}
-                              {streamValue &&
-                                streamData &&
-                                blockSectionValue[0] in streamData && (
-                                  <div className="mt-2">
+
+                                {/* Stream selection - independent now */}
+                                {roadValue && (
+                                  <div className="mt-4">
                                     <label className="block text-sm font-medium text-black mb-1">
-                                      Road {blockSectionValue[0]}
+                                      Direction of traffic affected for {blockSectionValue[0]} <span className="text-red-600">*</span>
                                     </label>
                                     <select
                                       className="input gov-input"
-                                      value={sectionEntry?.road || ""}
-                                      onChange={(e) =>
-                                        handleRoadSelection(
-                                          blockSectionValue[0],
-                                          e.target.value
-                                        )
-                                      }
                                       style={{
                                         color: "black",
                                         borderColor: errors[
-                                          `processedLineSections.${blockSectionValue[0]}.road`
+                                          `processedLineSections.${blockSectionValue[0]}.stream`
                                         ]
                                           ? "#dc2626"
-                                          : "#45526c",
+                                          : sectionEntry?.stream
+                                          ? "#45526c"
+                                          : "#dc2626",
                                         fontSize: "14px",
+                                      }}
+                                      value={sectionEntry?.stream || ""}
+                                      onChange={(e) => {
+                                        // Use a function that explicitly preserves the road value
+                                        const streamValue = e.target.value;
+                                        setFormData((prev) => {
+                                          const existingSections = [...(prev.processedLineSections || [])];
+                                          const sectionIndex = existingSections.findIndex(
+                                            (section) => section.block === blockSectionValue[0]
+                                          );
+                                          
+                                          if (sectionIndex >= 0) {
+                                            const currentSection = existingSections[sectionIndex];
+                                            existingSections[sectionIndex] = {
+                                              ...currentSection,
+                                              stream: streamValue,
+                                            };
+                                          } else {
+                                            existingSections.push({
+                                              block: blockSectionValue[0],
+                                              type: "yard",
+                                              stream: streamValue,
+                                              road: roadValue,
+                                              otherRoads: "",
+                                              lineName: "",
+                                              otherLines: "",
+                                            });
+                                          }
+                                          
+                                          return {
+                                            ...prev,
+                                            processedLineSections: existingSections,
+                                          };
+                                        });
                                       }}
                                     >
                                       <option value="" disabled>
-                                        Select Road
+                                        Select Stream
                                       </option>
-                                      {getStreamDataSafely(
-                                        blockSectionValue[0],
-                                        streamValue
-                                      ).map((road: string) => (
-                                        <option key={road} value={road}>
-                                          {road}
+                                      {streamData &&
+                                      blockSectionValue[0] in streamData &&
+                                      Object.keys(
+                                        streamData[
+                                          blockSectionValue[0] as keyof typeof streamData
+                                        ]
+                                      ).map((stream) => (
+                                        <option key={stream} value={stream}>
+                                          {stream}
                                         </option>
                                       ))}
                                     </select>
                                     {errors[
-                                      `processedLineSections.${blockSectionValue[0]}.road`
+                                      `processedLineSections.${blockSectionValue[0]}.stream`
                                     ] && (
                                       <span className="text-xs text-red-700 font-medium mb-2 block">
-                                        Road selection is required
+                                        Stream selection is required
                                       </span>
                                     )}
                                   </div>
                                 )}
-                              {sectionEntry?.road &&
-                                streamValue &&
-                                streamData &&
-                                blockSectionValue[0] in streamData && (
-                                  <div className="mt-2">
+
+                                {/* Other affected roads */}
+                                {roadValue && (
+                                  <div className="mt-4">
                                     <label className="block text-sm font-medium text-black mb-1">
-                                      Other affected Road {blockSectionValue[0]}
+                                      Other affected Roads for {blockSectionValue[0]}
                                     </label>
                                     <Select
                                       isMulti
-                                      options={getStreamDataSafely(
-                                        blockSectionValue[0],
-                                        streamValue
-                                      )
-                                        .filter(
-                                          (road: string) =>
-                                            road !== sectionEntry.road
-                                        )
-                                        .map((road: string) => ({
+                                      options={allRoads
+                                        .filter((road) => road !== roadValue)
+                                        .map((road) => ({
                                           value: road,
                                           label: road,
                                         }))}
                                       value={
-                                        sectionEntry.otherRoads
+                                        sectionEntry?.otherRoads
                                           ? sectionEntry.otherRoads
                                               .split(",")
                                               .filter(Boolean)
-                                              .map((road: string) => ({
+                                              .map((road) => ({
                                                 value: road,
                                                 label: road,
                                               }))
@@ -1255,29 +1601,14 @@ export default function CreateBlockRequestPage() {
                                       className="basic-multi-select"
                                       classNamePrefix="select"
                                       placeholder="Select other affected roads"
-                                      styles={{
-                                        control: (base) => ({
-                                          ...base,
-                                          fontSize: "14px",
-                                          minHeight: "36px",
-                                          padding: "2px",
-                                        }),
-                                        option: (base) => ({
-                                          ...base,
-                                          fontSize: "14px",
-                                          padding: "6px 12px",
-                                        }),
-                                        multiValueLabel: (base) => ({
-                                          ...base,
-                                          fontSize: "12px",
-                                        }),
-                                      }}
+                                      styles={getSelectStyles(false)}
                                     />
                                   </div>
                                 )}
-                            </>
-                          );
-                        })()}
+                              </>
+                            );
+                          })()}
+                        </div>
                       </div>
                     ) : (
                       // For regular sections (without -YD)
@@ -1376,23 +1707,7 @@ export default function CreateBlockRequestPage() {
                                     className="basic-multi-select"
                                     classNamePrefix="select"
                                     placeholder="Select other affected lines"
-                                    styles={{
-                                      control: (base) => ({
-                                        ...base,
-                                        fontSize: "14px",
-                                        minHeight: "36px",
-                                        padding: "2px",
-                                      }),
-                                      option: (base) => ({
-                                        ...base,
-                                        fontSize: "14px",
-                                        padding: "6px 12px",
-                                      }),
-                                      multiValueLabel: (base) => ({
-                                        ...base,
-                                        fontSize: "12px",
-                                      }),
-                                    }}
+                                    styles={getSelectStyles(false)}
                                   />
                                 </div>
                               )}
@@ -1422,192 +1737,149 @@ export default function CreateBlockRequestPage() {
                           {block.includes("-YD") ? (
                             // For yard sections in multiple selection
                             <>
+                            
                               <label className="block text-base font-medium text-black mb-2">
-                                Stream for {block}{" "}
-                                <span className="text-red-600">*</span>
+                                Road for {block} <span className="text-red-600">*</span>
                               </label>
                               <select
                                 className="input gov-input mb-3"
                                 style={{
                                   color: "black",
                                   borderColor: errors[
-                                    `processedLineSections.${block}.stream`
+                                    `processedLineSections.${block}.road`
                                   ]
                                     ? "#dc2626"
-                                    : sectionEntry?.stream
+                                    : sectionEntry?.road
                                     ? "#45526c"
                                     : "#dc2626",
                                 }}
-                                value={sectionEntry?.stream || ""}
+                                value={sectionEntry?.road || ""}
                                 onChange={(e) =>
-                                  handleStreamSelection(block, e.target.value)
+                                  handleRoadSelection(block, e.target.value)
                                 }
                               >
                                 <option value="" disabled>
-                                  Select Stream
+                                  Select Road
                                 </option>
-                                {streamData[
-                                  block as keyof typeof streamData
-                                ] ? (
-                                  Object.keys(
-                                    streamData[block as keyof typeof streamData]
-                                  ).map((stream) => (
-                                    <option key={stream} value={stream}>
-                                      {stream}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option value="up stream">up stream</option>
-                                )}
+                                {getAllRoadsForYard(block).map((road: string) => (
+                                  <option key={road} value={road}>
+                                    {road}
+                                  </option>
+                                ))}
                               </select>
-                              {errors[
-                                `processedLineSections.${block}.stream`
-                              ] && (
+                              {errors[`processedLineSections.${block}.road`] && (
                                 <span className="text-base text-red-700 font-medium mb-3 block">
-                                  Stream selection is required
+                                  Road selection is required
                                 </span>
                               )}
-                              {sectionEntry?.stream &&
-                                streamData[
-                                  block as keyof typeof streamData
-                                ] && (
-                                  <div className="mt-2 mb-3">
-                                    <label className="block text-base font-medium text-black mb-2">
-                                      Road {block}
-                                    </label>
-                                    <select
-                                      className="input gov-input"
-                                      value={sectionEntry?.road || ""}
-                                      onChange={(e) =>
-                                        handleRoadSelection(
-                                          block,
-                                          e.target.value
-                                        )
-                                      }
-                                      style={{
-                                        color: "black",
-                                        borderColor: errors[
-                                          `processedLineSections.${block}.road`
-                                        ]
-                                          ? "#dc2626"
-                                          : "#45526c",
-                                      }}
-                                    >
-                                      <option value="" disabled>
-                                        Select Road
-                                      </option>
-                                      {getStreamDataSafely(
+
+                              {sectionEntry?.road && (
+                                <div className="mt-2 mb-2">
+                                  <label className="block text-base font-medium text-black mb-2">
+                                    Other affected Road for {block}
+                                  </label>
+                                  <Select
+                                    isMulti
+                                    options={getAllRoadsForYard(block)
+                                      .filter((road) => road !== sectionEntry.road)
+                                      .map((road) => ({
+                                        value: road,
+                                        label: road,
+                                      }))}
+                                    value={
+                                      sectionEntry?.otherRoads
+                                        ? sectionEntry.otherRoads
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((road: string) => ({
+                                              value: road,
+                                              label: road,
+                                            }))
+                                        : []
+                                    }
+                                    onChange={(opts) =>
+                                      handleOtherAffectedLinesChange(
                                         block,
-                                        sectionEntry?.stream || ""
-                                      ).map((road: string) => (
-                                        <option key={road} value={road}>
-                                          {road}
+                                        opts as any
+                                      )
+                                    }
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    placeholder="Select other affected roads"
+                                    styles={getSelectStyles(false)}
+                                  />
+                                </div>
+                              )}
+                              {sectionEntry?.road && (
+                                <div className="mt-2 mb-3">
+                                  <label className="block text-base font-medium text-black mb-2">
+                                    Direction of movement affected for {block} <span className="text-red-600">*</span>
+                                  </label>
+                                  <select
+                                    className="input gov-input"
+                                    value={sectionEntry?.stream || ""}
+                                    onChange={(e) => {
+                                      // Use a function that explicitly preserves the road value
+                                      const streamValue = e.target.value;
+                                      setFormData((prev) => {
+                                        const existingSections = [...(prev.processedLineSections || [])];
+                                        const sectionIndex = existingSections.findIndex(
+                                          (section) => section.block === block
+                                        );
+                                        
+                                        if (sectionIndex >= 0) {
+                                          const currentSection = existingSections[sectionIndex];
+                                          existingSections[sectionIndex] = {
+                                            ...currentSection,
+                                            stream: streamValue,
+                                          };
+                                        } else {
+                                          existingSections.push({
+                                            block: block,
+                                            type: "yard",
+                                            stream: streamValue,
+                                            road: sectionEntry?.road || "",
+                                            otherRoads: "",
+                                            lineName: "",
+                                            otherLines: "",
+                                          });
+                                        }
+                                        
+                                        return {
+                                          ...prev,
+                                          processedLineSections: existingSections,
+                                        };
+                                      });
+                                    }}
+                                    style={{
+                                      color: "black",
+                                      borderColor: errors[
+                                        `processedLineSections.${block}.stream`
+                                      ]
+                                        ? "#dc2626"
+                                        : "#45526c",
+                                    }}
+                                  >
+                                    <option value="" disabled>
+                                      Select Direction
+                                    </option>
+                                    {streamData[block as keyof typeof streamData] &&
+                                      Object.keys(
+                                        streamData[block as keyof typeof streamData]
+                                      ).map((stream) => (
+                                        <option key={stream} value={stream}>
+                                          {stream == "bothNot" ? "Both directions not affected" : stream.charAt(0).toUpperCase() + stream.slice(1)} {stream == "bothNot" ? "" : `direction${stream == "both" ? "s" : ""} affected`}
                                         </option>
                                       ))}
-                                    </select>
-                                    {errors[
-                                      `processedLineSections.${block}.road`
-                                    ] && (
-                                      <span className="text-base text-red-700 font-medium mb-3 block">
-                                        Road selection is required
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              {sectionEntry?.road &&
-                                sectionEntry?.stream &&
-                                block in streamData && (
-                                  <div className="mt-2 mb-2">
-                                    <label className="block text-base font-medium text-black mb-2">
-                                      Other affected Road for {block}
-                                    </label>
-                                    <Select
-                                      isMulti
-                                      options={(() => {
-                                        // Type assertion for streamData index access
-                                        const blockKey =
-                                          block as keyof typeof streamData;
-                                        const blockData = streamData[blockKey];
+                                  </select>
+                                  {errors[`processedLineSections.${block}.stream`] && (
+                                    <span className="text-base text-red-700 font-medium mb-3 block">
+                                      Stream selection is required
+                                    </span>
+                                  )}
+                                </div>
+                              )}
 
-                                        // Check if blockData exists and is an object
-                                        if (
-                                          !blockData ||
-                                          typeof blockData !== "object"
-                                        ) {
-                                          return [];
-                                        }
-
-                                        // Get the stream key and check if it exists in blockData
-                                        const streamKey = sectionEntry.stream;
-                                        if (!streamKey) {
-                                          return [];
-                                        }
-
-                                        // Use safer approach with type assertion
-                                        // Converting to Record<string, any> to handle dynamic access safely
-                                        const typedBlockData =
-                                          blockData as Record<string, any>;
-
-                                        if (!(streamKey in typedBlockData)) {
-                                          return [];
-                                        }
-
-                                        const roadArray =
-                                          typedBlockData[streamKey];
-                                        if (!Array.isArray(roadArray)) {
-                                          return [];
-                                        }
-
-                                        return roadArray
-                                          .filter(
-                                            (road: string) =>
-                                              road !== sectionEntry.road
-                                          )
-                                          .map((road: string) => ({
-                                            value: road,
-                                            label: road,
-                                          }));
-                                      })()}
-                                      value={
-                                        sectionEntry?.otherRoads
-                                          ? sectionEntry.otherRoads
-                                              .split(",")
-                                              .filter(Boolean)
-                                              .map((road: string) => ({
-                                                value: road,
-                                                label: road,
-                                              }))
-                                          : []
-                                      }
-                                      onChange={(opts) =>
-                                        handleOtherAffectedLinesChange(
-                                          block,
-                                          opts as any
-                                        )
-                                      }
-                                      className="basic-multi-select"
-                                      classNamePrefix="select"
-                                      placeholder="Select other affected roads"
-                                      styles={{
-                                        control: (base) => ({
-                                          ...base,
-                                          fontSize: "14px",
-                                          minHeight: "36px",
-                                          padding: "2px",
-                                        }),
-                                        option: (base) => ({
-                                          ...base,
-                                          fontSize: "14px",
-                                          padding: "6px 12px",
-                                        }),
-                                        multiValueLabel: (base) => ({
-                                          ...base,
-                                          fontSize: "12px",
-                                        }),
-                                      }}
-                                    />
-                                  </div>
-                                )}
                             </>
                           ) : (
                             // For regular sections in multiple selection
@@ -1691,23 +1963,7 @@ export default function CreateBlockRequestPage() {
                                     className="basic-multi-select"
                                     classNamePrefix="select"
                                     placeholder="Select other affected lines"
-                                    styles={{
-                                      control: (base) => ({
-                                        ...base,
-                                        fontSize: "14px",
-                                        minHeight: "36px",
-                                        padding: "2px",
-                                      }),
-                                      option: (base) => ({
-                                        ...base,
-                                        fontSize: "14px",
-                                        padding: "6px 12px",
-                                      }),
-                                      multiValueLabel: (base) => ({
-                                        ...base,
-                                        fontSize: "12px",
-                                      }),
-                                    }}
+                                    styles={getSelectStyles(false)}
                                   />
                                 </div>
                               )}
@@ -2039,8 +2295,8 @@ export default function CreateBlockRequestPage() {
               </div>
 
               {formData.powerBlockRequired === true && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                  <div className="col-span-1">
                     <label className="block text-xs font-medium text-black mb-1">
                       Power Block Requirements *
                     </label>
@@ -2086,7 +2342,7 @@ export default function CreateBlockRequestPage() {
                       </span>
                     )}
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <label className="block text-xs font-medium text-black mb-1">
                       Elementary Section <span className="text-red-600">*</span>
                     </label>
@@ -2256,6 +2512,37 @@ export default function CreateBlockRequestPage() {
                     {errors.sntDisconnectionRequirements && (
                       <span className="text-xs text-red-700 font-medium mt-1 block">
                         {errors.sntDisconnectionRequirements}
+                      </span>
+                    )}
+                  </div>
+                  {/* Add the assignment dropdown */}
+                  <div className="col-span-1">
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Assign Disconnection To <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      name="sntDisconnectionAssignTo"
+                      value={formData.sntDisconnectionAssignTo || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.sntDisconnectionAssignTo ? "#dc2626" : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select Email
+                      </option>
+                      {sntDisconnectionAssignToOptions.map((email) => (
+                        <option key={email} value={email}>
+                          {email}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.sntDisconnectionAssignTo && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.sntDisconnectionAssignTo}
                       </span>
                     )}
                   </div>

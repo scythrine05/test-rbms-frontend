@@ -178,548 +178,657 @@ export const streamData = {
   'TPJ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MV-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KTM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TJ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KIK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PEM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'POM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NNM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TVR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NMJ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MQ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'CBU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PDY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KPD-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
-  'CUP J-YD': {
+  'CUP J-YD':{
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[], 
   },
-  'KJKPD-YD': {
+  'KJKPD-YD':{
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[], 
   },
 
   'VLNK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KKDI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TTP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AGX-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'GOC-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TPTN-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VLDE-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'LLI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KTTR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PMB-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KKPM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KLGM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SLTH-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ALU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'OTK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SNDI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MTUR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ICG-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PNDM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TLNR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VRI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PVN-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ULU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PRKL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TVNL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KDMD-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SXR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TUY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PRT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MBU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NPM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VKP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TDPR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'CUPJ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'CQS-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ALP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PUC-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PO-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KII-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'CDM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VMP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'CLN-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VDL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ANP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NID-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MCJ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TRB-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TOM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SGM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AYN-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'BAL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ALK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PVL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AZP-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PDV-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PML-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SPL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'SWI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'DSM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KMU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TRM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TDR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ADT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NPT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KDE-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KU-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KVL-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NGT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NCR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TMPT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MARD-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TNK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AMNR-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ATB-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MNLI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TAM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'MTT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AMM-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PKT-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PVI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'AYI-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'ATQ-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'PYK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KXY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'KVV-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'NVK-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'TOY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   },
   'VDY-YD': {
     "up": [],
     "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
+    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "bothNot":[],
   }
 };
 

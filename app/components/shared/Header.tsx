@@ -20,7 +20,7 @@ export default function Header({ showNavLinks = true }: HeaderProps) {
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-base md:text-md tracking-wide">
-            GOVERNMENT OF INDIA
+            Southern Railways
           </span>
           <span className="text-xs text-white">Ministry of Railways</span>
         </div>

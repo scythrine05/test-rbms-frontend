@@ -16,7 +16,7 @@ export default function LoginPage() {
           <div className="text-center text-xs text-gray-500 mt-6">
             <p>For technical assistance, please contact</p>
             <p className="font-medium">
-              IT Support: support@southernrailway.gov.in
+              IT Support: support@adrig.co.in
             </p>
           </div>
         </div>
