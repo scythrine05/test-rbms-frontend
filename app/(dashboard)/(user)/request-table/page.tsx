@@ -537,7 +537,7 @@ export default function RequestTablePage() {
           className={`px-1 py-0.5 text-xs flex items-center ${getStatusBadgeClass(status)} cursor-pointer`}
           onClick={(e) => {
             e.stopPropagation();
-            calculateTooltipPosition(e, requestId);
+            calculateTooltipPosition(e, requestId, setOpenTooltip, setTooltipPos);
           }}
         >
           {getStatusIcon(status)} {status}
@@ -679,7 +679,7 @@ export default function RequestTablePage() {
             className="inline-block px-1 py-0.5 mr-1 text-[8px] bg-blue-100 text-blue-800 border border-black cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              calculateTooltipPosition(e, tooltipId);
+              calculateTooltipPosition(e, tooltipId, setOpenTooltip, setTooltipPos);
             }}
           >
             <svg className="w-2 h-2 mr-0.5 inline" viewBox="0 0 20 20" fill="currentColor">
@@ -946,7 +946,7 @@ export default function RequestTablePage() {
   };
 
   // Smart tooltip positioning
-  const calculateTooltipPosition = (event: React.MouseEvent, tooltipId: string) => {
+  const calculateTooltipPosition = (event: React.MouseEvent, tooltipId: string, setOpenTooltip: any, setTooltipPos: any) => {
     // Get viewport dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -989,7 +989,7 @@ export default function RequestTablePage() {
     posY = Math.max(5, Math.min(viewportHeight - tooltipHeight - 5, posY));
     
     setTooltipPos({ x: posX, y: posY, placement });
-    setOpenTooltip(openTooltip === tooltipId ? null : tooltipId);
+    setOpenTooltip(tooltipId);
   };
 
   // Action buttons component for table rows
@@ -1113,6 +1113,56 @@ export default function RequestTablePage() {
     );
   };
 
+  // Column header with filter
+  const ColumnHeader = ({ icon, title, showFilter = true }: { icon: string, title: string, showFilter?: boolean }) => {
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
+    
+    return (
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center">
+          <HeaderIcon type={icon} />
+          <span>{title}</span>
+        </div>
+        {showFilter && (
+          <div className="relative">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFilterMenu(!showFilterMenu);
+              }}
+              className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm"
+            >
+              <HeaderIcon type="filter" />
+            </button>
+            {showFilterMenu && (
+              <div 
+                className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-50"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-2 text-xs">
+                  <div className="font-medium mb-1">Filter options</div>
+                  <div className="mb-2">
+                    <input 
+                      type="text" 
+                      placeholder="Search..."
+                      className="w-full border border-gray-300 px-2 py-1 rounded" 
+                    />
+                  </div>
+                  <button 
+                    className="w-full text-left px-2 py-1 hover:bg-blue-50 rounded"
+                    onClick={() => setShowFilterMenu(false)}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <Toaster position="top-center" />
@@ -1218,93 +1268,329 @@ export default function RequestTablePage() {
                   <thead className="bg-gray-100">
                     <tr>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="id" />
-                            <span>Request ID</span>
-                          </div>
-                          <button className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm">
-                            <HeaderIcon type="filter" />
-                          </button>
-                        </div>
+                        <ColumnHeader icon="id" title="Request ID" />
                       </th>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="date" />
-                            <span>Date</span>
-                          </div>
-                          <button className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm">
-                            <HeaderIcon type="filter" />
-                          </button>
-                        </div>
+                        <ColumnHeader icon="date" title="Date" />
                       </th>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="section" />
-                            <span>Section</span>
-                          </div>
-                          <button className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm">
-                            <HeaderIcon type="filter" />
-                          </button>
-                        </div>
+                        <ColumnHeader icon="section" title="Major Section" />
                       </th>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="time" />
-                            <span>Time</span>
-                          </div>
-                          <button className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm">
-                            <HeaderIcon type="filter" />
-                          </button>
-                        </div>
+                        <ColumnHeader icon="section" title="Depot" />
                       </th>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="work" />
-                            <span>Work</span>
-                          </div>
-                          <button className="ml-1 p-0.5 hover:bg-gray-200 rounded-sm">
-                            <HeaderIcon type="filter" />
-                          </button>
-                        </div>
+                        <ColumnHeader icon="section" title="Block Section" />
                       </th>
                       <th className="border border-black p-1 text-left font-medium">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <HeaderIcon type="disconnection" />
-                            <span>Disconnection</span>
-                          </div>
-                        </div>
+                        <ColumnHeader icon="section" title="Line" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        <ColumnHeader icon="time" title="Time" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        <ColumnHeader icon="section" title="Corridor Type" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        <ColumnHeader icon="work" title="Work Details" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        <ColumnHeader icon="disconnection" title="Disconnections" showFilter={false} />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        <ColumnHeader icon="status" title="Status" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedRequests.map((request) => (
-                      <tr key={request.id}>
-                        <td className="border border-black p-1 text-left">{request.id}</td>
-                        <td className="border border-black p-1 text-left">{formatDate(request.date)}</td>
-                        <td className="border border-black p-1 text-left">{getLineName(request)}</td>
-                        <td className="border border-black p-1 text-left">{formatTimePeriod(request.demandTimeFrom, request.demandTimeTo)}</td>
-                        <td className="border border-black p-1 text-left">{getWorkInfoChip(request)}</td>
-                        <td className="border border-black p-1 text-left">{getDisconnectionBadges(request)}</td>
+                      <tr
+                        key={`compact-${request.id}-${request.date}`}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="border border-black p-1">
+                          {request.id.substring(0, 8)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {formatDate(request.date)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.selectedSection}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.selectedDepo}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.missionBlock}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getLineName(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {formatTimePeriod(
+                            request.demandTimeFrom,
+                            request.demandTimeTo
+                          )}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getCorridorType(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getWorkInfoChip(request)}
+                        </td>
+                        <td className="border border-black p-1 text-[8px]">
+                          {getDisconnectionBadges(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getEnhancedStatus(request)}
+                        </td>
+                        <td className="border border-black p-1 whitespace-nowrap">
+                          <RequestActions request={request} />
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </>
             )}
           </div>
         ) : (
           /* Gantt View */
-          <div className="overflow-x-auto">
-            {/* Gantt view content */}
+          <div className="mb-3 text-black">
+            <div className="overflow-x-auto">
+              <div className="w-full">
+                {/* Week days header */}
+                <div className="flex border-b border-black text-xs">
+                  <div className="w-[20%] min-w-32 flex-shrink-0 p-1 font-medium bg-gray-100 border-r border-black">
+                    Block Section
+                  </div>
+                  {weekDates.map((dateInfo) => (
+                    <div
+                      key={`date-${dateInfo.formattedDate}`}
+                      className="flex-1 min-w-14 p-1 text-center border-r border-black bg-gray-100"
+                    >
+                      <div>{dateInfo.dayOfWeek}</div>
+                      <div>{format(dateInfo.date, "dd-MM")}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {isWeeklyLoading ? (
+                  <div className="text-center py-3 text-sm">
+                    Loading weekly data...
+                  </div>
+                ) : weeklyError ? (
+                  <div className="text-center py-3 text-sm text-red-600">
+                    Error loading weekly data. Please try again.
+                  </div>
+                ) : !filteredWeeklyRequests || filteredWeeklyRequests.length === 0 ? (
+                  <div className="text-center py-3 text-sm text-gray-600">
+                    No requests found for this week.
+                    <div className="mt-2">
+                      <Link
+                        href="/create-block-request"
+                        className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black"
+                      >
+                        Create New Block Request
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  /* Group by block section for Gantt view */
+                  Object.entries(
+                    filteredWeeklyRequests.reduce((acc, request) => {
+                      const blockSections = request.missionBlock.split(",");
+                      blockSections.forEach((section) => {
+                        if (!acc[section]) acc[section] = [];
+                        acc[section].push(request);
+                      });
+                      return acc;
+                    }, {} as Record<string, RequestItem[]>) || {}
+                  ).map(([blockSection, requests]) => (
+                    <div
+                      key={`gantt-section-${blockSection}`}
+                      className="flex border-b border-black"
+                    >
+                      <div className="w-[20%] min-w-32 flex-shrink-0 p-1 font-medium text-xs border-r border-black">
+                        {blockSection}
+                      </div>
+
+                      {weekDates.map((dateInfo) => {
+                        const dateStr = format(dateInfo.date, "yyyy-MM-dd");
+                        const requestsForDay = requests.filter((request) => {
+                          // Compare dates using yyyy-MM-dd format for consistency
+                          const requestDateStr = format(parseISO(request.date), "yyyy-MM-dd");
+                          const cellDateStr = format(dateInfo.date, "yyyy-MM-dd");
+                          return requestDateStr === cellDateStr;
+                        });
+
+                        return (
+                          <div
+                            key={`gantt-cell-${blockSection}-${dateInfo.formattedDate}`}
+                            className="flex-1 min-w-14 p-0.5 border-r border-black relative min-h-8"
+                          >
+                            {requestsForDay.map((request) => (
+                              <Link
+                                key={`gantt-request-${request.id}-${dateInfo.formattedDate}`}
+                                href={`/view-request/${request.id}`}
+                                className={`block text-[8px] p-0.5 mb-0.5 border border-black overflow-hidden text-white
+                                  ${
+                                    request.status === "APPROVED"
+                                      ? "bg-green-700"
+                                      : request.status === "REJECTED"
+                                      ? "bg-red-700"
+                                      : request.workType === "EMERGENCY"
+                                      ? "bg-orange-700"
+                                      : "bg-[#13529e]"
+                                  }`}
+                                title={`${request.workType}: ${
+                                  request.activity
+                                } - ${formatTime(
+                                  request.demandTimeFrom
+                                )} to ${formatTime(request.demandTimeTo)} 
+${getCorridorType(request)} - ${request.selectedDepo}
+${request.missionBlock} - ${getLineName(request)}`}
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span>{formatTimePeriod(
+                                    request.demandTimeFrom,
+                                    request.demandTimeTo
+                                  )}</span>
+                                  {request.status === "APPROVED" && (
+                                    <svg className="w-2 h-2" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  {request.status === "REJECTED" && (
+                                    <svg className="w-2 h-2" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         )}
+
+        {/* Detailed view table for gantt view */}
+        {viewType === "gantt" &&
+          filteredWeeklyRequests &&
+          filteredWeeklyRequests.length > 0 && (
+            <div className="mt-3 border-t border-black pt-3">
+              <h2 className="text-md font-bold text-[#13529e] mb-2">
+                Detailed Weekly Requests
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse border border-black text-xs text-black">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border border-black p-1 text-left font-medium">
+                        ID <HeaderIcon type="id" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Date <HeaderIcon type="date" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Section <HeaderIcon type="section" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Depot <HeaderIcon type="section" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Block Section <HeaderIcon type="section" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Line <HeaderIcon type="section" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Time <HeaderIcon type="time" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Corridor <HeaderIcon type="section" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Work Details <HeaderIcon type="work" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Disconnections <HeaderIcon type="disconnection" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Status <HeaderIcon type="status" />
+                      </th>
+                      <th className="border border-black p-1 text-left font-medium">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredWeeklyRequests.map((request) => (
+                      <tr
+                        key={`detailed-${request.id}-${request.date}`}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="border border-black p-1">
+                          {request.id.substring(0, 8)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {formatDate(request.date)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.selectedSection}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.selectedDepo}
+                        </td>
+                        <td className="border border-black p-1">
+                          {request.missionBlock}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getLineName(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {formatTimePeriod(
+                            request.demandTimeFrom,
+                            request.demandTimeTo
+                          )}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getCorridorType(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getWorkInfoChip(request)}
+                        </td>
+                        <td className="border border-black p-1 text-[8px]">
+                          {getDisconnectionBadges(request)}
+                        </td>
+                        <td className="border border-black p-1">
+                          {getEnhancedStatus(request)}
+                        </td>
+                        <td className="border border-black p-1 whitespace-nowrap">
+                          <RequestActions request={request} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
         {/* Delete confirmation modal */}
         {confirmDelete && <DeleteConfirmationModal requestId={confirmDelete} />}
