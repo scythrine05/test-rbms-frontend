@@ -54,14 +54,7 @@ export default function LoginForm() {
         console.error("SignIn error:", result.error);
         setAuthError(result.error);
       } else {
-        window.location.href = "/dashboard";
-
-        // As a fallback, also use the router
-        setTimeout(() => {
-          if (window.location.pathname !== "/dashboard") {
-            router.push("/dashboard");
-          }
-        }, 1000);
+        router.push("/dashboard");
       }
     } catch (error: any) {
       console.error("Login error:", error);
