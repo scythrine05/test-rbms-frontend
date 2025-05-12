@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface FormData {
   date?: string;
@@ -47,28 +47,28 @@ interface ConfirmationDialogProps {
   formData: FormData;
 }
 
-const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  formData 
+const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  formData,
 }) => {
   if (!isOpen) return null;
 
   // Format time for display
   const formatTime = (time?: string): string => {
-    if (!time) return '';
+    if (!time) return "";
     return time;
   };
 
   // Format date for display
   const formatDate = (date?: string): string => {
-    if (!date) return '';
+    if (!date) return "";
     try {
-      return new Date(date).toLocaleDateString('en-GB');
+      return new Date(date).toLocaleDateString("en-GB");
     } catch (error) {
       console.error("Error formatting date:", error);
-      return date || '';
+      return date || "";
     }
   };
 
@@ -77,10 +77,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
     const lines: string[] = [];
 
     if (formData.processedLineSections) {
-      formData.processedLineSections.forEach(section => {
-        if (section.type === 'yard') {
+      formData.processedLineSections.forEach((section) => {
+        if (section.type === "yard") {
           if (section.stream && section.road) {
-            lines.push(`Road ${section.road} (${section.stream}) in yard ${section.block}`);
+            lines.push(
+              `Road ${section.road} (${section.stream}) in yard ${section.block}`
+            );
           }
         } else {
           if (section.lineName) {
@@ -90,7 +92,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       });
     }
 
-    return lines.length > 0 ? lines.join(', ') : 'None';
+    return lines.length > 0 ? lines.join(", ") : "None";
   };
 
   // Format other affected lines/roads
@@ -98,38 +100,45 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
     const lines: string[] = [];
 
     if (formData.processedLineSections) {
-      formData.processedLineSections.forEach(section => {
-        if (section.type === 'yard' && section.otherRoads) {
-          const roads = section.otherRoads.split(',').filter(Boolean);
+      formData.processedLineSections.forEach((section) => {
+        if (section.type === "yard" && section.otherRoads) {
+          const roads = section.otherRoads.split(",").filter(Boolean);
           if (roads.length > 0) {
-            lines.push(`Roads ${roads.join(', ')} in yard ${section.block}`);
+            lines.push(`Roads ${roads.join(", ")} in yard ${section.block}`);
           }
         } else if (section.otherLines) {
-          const otherLines = section.otherLines.split(',').filter(Boolean);
+          const otherLines = section.otherLines.split(",").filter(Boolean);
           if (otherLines.length > 0) {
-            lines.push(`Lines ${otherLines.join(', ')} in block ${section.block}`);
+            lines.push(
+              `Lines ${otherLines.join(", ")} in block ${section.block}`
+            );
           }
         }
       });
     }
 
-    return lines.length > 0 ? lines.join(', ') : 'None';
+    return lines.length > 0 ? lines.join(", ") : "None";
   };
 
   // Format work description
   const formatWorkDescription = (desc?: string): string => {
-    if (!desc) return '';
-    return desc === 'others' ? 'Other' : desc;
+    if (!desc) return "";
+    return desc === "others" ? "Other" : desc;
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/70 flex items-center justify-center z-50 backdrop-blur-sm">
+    <div className="fixed inset-0 bg-gray-900/70 flex items-center justify-center z-50 backdrop-blur-sm text-black">
       <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-center">Confirm Your Request</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">
+          Confirm Your Request
+        </h2>
 
         <div className="bg-blue-50 p-4 rounded-lg mb-4">
           <p className="text-lg font-semibold mb-2">
-            Your request for traffic block in {formData.missionBlock} Block Section on {formatDate(formData.date)} from {formatTime(formData.demandTimeFrom)} hrs to {formatTime(formData.demandTimeTo)} hrs is ready to be submitted.
+            Your request for traffic block in {formData.missionBlock} Block
+            Section on {formatDate(formData.date)} from{" "}
+            {formatTime(formData.demandTimeFrom)} hrs to{" "}
+            {formatTime(formData.demandTimeTo)} hrs is ready to be submitted.
           </p>
           <p className="text-sm text-gray-600">
             Please review all details below before final submission.
@@ -173,7 +182,10 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 </tr>
                 <tr>
                   <td className="font-medium pr-2">Demanded Time:</td>
-                  <td>{formatTime(formData.demandTimeFrom)} to {formatTime(formData.demandTimeTo)}</td>
+                  <td>
+                    {formatTime(formData.demandTimeFrom)} to{" "}
+                    {formatTime(formData.demandTimeTo)}
+                  </td>
                 </tr>
                 {formData.corridorTypeSelection && (
                   <tr>
@@ -247,18 +259,23 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                   <tr>
                     <td className="font-medium w-40">Caution Location:</td>
                     <td>
-                      {formData.freshCautionLocationFrom && formData.freshCautionLocationTo
+                      {formData.freshCautionLocationFrom &&
+                      formData.freshCautionLocationTo
                         ? `From ${formData.freshCautionLocationFrom} to ${formData.freshCautionLocationTo}`
                         : "Not specified"}
                     </td>
                   </tr>
                   <tr>
                     <td className="font-medium w-40">Caution Speed:</td>
-                    <td>{formData.freshCautionSpeed || "Not specified"} km/hr</td>
+                    <td>
+                      {formData.freshCautionSpeed || "Not specified"} km/hr
+                    </td>
                   </tr>
                   {formData.adjacentLinesAffected && (
                     <tr>
-                      <td className="font-medium w-40">Adjacent Lines Affected:</td>
+                      <td className="font-medium w-40">
+                        Adjacent Lines Affected:
+                      </td>
                       <td>{formData.adjacentLinesAffected}</td>
                     </tr>
                   )}
@@ -268,12 +285,13 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                 <td className="font-medium w-40">Power Block:</td>
                 <td>{formData.powerBlockRequired ? "Yes" : "No"}</td>
               </tr>
-              {formData.powerBlockRequired && formData.powerBlockRequirements && (
-                <tr>
-                  <td className="font-medium w-40">Requirements:</td>
-                  <td>{formData.powerBlockRequirements.join(', ')}</td>
-                </tr>
-              )}
+              {formData.powerBlockRequired &&
+                formData.powerBlockRequirements && (
+                  <tr>
+                    <td className="font-medium w-40">Requirements:</td>
+                    <td>{formData.powerBlockRequirements.join(", ")}</td>
+                  </tr>
+                )}
               <tr>
                 <td className="font-medium w-40">S&T Disconnection:</td>
                 <td>{formData.sntDisconnectionRequired ? "Yes" : "No"}</td>
@@ -283,7 +301,8 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                   <tr>
                     <td className="font-medium w-40">Line:</td>
                     <td>
-                      {formData.sntDisconnectionLineFrom && formData.sntDisconnectionLineTo
+                      {formData.sntDisconnectionLineFrom &&
+                      formData.sntDisconnectionLineTo
                         ? `From ${formData.sntDisconnectionLineFrom} to ${formData.sntDisconnectionLineTo}`
                         : "Not specified"}
                     </td>
@@ -291,7 +310,9 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                   {formData.sntDisconnectionRequirements && (
                     <tr>
                       <td className="font-medium w-40">Requirements:</td>
-                      <td>{formData.sntDisconnectionRequirements.join(', ')}</td>
+                      <td>
+                        {formData.sntDisconnectionRequirements.join(", ")}
+                      </td>
                     </tr>
                   )}
                 </>

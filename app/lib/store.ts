@@ -727,6 +727,9 @@ export const streamData = {
 
 
 export let lineData = {
+
+  // example
+  "NPM-VKP": ['UP', 'DN'],
   // TPJ-VM Section- All are UP and DN lines
   'TPJ-GOC': ['UP', 'DN'],
   'GOC-TPTN': ['UP', 'DN'],
