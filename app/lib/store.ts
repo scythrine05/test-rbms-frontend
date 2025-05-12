@@ -5,9 +5,9 @@ type DepotStructure = {
     [department in Department]: string[];
   };
 };
-export let MajorSection = {
-  "MAS": ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
-  "TPJ": ["MAS-AJJ", "AJJ-RU", "MAS-GDR"]
+export let MajorSection ={
+"MAS":["MAS-GDR","MAS-AJJ","AJJ-KPD","KPD-JTJ","AJJ-RU","AJJ-CGL","MSB-VM","MSB-VLCY"],
+"PGT":["TPJ-VM","VM-MV","TPJ-MV","TJ-KIK","MV-TVR","NMJ-MQ","VM-PDY","KPD-VM","CUPJ-VRI","TPJ-TP","NGT-VLNK","TVR-KKDI","TTP-AGX"]
 }
 
 export let blockSection = {
