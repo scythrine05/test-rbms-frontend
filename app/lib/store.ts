@@ -270,11 +270,7 @@ export const streamData = {
     "down": [],
     "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
   },
-  'NGT-YD': {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"]
-  },
+  
   'VLNK-YD': {
     "up": [],
     "down": [],
