@@ -338,25 +338,113 @@ const handleConfirmedSubmit = () => {
     (section) => blockSectionValue.includes(section.block)
   );
 
-  const processedSectionsWithDefaults = validProcessedSections.map((section) => {
-    if (section.type === "yard") {
-      return {
-        ...section,
-        lineName: section.lineName || "",
-        otherLines: section.otherLines || "",
-        stream: section.stream || "",
-        road: section.road || "",
-        otherRoads: section.otherRoads || "",
-      };
-    } else {
-      return {
-        ...section,
-        lineName: section.lineName || "",
-        otherLines: section.otherLines || "",
-        stream: "",
-        road: "",
-        otherRoads: "",
-      };
+
+    const validProcessedSections = (
+      formData.processedLineSections || []
+    ).filter((section) => blockSectionValue.includes(section.block));
+
+    // Ensure all required fields are present in each processed section
+    const processedSectionsWithDefaults = validProcessedSections.map(
+      (section) => {
+        if (section.type === "yard") {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: section.stream || "",
+            road: section.road || "",
+            otherRoads: section.otherRoads || "",
+          };
+        } else {
+          return {
+            ...section,
+            lineName: section.lineName || "",
+            otherLines: section.otherLines || "",
+            stream: "",
+            road: "",
+            otherRoads: "",
+          };
+        }
+      }
+    );
+
+    const processedFormData = {
+      ...formData,
+      corridorType: formData.corridorTypeSelection,
+      activity: finalActivity,
+      date: formData.date ? formatDateToISO(formData.date) : "",
+      demandTimeFrom: formData.demandTimeFrom
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeFrom)
+        : "",
+      demandTimeTo: formData.demandTimeTo
+        ? formatTimeToDatetime(formData.date || "", formData.demandTimeTo)
+        : "",
+      processedLineSections: processedSectionsWithDefaults,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired,
+      powerBlockRequired: formData.powerBlockRequired,
+      freshCautionRequired: formData.freshCautionRequired,
+      freshCautionLocationFrom: formData.freshCautionLocationFrom,
+      freshCautionLocationTo: formData.freshCautionLocationTo,
+      freshCautionSpeed: formData.freshCautionSpeed,
+      adjacentLinesAffected: formData.adjacentLinesAffected,
+      sntDisconnectionLineFrom: formData.sntDisconnectionLineFrom,
+      sntDisconnectionLineTo: formData.sntDisconnectionLineTo,
+      powerBlockRequirements: formData.powerBlockRequirements,
+      elementarySection: formData.elementarySection,
+      sntDisconnectionRequirements: formData.sntDisconnectionRequirements,
+    };
+
+    try {
+      mutation.mutate(processedFormData as UserRequestInput, {
+        onSuccess: (data) => {
+          setSuccess("Block request created successfully!");
+          // Reset form
+          setFormData({
+            ...formData,
+            sntDisconnectionRequired: null,
+            powerBlockRequired: null,
+            freshCautionRequired: null,
+            freshCautionLocationFrom: "",
+            freshCautionLocationTo: "",
+            sntDisconnectionRequirements: [],
+            sntDisconnectionLineFrom: "",
+            elementarySection: "",
+            sntDisconnectionLineTo: "",
+            powerBlockRequirements: [],
+            date: "",
+            selectedDepartment: session?.user.department || "",
+            selectedSection: "",
+            missionBlock: "",
+            workType: "",
+            activity: "",
+            corridorTypeSelection: null,
+            cautionRequired: false,
+            cautionSpeed: 0,
+            freshCautionSpeed: 0,
+            adjacentLinesAffected: "",
+            processedLineSections: [],
+            selectedStream: "",
+            demandTimeFrom: "",
+            demandTimeTo: "",
+          });
+          setBlockSectionValue([]);
+          setCustomActivity("");
+          setPowerBlockRequirements([]);
+          setSntDisconnectionRequirements([]);
+          setFormSubmitting(false);
+        },
+        onError: (error) => {
+          console.error("Error submitting form:", error);
+          setFormError("Failed to create block request. Please try again.");
+          setFormSubmitting(false);
+        },
+      });
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      setFormError(
+        "An error occurred during form submission. Please try again."
+      );
+      setFormSubmitting(false);
     }
   });
 

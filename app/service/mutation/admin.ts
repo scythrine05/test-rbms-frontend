@@ -1,0 +1,14 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminService } from "../api/admin";
+
+export const useAcceptUserRequest = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, accept }: { id: string; accept: boolean }) =>
+            adminService.acceptUserRequest(id, accept),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["requests"] });
+        },
+    });
+};

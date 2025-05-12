@@ -37,34 +37,51 @@ export interface UserRequest {
     date: string;
     selectedDepartment: string;
     selectedSection: string;
+    stationID: string | null;
     missionBlock: string;
     workType: string;
     activity: string;
-    corridorTypeSelection: string;
-    corridorType: string;
-    cautionRequired: boolean;
-    cautionSpeed: number;
     freshCautionRequired: boolean;
-    freshCautionSpeed: number;
-    freshCautionLocationFrom: string;
-    freshCautionLocationTo: string;
+    freshCautionSpeed: number | null;
+    freshCautionLocationFrom: string | null;
+    freshCautionLocationTo: string | null;
     adjacentLinesAffected: string;
     workLocationFrom: string;
     workLocationTo: string;
-    trdWorkLocation: string;
     demandTimeFrom: string;
     demandTimeTo: string;
+    selectedLine: string | null;
+    optimisedTimeFrom?: string;
+    optimisedTimeTo?: string;
     sigDisconnection: boolean;
     elementarySection: string;
+    elementarySectionTo: string | null;
+    sigElementarySectionFrom: string | null;
+    sigElementarySectionTo: string | null;
+    repercussions: string;
+    trdWorkLocation: string;
     requestremarks: string;
+    createdAt: string;
+    status: string;
     selectedDepo: string;
-    routeFrom: string;
-    routeTo: string;
-    powerBlockRequirements: string[];
-    sntDisconnectionRequired: boolean;
-    sntDisconnectionRequirements: string[];
-    sntDisconnectionLineFrom: string;
-    sntDisconnectionLineTo: string;
+    sigResponse: string;
+    ohDisconnection: boolean | null;
+    oheDisconnection: boolean | null;
+    oheResponse: string;
+    corridorType: string;
+    corridorTypeSelection: string | null;
+    sigActionsNeeded: boolean;
+    trdActionsNeeded: boolean;
+    ManagerResponse: string | null;
+    sigDisconnectionRequirements: string | null;
+    sntDisconnectionRequirements: string[] | null;
+    sntDisconnectionLine: string | null;
+    sntDisconnectionLineFrom: string | null;
+    sntDisconnectionLineTo: string | null;
+    trdDisconnectionRequirements: string | null;
+    powerBlockRequirements: string[] | null;
+    powerBlockRequired: boolean;
+    sntDisconnectionRequired: boolean | undefined;
     processedLineSections: Array<{
         road: string;
         type: string;
@@ -74,12 +91,14 @@ export interface UserRequest {
         otherLines: string;
         otherRoads: string;
     }>;
-    repercussions: string;
-    selectedStream: string;
+    routeFrom: string | null;
+    routeTo: string | null;
+    DisconnAcceptance: string;
+    userId: string;
+    managerAcceptanceId: string;
     managerAcceptance: boolean;
-    powerBlockRequired: boolean;
-    status: string;
-    createdAt: string;
+    adminAcceptanceId: string;
+    adminAcceptance: boolean;
     user: {
         id: string;
         name: string;
@@ -110,11 +129,21 @@ export const managerService = {
         return response.data;
     },
 
+    getAllManagers: async (page: number = 1): Promise<UsersResponse> => {
+        const response = await axiosInstance.get<UsersResponse>(`/api/auth/manager/admin?page=${page}`);
+        return response.data;
+    },
+
     /**
      * Create a new user
      */
     createUser: async (data: CreateUserInput): Promise<{ status: boolean; message: string }> => {
         const response = await axiosInstance.post("/api/auth/register-user", data);
+        return response.data;
+    },
+
+    createUserManager: async (data: CreateUserInput): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post("/api/auth/register-manager", data);
         return response.data;
     },
 
@@ -131,6 +160,11 @@ export const managerService = {
      */
     getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
         const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
+        return response.data;
+    },
+
+    getUserRequestsByAdmin: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
+        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}`);
         return response.data;
     },
 

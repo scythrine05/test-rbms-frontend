@@ -6,16 +6,18 @@ import { managerService, UserRequest } from "@/app/service/api/manager";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAcceptUserRequest } from "@/app/service/mutation/admin";
 
 export default function RequestTablePage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const acceptMutation = useAcceptUserRequest();
 
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
     queryKey: ["requests", page, statusFilter],
-    queryFn: () => managerService.getUserRequests(page),
+    queryFn: () => managerService.getUserRequestsByAdmin(page),
   });
 
   // Format date
@@ -39,13 +41,32 @@ export default function RequestTablePage() {
   // Status badge class
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "APPROVED":
+      case "ACCEPTED":
         return "bg-green-100 text-green-800 border border-black";
       case "REJECTED":
         return "bg-red-100 text-red-800 border border-black";
       case "PENDING":
       default:
-        return "bg-yellow-100 text-yellow-800 border border-black";
+        return "";
+    }
+  };
+
+  // Handle accept/reject request
+  const handleRequestAction = async (id: string, accept: boolean) => {
+    if (
+      confirm(
+        `Are you sure you want to ${
+          accept ? "approve" : "reject"
+        } this request?`
+      )
+    ) {
+      try {
+        await acceptMutation.mutateAsync({ id, accept });
+        alert(`Request ${accept ? "approved" : "rejected"} successfully`);
+      } catch (error) {
+        console.error("Failed to process request:", error);
+        alert("Failed to process request. Please try again.");
+      }
     }
   };
 
@@ -131,6 +152,9 @@ export default function RequestTablePage() {
                 Activity
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                S&T Approval
+              </th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Status
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
@@ -174,10 +198,29 @@ export default function RequestTablePage() {
                 <td className="border border-black p-1 text-sm">
                   <span
                     className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.managerAcceptance ? "APPROVED" : "PENDING"
+                      request.sntDisconnectionRequired === undefined
+                        ? "NAN"
+                        : request.sntDisconnectionRequired
+                        ? request.DisconnAcceptance || "PENDING"
+                        : "NAN"
                     )}`}
                   >
-                    {request.managerAcceptance ? "APPROVED" : "PENDING"}
+                    {request.sntDisconnectionRequired === undefined
+                      ? "NAN"
+                      : request.sntDisconnectionRequired
+                      ? request.DisconnAcceptance || "PENDING"
+                      : "NAN"}
+                  </span>
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  <span
+                    className={`px-2 py-0.5 text-xs ${
+                      request.adminAcceptance
+                        ? "bg-green-100 text-green-800 border border-black"
+                        : "bg-red-100 text-red-800 border border-black"
+                    }`}
+                  >
+                    {request.adminAcceptance ? "Approved" : "Rejected"}
                   </span>
                 </td>
                 <td className="border border-black p-1 text-sm">
@@ -188,6 +231,14 @@ export default function RequestTablePage() {
                     >
                       View
                     </Link>
+                    {request.adminAcceptance === true && (
+                      <button
+                        onClick={() => handleRequestAction(request.id, false)}
+                        className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                      >
+                        Reject
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

@@ -120,7 +120,7 @@ export default function ViewRequestPage() {
           >
             Back to List
           </Link>
-          {request.status === "PENDING" && (
+          {request.status === "PENDING" && !request.managerAcceptance && (
             <button
               onClick={handleAccept}
               disabled={isAccepting}

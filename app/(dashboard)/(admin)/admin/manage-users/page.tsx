@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
-import { useCreateUser, useDeleteUser } from "@/app/service/mutation/manager";
+import {
+  useCreateManager,
+  useDeleteUser,
+} from "@/app/service/mutation/manager";
 import { Loader } from "@/app/components/ui/Loader";
 import { useSession } from "next-auth/react";
 import { location } from "@/app/lib/store";
@@ -28,6 +31,7 @@ const CreateUserModal = ({
     department: "",
     phone: "",
     location: "",
+    depot: "OVERALL",
     role: "BRANCH_OFFICER",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -44,17 +48,20 @@ const CreateUserModal = ({
       department: "",
       phone: "",
       location: "",
+      depot: "OVERALL",
       role: "BRANCH_OFFICER",
     });
     setShowPassword(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 w-full max-w-md border border-black">
-        <h2 className="text-lg font-bold text-black mb-4 border-b border-gray-300 pb-2">
-          Create New Branch Officer
-        </h2>
+        <div className="border-b-2 border-[#13529e] pb-3 mb-4">
+          <h2 className="text-lg font-bold text-[#13529e]">
+            Create New Branch Officer
+          </h2>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-black mb-1">
@@ -66,7 +73,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -80,7 +87,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -95,7 +102,7 @@ const CreateUserModal = ({
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="gov-input text-black pr-10"
+                className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e] pr-10"
                 required
               />
               <button
@@ -151,7 +158,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, department: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             >
               <option value="">Select Department</option>
@@ -170,7 +177,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             />
           </div>
@@ -183,7 +190,7 @@ const CreateUserModal = ({
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
               }
-              className="gov-input text-black"
+              className="w-full p-2 border border-black text-black focus:outline-none focus:ring-1 focus:ring-[#13529e]"
               required
             >
               <option value="">Select Location</option>
@@ -194,17 +201,17 @@ const CreateUserModal = ({
               ))}
             </select>
           </div>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex justify-end gap-2 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1 text-sm bg-gray-100 text-black border border-black"
+              className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black"
+              className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black hover:bg-[#0d3d7a]"
             >
               Create Branch Officer
             </button>
@@ -253,6 +260,7 @@ type User = {
   department: string;
   phone: string;
   location: string;
+  depot: string;
   role:
     | "USER"
     | "JUNIOR_OFFICER"
@@ -262,20 +270,33 @@ type User = {
 };
 
 export default function ManageUsersPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const { data: session } = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Call all hooks unconditionally
+  const managersData = useQuery({
+    queryKey: ["managers", page],
+    queryFn: () => managerService.getAllManagers(page),
+    enabled: session?.user?.role === "ADMIN",
+  });
+
+  const createManager = useCreateManager();
+  const deleteUser = useDeleteUser();
 
   // Check if user is authorized
   useEffect(() => {
-    if (session?.user?.role !== "ADMIN") {
+    if (!session?.user?.role || session.user.role !== "ADMIN") {
       router.push("/unauthorized");
     }
   }, [session, router]);
 
   // If not authorized, show unauthorized message
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user?.role || session.user.role !== "ADMIN") {
     return (
       <div className="bg-white p-3 border border-black mb-3">
         <div className="text-center py-5">
@@ -290,23 +311,21 @@ export default function ManageUsersPage() {
     );
   }
 
-  // Fetch users data
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["users", page],
-    queryFn: () => managerService.getAllUsers(page),
-  });
+  const isLoading = managersData.isLoading;
+  const error = managersData.error;
 
-  // Mutations
-  const createUser = useCreateUser();
-  const deleteUser = useDeleteUser();
+  // Extract data with proper typing
+  const users = managersData.data?.data?.users || [];
+  const totalPages = managersData.data?.data?.totalPages || 0;
 
   const handleCreateUser = async (userData: any) => {
     try {
-      const response = await createUser.mutateAsync(userData);
+      const response = await createManager.mutateAsync(userData);
       if (!response.status) {
         throw new Error(response.message);
       }
-      setIsCreateModalOpen(false);
+      setIsCreateUserModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["managers"] });
     } catch (error: any) {
       throw error;
     }
@@ -316,6 +335,7 @@ export default function ManageUsersPage() {
     if (confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUser.mutateAsync(id);
+        queryClient.invalidateQueries({ queryKey: ["managers"] });
       } catch (error) {
         console.error("Failed to delete user:", error);
       }
@@ -325,9 +345,10 @@ export default function ManageUsersPage() {
   if (isLoading) return <Loader name="users" />;
   if (error) return <div>Error loading users</div>;
 
-  const branchOfficers =
-    data?.data.users.filter((user: User) => user.role === "BRANCH_OFFICER") ||
-    [];
+  // Filter users based on role
+  const branchOfficers = users.filter(
+    (user: User) => user.role === "BRANCH_OFFICER"
+  );
 
   return (
     <div className="bg-white p-3 border border-black mb-3">
@@ -337,7 +358,7 @@ export default function ManageUsersPage() {
         </h1>
         <div className="flex gap-2">
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsCreateUserModalOpen(true)}
             className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
           >
             Add Branch Officer
@@ -408,8 +429,8 @@ export default function ManageUsersPage() {
       </div>
 
       <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
         onSubmit={handleCreateUser}
       />
 

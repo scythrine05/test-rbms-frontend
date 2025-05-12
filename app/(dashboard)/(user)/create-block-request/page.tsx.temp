@@ -214,16 +214,6 @@ export default function CreateBlockRequestPage() {
   // Validate form
   const validateForm = () => {
     try {
-      console.log("Current form data:", formData);
-      console.log("Block Section Value:", blockSectionValue);
-      console.log(
-        "Current powerBlockRequirements state:",
-        powerBlockRequirements
-      );
-      console.log(
-        "Current sntDisconnectionRequirements state:",
-        sntDisconnectionRequirements
-      );
 
       // Create complete form data with explicit spread of all fields to debug any issues
       const completeFormData = {
@@ -421,7 +411,6 @@ export default function CreateBlockRequestPage() {
         }
       }
 
-      console.log("Complete form data:", completeFormData);
 
       // Use Zod to validate
       userRequestSchema.parse(completeFormData);
