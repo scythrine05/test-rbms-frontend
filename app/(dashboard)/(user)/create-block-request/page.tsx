@@ -130,11 +130,11 @@ const getSelectStyles = (hasError: boolean) => {
 
 // Add a constant for S&T Disconnection assignment emails near the top of the file with other constants
 const sntDisconnectionAssignToOptions = [
-  "snt.user@test.com",
-  "snt.officer2@railways.com",
-  "snt.supervisor@railways.com",
-  "snt.manager@railways.com",
-  "snt.engineer@railways.com"
+  { name: "S&T User", email: "snt.user@test.com" },
+  { name: "Officer 2", email: "snt.officer2@railways.com" },
+  { name: "Supervisor", email: "snt.supervisor@railways.com" },
+  { name: "Manager", email: "snt.manager@railways.com" },
+  { name: "Engineer", email: "snt.engineer@railways.com" }
 ];
 
 export default function CreateBlockRequestPage() {
@@ -2532,11 +2532,11 @@ export default function CreateBlockRequestPage() {
                       }}
                     >
                       <option value="" disabled>
-                        Select Email
+                        Select Person
                       </option>
-                      {sntDisconnectionAssignToOptions.map((email) => (
-                        <option key={email} value={email}>
-                          {email}
+                      {sntDisconnectionAssignToOptions.map((option) => (
+                        <option key={option.email} value={option.email}>
+                          {option.name}
                         </option>
                       ))}
                     </select>
