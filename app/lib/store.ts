@@ -10,9 +10,9 @@ type DepotStructure = {
 //   "TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ-MQ", "VM-PDY", "KPD-VM", "CUPJ-VRI", "TPJ-TP", "NGT-VLNK", "TVR-KKDI", "TTP-AGX"]
 // }
 export let MajorSection = {
- " MAS": ["MAS-GDR","MAS-AJJ","AJJ-KPD", "KPD-JTJ", "AJJ-RU","AJJ-CGL","MSB-VM","MSB-VLCY"],
-"TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV","TJ-KIK","MV-TVR","NMJ- MQ","VM-PDY","KPD-VM","CUP J-VRI","TPJ-TP","NGT-VLNK","TVR- KKDI","TTP- AGX"],
-"SA":["JTJ-ED","ED-PTJ","ED-TPJ","KKR-DG","SA-VRI","SA-MTDM","SA-KRR","CBE-MTP","MTP-UAM","PTJ-CNV"]
+  " MAS": ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
+  "TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ- MQ", "VM-PDY", "KPD-VM", "CUP J-VRI", "TPJ-TP", "NGT-VLNK", "TVR- KKDI", "TTP- AGX"],
+  "SA": ["JTJ-ED", "ED-PTJ", "ED-TPJ", "KKR-DG", "SA-VRI", "SA-MTDM", "SA-KRR", "CBE-MTP", "MTP-UAM", "PTJ-CNV"]
 };
 
 
@@ -107,61 +107,61 @@ export let MajorSection = {
 
 export let blockSection = {
   'TPJ-VM': [
-    "TPJ-GOC", "GOC-TPTN", "TPTN-SRGM", "SRGM-VLDE", "VLDE-LLI", "LLI-PMB", "PMB-KKPM", "KKPM-KLGM", "KLGM-SLT", "SLT-ALU", 
-    "ALU-OTK", "OTK-SNDI", "SNDI-MTUR", "MTUR-ICG ", 
-    "ICG-TLNR", "TLNR-VRI", "VRI-PVN", 
+    "TPJ-GOC", "GOC-TPTN", "TPTN-SRGM", "SRGM-VLDE", "VLDE-LLI", "LLI-PMB", "PMB-KKPM", "KKPM-KLGM", "KLGM-SLT", "SLT-ALU",
+    "ALU-OTK", "OTK-SNDI", "SNDI-MTUR", "MTUR-ICG ",
+    "ICG-TLNR", "TLNR-VRI", "VRI-PVN",
     "PVN-ULU", "ULU-PRKL", "PRKL-TVNL", "TVNL-KDMD", "KDMD-VM",
 
-"TPJ-YD", "GOC-YD", "SRGM-YD","VLDE-YD", "LLI-YD","PMB-YD",
+    "TPJ-YD", "GOC-YD", "SRGM-YD", "VLDE-YD", "LLI-YD", "PMB-YD",
     "KKPM-YD", "KLGM-YD", "SLT-YD", "ALU-YD", "OTK-YD", "SNDI-YD", "MTUR-YD",
     "ICG-YD", "TLNR-YD", "VRI-YD", "PVN-YD", "ULU-YD", "PRKL-YD",
     "TVNL-YD", "KDMD-YD", "VM-YD"
   ],
   'VM-MV': [
-    "VM-SXR", "SXR-TUY", "TUY-PRT", "PRT-MBU", "MBU-NPM", "NPM-TDPR", "TDPR-CUPJ", "CUPJ-ALP", "ALP-PUC", 
-    "PUC-KII", "KII-CDM", "CDM-CLN", "CLN-SY", 
-    "SY-VDL", "VDL-ANP", "ANP-MV","VM-YD", "SXR-YD", "TUY-YD", "PRT-YD", "MBU-YD", "NPM-YD","TDPR-YD",
-    "CUPJ-YD", "ALP-YD", "PUC-YD", "KII-YD", "CDM-YD","CLN-YD", "SY-YD", "VDL-YD", "ANP-YD","MV-YD"
+    "VM-SXR", "SXR-TUY", "TUY-PRT", "PRT-MBU", "MBU-NPM", "NPM-TDPR", "TDPR-CUPJ", "CUPJ-ALP", "ALP-PUC",
+    "PUC-KII", "KII-CDM", "CDM-CLN", "CLN-SY",
+    "SY-VDL", "VDL-ANP", "ANP-MV", "VM-YD", "SXR-YD", "TUY-YD", "PRT-YD", "MBU-YD", "NPM-YD", "TDPR-YD",
+    "CUPJ-YD", "ALP-YD", "PUC-YD", "KII-YD", "CDM-YD", "CLN-YD", "SY-YD", "VDL-YD", "ANP-YD", "MV-YD"
   ],
   'TPJ-MV': [
-    "TPJ-GOC", "GOC-TRB", "TRB-SGM", "SGM-BAL", "BAL-ALK", "ALK-TJ", "TJ-TT", "TT-PDV", "PDV-SPL", "SPL-KMU", 
-    "KMU-ADT", "ADT-KTM", "KTM-MV", "TPJ-YD", "GOC-YD","TRB-YD", "SGM-YD", "BAL-YD",
+    "TPJ-GOC", "GOC-TRB", "TRB-SGM", "SGM-BAL", "BAL-ALK", "ALK-TJ", "TJ-TT", "TT-PDV", "PDV-SPL", "SPL-KMU",
+    "KMU-ADT", "ADT-KTM", "KTM-MV", "TPJ-YD", "GOC-YD", "TRB-YD", "SGM-YD", "BAL-YD",
     "ALK-YD", "TJ-YD", "TT-YD", "PDV-YD", "SPL-YD",
-"KMU-YD", "ADT-YD", "KTM-YD", "MV-YD"
+    "KMU-YD", "ADT-YD", "KTM-YD", "MV-YD"
   ],
   'TJ-KIK': [
-    "TJ-SMM", "SMM-NMJ", 
-    "NMJ-KDE", "KDE-KU", "KU-TVR", "TVR-KVL", "KVL-NGT", "NGT-NCR", "NCR-KIK", "TJ-YD","SMM-YD","NMJ-YD", "KDE-YD", "KU-YD", "TVR-YD", "KVL-YD", "NGT-YD", "NCR-YD","KIK-YD"
+    "TJ-SMM", "SMM-NMJ",
+    "NMJ-KDE", "KDE-KU", "KU-TVR", "TVR-KVL", "KVL-NGT", "NGT-NCR", "NCR-KIK", "TJ-YD", "SMM-YD", "NMJ-YD", "KDE-YD", "KU-YD", "TVR-YD", "KVL-YD", "NGT-YD", "NCR-YD", "KIK-YD"
   ],
   'MV-TVR': [
-    "MV-PEM", "PEM-NNM", "NNM-TVR","MV-YD", "PEM-YD", "NNM-YD", "TVR-YD"
+    "MV-PEM", "PEM-NNM", "NNM-TVR", "MV-YD", "PEM-YD", "NNM-YD", "TVR-YD"
   ],
   'NMJ-MQ': [
     "NMJ-MQ", "NMJ-YD", "MQ-YD"
   ],
   'VM-PDY': [
-    "VM-CBU", "CBU-PDY","CBU-YD", "PDY-YD"
+    "VM-CBU", "CBU-PDY", "CBU-YD", "PDY-YD"
   ],
   'KPD-VM': [
-    "KPD-VLR", "VLR-KNB", "KNB-ARV", "ARV-PRL", "PRL-AGM", "AGM-TJM", 
-    "TJM-TNM", "TNM-TNI", "TNI-TRK", "TRK-MMP", "MMP-VKM", "VKM-VM", "KPD-YD","VLR-YD", "KNB-YD", "KMM-YD","ARV-YD","PRL-YD", "AGM-YD", "TJM-YD", "TNM-YD", "TNI-YD","TRK-YD","MMP-YD", "VKM-YD", "VM-YD"
+    "KPD-VLR", "VLR-KNB", "KNB-ARV", "ARV-PRL", "PRL-AGM", "AGM-TJM",
+    "TJM-TNM", "TNM-TNI", "TNI-TRK", "TRK-MMP", "MMP-VKM", "VKM-VM", "KPD-YD", "VLR-YD", "KNB-YD", "KMM-YD", "ARV-YD", "PRL-YD", "AGM-YD", "TJM-YD", "TNM-YD", "TNI-YD", "TRK-YD", "MMP-YD", "VKM-YD", "VM-YD"
   ],
   'CUPJ-VRI': [
-    "CUP J-KJKPD", "KJKPD-VLU", "VLU-NVL", "NVL-UMG", "UMG-VRI","CUP J-YD", "KJKPD-YD", "VLU-YD", "NVL-YD", "UMG-YD", "VRI-YD"
+    "CUP J-KJKPD", "KJKPD-VLU", "VLU-NVL", "NVL-UMG", "UMG-VRI", "CUP J-YD", "KJKPD-YD", "VLU-YD", "NVL-YD", "UMG-YD", "VRI-YD"
   ],
   'TPJ-TP': [
-    "TPJ-TP","TPJ-YD","TP-YD"
+    "TPJ-TP", "TPJ-YD", "TP-YD"
   ],
   'NGT-VLNK': [
     "NGT-VLNK", "NGT-YD", "VLNK-YD"
   ],
   'TVR-KKDI': [
-    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT", 
+    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT",
     "PKT-PVI", "PVI-AYI", "AYI-ATQ", "ATQ-PYK", "PYK-KKDI", "TVR-YD", "TNK-YD", "TTP-YD", "TAM-YD",
     "AMM-YD", "PKT-YD", "PVI-YD", "AYI-YD", "ATQ-YD", "PYK-YD", "KKDI-YD"
   ],
   'TTP-AGX': [
-    "TTP-AGX","TTP-YD","AGX-YD"
+    "TTP-AGX", "TTP-YD", "AGX-YD"
   ]
 };
 
@@ -259,659 +259,575 @@ export const streamData = {
   'TPJ-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'MV-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'KTM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TJ-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'KIK-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PEM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'POM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'NNM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TVR-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'NMJ-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'MQ-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'CBU-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VI-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PDY-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'KPD-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VT-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'CUP J-YD':{
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[], 
-  },
-  'KJKPD-YD':{
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[], 
-  },
-
-  'VLNK-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'KKDI-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TTP-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'AGX-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10"],
+    "both direction not affected": [],
   },
   'GOC-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+    "both direction not affected": [],
   },
-  'TPTN-YD': {
+  'SRGM-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'VLDE-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'LLI-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'KTTR-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'PMB-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'KKPM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "both direction not affected": [],
   },
   'KLGM-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'SLTH-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "both direction not affected": [],
   },
   'ALU-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+    "both direction not affected": [],
   },
   'OTK-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'SNDI-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'MTUR-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'ICG-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PNDM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "both direction not affected": [],
   },
   'TLNR-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'VRI-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8"],
+    "both direction not affected": [],
   },
   'PVN-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'ULU-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'PRKL-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'TVNL-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'KDMD-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
+  },
+  'VM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8"],
+    "both direction not affected": [],
   },
   'SXR-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'TUY-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'PRT-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'MBU-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'NPM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VKP-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'TDPR-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'CUPJ-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'CQS-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "both direction not affected": [],
   },
   'ALP-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'PUC-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PO-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "both direction not affected": [],
   },
   'KII-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'CDM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VMP-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
   'CLN-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'SY-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'VDL-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'ANP-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
-  'NID-YD': {
+  'MV-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'MCJ-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8"],
+    "both direction not affected": [],
   },
   'TRB-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TOM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'SGM-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'AYN-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'BAL-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'ALK-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
+  },
+  'TJ-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+    "both direction not affected": [],
   },
   'TT-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PVL-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'AZP-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'PDV-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'PML-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'SPL-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'SWI-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'DSM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": [],
   },
   'KMU-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TRM-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TDR-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": [],
   },
   'ADT-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
   },
-  'NPT-YD': {
+  'KTM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": [],
+  },
+  'SMM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
   'KDE-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
   'KU-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'TVR-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+    "both direction not affected": []
   },
   'KVL-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
   'NGT-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
   'NCR-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
-  'TMPT-YD': {
+  'KIK-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'PEM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'POM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'NNM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'KPD-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'VLR-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
-  'MARD-YD': {
+  'KNB-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'KMM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'ARV-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'PRL-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'AGM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'TJM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'TNM-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
+  },
+  'TNI-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'TRK-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
+    "both direction not affected": []
+  },
+  'MMP-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'VKM-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  }
+  ,
+  'CUP J-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'KJKPD-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
+  },
+  'VLU-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
+  },
+  'NVL-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
+  },
+  'UMG-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
   'TNK-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
-  'AMNR-YD': {
+  'TTP-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'ATB-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'MNLI-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
   'TAM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'MTT-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
   'AMM-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
   'PKT-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
   'PVI-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
   'AYI-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
   'ATQ-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
   },
   'PYK-YD': {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction not affected": []
   },
-  'KXY-YD': {
+  'KKDI-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'AGX-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'VLNK-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'CBU-YD': {
+    "up direction affected": [],
+    "down direction affected": [],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction not affected": []
+  },
+  'PDY-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
-  'KVV-YD': {
+  'NMJ-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   },
-  'NVK-YD': {
+  'MQ-YD': {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'TOY-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
-  },
-  'VDY-YD': {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4"],
-    "both direction not affected":[],
+    "both direction not affected": []
   }
+
+
 };
+
+
+
+
 
 
 
@@ -1061,7 +977,7 @@ export let lineData = {
   'PRKL-TVNL': ['UP', 'DN'],
   'TVNL-KDMD': ['UP', 'DN'],
   'KDMD-VM': ['UP', 'DN'],  // Junction with VM-MV, VM-PDY, and KPD-VM lines
-  
+
   // Yard connections for TPJ-VM
   'TPJ-YD': ['UP', 'DN'],
   'GOC-YD': ['UP', 'DN'],
@@ -1085,7 +1001,7 @@ export let lineData = {
   'TVNL-YD': ['UP', 'DN'],
   'KDMD-YD': ['UP', 'DN'],
   'VM-YD': ['UP', 'DN'],  // Appears in multiple sections as VM is a major junction
-  
+
   // VM-MV Section - Double line section
   'VM-SXR': ['UP', 'DN'],  // VM is junction with TPJ-VM, VM-PDY, and KPD-VM lines
   'SXR-TUY': ['UP', 'DN'],
@@ -1119,7 +1035,7 @@ export let lineData = {
   'VDL-YD': ['UP', 'DN'],
   'ANP-YD': ['UP', 'DN'],
   'MV-YD': ['UP', 'DN'],  // Appears in multiple sections as MV is a junction
-  
+
   // TPJ-MV Section - Single line
   // 'TPJ-GOC': ['UP', 'DN'],  // Already listed in TPJ-VM, repeated here as it's a junction
   'GOC-TRB': ['SINGLE'],
@@ -1146,7 +1062,7 @@ export let lineData = {
   'ADT-YD': ['SINGLE'],
   'KTM-YD': ['SINGLE'],
   // 'MV-YD': ['UP', 'DN'],  // Already listed in VM-MV, MV is a major junction
-  
+
   // TJ-KIK Section - Single line
   'TJ-SMM': ['SINGLE'],  // TJ is junction with TPJ-MV line
   'SMM-NMJ': ['SINGLE'],  // NMJ is junction with NMJ-MQ line
@@ -1167,7 +1083,7 @@ export let lineData = {
   'NGT-YD': ['SINGLE'],  // Appears in both TJ-KIK and NGT-VLNK sections
   'NCR-YD': ['SINGLE'],
   'KIK-YD': ['SINGLE'],
-  
+
   // MV-TVR Section - Single line
   'MV-PEM': ['SINGLE'],  // MV is junction with TPJ-MV and VM-MV lines
   'PEM-NNM': ['SINGLE'],
@@ -1176,19 +1092,19 @@ export let lineData = {
   'PEM-YD': ['SINGLE'],
   'NNM-YD': ['SINGLE'],
   // 'TVR-YD': ['SINGLE'],  // Already listed in TJ-KIK, TVR is a junction
-  
+
   // NMJ-MQ Section - Single line
   'NMJ-MQ': ['SINGLE'],  // NMJ is junction with TJ-KIK line
   // 'NMJ-YD': ['SINGLE'],  // Already listed in TJ-KIK
   'MQ-YD': ['SINGLE'],
-  
+
   // VM-PDY Section - Single line
   'VM-CBU': ['SINGLE'],  // VM is junction with TPJ-VM, VM-MV, and KPD-VM lines
   'CBU-PDY': ['SINGLE'],
   // 'VM-YD': ['UP', 'DN'],  // Already listed in TPJ-VM and VM-MV
   'CBU-YD': ['SINGLE'],
   'PDY-YD': ['SINGLE'],
-  
+
   // KPD-VM Section - Single line
   'KPD-VLR': ['SINGLE'],
   'VLR-KNB': ['SINGLE'],
@@ -1216,7 +1132,7 @@ export let lineData = {
   'MMP-YD': ['SINGLE'],
   'VKM-YD': ['SINGLE'],
   // 'VM-YD': ['UP', 'DN'],  // Already listed in multiple sections
-  
+
   // CUPJ-VRI Section - Single line
   'CUPJ-KJKPD': ['SINGLE'],  // CUPJ is junction with VM-MV line
   'KJKPD-VLU': ['SINGLE'],
@@ -1229,17 +1145,17 @@ export let lineData = {
   'NVL-YD': ['SINGLE'],
   'UMG-YD': ['SINGLE'],
   // 'VRI-YD': ['UP', 'DN'],  // Already listed in TPJ-VM
-  
+
   // TPJ-TP Section - Single line
   'TPJ-TP': ['SINGLE'],  // TPJ is junction with TPJ-VM and TPJ-MV lines
   // 'TPJ-YD': ['UP', 'DN'],  // Already listed in TPJ-VM
   'TP-YD': ['SINGLE'],
-  
+
   // NGT-VLNK Section - Single line
   'NGT-VLNK': ['SINGLE'],  // NGT is junction with TJ-KIK line
   // 'NGT-YD': ['SINGLE'],  // Already listed in TJ-KIK
   'VLNK-YD': ['SINGLE'],
-  
+
   // TVR-KKDI Section - Single line
   'TVR-TNK': ['SINGLE'],  // TVR is junction with TJ-KIK and MV-TVR lines
   'TNK-TTP': ['SINGLE'],  // TTP is junction with TTP-AGX line
@@ -1261,7 +1177,7 @@ export let lineData = {
   'ATQ-YD': ['SINGLE'],
   'PYK-YD': ['SINGLE'],
   'KKDI-YD': ['SINGLE'],
-  
+
   // TTP-AGX Section - Single line
   'TTP-AGX': ['SINGLE'],  // TTP is junction with TVR-KKDI line
   // 'TTP-YD': ['SINGLE'],  // Already listed in TVR-KKDI
@@ -1351,32 +1267,32 @@ export let lineData = {
 // };
 export const depot: DepotStructure = {
   "TPJ-VM": {
-    'ENGG': ["TPJ","LLI","ALU","A/VRI","",""],
-    'S&T': ["TPJ", "ALU","VRI","VM"],
-    'TRD': ["RRI","Lines","VRI/A","VRI/B","VM"]
+    'ENGG': ["TPJ", "LLI", "ALU", "A/VRI", "", ""],
+    'S&T': ["TPJ", "ALU", "VRI", "VM"],
+    'TRD': ["RRI", "Lines", "VRI/A", "VRI/B", "VM"]
   },
 
   "VM-MV": {
-    'TRD': ["CUP J", "MV","VM"],
-    'S&T': ["CUP J", "MV","VM"],
-    'ENGG': ["CUP J","MV"]
+    'TRD': ["CUP J", "MV", "VM"],
+    'S&T': ["CUP J", "MV", "VM"],
+    'ENGG': ["CUP J", "MV"]
   },
 
   "TPJ-MV": {
     'TRD': ["TJ", "MV", "RRI"],
     'S&T': ["TPJ", "TJ", "MV"],
-    'ENGG': ["TPJ","TJ", "KMU", "MV"]
+    'ENGG': ["TPJ", "TJ", "KMU", "MV"]
   },
 
   "TJ-KIK": {
     'TRD': ["TJ", "TVR"],
-    'S&T': ["TJ", "KIK","TVR"],
+    'S&T': ["TJ", "KIK", "TVR"],
     'ENGG': ["TJ", "A/TVR"]
   },
 
   "MV-TVR": {
-    'TRD': ["MV","TVR"],
-    'S&T': ["MV","TVR"],
+    'TRD': ["MV", "TVR"],
+    'S&T': ["MV", "TVR"],
     'ENGG': ["MV", "TVR"]
   },
 
@@ -1393,33 +1309,33 @@ export const depot: DepotStructure = {
   },
 
   "KPD-VM": {
-    'TRD': ["VLR","TNM"],
-    'S&T': ["TNM", "VM","ARV" ],
+    'TRD': ["VLR", "TNM"],
+    'S&T': ["TNM", "VM", "ARV"],
     'ENGG': ["TNM", "VLR",]
   },
 
   "CUPJ-VRI": {
-    'TRD': ["CUP J", "VRI" ],
+    'TRD': ["CUP J", "VRI"],
     'S&T': ["CUP J", "VRI"],
     'ENGG': ["BVR"]
   },
 
   "TPJ-TP": {
-    'TRD': ["RRI","Lines" ],
+    'TRD': ["RRI", "Lines"],
     'S&T': ["TPJ",],
-    'ENGG': ["TPJ", ]
+    'ENGG': ["TPJ",]
   },
 
   "NGT-VLNK": {
-    'TRD': ["TVR" ],
+    'TRD': ["TVR"],
     'S&T': ["KIK"],
     'ENGG': ["A/TVR"]
   },
 
   "TVR-KKDI": {
-    'TRD': ["TVR","PKT"],
+    'TRD': ["TVR", "PKT"],
     'S&T': ["TVR"],
-    'ENGG': ["PKT","TTP","B/TVR"]
+    'ENGG': ["PKT", "TTP", "B/TVR"]
   },
 
   "TTP-AGX": {
@@ -1461,7 +1377,8 @@ export const depotOnLocation = {
     "VRI/B",
     "CUP J",   // Cuddalore Port Junction
     "MV",      // Mayiladuthurai Junction
-  ]}
+  ]
+}
 
 export let machine = [
   "BCM",
