@@ -153,9 +153,48 @@ export default function RequestTablePage() {
                 <td className="border border-black p-1 text-sm">
                   {request.missionBlock}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                {/* <td className="border border-black p-1 text-sm">
                   {request.processedLineSections?.[0]?.lineName || "N/A"}
+                </td> */}
+                <td className="border border-black p-1 text-sm">
+                  {(() => {
+                    if (
+                      request.processedLineSections &&
+                      Array.isArray(request.processedLineSections) &&
+                      request.processedLineSections.length > 0
+                    ) {
+                      const regularSection = request.processedLineSections.find(
+                        (section) => section.type === "regular"
+                      );
+                      if (regularSection && regularSection.lineName) {
+                        return regularSection.lineName;
+                      }
+
+                      const yardSection = request.processedLineSections.find(
+                        (section) => section.type === "yard"
+                      );
+                      if (yardSection) {
+                        if (yardSection.stream && yardSection.road) {
+                          return `${yardSection.stream}/${yardSection.road}`;
+                        }
+                        if (yardSection.stream) {
+                          return yardSection.stream;
+                        }
+                      }
+
+                      const firstSection = request.processedLineSections[0];
+                      if (firstSection.lineName) return firstSection.lineName;
+                      if (firstSection.stream) return firstSection.stream;
+                    }
+
+                    if (request.selectedStream) {
+                      return request.selectedStream;
+                    }
+
+                    return "N/A";
+                  })()}
                 </td>
+
                 <td className="border border-black p-1 text-sm">
                   {formatTime(request.demandTimeFrom)} -{" "}
                   {formatTime(request.demandTimeTo)}

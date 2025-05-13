@@ -33,6 +33,7 @@ export interface UsersResponse {
 }
 
 export interface UserRequest {
+    selectedStream: any;
     id: string;
     date: string;
     selectedDepartment: string;

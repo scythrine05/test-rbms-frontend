@@ -132,7 +132,7 @@ const getDisconnectionStatus = (type: string, request: RequestItem) => {
   
   switch (type) {
     case "power":
-      return statusOptions[randomIndex];
+      return statusOptions[1];
     case "snt":
       return statusOptions[(randomIndex + 1) % statusOptions.length]; 
     case "sig":
