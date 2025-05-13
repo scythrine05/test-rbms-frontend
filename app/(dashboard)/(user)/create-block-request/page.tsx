@@ -3,6 +3,7 @@ import ConfirmationDialog from "@/app/components/ui/ConfirmationDiagonal";
 import React, { useState, useEffect } from "react";
 import { useCreateUserRequest } from "@/app/service/mutation/user-request";
 import { useSession } from "next-auth/react";
+import { ToastContainer, toast } from 'react-toastify';
 import {
   MajorSection,
   blockSection,
@@ -138,6 +139,7 @@ const sntDisconnectionAssignToOptions = [
 ];
 
 export default function CreateBlockRequestPage() {
+ 
   const [formData, setFormData] = useState<
     Partial<UserRequestInput> & {
       selectedStreams?: Record<string, string>;
@@ -400,7 +402,13 @@ export default function CreateBlockRequestPage() {
     >
   ) => {
     const { name, value, type } = e.target;
-    
+     if (errors[name]) {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[name];
+      return newErrors;
+    });
+  }
     // Special handling for date field
     if (name === 'date') {
       // Check if the selected date is allowed
@@ -464,194 +472,346 @@ export default function CreateBlockRequestPage() {
     return streamDataTyped[streamKey] || [];
   };
 
-  const handleFormValidation = () => {
-    if (!formData.date) {
-      setErrors({
-        date: "Please select a date for the block request",
-      });
-      return false;
-    }
+  // const handleFormValidation = () => {
+  //   if (!formData.date) {
+  //     setErrors({
+  //       date: "Please select a date for the block request",
+  //     });
+  //     return false;
+  //   }
     
-    const selectedDate = new Date(formData.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
+  //   const selectedDate = new Date(formData.date);
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
 
-    if (selectedDate < today) {
-      // Rejects past dates
-      setErrors({
-        date: "Block date must be today or in the future.",
-      });
-      return false;
-    }
+  //   if (selectedDate < today) {
+  //     // Rejects past dates
+  //     setErrors({
+  //       date: "Block date must be today or in the future.",
+  //     });
+  //     return false;
+  //   }
     
-    // Check if date is in current week but beyond urgent window
-    if (isBlockedCurrentWeekDate(formData.date)) {
-      setErrors({
-        date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
-      });
-      return false;
-    }
+  //   // Check if date is in current week but beyond urgent window
+  //   if (isBlockedCurrentWeekDate(formData.date)) {
+  //     setErrors({
+  //       date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
+  //     });
+  //     return false;
+  //   }
 
-    // Validate corridor type selection
-    if (!formData.corridorTypeSelection) {
-      setErrors({
-        corridorTypeSelection: "Corridor type is required",
-      });
-      return false;
-    }
+  //   // Validate corridor type selection
+  //   if (!formData.corridorTypeSelection) {
+  //     setErrors({
+  //       corridorTypeSelection: "Corridor type is required",
+  //     });
+  //     return false;
+  //   }
 
-    // Get corridor type restrictions based on selected date
-    const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
+  //   // Get corridor type restrictions based on selected date
+  //   const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
     
-    // Validate based on restrictions
-    if (urgentOnly && formData.corridorTypeSelection !== "Urgent Block") {
-      setErrors({
-        corridorTypeSelection: message,
-      });
-      return false;
-    }
+  //   // Validate based on restrictions
+  //   if (urgentOnly && formData.corridorTypeSelection !== "Urgent Block") {
+  //     setErrors({
+  //       corridorTypeSelection: message,
+  //     });
+  //     return false;
+  //   }
     
-    if (!urgentAllowed && formData.corridorTypeSelection === "Urgent Block") {
-      setErrors({
-        corridorTypeSelection: "Urgent Block is only allowed for today and next 2 days",
-      });
-      return false;
+  //   if (!urgentAllowed && formData.corridorTypeSelection === "Urgent Block") {
+  //     setErrors({
+  //       corridorTypeSelection: "Urgent Block is only allowed for today and next 2 days",
+  //     });
+  //     return false;
+  //   }
+
+  //   if (!formData.demandTimeFrom || !formData.demandTimeTo) {
+  //     const newErrors: Record<string, string> = {};
+  //     if (!formData.demandTimeFrom) {
+  //       newErrors.demandTimeFrom = "Demand Time From is required";
+  //     }
+  //     if (!formData.demandTimeTo) {
+  //       newErrors.demandTimeTo = "Demand Time To is required";
+  //     }
+  //     setErrors(newErrors);
+  //     return false;
+  //   }
+
+  //   let newErrors: Record<string, string> = {};
+  //   let hasError = false;
+
+  //   // Required fields validation
+  //   const requiredFields = [
+  //     "date",
+  //     "corridorTypeSelection",
+  //     "selectedSection",
+  //     "selectedDepo",
+  //     "demandTimeFrom",
+  //     "demandTimeTo",
+  //     "workType",
+  //     "activity",
+  //     "repercussions",
+  //   ];
+
+  //   // Check required fields
+  //   requiredFields.forEach((field) => {
+  //     if (
+  //       field === "repercussions" &&
+  //       !formData[field as keyof typeof formData]
+  //     ) {
+  //       if (session?.user.department === "TRD" || formData.corridorTypeSelection === "Outside Corridor") {
+  //         newErrors[field] = `${field
+  //           .replace(/([A-Z])/g, " $1")
+  //           .replace(/^./, (str) => str.toUpperCase())} is required`;
+  //         hasError = true;
+  //       }
+  //     } else if (!formData[field as keyof typeof formData]) {
+  //       newErrors[field] = `${field
+  //         .replace(/([A-Z])/g, " $1")
+  //         .replace(/^./, (str) => str.toUpperCase())} is required`;
+  //       hasError = true;
+  //     }
+  //   });
+
+  //   // Also make Remarks required for Outside Corridor
+  //   if (formData.corridorTypeSelection === "Outside Corridor" && !formData.requestremarks?.trim()) {
+  //     newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
+  //     hasError = true;
+  //   }
+
+  //   // Add custom activity validation when "others" is selected
+  //   if (formData.activity === "others" && !customActivity.trim()) {
+  //     newErrors.activity = "Please specify the custom activity";
+  //     hasError = true;
+  //   }
+
+  //   // Validate block section
+  //   if (blockSectionValue.length === 0) {
+  //     newErrors.missionBlock = "Block Section is required";
+  //     hasError = true;
+  //   }
+
+  //   // Validate line/stream entries for each block section
+  //   for (const block of blockSectionValue) {
+  //     const sectionEntry = formData.processedLineSections?.find(
+  //       (section) => section.block === block
+  //     );
+
+  //     if (block.includes("-YD")) {
+  //       // Validate yard sections
+  //       if (!sectionEntry || !sectionEntry.stream) {
+  //         newErrors[
+  //           `processedLineSections.${block}.stream`
+  //         ] = `Stream for ${block} is required`;
+  //         hasError = true;
+  //       }
+  //       if (sectionEntry?.stream && !sectionEntry.road) {
+  //         newErrors[
+  //           `processedLineSections.${block}.road`
+  //         ] = `Road for ${block} is required`;
+  //         hasError = true;
+  //       }
+  //     } else {
+  //       // Validate regular sections
+  //       if (!sectionEntry || !sectionEntry.lineName) {
+  //         newErrors[
+  //           `processedLineSections.${block}.lineName`
+  //         ] = `Line for ${block} is required`;
+  //         hasError = true;
+  //       }
+  //     }
+  //   }
+
+  //   // Add validation for sntDisconnectionAssignTo when sntDisconnectionRequired is true
+  //   if (sntDisconnectionChecked && !formData.sntDisconnectionAssignTo) {
+  //     newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
+  //     hasError = true;
+  //   }
+
+  //   // Set validation errors if any
+  //   if (hasError) {
+  //     setErrors(newErrors);
+  //     // Scroll to first error
+  //     const firstErrorKey = Object.keys(newErrors)[0];
+  //     const selector = firstErrorKey.includes(".")
+  //       ? `[name="${firstErrorKey.split(".")[0]}"]`
+  //       : `[name="${firstErrorKey}"]`;
+  //     const element = document.querySelector(selector);
+  //     if (element) {
+  //       element.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //     return false;
+  //   }
+
+  //   return true;
+
+ 
+
+  // };
+const handleFormValidation = () => {
+  // Clear previous errors
+  setErrors({});
+  
+  let newErrors: Record<string, string> = {};
+  let hasError = false;
+
+  // Basic required fields that are always needed
+  const alwaysRequired = [
+    'date',
+    'corridorTypeSelection',
+    'selectedSection',
+    'selectedDepo',
+    'demandTimeFrom',
+    'demandTimeTo',
+    'workType',
+    'activity',
+    'missionBlock' // This is your block section
+  ];
+
+  // Check always required fields
+  alwaysRequired.forEach((field) => {
+    if (!formData[field as keyof typeof formData]) {
+      newErrors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+      hasError = true;
     }
+  });
 
-    if (!formData.demandTimeFrom || !formData.demandTimeTo) {
-      const newErrors: Record<string, string> = {};
-      if (!formData.demandTimeFrom) {
-        newErrors.demandTimeFrom = "Demand Time From is required";
-      }
-      if (!formData.demandTimeTo) {
-        newErrors.demandTimeTo = "Demand Time To is required";
-      }
-      setErrors(newErrors);
-      return false;
-    }
+  // Special case for block section validation
+  if (blockSectionValue.length === 0) {
+    newErrors.missionBlock = "Block Section is required";
+    hasError = true;
+  }
 
-    let newErrors: Record<string, string> = {};
-    let hasError = false;
+  // Validate line/stream entries for each block section
+  for (const block of blockSectionValue) {
+    const sectionEntry = formData.processedLineSections?.find(
+      section => section.block === block
+    );
 
-    // Required fields validation
-    const requiredFields = [
-      "date",
-      "corridorTypeSelection",
-      "selectedSection",
-      "selectedDepo",
-      "demandTimeFrom",
-      "demandTimeTo",
-      "workType",
-      "activity",
-      "repercussions",
-    ];
-
-    // Check required fields
-    requiredFields.forEach((field) => {
-      if (
-        field === "repercussions" &&
-        !formData[field as keyof typeof formData]
-      ) {
-        if (session?.user.department === "TRD" || formData.corridorTypeSelection === "Outside Corridor") {
-          newErrors[field] = `${field
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase())} is required`;
-          hasError = true;
-        }
-      } else if (!formData[field as keyof typeof formData]) {
-        newErrors[field] = `${field
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase())} is required`;
+    if (block.includes('-YD')) {
+      // Yard section validation
+      if (!sectionEntry || !sectionEntry.road) {
+        newErrors[`${block}.road`] = `Road for ${block} is required`;
         hasError = true;
       }
-    });
-
-    // Also make Remarks required for Outside Corridor
-    if (formData.corridorTypeSelection === "Outside Corridor" && !formData.requestremarks?.trim()) {
-      newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
-      hasError = true;
-    }
-
-    // Add custom activity validation when "others" is selected
-    if (formData.activity === "others" && !customActivity.trim()) {
-      newErrors.activity = "Please specify the custom activity";
-      hasError = true;
-    }
-
-    // Validate block section
-    if (blockSectionValue.length === 0) {
-      newErrors.missionBlock = "Block Section is required";
-      hasError = true;
-    }
-
-    // Validate line/stream entries for each block section
-    for (const block of blockSectionValue) {
-      const sectionEntry = formData.processedLineSections?.find(
-        (section) => section.block === block
-      );
-
-      if (block.includes("-YD")) {
-        // Validate yard sections
-        if (!sectionEntry || !sectionEntry.stream) {
-          newErrors[
-            `processedLineSections.${block}.stream`
-          ] = `Stream for ${block} is required`;
-          hasError = true;
-        }
-        if (sectionEntry?.stream && !sectionEntry.road) {
-          newErrors[
-            `processedLineSections.${block}.road`
-          ] = `Road for ${block} is required`;
-          hasError = true;
-        }
-      } else {
-        // Validate regular sections
-        if (!sectionEntry || !sectionEntry.lineName) {
-          newErrors[
-            `processedLineSections.${block}.lineName`
-          ] = `Line for ${block} is required`;
-          hasError = true;
-        }
+      if (!sectionEntry?.stream) {
+        newErrors[`${block}.stream`] = `Stream for ${block} is required`;
+        hasError = true;
+      }
+    } else {
+      // Regular section validation
+      if (!sectionEntry || !sectionEntry.lineName) {
+        newErrors[`${block}.lineName`] = `Line for ${block} is required`;
+        hasError = true;
       }
     }
+  }
 
-    // Add validation for sntDisconnectionAssignTo when sntDisconnectionRequired is true
-    if (sntDisconnectionChecked && !formData.sntDisconnectionAssignTo) {
+  // Department-specific validations
+  if (session?.user.department === 'TRD') {
+    if (!formData.repercussions) {
+      newErrors.repercussions = "Coaching repercussions are required";
+      hasError = true;
+    }
+  }
+
+  if (session?.user.department === 'S&T') {
+    if (!formData.routeFrom || !formData.routeTo) {
+      if (!formData.routeFrom) newErrors.routeFrom = "Route From is required";
+      if (!formData.routeTo) newErrors.routeTo = "Route To is required";
+      hasError = true;
+    }
+  }
+
+  // Outside corridor requires remarks
+  if (formData.corridorTypeSelection === 'Outside Corridor' && !formData.requestremarks?.trim()) {
+    newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
+    hasError = true;
+  }
+
+  // Custom activity validation
+  if (formData.activity === 'others' && !customActivity.trim()) {
+    newErrors.activity = "Please specify the custom activity";
+    hasError = true;
+  }
+
+  // S&T disconnection validation
+  if (formData.sntDisconnectionRequired === true) {
+    if (!formData.sntDisconnectionLineFrom) {
+      newErrors.sntDisconnectionLineFrom = "Disconnection Line From is required";
+      hasError = true;
+    }
+    if (!formData.sntDisconnectionLineTo) {
+      newErrors.sntDisconnectionLineTo = "Disconnection Line To is required";
+      hasError = true;
+    }
+    if (!formData.sntDisconnectionAssignTo) {
       newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
       hasError = true;
     }
+  }
 
-    // Set validation errors if any
-    if (hasError) {
-      setErrors(newErrors);
-      // Scroll to first error
-      const firstErrorKey = Object.keys(newErrors)[0];
-      const selector = firstErrorKey.includes(".")
-        ? `[name="${firstErrorKey.split(".")[0]}"]`
-        : `[name="${firstErrorKey}"]`;
-      const element = document.querySelector(selector);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return false;
+  // Power block validation
+  if (formData.powerBlockRequired === true) {
+    if (!formData.elementarySection) {
+      newErrors.elementarySection = "Elementary Section is required for power block";
+      hasError = true;
     }
+  }
 
-    return true;
-  };
+  // Fresh caution validation
+  if (formData.freshCautionRequired === true) {
+    if (!formData.freshCautionLocationFrom) {
+      newErrors.freshCautionLocationFrom = "Caution Location From is required";
+      hasError = true;
+    }
+    if (!formData.freshCautionLocationTo) {
+      newErrors.freshCautionLocationTo = "Caution Location To is required";
+      hasError = true;
+    }
+    if (!formData.freshCautionSpeed || formData.freshCautionSpeed <= 0) {
+      newErrors.freshCautionSpeed = "Valid Caution Speed is required";
+      hasError = true;
+    }
+  }
+
+  if (hasError) {
+    setErrors(newErrors);
+    // Scroll to first error
+    const firstErrorKey = Object.keys(newErrors)[0];
+    const element = document.querySelector(`[name="${firstErrorKey}"]`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return false;
+  }
+
+  return true;
+};
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    setSuccess(null);
+  e.preventDefault();
+  setFormError(null);
+  setSuccess(null);
 
-    // const finalActivity =
-    //   formData.activity === "others" ? customActivity : formData.activity;
+  if (!handleFormValidation()) {
+    toast.error('Please fill all required fields', {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    return;
+  }
+  setShowConfirmation(true);
+};
+ 
 
-    if (!handleFormValidation()) {
-      return;
-    }
-    setShowConfirmation(true);
-  };
   const handleConfirmedSubmit = () => {
+    
     setShowConfirmation(false);
     setFormSubmitting(true);
     const finalActivity =
@@ -1205,7 +1365,7 @@ export default function CreateBlockRequestPage() {
             />
           </div>
 
-          {session?.user.department === "S&T" && (
+          {/* {session?.user.department === "S&T" && (
             <div className="form-group col-span-3">
               <label className="block text-sm font-medium text-black mb-1">
                 Route <span className="text-red-600">*</span>
@@ -1247,7 +1407,62 @@ export default function CreateBlockRequestPage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
+          {session?.user.department === "S&T" && (
+  <div className="form-group col-span-3">
+    <label className="block text-sm font-medium text-black mb-1">
+      Route <span className="text-red-600">*</span>
+    </label>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div>
+        <label className="block text-xs font-medium text-black mb-1" htmlFor="routeFrom">
+          From Location
+        </label>
+        <input
+          id="routeFrom"
+          name="routeFrom"
+          value={formData.routeFrom || ""}
+          onChange={handleInputChange}
+          className="input gov-input"
+          style={{ 
+            color: "black", 
+            fontSize: "14px",
+            borderColor: errors.routeFrom ? "#dc2626" : "#45526c"
+          }}
+          aria-label="Route from location"
+        />
+        {errors.routeFrom && (
+          <span className="text-xs text-red-700 font-medium mt-1 block">
+            {errors.routeFrom}
+          </span>
+        )}
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-black mb-1" htmlFor="routeTo">
+          To Location
+        </label>
+        <input
+          id="routeTo"
+          name="routeTo"
+          value={formData.routeTo || ""}
+          onChange={handleInputChange}
+          className="input gov-input"
+          style={{ 
+            color: "black", 
+            fontSize: "14px",
+            borderColor: errors.routeTo ? "#dc2626" : "#45526c"
+          }}
+          aria-label="Route to location"
+        />
+        {errors.routeTo && (
+          <span className="text-xs text-red-700 font-medium mt-1 block">
+            {errors.routeTo}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
           {session?.user.department === "TRD" && (
             <div className="form-group col-span-3">
@@ -2613,6 +2828,18 @@ export default function CreateBlockRequestPage() {
           onConfirm={handleConfirmedSubmit}
           formData={formData}
         />
+        <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
         {success && (
           <div className="text-green-700 text-xs mt-2 text-center">
             {success}
