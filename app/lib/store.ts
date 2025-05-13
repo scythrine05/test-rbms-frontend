@@ -1270,83 +1270,162 @@ export let lineData = {
 
 
 
+// export const depot: DepotStructure = {
+//   "TPJ-VM": {
+//     'TRD': ["TPJ", "VM"],
+//     'S&T': ["TPJ", "VM"],
+//     'ENGG': ["TPJ", "VM"]
+//   },
+
+//   "VM-MV": {
+//     'TRD': ["VM", "MV"],
+//     'S&T': ["VM", "MV"],
+//     'ENGG': ["VM", "MV"]
+//   },
+
+//   "TPJ-MV": {
+//     'TRD': ["TPJ", "MV"],
+//     'S&T': ["TPJ", "MV"],
+//     'ENGG': ["TPJ", "KTM", "MV"]
+//   },
+
+//   "TJ-KIK": {
+//     'TRD': ["TJ", "KIK"],
+//     'S&T': ["TJ", "KIK"],
+//     'ENGG': ["TJ", "KIK"]
+//   },
+
+//   "MV-TVR": {
+//     'TRD': ["MV", "PEM", "POM", "NNM", "TVR"],
+//     'S&T': ["MV", "PEM", "POM", "NNM", "TVR"],
+//     'ENGG': ["MV", "PEM", "POM", "NNM", "TVR"]
+//   },
+
+//   "NMJ-MQ": {
+//     'TRD': ["NMJ", "MQ"],
+//     'S&T': ["NMJ", "MQ"],
+//     'ENGG': ["NMJ", "MQ"]
+//   },
+
+//   "VM-PDY": {
+//     'TRD': ["VM", "VRA", "CBU", "VI", "PDY"],
+//     'S&T': ["VM", "VRA", "CBU", "VI", "PDY"],
+//     'ENGG': ["VM", "VRA", "CBU", "VI", "PDY"]
+//   },
+
+//   "KPD-VM": {
+//     'TRD': ["KPD"],
+//     'S&T': ["KPD", "VT"],
+//     'ENGG': ["KPD", "VT"]
+//   },
+
+//   "CUPJ-VRI": {
+//     'TRD': ["CUP J", "KJKPD"],
+//     'S&T': ["CUP J", "KJKPD"],
+//     'ENGG': ["CUP J", "KJKPD"]
+//   },
+
+//   "TPJ-TP": {
+//     'TRD': ["TPJ"],
+//     'S&T': ["TPJ"],
+//     'ENGG': ["TPJ"]
+//   },
+
+//   "NGT-VLNK": {
+//     'TRD': ["NGT"],
+//     'S&T': ["NGT"],
+//     'ENGG': ["NGT"]
+//   },
+
+//   "TVR-KKDI": {
+//     'TRD': ["TVR", "KKDI"],
+//     'S&T': ["TVR", "KKDI"],
+//     'ENGG': ["TVR", "KKDI"]
+//   },
+
+//   "TTP-AGX": {
+//     'TRD': ["TTP", "AGX"],
+//     'S&T': ["TTP", "AGX"],
+//     'ENGG': ["TTP", "AGX"]
+//   }
+// };
 export const depot: DepotStructure = {
   "TPJ-VM": {
-    'TRD': ["TPJ", "VM"],
-    'S&T': ["TPJ", "VM"],
-    'ENGG': ["TPJ", "VM"]
+    'ENGG': ["TPJ","LLI","ALU","A/VRI","",""],
+    'S&T': ["TPJ", "ALU","VRI","VM"],
+    'TRD': ["RRI","Lines","VRI/A","VRI/B","VM"]
   },
 
   "VM-MV": {
-    'TRD': ["VM", "MV"],
-    'S&T': ["VM", "MV"],
-    'ENGG': ["VM", "MV"]
+    'TRD': ["CUP J", "MV","VM"],
+    'S&T': ["CUP J", "MV","VM"],
+    'ENGG': ["CUP J","MV"]
   },
 
   "TPJ-MV": {
-    'TRD': ["TPJ", "MV"],
-    'S&T': ["TPJ", "MV"],
-    'ENGG': ["TPJ", "KTM", "MV"]
+    'TRD': ["TJ", "MV", "RRI"],
+    'S&T': ["TPJ", "TJ", "MV"],
+    'ENGG': ["TPJ","TJ", "KMU", "MV"]
   },
 
   "TJ-KIK": {
-    'TRD': ["TJ", "KIK"],
-    'S&T': ["TJ", "KIK"],
-    'ENGG': ["TJ", "KIK"]
+    'TRD': ["TJ", "TVR"],
+    'S&T': ["TJ", "KIK","TVR"],
+    'ENGG': ["TJ", "A/TVR"]
   },
 
   "MV-TVR": {
-    'TRD': ["MV", "PEM", "POM", "NNM", "TVR"],
-    'S&T': ["MV", "PEM", "POM", "NNM", "TVR"],
-    'ENGG': ["MV", "PEM", "POM", "NNM", "TVR"]
+    'TRD': ["MV","TVR"],
+    'S&T': ["MV","TVR"],
+    'ENGG': ["MV", "TVR"]
   },
 
   "NMJ-MQ": {
-    'TRD': ["NMJ", "MQ"],
-    'S&T': ["NMJ", "MQ"],
-    'ENGG': ["NMJ", "MQ"]
+    'TRD': ["TJ", "TVR"],
+    'S&T': ["TJ", "TVR"],
+    'ENGG': ["TJ", "TVR"]
   },
 
   "VM-PDY": {
-    'TRD': ["VM", "VRA", "CBU", "VI", "PDY"],
-    'S&T': ["VM", "VRA", "CBU", "VI", "PDY"],
-    'ENGG': ["VM", "VRA", "CBU", "VI", "PDY"]
+    'TRD': ["VM"],
+    'S&T': ["VM"],
+    'ENGG': ["VM"]
   },
 
   "KPD-VM": {
-    'TRD': ["KPD"],
-    'S&T': ["KPD", "VT"],
-    'ENGG': ["KPD", "VT"]
+    'TRD': ["VLR","TNM"],
+    'S&T': ["TNM", "VM","ARV" ],
+    'ENGG': ["TNM", "VLR",]
   },
 
   "CUPJ-VRI": {
-    'TRD': ["CUP J", "KJKPD"],
-    'S&T': ["CUP J", "KJKPD"],
-    'ENGG': ["CUP J", "KJKPD"]
+    'TRD': ["CUP J", "VRI" ],
+    'S&T': ["CUP J", "VRI"],
+    'ENGG': ["BVR"]
   },
 
   "TPJ-TP": {
-    'TRD': ["TPJ"],
-    'S&T': ["TPJ"],
-    'ENGG': ["TPJ"]
+    'TRD': ["RRI","Lines" ],
+    'S&T': ["TPJ",],
+    'ENGG': ["TPJ", ]
   },
 
   "NGT-VLNK": {
-    'TRD': ["NGT"],
-    'S&T': ["NGT"],
-    'ENGG': ["NGT"]
+    'TRD': ["TVR" ],
+    'S&T': ["KIK"],
+    'ENGG': ["A/TVR"]
   },
 
   "TVR-KKDI": {
-    'TRD': ["TVR", "KKDI"],
-    'S&T': ["TVR", "KKDI"],
-    'ENGG': ["TVR", "KKDI"]
+    'TRD': ["TVR","PKT"],
+    'S&T': ["TVR"],
+    'ENGG': ["PKT","TTP","B/TVR"]
   },
 
   "TTP-AGX": {
-    'TRD': ["TTP", "AGX"],
-    'S&T': ["TTP", "AGX"],
-    'ENGG': ["TTP", "AGX"]
+    'TRD': ["PKT"],
+    'S&T': ["TVR"],
+    'ENGG': ["TTP"]
   }
 };
 
@@ -1358,17 +1437,31 @@ export const location = {
   "AJP": "DSFSD",
 }
 
+// export const depotOnLocation = {
+//   "TPJ": [
+//     "TPJ", "VM", "MV", "KTM", "TJ", "KIK", "PEM", "POM", "NNM", "TVR",
+//     "NMJ", "MQ", "VRA", "CBU", "VI", "PDY", "KPD", "VT", "CUP J", "KJKPD",
+//     "NGT", "KKDI", "TTP", "AGX", "TVT", "PON", "SPE", "GDR", "WSTA",
+//     "WSTB", "AVD", "TRLA", "TRLB", "AJJ", "WJR", "AB", "JTJ", "TRT",
+//     "PUT", "CJ", "MS", "TBM", "CGL", "ACK", "TMV", "MSB", "BBQ", "GPD",
+//     "NYP", "TRL", "AJJE", "KPDW"
+//   ]
+// };
 export const depotOnLocation = {
   "TPJ": [
-    "TPJ", "VM", "MV", "KTM", "TJ", "KIK", "PEM", "POM", "NNM", "TVR",
-    "NMJ", "MQ", "VRA", "CBU", "VI", "PDY", "KPD", "VT", "CUP J", "KJKPD",
-    "NGT", "KKDI", "TTP", "AGX", "TVT", "PON", "SPE", "GDR", "WSTA",
-    "WSTB", "AVD", "TRLA", "TRLB", "AJJ", "WJR", "AB", "JTJ", "TRT",
-    "PUT", "CJ", "MS", "TBM", "CGL", "ACK", "TMV", "MSB", "BBQ", "GPD",
-    "NYP", "TRL", "AJJE", "KPDW"
-  ]
-};
-
+    "TPJ",     // Tiruchchirappalli Junction
+    "LLI",
+    "ALU",     // Alur
+    "A/VRI",
+    "VRI",     // Virarakhavam
+    "VM",      // Villupuram Junction
+    "RRI",
+    "Lines",
+    "VRI/A",
+    "VRI/B",
+    "CUP J",   // Cuddalore Port Junction
+    "MV",      // Mayiladuthurai Junction
+  ]}
 
 export let machine = [
   "BCM",

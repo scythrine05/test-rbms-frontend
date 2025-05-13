@@ -746,10 +746,10 @@ const handleFormValidation = () => {
       newErrors.sntDisconnectionLineTo = "Disconnection Line To is required";
       hasError = true;
     }
-    if (!formData.sntDisconnectionAssignTo) {
-      newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
-      hasError = true;
-    }
+    // if (!formData.sntDisconnectionAssignTo) {
+    //   newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
+    //   hasError = true;
+    // }
   }
 
   // Power block validation
@@ -2731,7 +2731,7 @@ const handleFormValidation = () => {
                     )}
                   </div>
                   {/* Add the assignment dropdown */}
-                  <div className="col-span-1">
+                  {/* <div className="col-span-1">
                     <label className="block text-xs font-medium text-black mb-1">
                       Assign Disconnection To <span className="text-red-600">*</span>
                     </label>
@@ -2760,7 +2760,7 @@ const handleFormValidation = () => {
                         {errors.sntDisconnectionAssignTo}
                       </span>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               )}
               <div className="form-group col-span-2 mt-5">
