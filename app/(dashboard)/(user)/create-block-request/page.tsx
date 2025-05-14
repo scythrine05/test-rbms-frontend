@@ -138,6 +138,14 @@ const sntDisconnectionAssignToOptions = [
   { name: "Engineer", email: "snt.engineer@railways.com" }
 ];
 
+// Add RNT disconnection options
+const trdDisconnectionAssignToOptions = [
+  { name: "Elec Engineer", email: "snt.user@test.com" },
+  { name: "Elec Supervisor", email: "trd.supervisor@railways.com" },
+  { name: "Elec Officer", email: "trd.officer@railways.com" },
+  { name: "Elec Manager", email: "trd.manager@railways.com" }
+];
+
 export default function CreateBlockRequestPage() {
 
   const [formData, setFormData] = useState<
@@ -150,6 +158,7 @@ export default function CreateBlockRequestPage() {
       powerBlockRequirements: string[];
       sntDisconnectionRequirements: string[];
       sntDisconnectionAssignTo?: string; // Add this new field
+      trdDisconnectionAssignTo?: string;
     }
   >({
     date: "",
@@ -186,6 +195,7 @@ export default function CreateBlockRequestPage() {
     repercussions: "",
     selectedStream: "",
     sntDisconnectionAssignTo: "", // Initialize with empty string
+    trdDisconnectionAssignTo: "",
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -472,183 +482,6 @@ export default function CreateBlockRequestPage() {
     return streamDataTyped[streamKey] || [];
   };
 
-  // const handleFormValidation = () => {
-  //   if (!formData.date) {
-  //     setErrors({
-  //       date: "Please select a date for the block request",
-  //     });
-  //     return false;
-  //   }
-
-  //   const selectedDate = new Date(formData.date);
-  //   const today = new Date();
-  //   today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
-
-  //   if (selectedDate < today) {
-  //     // Rejects past dates
-  //     setErrors({
-  //       date: "Block date must be today or in the future.",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Check if date is in current week but beyond urgent window
-  //   if (isBlockedCurrentWeekDate(formData.date)) {
-  //     setErrors({
-  //       date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Validate corridor type selection
-  //   if (!formData.corridorTypeSelection) {
-  //     setErrors({
-  //       corridorTypeSelection: "Corridor type is required",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Get corridor type restrictions based on selected date
-  //   const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
-
-  //   // Validate based on restrictions
-  //   if (urgentOnly && formData.corridorTypeSelection !== "Urgent Block") {
-  //     setErrors({
-  //       corridorTypeSelection: message,
-  //     });
-  //     return false;
-  //   }
-
-  //   if (!urgentAllowed && formData.corridorTypeSelection === "Urgent Block") {
-  //     setErrors({
-  //       corridorTypeSelection: "Urgent Block is only allowed for today and next 2 days",
-  //     });
-  //     return false;
-  //   }
-
-  //   if (!formData.demandTimeFrom || !formData.demandTimeTo) {
-  //     const newErrors: Record<string, string> = {};
-  //     if (!formData.demandTimeFrom) {
-  //       newErrors.demandTimeFrom = "Demand Time From is required";
-  //     }
-  //     if (!formData.demandTimeTo) {
-  //       newErrors.demandTimeTo = "Demand Time To is required";
-  //     }
-  //     setErrors(newErrors);
-  //     return false;
-  //   }
-
-  //   let newErrors: Record<string, string> = {};
-  //   let hasError = false;
-
-  //   // Required fields validation
-  //   const requiredFields = [
-  //     "date",
-  //     "corridorTypeSelection",
-  //     "selectedSection",
-  //     "selectedDepo",
-  //     "demandTimeFrom",
-  //     "demandTimeTo",
-  //     "workType",
-  //     "activity",
-  //     "repercussions",
-  //   ];
-
-  //   // Check required fields
-  //   requiredFields.forEach((field) => {
-  //     if (
-  //       field === "repercussions" &&
-  //       !formData[field as keyof typeof formData]
-  //     ) {
-  //       if (session?.user.department === "TRD" || formData.corridorTypeSelection === "Outside Corridor") {
-  //         newErrors[field] = `${field
-  //           .replace(/([A-Z])/g, " $1")
-  //           .replace(/^./, (str) => str.toUpperCase())} is required`;
-  //         hasError = true;
-  //       }
-  //     } else if (!formData[field as keyof typeof formData]) {
-  //       newErrors[field] = `${field
-  //         .replace(/([A-Z])/g, " $1")
-  //         .replace(/^./, (str) => str.toUpperCase())} is required`;
-  //       hasError = true;
-  //     }
-  //   });
-
-  //   // Also make Remarks required for Outside Corridor
-  //   if (formData.corridorTypeSelection === "Outside Corridor" && !formData.requestremarks?.trim()) {
-  //     newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
-  //     hasError = true;
-  //   }
-
-  //   // Add custom activity validation when "others" is selected
-  //   if (formData.activity === "others" && !customActivity.trim()) {
-  //     newErrors.activity = "Please specify the custom activity";
-  //     hasError = true;
-  //   }
-
-  //   // Validate block section
-  //   if (blockSectionValue.length === 0) {
-  //     newErrors.missionBlock = "Block Section is required";
-  //     hasError = true;
-  //   }
-
-  //   // Validate line/stream entries for each block section
-  //   for (const block of blockSectionValue) {
-  //     const sectionEntry = formData.processedLineSections?.find(
-  //       (section) => section.block === block
-  //     );
-
-  //     if (block.includes("-YD")) {
-  //       // Validate yard sections
-  //       if (!sectionEntry || !sectionEntry.stream) {
-  //         newErrors[
-  //           `processedLineSections.${block}.stream`
-  //         ] = `Stream for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //       if (sectionEntry?.stream && !sectionEntry.road) {
-  //         newErrors[
-  //           `processedLineSections.${block}.road`
-  //         ] = `Road for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //     } else {
-  //       // Validate regular sections
-  //       if (!sectionEntry || !sectionEntry.lineName) {
-  //         newErrors[
-  //           `processedLineSections.${block}.lineName`
-  //         ] = `Line for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //     }
-  //   }
-
-  //   // Add validation for sntDisconnectionAssignTo when sntDisconnectionRequired is true
-  //   if (sntDisconnectionChecked && !formData.sntDisconnectionAssignTo) {
-  //     newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
-  //     hasError = true;
-  //   }
-
-  //   // Set validation errors if any
-  //   if (hasError) {
-  //     setErrors(newErrors);
-  //     // Scroll to first error
-  //     const firstErrorKey = Object.keys(newErrors)[0];
-  //     const selector = firstErrorKey.includes(".")
-  //       ? `[name="${firstErrorKey.split(".")[0]}"]`
-  //       : `[name="${firstErrorKey}"]`;
-  //     const element = document.querySelector(selector);
-  //     if (element) {
-  //       element.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //     return false;
-  //   }
-
-  //   return true;
-
-
-
-  // };
   const handleFormValidation = () => {
     // Clear previous errors
     setErrors({});
@@ -746,16 +579,20 @@ export default function CreateBlockRequestPage() {
         newErrors.sntDisconnectionLineTo = "Disconnection Line To is required";
         hasError = true;
       }
-      // if (!formData.sntDisconnectionAssignTo) {
-      //   newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
-      //   hasError = true;
-      // }
+      if (!formData.sntDisconnectionAssignTo) {
+        newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
+        hasError = true;
+      }
     }
 
     // Power block validation
     if (formData.powerBlockRequired === true) {
       if (!formData.elementarySection) {
         newErrors.elementarySection = "Elementary Section is required for power block";
+        hasError = true;
+      }
+      if (!formData.trdDisconnectionAssignTo) {
+        newErrors.trdDisconnectionAssignTo = "Please select who to assign the power block disconnection to";
         hasError = true;
       }
     }
@@ -869,7 +706,8 @@ export default function CreateBlockRequestPage() {
       powerBlockRequirements: formData.powerBlockRequirements,
       elementarySection: formData.elementarySection,
       sntDisconnectionRequirements: formData.sntDisconnectionRequirements,
-      sntDisconnectionAssignTo: formData.sntDisconnectionAssignTo, // Include in form submission
+      sntDisconnectionAssignTo: formData.sntDisconnectionAssignTo,
+      trdDisconnectionAssignTo: formData.trdDisconnectionAssignTo,
     };
 
     try {
@@ -890,7 +728,8 @@ export default function CreateBlockRequestPage() {
             elementarySection: "",
             sntDisconnectionLineTo: "",
             powerBlockRequirements: [],
-            sntDisconnectionAssignTo: "", // Reset this field too
+            sntDisconnectionAssignTo: "",
+            trdDisconnectionAssignTo: "",
             date: "",
             selectedDepartment: session?.user.department || "",
             selectedSection: "",
@@ -979,6 +818,12 @@ export default function CreateBlockRequestPage() {
       String(formData.sntDisconnectionRequired) === "true"
     );
   }, [formData.sntDisconnectionRequired]);
+
+  // useEffect(() => {
+  //   setTrdDisconnectionChecked(
+  //     String(formData.trdDisconnectionRequired) === "true"
+  //   );
+  // }, [formData.trdDisconnectionRequired]);
 
   // useEffect(()=>{
   //   setPowerBlockChecked(
@@ -2580,44 +2425,38 @@ export default function CreateBlockRequestPage() {
                         </span>
                       )}
                     </div>
-                     <div className="col-span-1">
+                    <div className="col-span-1">
                       <label className="block text-xs font-medium text-black mb-1">
-                        Assign Disconnection To <span className="text-red-600">*</span>
+                        Assign TRD Disconnection To <span className="text-red-600">*</span>
                       </label>
                       <select
-                        name="sntDisconnectionAssignTo"
-                        value={formData.sntDisconnectionAssignTo || ""}
+                        name="trdDisconnectionAssignTo"
+                        value={formData.trdDisconnectionAssignTo || ""}
                         onChange={handleInputChange}
                         className="input gov-input"
                         style={{
                           color: "black",
-                          borderColor: errors.sntDisconnectionAssignTo ? "#dc2626" : "#45526c",
+                          borderColor: errors.trdDisconnectionAssignTo ? "#dc2626" : "#45526c",
                           fontSize: "14px",
                         }}
                       >
                         <option value="" disabled>
-                          Select Depo
+                          Select TRD Personnel
                         </option>
-                        {selectedMajorSection &&
-                          session?.user.department &&
-                          depot[selectedMajorSection] &&
-                          depot[selectedMajorSection]['TRD'] ? (
-                          depot[selectedMajorSection]['TRD'].map((depotOption: string, index) => (
-                            <option key={index} value={depotOption}>
-                              {depotOption}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>
-                            Select Major Section first
+                        {trdDisconnectionAssignToOptions.map((option) => (
+                          <option key={option.email} value={option.email}>
+                            {option.name}
                           </option>
-                        )}
+                        ))}
                       </select>
-                      {errors.sntDisconnectionAssignTo && (
+                      {errors.trdDisconnectionAssignTo && (
                         <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionAssignTo}
+                          {errors.trdDisconnectionAssignTo}
                         </span>
                       )}
+                      <span className="text-xs text-gray-600 mt-1 block">
+                        Person responsible for power block disconnection
+                      </span>
                     </div>
                   </div>
                 )}
@@ -2772,7 +2611,7 @@ export default function CreateBlockRequestPage() {
                     {/* Add the assignment dropdown */}
                     <div className="col-span-1">
                       <label className="block text-xs font-medium text-black mb-1">
-                        Assign Disconnection To <span className="text-red-600">*</span>
+                        Assign S&T Disconnection To <span className="text-red-600">*</span>
                       </label>
                       <select
                         name="sntDisconnectionAssignTo"
@@ -2786,22 +2625,13 @@ export default function CreateBlockRequestPage() {
                         }}
                       >
                         <option value="" disabled>
-                          Select Depo
+                          Select S&T Personnel
                         </option>
-                        {selectedMajorSection &&
-                          session?.user.department &&
-                          depot[selectedMajorSection] &&
-                          depot[selectedMajorSection]['S&T'] ? (
-                          depot[selectedMajorSection]['S&T'].map((depotOption: string, index) => (
-                            <option key={index} value={depotOption}>
-                              {depotOption}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>
-                            Select Major Section first
+                        {sntDisconnectionAssignToOptions.map((option) => (
+                          <option key={option.email} value={option.email}>
+                            {option.name}
                           </option>
-                        )}
+                        ))}
                       </select>
                       {errors.sntDisconnectionAssignTo && (
                         <span className="text-xs text-red-700 font-medium mt-1 block">
@@ -2811,6 +2641,7 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </div>
                 )}
+
                 <div className="form-group col-span-2 mt-5">
                   <label className="block text-sm font-medium text-black mb-1">
                     Remarks

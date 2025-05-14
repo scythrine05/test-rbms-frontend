@@ -5,20 +5,63 @@ import { userRequestService } from "@/app/service/api/user-request";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useUpdateOtherRequest } from "@/app/service/mutation/user-request";
+import { useState } from "react";
 
 export default function ViewRequestPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectRemarks, setRejectRemarks] = useState("");
 
   // Fetch request data
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["request", id],
     queryFn: () => userRequestService.getById(id),
   });
 
   // Update other request mutation
-  const { mutate: updateOtherRequest } = useUpdateOtherRequest();
+  const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
+
+  // Handle accept/reject request
+  const handleRequestAction = (accept: boolean) => {
+    if (accept) {
+      updateOtherRequest(
+        { id, accept },
+        {
+          onSuccess: () => {
+            refetch();
+          },
+        }
+      );
+    } else {
+      // Show rejection dialog
+      setShowRejectDialog(true);
+    }
+  };
+
+  // Handle confirm rejection with remarks
+  const handleConfirmReject = () => {
+    if (!rejectRemarks.trim()) {
+      alert("Please provide rejection remarks");
+      return;
+    }
+
+    updateOtherRequest(
+      {
+        id,
+        accept: false,
+        disconnectionRequestRejectRemarks: rejectRemarks,
+      },
+      {
+        onSuccess: () => {
+          setShowRejectDialog(false);
+          setRejectRemarks("");
+          refetch();
+        },
+      }
+    );
+  };
 
   // Format date and time
   const formatDate = (dateString: string) => {
@@ -101,21 +144,60 @@ export default function ViewRequestPage() {
           {request.DisconnAcceptance === "PENDING" && (
             <div className="flex gap-2">
               <button
-                onClick={() => updateOtherRequest({ id, accept: true })}
-                className="px-3 py-1 text-sm bg-green-50 text-green-700 border border-green-700 rounded hover:bg-green-100"
+                onClick={() => handleRequestAction(true)}
+                disabled={isMutating}
+                className="px-3 py-1 text-sm bg-green-50 text-green-700 border border-green-700 rounded hover:bg-green-100 disabled:opacity-50"
               >
-                Accept
+                {isMutating ? "Processing..." : "Accept"}
               </button>
               <button
-                onClick={() => updateOtherRequest({ id, accept: false })}
-                className="px-3 py-1 text-sm bg-red-50 text-red-700 border border-red-700 rounded hover:bg-red-100"
+                onClick={() => handleRequestAction(false)}
+                disabled={isMutating}
+                className="px-3 py-1 text-sm bg-red-50 text-red-700 border border-red-700 rounded hover:bg-red-100 disabled:opacity-50"
               >
-                Reject
+                {isMutating ? "Processing..." : "Reject"}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Rejection Dialog */}
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-md max-w-md w-full">
+            <h3 className="text-lg font-medium mb-3 text-black">Rejection Remarks</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Please provide a reason for rejecting this request.
+            </p>
+            <textarea
+              value={rejectRemarks}
+              onChange={(e) => setRejectRemarks(e.target.value)}
+              className="w-full border border-gray-300 rounded p-2 mb-3 text-black"
+              placeholder="Enter rejection remarks"
+              rows={4}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowRejectDialog(false);
+                  setRejectRemarks("");
+                }}
+                className="px-3 py-1 text-sm bg-gray-50 text-gray-700 border border-gray-700 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                className="px-3 py-1 text-sm bg-red-50 text-red-700 border border-red-700 rounded"
+                disabled={!rejectRemarks.trim() || isMutating}
+              >
+                {isMutating ? "Processing..." : "Confirm Rejection"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-4 px-2 py-1 inline-block">
         <span

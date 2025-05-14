@@ -87,10 +87,17 @@ export const userRequestService = {
     /**
      * Update other request status
      * @param id - The request ID
+     * @param accept - Whether to accept the request
+     * @param disconnectionRequestRejectRemarks - Remarks for rejection (required when rejecting)
      * @returns Promise with the response
      */
-    updateOtherRequest: async (id: string, accept: boolean): Promise<UserRequestResponse> => {
-        const response = await axiosInstance.put<UserRequestResponse>(`/api/user-request/other/${id}?accept=${accept}`);
+    updateOtherRequest: async (id: string, accept: boolean, disconnectionRequestRejectRemarks?: string): Promise<UserRequestResponse> => {
+        const url = `/api/user-request/other/${id}?accept=${accept}`;
+        
+        // If rejecting, include the rejection remarks in the request body
+        const body = !accept && disconnectionRequestRejectRemarks ? { disconnectionRequestRejectRemarks } : undefined;
+        
+        const response = await axiosInstance.put<UserRequestResponse>(url, body);
         return response.data;
     }
 };

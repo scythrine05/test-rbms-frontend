@@ -74,6 +74,9 @@ export default function OtherRequestsPage() {
   const { data: session } = useSession();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectRemarks, setRejectRemarks] = useState("");
+  const [selectedRequestId, setSelectedRequestId] = useState("");
 
   // Get the depot from session data
   const selectedDepo = session?.user?.depot || "";
@@ -109,14 +112,45 @@ export default function OtherRequestsPage() {
 
   // Handle status update with refetch
   const handleStatusUpdate = (id: string, accept: boolean) => {
+    if (accept) {
+      updateOtherRequest(
+        {
+          id,
+          accept,
+        },
+        {
+          onSuccess: () => {
+            // Refetch the data after the mutation succeeds
+            refetch();
+          },
+        }
+      );
+    } else {
+      // If rejecting, show the dialog to enter remarks
+      setSelectedRequestId(id);
+      setShowRejectDialog(true);
+    }
+  };
+
+  // Handle confirmation of rejection with remarks
+  const handleConfirmReject = () => {
+    if (!rejectRemarks.trim()) {
+      alert("Please provide rejection remarks");
+      return;
+    }
+
     updateOtherRequest(
       {
-        id,
-        accept,
+        id: selectedRequestId,
+        accept: false,
+        disconnectionRequestRejectRemarks: rejectRemarks,
       },
       {
         onSuccess: () => {
-          // Refetch the data after the mutation succeeds
+          // Reset the form and refetch data after successful rejection
+          setShowRejectDialog(false);
+          setRejectRemarks("");
+          setSelectedRequestId("");
           refetch();
         },
       }
@@ -278,8 +312,46 @@ export default function OtherRequestsPage() {
         )}
       </div>
 
+      {/* Rejection Dialog */}
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-md max-w-md w-full">
+            <h3 className="text-lg font-medium mb-3 text-black">Rejection Remarks</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Please provide a reason for rejecting this request.
+            </p>
+            <textarea
+              value={rejectRemarks}
+              onChange={(e) => setRejectRemarks(e.target.value)}
+              className="w-full border border-gray-300 rounded p-2 mb-3 text-black"
+              placeholder="Enter rejection remarks"
+              rows={4}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowRejectDialog(false);
+                  setRejectRemarks("");
+                  setSelectedRequestId("");
+                }}
+                className="px-3 py-1 text-sm bg-gray-50 text-gray-700 border border-gray-700 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                className="px-3 py-1 text-sm bg-red-50 text-red-700 border border-red-700 rounded"
+                disabled={!rejectRemarks.trim()}
+              >
+                Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1">
-        © {new Date().getFullYear()} Indian Railways. All Rights Reserved.
+        © {new Date().getFullYear()} Indian Railways. All Rights Reserved. 
       </div>
     </div>
   );
