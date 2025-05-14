@@ -10,9 +10,9 @@ type DepotStructure = {
 //   "TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ-MQ", "VM-PDY", "KPD-VM", "CUPJ-VRI", "TPJ-TP", "NGT-VLNK", "TVR-KKDI", "TTP-AGX"]
 // }
 export let MajorSection = {
-  " MAS": ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
-  "TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ- MQ", "VM-PDY", "KPD-VM", "CUP J-VRI", "TPJ-TP", "NGT-VLNK", "TVR- KKDI", "TTP- AGX"],
-  "SA": ["JTJ-ED", "ED-PTJ", "ED-TPJ", "KKR-DG", "SA-VRI", "SA-MTDM", "SA-KRR", "CBE-MTP", "MTP-UAM", "PTJ-CNV"]
+ " MAS": ["MAS-GDR","MAS-AJJ","AJJ-KPD", "KPD-JTJ", "AJJ-RU","AJJ-CGL","MSB-VM","MSB-VLCY"],
+"TPJ": ["TPJ-VM", "VM-MV", "TPJ-MV","TJ-KIK","MV-TVR","NMJ- MQ","VM-PDY","KPD-VM","CUPJ-VRI","TPJ-TP","NGT-VLNK","TVR- KKDI","TTP-AGX"],
+"SA":["JTJ-ED","ED-PTJ","ED-TPJ","KKR-DG","SA-VRI","SA-MTDM","SA-KRR","CBE-MTP","MTP-UAM","PTJ-CNV"]
 };
 
 
@@ -136,7 +136,7 @@ export let blockSection = {
   'MV-TVR': [
     "MV-PEM", "PEM-NNM", "NNM-TVR", "MV-YD", "PEM-YD", "NNM-YD", "TVR-YD"
   ],
-  'NMJ-MQ': [
+  'NMJ- MQ': [
     "NMJ-MQ", "NMJ-YD", "MQ-YD"
   ],
   'VM-PDY': [
@@ -155,8 +155,8 @@ export let blockSection = {
   'NGT-VLNK': [
     "NGT-VLNK", "NGT-YD", "VLNK-YD"
   ],
-  'TVR-KKDI': [
-    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT",
+  'TVR- KKDI': [
+    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT", 
     "PKT-PVI", "PVI-AYI", "AYI-ATQ", "ATQ-PYK", "PYK-KKDI", "TVR-YD", "TNK-YD", "TTP-YD", "TAM-YD",
     "AMM-YD", "PKT-YD", "PVI-YD", "AYI-YD", "ATQ-YD", "PYK-YD", "KKDI-YD"
   ],
@@ -1267,9 +1267,9 @@ export let lineData = {
 // };
 export const depot: DepotStructure = {
   "TPJ-VM": {
-    'ENGG': ["TPJ", "LLI", "ALU", "A/VRI", "", ""],
-    'S&T': ["TPJ", "ALU", "VRI", "VM"],
-    'TRD': ["RRI", "Lines", "VRI/A", "VRI/B", "VM"]
+    'ENGG': ["TPJ","LLI","ALU","A/VRI"],
+    'S&T': ["TPJ", "ALU","VRI","VM"],
+    'TRD': ["RRI","Lines","VRI/A","VRI/B","VM"]
   },
 
   "VM-MV": {
@@ -1296,7 +1296,7 @@ export const depot: DepotStructure = {
     'ENGG': ["MV", "TVR"]
   },
 
-  "NMJ-MQ": {
+  "NMJ- MQ": {
     'TRD': ["TJ", "TVR"],
     'S&T': ["TJ", "TVR"],
     'ENGG': ["TJ", "TVR"]
@@ -1332,8 +1332,8 @@ export const depot: DepotStructure = {
     'ENGG': ["A/TVR"]
   },
 
-  "TVR-KKDI": {
-    'TRD': ["TVR", "PKT"],
+  "TVR- KKDI": {
+    'TRD': ["TVR","PKT"],
     'S&T': ["TVR"],
     'ENGG': ["PKT", "TTP", "B/TVR"]
   },
