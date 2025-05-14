@@ -58,13 +58,13 @@ const formatDate = (dateString: string) => {
 // Helper function to safely extract HH:mm from ISO string without timezone conversion
 const formatTime = (dateString: string): string => {
   if (!dateString) return "Invalid time";
-  
+
   try {
     // Handle both full ISO strings and time-only strings
-    const timePart = dateString.includes('T') 
-      ? dateString.split('T')[1] 
+    const timePart = dateString.includes('T')
+      ? dateString.split('T')[1]
       : dateString;
-    
+
     // Extract just the hours and minutes
     const [hours, minutes] = timePart.split(':');
     return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0').substring(0, 2)}`;
@@ -77,36 +77,36 @@ const formatTime = (dateString: string): string => {
 const formatTimePeriod = (fromTime: string, toTime: string): string => {
   const from = formatTime(fromTime);
   const to = formatTime(toTime);
-  
+
   if (from === "Invalid time" || to === "Invalid time") {
     return "Invalid time period";
   }
-  
+
   // Calculate duration if possible
   let durationText = "";
   try {
     const fromParts = from.split(':').map(Number);
     const toParts = to.split(':').map(Number);
-    
+
     if (fromParts.length === 2 && toParts.length === 2) {
       let hours = toParts[0] - fromParts[0];
       let minutes = toParts[1] - fromParts[1];
-      
+
       if (minutes < 0) {
         hours -= 1;
         minutes += 60;
       }
-      
+
       if (hours < 0) {
         hours += 24; // Assuming end time could be next day
       }
-      
+
       durationText = ` (${hours}h ${minutes}m)`;
     }
   } catch (error) {
     console.error("Error calculating duration", error);
   }
-  
+
   return `${from}-${to}${durationText}`;
 };
 
@@ -129,12 +129,12 @@ const getDisconnectionStatus = (type: string, request: RequestItem) => {
   // Since the actual status fields aren't in the RequestItem type, we'll use simulated statuses
   const statusOptions = ["Accepted by Electrical Dept.", "Pending Approval", "Rejected by S&T Dept.", "Approved by Station Master"];
   const randomIndex = (request.id || "").length % statusOptions.length; // Use ID length to create consistent "random" index
-  
+
   switch (type) {
     case "power":
       return statusOptions[1];
     case "snt":
-      return statusOptions[(randomIndex + 1) % statusOptions.length]; 
+      return statusOptions[(randomIndex + 1) % statusOptions.length];
     case "sig":
       return "Conditionally approved - needs verification";
     case "trd":
@@ -224,7 +224,7 @@ const TimePeriodDisplay = ({ fromTime, toTime }: { fromTime: string, toTime: str
   const formattedPeriod = formatTimePeriod(fromTime, toTime);
   const [timeRange, duration] = formattedPeriod.split(/\s+\(|\)/).filter(Boolean);
   const [startTime, endTime] = timeRange.split('-');
-  
+
   return (
     <div className="flex items-center space-x-2">
       <TimeChip time={startTime} />
@@ -347,7 +347,7 @@ export default function RequestTablePage() {
       if (openTooltip !== null && !((event.target as Element).closest('.tooltip-container'))) {
         setOpenTooltip(null);
       }
-      
+
       // Close info panel when clicking outside
       if (showInfoPanel && !((event.target as Element).closest('.info-container'))) {
         setShowInfoPanel(false);
@@ -368,7 +368,7 @@ export default function RequestTablePage() {
           const requestDate = parseISO(request.date);
           const startDate = parseISO(weekRange.startDate);
           const endDate = parseISO(weekRange.endDate);
-          
+
           // Check if request date falls within current week range
           return requestDate >= startDate && requestDate <= endDate;
         } catch (error) {
@@ -376,9 +376,9 @@ export default function RequestTablePage() {
           return false;
         }
       });
-      
+
       setFilteredWeeklyRequests(filteredRequests);
-      
+
       const start = (currentPage - 1) * pageSize;
       const end = start + pageSize;
       setPaginatedRequests(filteredRequests.slice(start, end));
@@ -449,16 +449,16 @@ export default function RequestTablePage() {
           );
       }
     };
-    
+
     const status = request.status || "PENDING";
     const requestId = request.id || "";
-    
+
     // Create a detailed tooltip with all relevant status information
     const tooltipContent = (
       <div className="bg-white border border-gray-300 shadow-lg p-3 rounded-md text-black text-xs w-80">
         <div className="flex justify-between items-center border-b border-gray-200 pb-1 mb-2">
           <h5 className="font-bold text-[#13529e]">Status Details</h5>
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setOpenTooltip(null);
@@ -470,9 +470,9 @@ export default function RequestTablePage() {
             </svg>
           </button>
         </div>
-        
+
         <div className="mb-2">
-          <div className="font-semibold">Status: 
+          <div className="font-semibold">Status:
             <span className={`mx-1 px-2 py-0.5 ${getStatusBadgeClass(status)}`}>
               {status}
             </span>
@@ -481,59 +481,63 @@ export default function RequestTablePage() {
             {getStatusDetails(status)}
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 border-t border-gray-200 pt-2">
           <div className="font-semibold">Work Type:</div>
           <div>{request.workType || "N/A"}</div>
-          
+
           <div className="font-semibold">Activity:</div>
           <div>{request.activity || "N/A"}</div>
-          
+
           <div className="font-semibold">Date:</div>
           <div>{formatDate(request.date)}</div>
-          
+
           <div className="font-semibold">Time:</div>
           <div>{formatTimePeriod(request.demandTimeFrom, request.demandTimeTo)}</div>
         </div>
-        
-        {(request.powerBlockRequired || request.sntDisconnectionRequired || 
-         request.sigDisconnectionRequirements || request.trdDisconnectionRequirements) && (
-          <div className="mt-2 pt-1 border-t border-gray-200">
-            <div className="font-semibold mb-1">Required Disconnections:</div>
-            <ul className="space-y-1 text-[10px]">
-              {request.powerBlockRequired && (
-                <li className="flex justify-between rounded px-1 py-0.5 bg-blue-50">
-                  <span className="font-medium">Power Block:</span>
-                  <span className="italic">{getDisconnectionStatus("power", request)}</span>
-                </li>
-              )}
-              {request.sntDisconnectionRequired && (
-                <li className="flex justify-between rounded px-1 py-0.5 bg-purple-50">
-                  <span className="font-medium">S&T Disconnection:</span>
-                  <span className="italic">{getDisconnectionStatus("snt", request)}</span>
-                </li>
-              )}
-              {request.sigDisconnectionRequirements && (
-                <li className="flex justify-between rounded px-1 py-0.5 bg-indigo-50">
-                  <span className="font-medium">SIG Disconnection:</span>
-                  <span className="italic">{getDisconnectionStatus("sig", request)}</span>
-                </li>
-              )}
-              {request.trdDisconnectionRequirements && (
-                <li className="flex justify-between rounded px-1 py-0.5 bg-cyan-50">
-                  <span className="font-medium">TRD Disconnection:</span>
-                  <span className="italic">{getDisconnectionStatus("trd", request)}</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        )}
+
+        {(request.powerBlockRequired || request.sntDisconnectionRequired ||
+          request.sigDisconnectionRequirements || request.trdDisconnectionRequirements) && (
+            <div className="mt-2 pt-1 border-t border-gray-200">
+              <div className="font-semibold mb-1">Required Disconnections:</div>
+              <ul className="space-y-1 text-[10px]">
+                {request.powerBlockRequired && (
+                  <li className="flex justify-between rounded px-1 py-0.5 bg-blue-50">
+                    <span className="font-medium">Power Block:</span>
+                    <span className="italic">{getDisconnectionStatus("power", request)}</span>
+                  </li>
+                )}
+                {request.sntDisconnectionRequired && (
+                  <li className="flex justify-between rounded px-1 py-0.5 bg-purple-50">
+                    <span className="font-medium">S&T Disconnection:</span>
+                    <span className="italic">
+                      {request.DisconnAcceptance === "ACCEPTED"
+                        ? "Accepted by S&T Dept."
+                        : "Pending Approval"}
+                    </span>
+                  </li>
+                )}
+                {request.sigDisconnectionRequirements && (
+                  <li className="flex justify-between rounded px-1 py-0.5 bg-indigo-50">
+                    <span className="font-medium">SIG Disconnection:</span>
+                    <span className="italic">{getDisconnectionStatus("sig", request)}</span>
+                  </li>
+                )}
+                {request.trdDisconnectionRequirements && (
+                  <li className="flex justify-between rounded px-1 py-0.5 bg-cyan-50">
+                    <span className="font-medium">TRD Disconnection:</span>
+                    <span className="italic">{getDisconnectionStatus("trd", request)}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
       </div>
     );
-    
+
     return (
       <div className="relative flex flex-col items-start tooltip-container">
-        <span 
+        <span
           className={`px-1 py-0.5 text-xs flex items-center ${getStatusBadgeClass(status)} cursor-pointer`}
           onClick={(e) => {
             e.stopPropagation();
@@ -548,8 +552,8 @@ export default function RequestTablePage() {
           )}
         </span>
         {openTooltip === requestId && (
-          <div 
-            className="fixed z-[9999]" 
+          <div
+            className="fixed z-[9999]"
             style={{
               left: `${tooltipPos?.x}px`,
               top: `${tooltipPos?.y}px`,
@@ -567,7 +571,7 @@ export default function RequestTablePage() {
   const InfoCorner = () => {
     return (
       <div className="relative info-container">
-        <button 
+        <button
           className="h-6 w-6 rounded-full border border-[#13529e] bg-white text-[#13529e] flex items-center justify-center hover:bg-[#13529e] hover:text-white"
           onClick={(e) => {
             e.stopPropagation();
@@ -582,7 +586,7 @@ export default function RequestTablePage() {
           <div className="absolute right-0 top-8 z-10 bg-white border border-gray-300 shadow-lg p-3 rounded-md w-72 text-sm text-black info-container">
             <div className="flex justify-between items-center border-b border-gray-200 pb-1 mb-2">
               <h5 className="font-bold text-[#13529e]">Legend</h5>
-              <button 
+              <button
                 onClick={() => setShowInfoPanel(false)}
                 className="text-gray-600 hover:text-black"
               >
@@ -597,25 +601,25 @@ export default function RequestTablePage() {
                 <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className="mx-1 px-2 py-0.5 bg-green-100 text-green-800 text-[10px] border border-black">APPROVED</span>: 
+                <span className="mx-1 px-2 py-0.5 bg-green-100 text-green-800 text-[10px] border border-black">APPROVED</span>:
                 <span className="ml-1 text-[10px]">Request has been approved</span>
               </li>
               <li className="flex items-center mb-1">
                 <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-                <span className="mx-1 px-2 py-0.5 bg-red-100 text-red-800 text-[10px] border border-black">REJECTED</span>: 
+                <span className="mx-1 px-2 py-0.5 bg-red-100 text-red-800 text-[10px] border border-black">REJECTED</span>:
                 <span className="ml-1 text-[10px]">Request has been rejected</span>
               </li>
               <li className="flex items-center mb-1">
                 <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
-                <span className="mx-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] border border-black">PENDING</span>: 
+                <span className="mx-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] border border-black">PENDING</span>:
                 <span className="ml-1 text-[10px]">Request awaiting approval</span>
               </li>
             </ul>
-            
+
             <h6 className="font-semibold mt-2">Disconnection Types:</h6>
             <ul className="mb-1">
               <li className="flex items-center mb-1">
@@ -631,7 +635,7 @@ export default function RequestTablePage() {
                 <span className="ml-1 text-[10px]">S&T Disconnection</span>
               </li>
             </ul>
-            
+
             <div className="text-[10px] mt-2 text-gray-600 border-t border-gray-200 pt-2">
               Click on status badges for more details.
             </div>
@@ -644,14 +648,14 @@ export default function RequestTablePage() {
   // Get disconnection status badges with tooltips
   const getDisconnectionBadges = (request: RequestItem) => {
     const badges = [];
-    
+
     if (request.powerBlockRequired) {
       const tooltipId = `power-${request.id}`;
       const tooltipContent = (
         <div className="bg-white border border-gray-300 shadow-lg p-2 rounded-md text-black text-xs max-w-xs z-20">
           <div className="flex justify-between items-center border-b border-gray-200 pb-1 mb-1">
             <h5 className="font-bold text-blue-800">Power Block</h5>
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setOpenTooltip(null);
@@ -672,10 +676,10 @@ export default function RequestTablePage() {
           </div>
         </div>
       );
-      
+
       badges.push(
         <div key={tooltipId} className="relative inline-block tooltip-container">
-          <span 
+          <span
             className="inline-block px-1 py-0.5 mr-1 text-[8px] bg-blue-100 text-blue-800 border border-black cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
@@ -688,8 +692,8 @@ export default function RequestTablePage() {
             Power
           </span>
           {openTooltip === tooltipId && (
-            <div 
-              className="fixed z-[9999]" 
+            <div
+              className="fixed z-[9999]"
               style={{
                 left: `${tooltipPos?.x}px`,
                 top: `${tooltipPos?.y}px`,
@@ -702,14 +706,14 @@ export default function RequestTablePage() {
         </div>
       );
     }
-    
+
     if (request.sntDisconnectionRequired) {
       const tooltipId = `snt-${request.id}`;
       const tooltipContent = (
         <div className="bg-white border border-gray-300 shadow-lg p-2 rounded-md text-black text-xs max-w-xs z-20">
           <div className="flex justify-between items-center border-b border-gray-200 pb-1 mb-1">
             <h5 className="font-bold text-purple-800">S&T Disconnection</h5>
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setOpenTooltip(null);
@@ -730,10 +734,10 @@ export default function RequestTablePage() {
           </div>
         </div>
       );
-      
+
       badges.push(
         <div key={tooltipId} className="relative inline-block tooltip-container">
-          <span 
+          <span
             className="inline-block px-1 py-0.5 mr-1 text-[8px] bg-purple-100 text-purple-800 border border-black cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
@@ -753,14 +757,14 @@ export default function RequestTablePage() {
         </div>
       );
     }
-    
+
     // Simplified versions for remaining types to save space
     if (request.sigDisconnectionRequirements) {
       const tooltipId = `sig-${request.id}`;
-      
+
       badges.push(
         <div key={tooltipId} className="relative inline-block tooltip-container">
-          <span 
+          <span
             className="inline-block px-1 py-0.5 mr-1 text-[8px] bg-indigo-100 text-indigo-800 border border-black cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
@@ -790,13 +794,13 @@ export default function RequestTablePage() {
         </div>
       );
     }
-    
+
     if (request.trdDisconnectionRequirements) {
       const tooltipId = `trd-${request.id}`;
-      
+
       badges.push(
         <div key={tooltipId} className="relative inline-block tooltip-container">
-          <span 
+          <span
             className="inline-block px-1 py-0.5 mr-1 text-[8px] bg-cyan-100 text-cyan-800 border border-black cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
@@ -826,7 +830,7 @@ export default function RequestTablePage() {
         </div>
       );
     }
-    
+
     return badges.length > 0 ? badges : <span className="text-[8px] text-gray-500">None</span>;
   };
 
@@ -834,7 +838,7 @@ export default function RequestTablePage() {
   const getPriorityBadge = (request: RequestItem) => {
     // Default to "NORMAL" if no priority specified
     let priority = "NORMAL";
-    
+
     // Try to determine priority from other fields if available
     if (request.workType === "EMERGENCY") {
       priority = "HIGH";
@@ -843,15 +847,15 @@ export default function RequestTablePage() {
     } else if (request.workType === "PLANNED") {
       priority = "LOW";
     }
-    
+
     let bgColor = "bg-blue-100 text-blue-800";
-    
+
     if (priority === "HIGH") {
       bgColor = "bg-red-100 text-red-800";
     } else if (priority === "LOW") {
       bgColor = "bg-green-100 text-green-800";
     }
-    
+
     return (
       <span className={`px-1 py-0.5 text-xs ${bgColor} border border-black`}>
         {priority}
@@ -929,7 +933,7 @@ export default function RequestTablePage() {
       Activity: ${request.activity || "N/A"}
       Corridor Type: ${getCorridorType(request)}
     `.trim();
-    
+
     return (
       <div title={tooltip} className="flex flex-col">
         <span className="text-xs font-medium">
@@ -950,20 +954,20 @@ export default function RequestTablePage() {
     // Get viewport dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
+
     // Get coordinates relative to viewport
     const x = event.clientX;
     const y = event.clientY;
-    
+
     // Assume tooltip width and height (adjust as needed)
     const tooltipWidth = 320;
     const tooltipHeight = 200;
-    
+
     // Determine best placement to keep tooltip on screen
     let placement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
     let posX = x;
     let posY = y;
-    
+
     // Horizontal placement
     if (x + tooltipWidth + 10 > viewportWidth) {
       // Not enough room to the right, place to the left
@@ -974,7 +978,7 @@ export default function RequestTablePage() {
       posX = x + 5;
       placement = y < viewportHeight / 2 ? 'top-right' : 'bottom-right';
     }
-    
+
     // Vertical placement
     if (placement.startsWith('top')) {
       posY = y + 5;
@@ -983,11 +987,11 @@ export default function RequestTablePage() {
       posY = y - tooltipHeight - 5;
       if (posY < 0) posY = 5; // Ensure it doesn't go off the top
     }
-    
+
     // Ensure tooltip is never off-screen
     posX = Math.max(5, Math.min(viewportWidth - tooltipWidth - 5, posX));
     posY = Math.max(5, Math.min(viewportHeight - tooltipHeight - 5, posY));
-    
+
     setTooltipPos({ x: posX, y: posY, placement });
     setOpenTooltip(tooltipId);
   };
@@ -1008,7 +1012,7 @@ export default function RequestTablePage() {
         >
           View
         </Link>
-        
+
         {isPending && isRequestOwner && (
           <Link
             href={`/edit-request/${request.id}`}
@@ -1017,7 +1021,7 @@ export default function RequestTablePage() {
             Edit
           </Link>
         )}
-        
+
         {isPending && canApproveRequest && (
           <>
             <button
@@ -1040,7 +1044,7 @@ export default function RequestTablePage() {
             </button>
           </>
         )}
-        
+
         {isApproved && canApproveRequest && (
           <div className="px-1 py-0.5 text-[8px] bg-green-100 text-green-800 border border-black rounded flex items-center">
             <svg className="w-2 h-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -1049,7 +1053,7 @@ export default function RequestTablePage() {
             Approved
           </div>
         )}
-        
+
         {isRejected && canApproveRequest && (
           <div className="px-1 py-0.5 text-[8px] bg-red-100 text-red-800 border border-black rounded flex items-center">
             <svg className="w-2 h-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -1058,7 +1062,7 @@ export default function RequestTablePage() {
             Rejected
           </div>
         )}
-        
+
         {/* Delete button - available for admins/managers or request owners with pending status */}
         {(canDeleteRequest || (isRequestOwner && isPending)) && (
           <button
@@ -1071,7 +1075,7 @@ export default function RequestTablePage() {
             Delete
           </button>
         )}
-        
+
         {/* If the user is an officer with special permissions, show additional action buttons */}
         {canApproveRequest && userRole === "OFFICER" && isPending && request.powerBlockRequired && (
           <button
@@ -1088,20 +1092,20 @@ export default function RequestTablePage() {
   // Delete confirmation modal
   const DeleteConfirmationModal = ({ requestId }: { requestId: string }) => {
     if (!requestId) return null;
-    
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-4 rounded-md shadow-lg max-w-sm w-full text-black">
           <h3 className="font-bold text-lg">Confirm Delete</h3>
           <p className="py-2">Are you sure you want to delete this request? This action cannot be undone.</p>
           <div className="flex justify-end gap-2 mt-3">
-            <button 
+            <button
               onClick={() => setConfirmDelete(null)}
               className="px-3 py-1 bg-gray-200 text-black border border-black rounded"
             >
               Cancel
             </button>
-            <button 
+            <button
               onClick={() => handleDeleteRequest(requestId)}
               className="px-3 py-1 bg-red-600 text-white border border-black rounded"
             >
@@ -1116,7 +1120,7 @@ export default function RequestTablePage() {
   // Column header with filter
   const ColumnHeader = ({ icon, title, showFilter = true }: { icon: string, title: string, showFilter?: boolean }) => {
     const [showFilterMenu, setShowFilterMenu] = useState(false);
-    
+
     return (
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center">
@@ -1125,7 +1129,7 @@ export default function RequestTablePage() {
         </div>
         {showFilter && (
           <div className="relative">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowFilterMenu(!showFilterMenu);
@@ -1135,20 +1139,20 @@ export default function RequestTablePage() {
               <HeaderIcon type="filter" />
             </button>
             {showFilterMenu && (
-              <div 
+              <div
                 className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-50"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-2 text-xs">
                   <div className="font-medium mb-1">Filter options</div>
                   <div className="mb-2">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Search..."
-                      className="w-full border border-gray-300 px-2 py-1 rounded" 
+                      className="w-full border border-gray-300 px-2 py-1 rounded"
                     />
                   </div>
-                  <button 
+                  <button
                     className="w-full text-left px-2 py-1 hover:bg-blue-50 rounded"
                     onClick={() => setShowFilterMenu(false)}
                   >
@@ -1187,21 +1191,19 @@ export default function RequestTablePage() {
           <div className="space-x-1">
             <button
               onClick={() => setViewType("compact")}
-              className={`px-3 py-1 text-sm border border-black ${
-                viewType === "compact"
-                  ? "bg-[#13529e] text-white"
-                  : "bg-white text-[#13529e]"
-              }`}
+              className={`px-3 py-1 text-sm border border-black ${viewType === "compact"
+                ? "bg-[#13529e] text-white"
+                : "bg-white text-[#13529e]"
+                }`}
             >
               Compact View
             </button>
             <button
               onClick={() => setViewType("gantt")}
-              className={`px-3 py-1 text-sm border border-black ${
-                viewType === "gantt"
-                  ? "bg-[#13529e] text-white"
-                  : "bg-white text-[#13529e]"
-              }`}
+              className={`px-3 py-1 text-sm border border-black ${viewType === "gantt"
+                ? "bg-[#13529e] text-white"
+                : "bg-white text-[#13529e]"
+                }`}
             >
               Gantt View
             </button>
@@ -1443,20 +1445,18 @@ export default function RequestTablePage() {
                                 key={`gantt-request-${request.id}-${dateInfo.formattedDate}`}
                                 href={`/view-request/${request.id}`}
                                 className={`block text-[8px] p-0.5 mb-0.5 border border-black overflow-hidden text-white
-                                  ${
-                                    request.status === "APPROVED"
-                                      ? "bg-green-700"
-                                      : request.status === "REJECTED"
+                                  ${request.status === "APPROVED"
+                                    ? "bg-green-700"
+                                    : request.status === "REJECTED"
                                       ? "bg-red-700"
                                       : request.workType === "EMERGENCY"
-                                      ? "bg-orange-700"
-                                      : "bg-[#13529e]"
+                                        ? "bg-orange-700"
+                                        : "bg-[#13529e]"
                                   }`}
-                                title={`${request.workType}: ${
-                                  request.activity
-                                } - ${formatTime(
-                                  request.demandTimeFrom
-                                )} to ${formatTime(request.demandTimeTo)} 
+                                title={`${request.workType}: ${request.activity
+                                  } - ${formatTime(
+                                    request.demandTimeFrom
+                                  )} to ${formatTime(request.demandTimeTo)} 
 ${getCorridorType(request)} - ${request.selectedDepo}
 ${request.missionBlock} - ${getLineName(request)}`}
                               >
