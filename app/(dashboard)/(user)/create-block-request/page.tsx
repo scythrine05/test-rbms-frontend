@@ -3,7 +3,7 @@ import ConfirmationDialog from "@/app/components/ui/ConfirmationDiagonal";
 import React, { useState, useEffect } from "react";
 import { useCreateUserRequest } from "@/app/service/mutation/user-request";
 import { useSession } from "next-auth/react";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 import {
   MajorSection,
   blockSection,
@@ -44,7 +44,8 @@ const selectStyles = {
     ...base,
     zIndex: 10,
     backgroundColor: "white",
-    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    boxShadow:
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
   }),
   control: (base: any, state: any) => ({
     ...base,
@@ -85,7 +86,11 @@ const selectStyles = {
   option: (base: any, state: any) => ({
     ...base,
     color: "black",
-    backgroundColor: state.isSelected ? "#e0e7ef" : state.isFocused ? "#f3f4f6" : "white",
+    backgroundColor: state.isSelected
+      ? "#e0e7ef"
+      : state.isFocused
+      ? "#f3f4f6"
+      : "white",
     fontSize: "14px",
     padding: "6px 12px",
     "&:hover": {
@@ -113,19 +118,25 @@ const getSelectStyles = (hasError: boolean) => {
       ...base,
       backgroundColor: "white",
       color: "black",
-      borderColor: hasError ? "#dc2626" : state.isFocused ? "#2461aa" : "#45526c",
+      borderColor: hasError
+        ? "#dc2626"
+        : state.isFocused
+        ? "#2461aa"
+        : "#45526c",
       borderWidth: hasError ? "2px" : "1px",
       borderRadius: "4px",
       padding: "2px",
       boxShadow: hasError
         ? "0 0 0 1px rgba(220, 38, 38, 0.2)"
-        : state.isFocused ? "0 0 0 1px rgba(37, 99, 176, 0.1)" : "none",
+        : state.isFocused
+        ? "0 0 0 1px rgba(37, 99, 176, 0.1)"
+        : "none",
       fontSize: "14px",
       minHeight: "36px",
       "&:hover": {
         borderColor: hasError ? "#dc2626" : "#2461aa",
       },
-    })
+    }),
   };
 };
 
@@ -135,7 +146,7 @@ const sntDisconnectionAssignToOptions = [
   { name: "Officer 2", email: "snt.officer2@railways.com" },
   { name: "Supervisor", email: "snt.supervisor@railways.com" },
   { name: "Manager", email: "snt.manager@railways.com" },
-  { name: "Engineer", email: "snt.engineer@railways.com" }
+  { name: "Engineer", email: "snt.engineer@railways.com" },
 ];
 
 // Add RNT disconnection options
@@ -143,11 +154,10 @@ const trdDisconnectionAssignToOptions = [
   { name: "Elec Engineer", email: "snt.user@test.com" },
   { name: "Elec Supervisor", email: "trd.supervisor@railways.com" },
   { name: "Elec Officer", email: "trd.officer@railways.com" },
-  { name: "Elec Manager", email: "trd.manager@railways.com" }
+  { name: "Elec Manager", email: "trd.manager@railways.com" },
 ];
 
 export default function CreateBlockRequestPage() {
-
   const [formData, setFormData] = useState<
     Partial<UserRequestInput> & {
       selectedStreams?: Record<string, string>;
@@ -232,7 +242,7 @@ export default function CreateBlockRequestPage() {
   const selectedMajorSection = formData.selectedSection;
   const blockSectionOptions =
     selectedMajorSection &&
-      blockSection[selectedMajorSection as keyof typeof blockSection]
+    blockSection[selectedMajorSection as keyof typeof blockSection]
       ? blockSection[selectedMajorSection as keyof typeof blockSection]
       : [];
   const userDepartment = session?.user.department;
@@ -328,7 +338,9 @@ export default function CreateBlockRequestPage() {
   };
 
   // Helper function to determine corridor type restrictions based on date
-  const getCorridorTypeRestrictions = (dateString: string): {
+  const getCorridorTypeRestrictions = (
+    dateString: string
+  ): {
     urgentOnly: boolean;
     urgentAllowed: boolean;
     message: string;
@@ -355,9 +367,11 @@ export default function CreateBlockRequestPage() {
     // Set appropriate message
     let message = "";
     if (isUrgentTimeframe) {
-      message = "Dates within today and next 2 days must be Urgent Block requests.";
+      message =
+        "Dates within today and next 2 days must be Urgent Block requests.";
     } else if (isNextWeek && pastThursdayCutoff) {
-      message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+      message =
+        "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
     }
 
     return { urgentOnly, urgentAllowed, message };
@@ -413,20 +427,20 @@ export default function CreateBlockRequestPage() {
   ) => {
     const { name, value, type } = e.target;
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
       });
     }
     // Special handling for date field
-    if (name === 'date') {
+    if (name === "date") {
       // Check if the selected date is allowed
       if (value && !isDateSelectable(value)) {
         // If date is in current week but beyond urgent window, show error and don't update state
         setErrors({
           ...errors,
-          date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests."
+          date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
         });
         return;
       }
@@ -491,21 +505,23 @@ export default function CreateBlockRequestPage() {
 
     // Basic required fields that are always needed
     const alwaysRequired = [
-      'date',
-      'corridorTypeSelection',
-      'selectedSection',
-      'selectedDepo',
-      'demandTimeFrom',
-      'demandTimeTo',
-      'workType',
-      'activity',
-      'missionBlock' // This is your block section
+      "date",
+      "corridorTypeSelection",
+      "selectedSection",
+      "selectedDepo",
+      "demandTimeFrom",
+      "demandTimeTo",
+      "workType",
+      "activity",
+      "missionBlock", // This is your block section
     ];
 
     // Check always required fields
     alwaysRequired.forEach((field) => {
       if (!formData[field as keyof typeof formData]) {
-        newErrors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+        newErrors[field] = `${field
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())} is required`;
         hasError = true;
       }
     });
@@ -519,10 +535,10 @@ export default function CreateBlockRequestPage() {
     // Validate line/stream entries for each block section
     for (const block of blockSectionValue) {
       const sectionEntry = formData.processedLineSections?.find(
-        section => section.block === block
+        (section) => section.block === block
       );
 
-      if (block.includes('-YD')) {
+      if (block.includes("-YD")) {
         // Yard section validation
         if (!sectionEntry || !sectionEntry.road) {
           newErrors[`${block}.road`] = `Road for ${block} is required`;
@@ -542,14 +558,14 @@ export default function CreateBlockRequestPage() {
     }
 
     // Department-specific validations
-    if (session?.user.department === 'TRD') {
+    if (session?.user.department === "TRD") {
       if (!formData.repercussions) {
         newErrors.repercussions = "Coaching repercussions are required";
         hasError = true;
       }
     }
 
-    if (session?.user.department === 'S&T') {
+    if (session?.user.department === "S&T") {
       if (!formData.routeFrom || !formData.routeTo) {
         if (!formData.routeFrom) newErrors.routeFrom = "Route From is required";
         if (!formData.routeTo) newErrors.routeTo = "Route To is required";
@@ -558,13 +574,17 @@ export default function CreateBlockRequestPage() {
     }
 
     // Outside corridor requires remarks
-    if (formData.corridorTypeSelection === 'Outside Corridor' && !formData.requestremarks?.trim()) {
-      newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
+    if (
+      formData.corridorTypeSelection === "Outside Corridor" &&
+      !formData.requestremarks?.trim()
+    ) {
+      newErrors.requestremarks =
+        "Remarks are required for Outside Corridor requests";
       hasError = true;
     }
 
     // Custom activity validation
-    if (formData.activity === 'others' && !customActivity.trim()) {
+    if (formData.activity === "others" && !customActivity.trim()) {
       newErrors.activity = "Please specify the custom activity";
       hasError = true;
     }
@@ -572,7 +592,8 @@ export default function CreateBlockRequestPage() {
     // S&T disconnection validation
     if (formData.sntDisconnectionRequired === true) {
       if (!formData.sntDisconnectionLineFrom) {
-        newErrors.sntDisconnectionLineFrom = "Disconnection Line From is required";
+        newErrors.sntDisconnectionLineFrom =
+          "Disconnection Line From is required";
         hasError = true;
       }
       if (!formData.sntDisconnectionLineTo) {
@@ -580,7 +601,8 @@ export default function CreateBlockRequestPage() {
         hasError = true;
       }
       if (!formData.sntDisconnectionAssignTo) {
-        newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
+        newErrors.sntDisconnectionAssignTo =
+          "Please select who to assign the S&T disconnection to";
         hasError = true;
       }
     }
@@ -588,11 +610,13 @@ export default function CreateBlockRequestPage() {
     // Power block validation
     if (formData.powerBlockRequired === true) {
       if (!formData.elementarySection) {
-        newErrors.elementarySection = "Elementary Section is required for power block";
+        newErrors.elementarySection =
+          "Elementary Section is required for power block";
         hasError = true;
       }
       if (!formData.trdDisconnectionAssignTo) {
-        newErrors.trdDisconnectionAssignTo = "Please select who to assign the power block disconnection to";
+        newErrors.trdDisconnectionAssignTo =
+          "Please select who to assign the power block disconnection to";
         hasError = true;
       }
     }
@@ -600,7 +624,8 @@ export default function CreateBlockRequestPage() {
     // Fresh caution validation
     if (formData.freshCautionRequired === true) {
       if (!formData.freshCautionLocationFrom) {
-        newErrors.freshCautionLocationFrom = "Caution Location From is required";
+        newErrors.freshCautionLocationFrom =
+          "Caution Location From is required";
         hasError = true;
       }
       if (!formData.freshCautionLocationTo) {
@@ -619,7 +644,7 @@ export default function CreateBlockRequestPage() {
       const firstErrorKey = Object.keys(newErrors)[0];
       const element = document.querySelector(`[name="${firstErrorKey}"]`);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return false;
     }
@@ -632,7 +657,7 @@ export default function CreateBlockRequestPage() {
     setSuccess(null);
 
     if (!handleFormValidation()) {
-      toast.error('Please fill all required fields', {
+      toast.error("Please fill all required fields", {
         position: "bottom-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -646,9 +671,7 @@ export default function CreateBlockRequestPage() {
     setShowConfirmation(true);
   };
 
-
   const handleConfirmedSubmit = () => {
-
     setShowConfirmation(false);
     setFormSubmitting(true);
     const finalActivity =
@@ -789,7 +812,8 @@ export default function CreateBlockRequestPage() {
       setFormData({ ...formData, corridorTypeSelection: null });
     } else {
       // Get corridor type restrictions based on selected date
-      const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
+      const { urgentOnly, urgentAllowed, message } =
+        getCorridorTypeRestrictions(formData.date);
 
       if (urgentOnly) {
         // If urgent block is required, disable other options and set to Urgent
@@ -803,7 +827,10 @@ export default function CreateBlockRequestPage() {
         setIsDisabled(false);
 
         // If user had Urgent Block selected but it's not allowed, reset selection
-        if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
+        if (
+          formData.corridorTypeSelection === "Urgent Block" &&
+          !urgentAllowed
+        ) {
           setFormData({
             ...formData,
             corridorTypeSelection: null,
@@ -1005,7 +1032,7 @@ export default function CreateBlockRequestPage() {
         const updatedSection = {
           ...existingProcessedSections[sectionIndex],
           stream: value,
-          type: "yard" // Ensure type is set
+          type: "yard", // Ensure type is set
         };
         existingProcessedSections[sectionIndex] = updatedSection;
       } else {
@@ -1051,9 +1078,9 @@ export default function CreateBlockRequestPage() {
     // Flatten all roads from all streams into a single array
     const allRoads: string[] = [];
 
-    Object.keys(blockData).forEach(streamKey => {
+    Object.keys(blockData).forEach((streamKey) => {
       const roads = (blockData as Record<string, string[]>)[streamKey] || [];
-      roads.forEach(road => {
+      roads.forEach((road) => {
         if (!allRoads.includes(road)) {
           allRoads.push(road);
         }
@@ -1132,7 +1159,10 @@ export default function CreateBlockRequestPage() {
               </span>
             )}
             <span className="text-xs text-gray-600 mt-1 block">
-              Note: Only today, tomorrow, and day after tomorrow are available for urgent blocks. Dates in current week beyond these are not available. Week 2 block requests must be submitted before Thursday 22:00 of current week.
+              Note: Only today, tomorrow, and day after tomorrow are available
+              for urgent blocks. Dates in current week beyond these are not
+              available. Week 2 block requests must be submitted before Thursday
+              22:00 of current week.
             </span>
           </div>
           <div className="form-group col-span-1 text-black">
@@ -1173,7 +1203,10 @@ export default function CreateBlockRequestPage() {
                   value="Urgent Block"
                   checked={formData.corridorTypeSelection === "Urgent Block"}
                   onChange={handleInputChange}
-                  disabled={!formData.date || !getCorridorTypeRestrictions(formData.date).urgentAllowed}
+                  disabled={
+                    !formData.date ||
+                    !getCorridorTypeRestrictions(formData.date).urgentAllowed
+                  }
                   className="form-radio h-4 w-4"
                 />
                 <span className="ml-2 text-sm">Urgent Block</span>
@@ -1184,11 +1217,12 @@ export default function CreateBlockRequestPage() {
                 {getCorridorTypeRestrictions(formData.date).message}
               </span>
             )}
-            {formData.date && !getCorridorTypeRestrictions(formData.date).urgentAllowed && (
-              <span className="text-xs text-gray-600 mt-1 block">
-                Urgent Block is only available for today and the next 2 days.
-              </span>
-            )}
+            {formData.date &&
+              !getCorridorTypeRestrictions(formData.date).urgentAllowed && (
+                <span className="text-xs text-gray-600 mt-1 block">
+                  Urgent Block is only available for today and the next 2 days.
+                </span>
+              )}
             {errors.corridorTypeSelection && (
               <span className="text-xs text-red-700 font-medium mt-1 block">
                 {errors.corridorTypeSelection}
@@ -1260,7 +1294,10 @@ export default function CreateBlockRequestPage() {
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-black mb-1" htmlFor="routeFrom">
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeFrom"
+                  >
                     From Location
                   </label>
                   <input
@@ -1272,7 +1309,7 @@ export default function CreateBlockRequestPage() {
                     style={{
                       color: "black",
                       fontSize: "14px",
-                      borderColor: errors.routeFrom ? "#dc2626" : "#45526c"
+                      borderColor: errors.routeFrom ? "#dc2626" : "#45526c",
                     }}
                     aria-label="Route from location"
                   />
@@ -1283,7 +1320,10 @@ export default function CreateBlockRequestPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-black mb-1" htmlFor="routeTo">
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeTo"
+                  >
                     To Location
                   </label>
                   <input
@@ -1295,7 +1335,7 @@ export default function CreateBlockRequestPage() {
                     style={{
                       color: "black",
                       fontSize: "14px",
-                      borderColor: errors.routeTo ? "#dc2626" : "#45526c"
+                      borderColor: errors.routeTo ? "#dc2626" : "#45526c",
                     }}
                     aria-label="Route to location"
                   />
@@ -1394,11 +1434,11 @@ export default function CreateBlockRequestPage() {
                 Select Depot / SSE
               </option>
               {selectedMajorSection &&
-                session?.user.department &&
-                depot[selectedMajorSection] &&
-                depot[selectedMajorSection][
+              session?.user.department &&
+              depot[selectedMajorSection] &&
+              depot[selectedMajorSection][
                 session.user.department as Department
-                ] ? (
+              ] ? (
                 depot[selectedMajorSection][
                   session.user.department as Department
                 ].map((depotOption: string, index) => (
@@ -1494,23 +1534,29 @@ export default function CreateBlockRequestPage() {
                       <div>
                         {/* Road selection - shown first */}
                         <label className="block text-sm font-medium text-black mb-1">
-                          Road for {blockSectionValue[0]} <span className="text-red-600">*</span>
+                          Road for {blockSectionValue[0]}{" "}
+                          <span className="text-red-600">*</span>
                         </label>
                         <div>
                           {(() => {
                             // Find the section in processedLineSections for this block
-                            const sectionEntry = formData.processedLineSections?.find(
-                              (section) => section.block === blockSectionValue[0]
-                            );
+                            const sectionEntry =
+                              formData.processedLineSections?.find(
+                                (section) =>
+                                  section.block === blockSectionValue[0]
+                              );
                             const roadValue = sectionEntry?.road || "";
 
                             // Get all roads for this yard
-                            const allRoads = getAllRoadsForYard(blockSectionValue[0]);
+                            const allRoads = getAllRoadsForYard(
+                              blockSectionValue[0]
+                            );
 
                             // Check if we have error
-                            const hasRoadError = errors[
-                              `processedLineSections.${blockSectionValue[0]}.road`
-                            ];
+                            const hasRoadError =
+                              errors[
+                                `processedLineSections.${blockSectionValue[0]}.road`
+                              ];
 
                             return (
                               <>
@@ -1521,8 +1567,8 @@ export default function CreateBlockRequestPage() {
                                     borderColor: hasRoadError
                                       ? "#dc2626"
                                       : roadValue
-                                        ? "#45526c"
-                                        : "#dc2626",
+                                      ? "#45526c"
+                                      : "#dc2626",
                                     fontSize: "14px",
                                   }}
                                   value={roadValue}
@@ -1552,7 +1598,9 @@ export default function CreateBlockRequestPage() {
                                 {roadValue && (
                                   <div className="mt-4">
                                     <label className="block text-sm font-medium text-black mb-1">
-                                      Direction of traffic affected for {blockSectionValue[0]} <span className="text-red-600">*</span>
+                                      Direction of traffic affected for{" "}
+                                      {blockSectionValue[0]}{" "}
+                                      <span className="text-red-600">*</span>
                                     </label>
                                     <select
                                       className="input gov-input"
@@ -1563,8 +1611,8 @@ export default function CreateBlockRequestPage() {
                                         ]
                                           ? "#dc2626"
                                           : sectionEntry?.stream
-                                            ? "#45526c"
-                                            : "#dc2626",
+                                          ? "#45526c"
+                                          : "#dc2626",
                                         fontSize: "14px",
                                       }}
                                       value={sectionEntry?.stream || ""}
@@ -1572,13 +1620,20 @@ export default function CreateBlockRequestPage() {
                                         // Use a function that explicitly preserves the road value
                                         const streamValue = e.target.value;
                                         setFormData((prev) => {
-                                          const existingSections = [...(prev.processedLineSections || [])];
-                                          const sectionIndex = existingSections.findIndex(
-                                            (section) => section.block === blockSectionValue[0]
-                                          );
+                                          const existingSections = [
+                                            ...(prev.processedLineSections ||
+                                              []),
+                                          ];
+                                          const sectionIndex =
+                                            existingSections.findIndex(
+                                              (section) =>
+                                                section.block ===
+                                                blockSectionValue[0]
+                                            );
 
                                           if (sectionIndex >= 0) {
-                                            const currentSection = existingSections[sectionIndex];
+                                            const currentSection =
+                                              existingSections[sectionIndex];
                                             existingSections[sectionIndex] = {
                                               ...currentSection,
                                               stream: streamValue,
@@ -1597,7 +1652,8 @@ export default function CreateBlockRequestPage() {
 
                                           return {
                                             ...prev,
-                                            processedLineSections: existingSections,
+                                            processedLineSections:
+                                              existingSections,
                                           };
                                         });
                                       }}
@@ -1609,7 +1665,7 @@ export default function CreateBlockRequestPage() {
                                         blockSectionValue[0] in streamData &&
                                         Object.keys(
                                           streamData[
-                                          blockSectionValue[0] as keyof typeof streamData
+                                            blockSectionValue[0] as keyof typeof streamData
                                           ]
                                         ).map((stream) => (
                                           <option key={stream} value={stream}>
@@ -1620,10 +1676,10 @@ export default function CreateBlockRequestPage() {
                                     {errors[
                                       `processedLineSections.${blockSectionValue[0]}.stream`
                                     ] && (
-                                        <span className="text-xs text-red-700 font-medium mb-2 block">
-                                          Stream selection is required
-                                        </span>
-                                      )}
+                                      <span className="text-xs text-red-700 font-medium mb-2 block">
+                                        Stream selection is required
+                                      </span>
+                                    )}
                                   </div>
                                 )}
 
@@ -1631,7 +1687,8 @@ export default function CreateBlockRequestPage() {
                                 {roadValue && (
                                   <div className="mt-4">
                                     <label className="block text-sm font-medium text-black mb-1">
-                                      Other affected Roads for {blockSectionValue[0]}
+                                      Other affected Roads for{" "}
+                                      {blockSectionValue[0]}
                                     </label>
                                     <Select
                                       isMulti
@@ -1644,12 +1701,12 @@ export default function CreateBlockRequestPage() {
                                       value={
                                         sectionEntry?.otherRoads
                                           ? sectionEntry.otherRoads
-                                            .split(",")
-                                            .filter(Boolean)
-                                            .map((road) => ({
-                                              value: road,
-                                              label: road,
-                                            }))
+                                              .split(",")
+                                              .filter(Boolean)
+                                              .map((road) => ({
+                                                value: road,
+                                                label: road,
+                                              }))
                                           : []
                                       }
                                       onChange={(opts) =>
@@ -1689,7 +1746,7 @@ export default function CreateBlockRequestPage() {
                           // Check if we have error
                           const hasLineError =
                             errors[
-                            `processedLineSections.${blockSectionValue[0]}.lineName`
+                              `processedLineSections.${blockSectionValue[0]}.lineName`
                             ];
 
                           return (
@@ -1701,8 +1758,8 @@ export default function CreateBlockRequestPage() {
                                   borderColor: hasLineError
                                     ? "#dc2626"
                                     : lineValue
-                                      ? "#45526c"
-                                      : "#dc2626",
+                                    ? "#45526c"
+                                    : "#dc2626",
                                   fontSize: "14px",
                                 }}
                                 value={lineValue}
@@ -1739,7 +1796,7 @@ export default function CreateBlockRequestPage() {
                                     isMulti
                                     options={(
                                       lineData[
-                                      blockSectionValue[0] as keyof typeof lineData
+                                        blockSectionValue[0] as keyof typeof lineData
                                       ] || []
                                     )
                                       .filter((l: string) => l !== lineValue)
@@ -1750,12 +1807,12 @@ export default function CreateBlockRequestPage() {
                                     value={
                                       sectionEntry?.otherLines
                                         ? sectionEntry.otherLines
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((line: string) => ({
-                                            value: line,
-                                            label: line,
-                                          }))
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((line: string) => ({
+                                              value: line,
+                                              label: line,
+                                            }))
                                         : []
                                     }
                                     onChange={(opts) =>
@@ -1797,9 +1854,9 @@ export default function CreateBlockRequestPage() {
                           {block.includes("-YD") ? (
                             // For yard sections in multiple selection
                             <>
-
                               <label className="block text-base font-medium text-black mb-2">
-                                Road for {block} <span className="text-red-600">*</span>
+                                Road for {block}{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <select
                                 className="input gov-input mb-3"
@@ -1810,8 +1867,8 @@ export default function CreateBlockRequestPage() {
                                   ]
                                     ? "#dc2626"
                                     : sectionEntry?.road
-                                      ? "#45526c"
-                                      : "#dc2626",
+                                    ? "#45526c"
+                                    : "#dc2626",
                                 }}
                                 value={sectionEntry?.road || ""}
                                 onChange={(e) =>
@@ -1821,13 +1878,17 @@ export default function CreateBlockRequestPage() {
                                 <option value="" disabled>
                                   Select Road
                                 </option>
-                                {getAllRoadsForYard(block).map((road: string) => (
-                                  <option key={road} value={road}>
-                                    {road}
-                                  </option>
-                                ))}
+                                {getAllRoadsForYard(block).map(
+                                  (road: string) => (
+                                    <option key={road} value={road}>
+                                      {road}
+                                    </option>
+                                  )
+                                )}
                               </select>
-                              {errors[`processedLineSections.${block}.road`] && (
+                              {errors[
+                                `processedLineSections.${block}.road`
+                              ] && (
                                 <span className="text-base text-red-700 font-medium mb-3 block">
                                   Road selection is required
                                 </span>
@@ -1841,7 +1902,9 @@ export default function CreateBlockRequestPage() {
                                   <Select
                                     isMulti
                                     options={getAllRoadsForYard(block)
-                                      .filter((road) => road !== sectionEntry.road)
+                                      .filter(
+                                        (road) => road !== sectionEntry.road
+                                      )
                                       .map((road) => ({
                                         value: road,
                                         label: road,
@@ -1849,12 +1912,12 @@ export default function CreateBlockRequestPage() {
                                     value={
                                       sectionEntry?.otherRoads
                                         ? sectionEntry.otherRoads
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((road: string) => ({
-                                            value: road,
-                                            label: road,
-                                          }))
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((road: string) => ({
+                                              value: road,
+                                              label: road,
+                                            }))
                                         : []
                                     }
                                     onChange={(opts) =>
@@ -1873,7 +1936,8 @@ export default function CreateBlockRequestPage() {
                               {sectionEntry?.road && (
                                 <div className="mt-2 mb-3">
                                   <label className="block text-base font-medium text-black mb-2">
-                                    Direction of movement affected for {block} <span className="text-red-600">*</span>
+                                    Direction of movement affected for {block}{" "}
+                                    <span className="text-red-600">*</span>
                                   </label>
                                   <select
                                     className="input gov-input"
@@ -1882,13 +1946,17 @@ export default function CreateBlockRequestPage() {
                                       // Use a function that explicitly preserves the road value
                                       const streamValue = e.target.value;
                                       setFormData((prev) => {
-                                        const existingSections = [...(prev.processedLineSections || [])];
-                                        const sectionIndex = existingSections.findIndex(
-                                          (section) => section.block === block
-                                        );
+                                        const existingSections = [
+                                          ...(prev.processedLineSections || []),
+                                        ];
+                                        const sectionIndex =
+                                          existingSections.findIndex(
+                                            (section) => section.block === block
+                                          );
 
                                         if (sectionIndex >= 0) {
-                                          const currentSection = existingSections[sectionIndex];
+                                          const currentSection =
+                                            existingSections[sectionIndex];
                                           existingSections[sectionIndex] = {
                                             ...currentSection,
                                             stream: streamValue,
@@ -1907,7 +1975,8 @@ export default function CreateBlockRequestPage() {
 
                                         return {
                                           ...prev,
-                                          processedLineSections: existingSections,
+                                          processedLineSections:
+                                            existingSections,
                                         };
                                       });
                                     }}
@@ -1923,23 +1992,36 @@ export default function CreateBlockRequestPage() {
                                     <option value="" disabled>
                                       Select Direction
                                     </option>
-                                    {streamData[block as keyof typeof streamData] &&
+                                    {streamData[
+                                      block as keyof typeof streamData
+                                    ] &&
                                       Object.keys(
-                                        streamData[block as keyof typeof streamData]
+                                        streamData[
+                                          block as keyof typeof streamData
+                                        ]
                                       ).map((stream) => (
                                         <option key={stream} value={stream}>
-                                          {stream == "bothNot" ? "Both directions not affected" : stream.charAt(0).toUpperCase() + stream.slice(1)} {stream == "bothNot" ? "" : `direction${stream == "both" ? "s" : ""} affected`}
+                                          {stream == "bothNot"
+                                            ? "Both directions not affected"
+                                            : stream.charAt(0).toUpperCase() +
+                                              stream.slice(1)}{" "}
+                                          {stream == "bothNot"
+                                            ? ""
+                                            : `direction${
+                                                stream == "both" ? "s" : ""
+                                              } affected`}
                                         </option>
                                       ))}
                                   </select>
-                                  {errors[`processedLineSections.${block}.stream`] && (
+                                  {errors[
+                                    `processedLineSections.${block}.stream`
+                                  ] && (
                                     <span className="text-base text-red-700 font-medium mb-3 block">
                                       Stream selection is required
                                     </span>
                                   )}
                                 </div>
                               )}
-
                             </>
                           ) : (
                             // For regular sections in multiple selection
@@ -1957,8 +2039,8 @@ export default function CreateBlockRequestPage() {
                                   ]
                                     ? "#dc2626"
                                     : sectionEntry?.lineName
-                                      ? "#45526c"
-                                      : "#dc2626",
+                                    ? "#45526c"
+                                    : "#dc2626",
                                 }}
                                 value={sectionEntry?.lineName || ""}
                                 onChange={(e) =>
@@ -1979,10 +2061,10 @@ export default function CreateBlockRequestPage() {
                               {errors[
                                 `processedLineSections.${block}.lineName`
                               ] && (
-                                  <span className="text-base text-red-700 font-medium mb-3 block">
-                                    Line selection is required
-                                  </span>
-                                )}
+                                <span className="text-base text-red-700 font-medium mb-3 block">
+                                  Line selection is required
+                                </span>
+                              )}
                               {sectionEntry?.lineName && (
                                 <div className="mt-2 mb-2">
                                   <label className="block text-base font-medium text-black mb-2">
@@ -1992,7 +2074,7 @@ export default function CreateBlockRequestPage() {
                                     isMulti
                                     options={(
                                       lineData[
-                                      block as keyof typeof lineData
+                                        block as keyof typeof lineData
                                       ] || []
                                     )
                                       .filter(
@@ -2006,12 +2088,12 @@ export default function CreateBlockRequestPage() {
                                     value={
                                       sectionEntry?.otherLines
                                         ? sectionEntry.otherLines
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((line: string) => ({
-                                            value: line,
-                                            label: line,
-                                          }))
+                                            .split(",")
+                                            .filter(Boolean)
+                                            .map((line: string) => ({
+                                              value: line,
+                                              label: line,
+                                            }))
                                         : []
                                     }
                                     onChange={(opts) =>
@@ -2167,303 +2249,156 @@ export default function CreateBlockRequestPage() {
           </h2>
           {(session?.user.department === "S&T" ||
             session?.user.department === "ENGG") && (
-              <>
-                <div className="grid grid-cols-1  gap-2">
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Whether Fresh Caution will be imposed after block{" "}
-                      {(session?.user.department === "S&T" ||
-                        session?.user.department === "ENGG") && (
-                          <span className="text-red-600">*</span>
-                        )}
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="freshCautionRequired"
-                          value="true"
-                          checked={formData.freshCautionRequired === true}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="freshCautionRequired"
-                          value="false"
-                          checked={formData.freshCautionRequired === false}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">No</span>
-                      </label>
-                    </div>
-                    {errors.freshCautionRequired && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionRequired}
-                      </span>
+            <>
+              <div className="grid grid-cols-1  gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">
+                    Whether Fresh Caution will be imposed after block{" "}
+                    {(session?.user.department === "S&T" ||
+                      session?.user.department === "ENGG") && (
+                      <span className="text-red-600">*</span>
                     )}
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="freshCautionRequired"
+                        value="true"
+                        checked={formData.freshCautionRequired === true}
+                        onChange={handleInputChange}
+                        className="form-radio h-4 w-4"
+                      />
+                      <span className="ml-2 text-sm">Yes</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        name="freshCautionRequired"
+                        value="false"
+                        checked={formData.freshCautionRequired === false}
+                        onChange={handleInputChange}
+                        className="form-radio h-4 w-4"
+                      />
+                      <span className="ml-2 text-sm">No</span>
+                    </label>
                   </div>
-
-                  {formData.freshCautionRequired === true && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Location From{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="freshCautionLocationFrom"
-                          value={formData.freshCautionLocationFrom || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Approximately from"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionLocationFrom
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionLocationFrom && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionLocationFrom}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Location To{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="freshCautionLocationTo"
-                          value={formData.freshCautionLocationTo || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Approximately to"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionLocationTo
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionLocationTo && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionLocationTo}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Speed (km/hr){" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="freshCautionSpeed"
-                          value={formData.freshCautionSpeed || 0}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionSpeed
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionSpeed && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionSpeed}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Adjacent lines affected
-                          {/* <span className="text-red-600">*</span> */}
-                        </label>
-                        <input
-                          type="text"
-                          name="adjacentLinesAffected"
-                          value={formData.adjacentLinesAffected || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Lines Affected"
-                          style={{
-                            color: "black",
-                            borderColor: errors.adjacentLinesAffected
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.adjacentLinesAffected && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.adjacentLinesAffected}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  {errors.freshCautionRequired && (
+                    <span className="text-xs text-red-700 font-medium mt-1 block">
+                      {errors.freshCautionRequired}
+                    </span>
                   )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Whether Power Block Needed{" "}
-                      {session?.user.department === "S&T" ||
-                        (session?.user.department === "ENGG" && (
-                          <span className="text-red-600">*</span>
-                        ))}
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="true"
-                          checked={formData.powerBlockRequired === true}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="false"
-                          checked={formData.powerBlockRequired === false}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">No</span>
-                      </label>
-                    </div>
-                    {errors.powerBlockRequired && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.powerBlockRequired}
-                      </span>
-                    )}
-                  </div>
                 </div>
 
-                {formData.powerBlockRequired === true && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                    <div className="col-span-1">
+                {formData.freshCautionRequired === true && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                    <div>
                       <label className="block text-xs font-medium text-black mb-1">
-                        Power Block Requirements *
-                      </label>
-                      <div className="space-y-1 flex gap-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            value="Gears Required"
-                            checked={powerBlockRequirements.includes(
-                              "Gears Required"
-                            )}
-                            onChange={(e) => {
-                              handlePowerBlockRequirementsChange(
-                                "Gears Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-4 w-4"
-                          />
-                          <span className="ml-2 text-sm">Gears Required</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            value="Staff Required"
-                            checked={powerBlockRequirements.includes(
-                              "Staff Required"
-                            )}
-                            onChange={(e) => {
-                              handlePowerBlockRequirementsChange(
-                                "Staff Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-4 w-4"
-                          />
-                          <span className="ml-2 text-sm">Staff Required</span>
-                        </label>
-                      </div>
-                      {errors.powerBlockRequirements && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.powerBlockRequirements}
-                        </span>
-                      )}
-                    </div>
-                    <div className="col-span-2">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Elementary Section <span className="text-red-600">*</span>
+                        Caution Location From{" "}
+                        <span className="text-red-600">*</span>
                       </label>
                       <input
-                        name="elementarySection"
-                        value={formData.elementarySection || ""}
+                        name="freshCautionLocationFrom"
+                        value={formData.freshCautionLocationFrom || ""}
                         onChange={handleInputChange}
                         className="input gov-input"
+                        placeholder="Approximately from"
                         style={{
                           color: "black",
-                          borderColor: errors.elementarySection
+                          borderColor: errors.freshCautionLocationFrom
                             ? "#dc2626"
                             : "#45526c",
                           fontSize: "14px",
                         }}
                       />
-                      {errors.elementarySection && (
+                      {errors.freshCautionLocationFrom && (
                         <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.elementarySection}
+                          {errors.freshCautionLocationFrom}
                         </span>
                       )}
                     </div>
-                    <div className="col-span-1">
+                    <div>
                       <label className="block text-xs font-medium text-black mb-1">
-                        Assign TRD Disconnection To <span className="text-red-600">*</span>
+                        Caution Location To{" "}
+                        <span className="text-red-600">*</span>
                       </label>
-                      <select
-                        name="trdDisconnectionAssignTo"
-                        value={formData.trdDisconnectionAssignTo || ""}
+                      <input
+                        name="freshCautionLocationTo"
+                        value={formData.freshCautionLocationTo || ""}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        placeholder="Approximately to"
+                        style={{
+                          color: "black",
+                          borderColor: errors.freshCautionLocationTo
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.freshCautionLocationTo && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.freshCautionLocationTo}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Caution Speed (km/hr){" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="freshCautionSpeed"
+                        value={formData.freshCautionSpeed || 0}
                         onChange={handleInputChange}
                         className="input gov-input"
                         style={{
                           color: "black",
-                          borderColor: errors.trdDisconnectionAssignTo ? "#dc2626" : "#45526c",
+                          borderColor: errors.freshCautionSpeed
+                            ? "#dc2626"
+                            : "#45526c",
                           fontSize: "14px",
                         }}
-                      >
-                        <option value="" disabled>
-                          Select TRD Personnel
-                        </option>
-                        {trdDisconnectionAssignToOptions.map((option) => (
-                          <option key={option.email} value={option.email}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.trdDisconnectionAssignTo && (
+                      />
+                      {errors.freshCautionSpeed && (
                         <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.trdDisconnectionAssignTo}
+                          {errors.freshCautionSpeed}
                         </span>
                       )}
-                      <span className="text-xs text-gray-600 mt-1 block">
-                        Person responsible for power block disconnection
-                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-black mb-1">
+                        Adjacent lines affected
+                        {/* <span className="text-red-600">*</span> */}
+                      </label>
+                      <input
+                        type="text"
+                        name="adjacentLinesAffected"
+                        value={formData.adjacentLinesAffected || ""}
+                        onChange={handleInputChange}
+                        className="input gov-input"
+                        placeholder="Lines Affected"
+                        style={{
+                          color: "black",
+                          borderColor: errors.adjacentLinesAffected
+                            ? "#dc2626"
+                            : "#45526c",
+                          fontSize: "14px",
+                        }}
+                      />
+                      {errors.adjacentLinesAffected && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.adjacentLinesAffected}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
 
-                <div className="mt-2">
+                <div>
                   <label className="block text-sm font-medium text-black mb-1">
-                    Whether S&T Disconnection Required{" "}
+                    Whether Power Block Needed{" "}
                     {session?.user.department === "S&T" ||
                       (session?.user.department === "ENGG" && (
                         <span className="text-red-600">*</span>
@@ -2473,15 +2408,10 @@ export default function CreateBlockRequestPage() {
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        name="sntDisconnectionRequired"
+                        name="powerBlockRequired"
                         value="true"
-                        checked={formData.sntDisconnectionRequired === true}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            sntDisconnectionRequired: true,
-                          })
-                        }
+                        checked={formData.powerBlockRequired === true}
+                        onChange={handleInputChange}
                         className="form-radio h-4 w-4"
                       />
                       <span className="ml-2 text-sm">Yes</span>
@@ -2489,190 +2419,338 @@ export default function CreateBlockRequestPage() {
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        name="sntDisconnectionRequired"
+                        name="powerBlockRequired"
                         value="false"
-                        checked={formData.sntDisconnectionRequired === false}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            sntDisconnectionRequired: false,
-                          })
-                        }
+                        checked={formData.powerBlockRequired === false}
+                        onChange={handleInputChange}
                         className="form-radio h-4 w-4"
                       />
                       <span className="ml-2 text-sm">No</span>
                     </label>
                   </div>
-                  {errors.sntDisconnectionRequired && (
+                  {errors.powerBlockRequired && (
                     <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.sntDisconnectionRequired}
+                      {errors.powerBlockRequired}
                     </span>
                   )}
                 </div>
+              </div>
 
-                {sntDisconnectionChecked && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Line From <span className="text-red-600">*</span>
+              {formData.powerBlockRequired === true && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                  <div className="col-span-1">
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Power Block Requirements *
+                    </label>
+                    <div className="space-y-1 flex gap-4">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          value="Gears Required"
+                          checked={powerBlockRequirements.includes(
+                            "Gears Required"
+                          )}
+                          onChange={(e) => {
+                            handlePowerBlockRequirementsChange(
+                              "Gears Required",
+                              e.target.checked
+                            );
+                          }}
+                          className="form-checkbox h-4 w-4"
+                        />
+                        <span className="ml-2 text-sm">Gears Required</span>
                       </label>
-                      <input
-                        name="sntDisconnectionLineFrom"
-                        value={formData.sntDisconnectionLineFrom || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionLineFrom
-                            ? "#dc2626"
-                            : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      />
-                      {errors.sntDisconnectionLineFrom && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionLineFrom}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Line To <span className="text-red-600">*</span>
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          value="Staff Required"
+                          checked={powerBlockRequirements.includes(
+                            "Staff Required"
+                          )}
+                          onChange={(e) => {
+                            handlePowerBlockRequirementsChange(
+                              "Staff Required",
+                              e.target.checked
+                            );
+                          }}
+                          className="form-checkbox h-4 w-4"
+                        />
+                        <span className="ml-2 text-sm">Staff Required</span>
                       </label>
-                      <input
-                        name="sntDisconnectionLineTo"
-                        value={formData.sntDisconnectionLineTo || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionLineTo
-                            ? "#dc2626"
-                            : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      />
-                      {errors.sntDisconnectionLineTo && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionLineTo}
-                        </span>
-                      )}
                     </div>
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Disconnection Requirements *
-                      </label>
-                      <div className="space-x-2 flex ">
-                        <label className="inline-flex whitespace-nowrap items-center">
-                          <input
-                            type="checkbox"
-                            value="Gears Required"
-                            checked={sntDisconnectionRequirements.includes(
-                              "Gears Required"
-                            )}
-                            onChange={(e) => {
-                              handleSntDisconnectionRequirementsChange(
-                                "Gears Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-3 w-3"
-                          />
-                          <span className="ml-1 text-xs text-black">
-                            Gears Required
-                          </span>
-                        </label>
-                        <label className="inline-flex whitespace-nowrap items-center">
-                          <input
-                            type="checkbox"
-                            value="Staff Required"
-                            checked={sntDisconnectionRequirements.includes(
-                              "Staff Required"
-                            )}
-                            onChange={(e) => {
-                              handleSntDisconnectionRequirementsChange(
-                                "Staff Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-3 w-3"
-                          />
-                          <span className="ml-1 text-xs text-black">
-                            Staff Required
-                          </span>
-                        </label>
-                      </div>
-                      {errors.sntDisconnectionRequirements && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionRequirements}
-                        </span>
-                      )}
-                    </div>
-                    {/* Add the assignment dropdown */}
-                    <div className="col-span-1">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Assign S&T Disconnection To <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        name="sntDisconnectionAssignTo"
-                        value={formData.sntDisconnectionAssignTo || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionAssignTo ? "#dc2626" : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      >
-                        <option value="" disabled>
-                          Select S&T Personnel
-                        </option>
-                        {sntDisconnectionAssignToOptions.map((option) => (
-                          <option key={option.email} value={option.email}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.sntDisconnectionAssignTo && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionAssignTo}
-                        </span>
-                      )}
-                    </div>
+                    {errors.powerBlockRequirements && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.powerBlockRequirements}
+                      </span>
+                    )}
                   </div>
-                )}
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Elementary Section <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      name="elementarySection"
+                      value={formData.elementarySection || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.elementarySection
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {errors.elementarySection && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.elementarySection}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-span-1">
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Assign TRD Disconnection To{" "}
+                      <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      name="trdDisconnectionAssignTo"
+                      value={formData.trdDisconnectionAssignTo || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.trdDisconnectionAssignTo
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select TRD Personnel
+                      </option>
+                      {trdDisconnectionAssignToOptions.map((option) => (
+                        <option key={option.email} value={option.email}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.trdDisconnectionAssignTo && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.trdDisconnectionAssignTo}
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-600 mt-1 block">
+                      Person responsible for power block disconnection
+                    </span>
+                  </div>
+                </div>
+              )}
 
-                <div className="form-group col-span-2 mt-5">
-                  <label className="block text-sm font-medium text-black mb-1">
-                    Remarks
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-black mb-1">
+                  Whether S&T Disconnection Required{" "}
+                  {session?.user.department === "S&T" ||
+                    (session?.user.department === "ENGG" && (
+                      <span className="text-red-600">*</span>
+                    ))}
+                </label>
+                <div className="flex space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="sntDisconnectionRequired"
+                      value="true"
+                      checked={formData.sntDisconnectionRequired === true}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: true,
+                        })
+                      }
+                      className="form-radio h-4 w-4"
+                    />
+                    <span className="ml-2 text-sm">Yes</span>
                   </label>
-                  <textarea
-                    name="requestremarks"
-                    value={formData.requestremarks || ""}
-                    onChange={handleInputChange}
-                    className="gov-input"
-                    style={{
-                      color: "black",
-                      minHeight: "80px",
-                      width: "100%",
-                      fontSize: "14px",
-                    }}
-                    placeholder="Enter any additional remarks"
-                    aria-label="Request remarks"
-                  ></textarea>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="sntDisconnectionRequired"
+                      value="false"
+                      checked={formData.sntDisconnectionRequired === false}
+                      onChange={() =>
+                        setFormData({
+                          ...formData,
+                          sntDisconnectionRequired: false,
+                        })
+                      }
+                      className="form-radio h-4 w-4"
+                    />
+                    <span className="ml-2 text-sm">No</span>
+                  </label>
                 </div>
-                <div className="flex justify-center mt-5">
-                  <button
-                    type="submit"
-                    className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
-                    disabled={formSubmitting}
-                    aria-label="Submit block request form"
-                  >
-                    {formSubmitting ? "Submitting..." : "Submit Block Request"}
-                  </button>
+                {errors.sntDisconnectionRequired && (
+                  <span className="text-xs text-red-700 font-medium mt-1 block">
+                    {errors.sntDisconnectionRequired}
+                  </span>
+                )}
+              </div>
+
+              {sntDisconnectionChecked && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                  <div>
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Line From <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      name="sntDisconnectionLineFrom"
+                      value={formData.sntDisconnectionLineFrom || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.sntDisconnectionLineFrom
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {errors.sntDisconnectionLineFrom && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.sntDisconnectionLineFrom}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Line To <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      name="sntDisconnectionLineTo"
+                      value={formData.sntDisconnectionLineTo || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.sntDisconnectionLineTo
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {errors.sntDisconnectionLineTo && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.sntDisconnectionLineTo}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Disconnection Requirements *
+                    </label>
+                    <div className="space-x-2 flex ">
+                      <label className="inline-flex whitespace-nowrap items-center">
+                        <input
+                          type="checkbox"
+                          value="Gears Required"
+                          checked={sntDisconnectionRequirements.includes(
+                            "Gears Required"
+                          )}
+                          onChange={(e) => {
+                            handleSntDisconnectionRequirementsChange(
+                              "Gears Required",
+                              e.target.checked
+                            );
+                          }}
+                          className="form-checkbox h-3 w-3"
+                        />
+                        <span className="ml-1 text-xs text-black">
+                          Gears Required
+                        </span>
+                      </label>
+                      <label className="inline-flex whitespace-nowrap items-center">
+                        <input
+                          type="checkbox"
+                          value="Staff Required"
+                          checked={sntDisconnectionRequirements.includes(
+                            "Staff Required"
+                          )}
+                          onChange={(e) => {
+                            handleSntDisconnectionRequirementsChange(
+                              "Staff Required",
+                              e.target.checked
+                            );
+                          }}
+                          className="form-checkbox h-3 w-3"
+                        />
+                        <span className="ml-1 text-xs text-black">
+                          Staff Required
+                        </span>
+                      </label>
+                    </div>
+                    {errors.sntDisconnectionRequirements && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.sntDisconnectionRequirements}
+                      </span>
+                    )}
+                  </div>
+                  {/* Add the assignment dropdown */}
+                  <div className="col-span-1">
+                    <label className="block text-xs font-medium text-black mb-1">
+                      Assign S&T Disconnection To{" "}
+                      <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      name="sntDisconnectionAssignTo"
+                      value={formData.sntDisconnectionAssignTo || ""}
+                      onChange={handleInputChange}
+                      className="input gov-input"
+                      style={{
+                        color: "black",
+                        borderColor: errors.sntDisconnectionAssignTo
+                          ? "#dc2626"
+                          : "#45526c",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Select S&T Personnel
+                      </option>
+                      {sntDisconnectionAssignToOptions.map((option) => (
+                        <option key={option.email} value={option.email}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.sntDisconnectionAssignTo && (
+                      <span className="text-xs text-red-700 font-medium mt-1 block">
+                        {errors.sntDisconnectionAssignTo}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </>
-            )}
+              )}
+
+              <div className="form-group col-span-2 mt-5">
+                <label className="block text-sm font-medium text-black mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  name="requestremarks"
+                  value={formData.requestremarks || ""}
+                  onChange={handleInputChange}
+                  className="gov-input"
+                  style={{
+                    color: "black",
+                    minHeight: "80px",
+                    width: "100%",
+                    fontSize: "14px",
+                  }}
+                  placeholder="Enter any additional remarks"
+                  aria-label="Request remarks"
+                ></textarea>
+              </div>
+            </>
+          )}
           {session?.user.department === "TRD" && (
             <div>
               <label className="block text-sm font-medium text-black mb-1">
@@ -2700,7 +2778,16 @@ export default function CreateBlockRequestPage() {
             </div>
           )}
         </div>
-
+        <div className="flex justify-center mt-5">
+          <button
+            type="submit"
+            className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
+            disabled={formSubmitting}
+            aria-label="Submit block request form"
+          >
+            {formSubmitting ? "Submitting..." : "Submit Block Request"}
+          </button>
+        </div>
         <ConfirmationDialog
           isOpen={showConfirmation}
           onClose={() => setShowConfirmation(false)}

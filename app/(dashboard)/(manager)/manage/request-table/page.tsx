@@ -213,10 +213,10 @@ export default function RequestTablePage() {
                 <td className="border border-black p-1 text-sm">
                   <span
                     className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.managerAcceptance ? "APPROVED" : "PENDING"
+                      request.status
                     )}`}
                   >
-                    {request.managerAcceptance ? "APPROVED" : "PENDING"}
+                    {request.status}
                   </span>
                 </td>
                 <td className="border border-black p-1 text-sm">

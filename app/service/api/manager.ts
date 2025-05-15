@@ -172,10 +172,12 @@ export const managerService = {
     /**
      * Accept a user request
      */
-    acceptUserRequest: async (id: string): Promise<{ status: boolean; message: string }> => {
-        const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`);
-        return response.data;
-    },
+    
+// Fixed version
+acceptUserRequest: async (id: string, isAccept: boolean): Promise<{ status: boolean; message: string }> => {
+    const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept });
+    return response.data;
+},
 
     /**
      * Get a single user request by ID

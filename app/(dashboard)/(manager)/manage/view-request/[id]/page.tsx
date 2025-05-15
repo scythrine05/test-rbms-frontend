@@ -13,6 +13,7 @@ export default function ViewRequestPage() {
   const queryClient = useQueryClient();
   const id = params.id as string;
   const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   // Fetch request data
   const { data, isLoading, error } = useQuery({
@@ -21,19 +22,33 @@ export default function ViewRequestPage() {
   });
 
   // Accept request mutation
-  const acceptMutation = useMutation({
-    mutationFn: () => managerService.acceptUserRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["request", id] });
-      queryClient.invalidateQueries({ queryKey: ["requests"] });
-      alert("Request accepted successfully");
-      router.push("/manage/request-table");
-    },
-    onError: (error) => {
-      console.error("Failed to accept request:", error);
-      alert("Failed to accept request. Please try again.");
-    },
-  });
+  // const acceptMutation = useMutation({
+  //   mutationFn: () => managerService.acceptUserRequest(id),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["request", id] });
+  //     queryClient.invalidateQueries({ queryKey: ["requests"] });
+  //     alert("Request accepted successfully");
+  //     router.push("/manage/request-table");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Failed to accept request:", error);
+  //     alert("Failed to accept request. Please try again.");
+  //   },
+  // });
+const acceptMutation = useMutation({
+  mutationFn: (isAccept: boolean) => 
+    managerService.acceptUserRequest(id, isAccept),  // Pass the decision to the API
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["request", id] });
+    queryClient.invalidateQueries({ queryKey: ["requests"] });
+    alert("Request processed successfully");
+    router.push("/manage/request-table");
+  },
+  onError: (error) => {
+    console.error("Failed to process request:", error);
+    alert("Failed to process request. Please try again.");
+  },
+});
 
   // Format date and time
   const formatDate = (dateString: string) => {
@@ -53,16 +68,39 @@ export default function ViewRequestPage() {
   };
 
   // Handle accept request
-  const handleAccept = async () => {
-    if (confirm("Are you sure you want to accept this request?")) {
+  // const handleAccept = async () => {
+  //   if (confirm("Are you sure you want to accept this request?")) {
+  //     setIsAccepting(true);
+  //     try {
+  //       await acceptMutation.mutateAsync();
+  //     } finally {
+  //       setIsAccepting(false);
+  //     }
+  //   }
+  // };
+
+// Handle accept or reject request
+const handleAcceptReject = async (isAccept: boolean) => {
+  const action = isAccept ? "accept" : "reject";
+  if (confirm(`Are you sure you want to ${action} this request?`)) {
+    if (isAccept) {
       setIsAccepting(true);
-      try {
-        await acceptMutation.mutateAsync();
-      } finally {
+    } else {
+      setIsRejecting(true);
+    }
+    try {
+      await acceptMutation.mutateAsync(isAccept);
+    } finally {
+      if (isAccept) {
         setIsAccepting(false);
+      } else {
+        setIsRejecting(false);
       }
     }
-  };
+  }
+};
+
+
 
   // Status badge class
   const getStatusBadgeClass = (status: string) => {
@@ -119,16 +157,25 @@ export default function ViewRequestPage() {
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
             Back to List
-          </Link>
-          {request.status === "PENDING" && !request.managerAcceptance && (
-            <button
-              onClick={handleAccept}
-              disabled={isAccepting}
-              className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-            >
-              {isAccepting ? "Accepting..." : "Accept Request"}
-            </button>
-          )}
+          </Link>{request.status === "PENDING" && !request.managerAcceptance && (
+  <>
+    <button
+      onClick={() => handleAcceptReject(true)}  // Accept
+      disabled={isAccepting || isRejecting}
+      className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
+    >
+      {isAccepting ? "Accepting..." : "Accept Request"}
+    </button>
+    <button
+      onClick={() => handleAcceptReject(false)}  // Reject
+      disabled={isAccepting || isRejecting}
+      className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
+    >
+      {isRejecting  ? "Rejecting..." : "Reject Request"}
+    </button>
+  </>
+)}
+
         </div>
       </div>
 
@@ -210,7 +257,7 @@ export default function ViewRequestPage() {
                 <tr>
                   <td className="py-1 font-medium">Work Location:</td>
                   <td className="py-1">
-                    {request.workLocationFrom} to {request.workLocationTo}
+                    {request.workLocationFrom}
                   </td>
                 </tr>
               ) : null}
