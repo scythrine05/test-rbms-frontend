@@ -17,6 +17,7 @@ export interface RequestResponse {
 }
 
 export interface RequestItem {
+    remarkByManager: string;
     adjacentLinesAffected: string;
     id: string;
     date: string;

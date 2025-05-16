@@ -480,6 +480,10 @@ export default function RequestTablePage() {
           <div className="text-gray-700 my-1">
             {getStatusDetails(status)}
           </div>
+          {status==="REJECTED"&&<div className="text-gray-700 my-1">
+            Reason for reject - {request.remarkByManager}
+          </div>}
+          
         </div>
 
         <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 border-t border-gray-200 pt-2">
