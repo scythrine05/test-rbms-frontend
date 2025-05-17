@@ -2730,7 +2730,7 @@ export default function CreateBlockRequestPage() {
                 </div>
               )}
 
-              <div className="form-group col-span-2 mt-5">
+              {/* <div className="form-group col-span-2 mt-5">
                 <label className="block text-sm font-medium text-black mb-1">
                   Remarks
                 </label>
@@ -2748,7 +2748,7 @@ export default function CreateBlockRequestPage() {
                   placeholder="Enter any additional remarks"
                   aria-label="Request remarks"
                 ></textarea>
-              </div>
+              </div> */}
             </>
           )}
           {session?.user.department === "TRD" && (
@@ -2778,6 +2778,25 @@ export default function CreateBlockRequestPage() {
             </div>
           )}
         </div>
+            <div className="form-group col-span-2 mt-5">
+                <label className="block text-sm font-medium text-black mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  name="requestremarks"
+                  value={formData.requestremarks || ""}
+                  onChange={handleInputChange}
+                  className="gov-input"
+                  style={{
+                    color: "black",
+                    minHeight: "80px",
+                    width: "100%",
+                    fontSize: "14px",
+                  }}
+                  placeholder="Enter any additional remarks"
+                  aria-label="Request remarks"
+                ></textarea>
+              </div>
         <div className="flex justify-center mt-5">
           <button
             type="submit"
