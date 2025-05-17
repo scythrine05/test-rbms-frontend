@@ -13,7 +13,9 @@ export default function ViewRequestPage() {
   const queryClient = useQueryClient();
   const id = params.id as string;
   const [isAccepting, setIsAccepting] = useState(false);
-
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
   // Fetch request data
   const { data, isLoading, error } = useQuery({
     queryKey: ["request", id],
@@ -21,20 +23,47 @@ export default function ViewRequestPage() {
   });
 
   // Accept request mutation
-  const acceptMutation = useMutation({
-    mutationFn: () => managerService.acceptUserRequest(id),
+  // const acceptMutation = useMutation({
+  //   mutationFn: () => managerService.acceptUserRequest(id),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["request", id] });
+  //     queryClient.invalidateQueries({ queryKey: ["requests"] });
+  //     alert("Request accepted successfully");
+  //     router.push("/manage/request-table");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Failed to accept request:", error);
+  //     alert("Failed to accept request. Please try again.");
+  //   },
+  // });
+// const acceptMutation = useMutation({
+//   mutationFn: (isAccept: boolean) => 
+//     managerService.acceptUserRequest(id, isAccept),  // Pass the decision to the API
+//   onSuccess: () => {
+//     queryClient.invalidateQueries({ queryKey: ["request", id] });
+//     queryClient.invalidateQueries({ queryKey: ["requests"] });
+//     alert("Request processed successfully");
+//     router.push("/manage/request-table");
+//   },
+//   onError: (error) => {
+//     console.error("Failed to process request:", error);
+//     alert("Failed to process request. Please try again.");
+//   },
+// });
+ const acceptMutation = useMutation({
+    mutationFn: ({ isAccept, remark }: { isAccept: boolean; remark?: string }) => 
+      managerService.acceptUserRequest(id, isAccept, remark),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["request", id] });
       queryClient.invalidateQueries({ queryKey: ["requests"] });
-      alert("Request accepted successfully");
+      alert(`Request ${isAccepting ? "accepted" : "rejected"} successfully`);
       router.push("/manage/request-table");
     },
     onError: (error) => {
-      console.error("Failed to accept request:", error);
-      alert("Failed to accept request. Please try again.");
+      console.error("Failed to process request:", error);
+      alert("Failed to process request. Please try again.");
     },
   });
-
   // Format date and time
   const formatDate = (dateString: string) => {
     try {
@@ -53,16 +82,73 @@ export default function ViewRequestPage() {
   };
 
   // Handle accept request
+  // const handleAccept = async () => {
+  //   if (confirm("Are you sure you want to accept this request?")) {
+  //     setIsAccepting(true);
+  //     try {
+  //       await acceptMutation.mutateAsync();
+  //     } finally {
+  //       setIsAccepting(false);
+  //     }
+  //   }
+  // };
+
+// Handle accept or reject request
+// const handleAcceptReject = async (isAccept: boolean) => {
+//   const action = isAccept ? "accept" : "reject";
+//   if (confirm(`Are you sure you want to ${action} this request?`)) {
+//     if (isAccept) {
+//       setIsAccepting(true);
+//     } else {
+//       setIsRejecting(true);
+//     }
+//     try {
+//       await acceptMutation.mutateAsync(isAccept);
+//     } finally {
+//       if (isAccept) {
+//         setIsAccepting(false);
+//       } else {
+//         setIsRejecting(false);
+//       }
+//     }
+//   }
+// };
+  // Handle accept request
   const handleAccept = async () => {
     if (confirm("Are you sure you want to accept this request?")) {
       setIsAccepting(true);
       try {
-        await acceptMutation.mutateAsync();
+        await acceptMutation.mutateAsync({ isAccept: true });
       } finally {
         setIsAccepting(false);
       }
     }
   };
+
+  // Handle reject request with reason
+  const handleReject = async () => {
+    setShowRejectModal(true);
+  };
+
+  const submitRejection = async () => {
+    if (!rejectionReason.trim()) {
+      alert("Please enter a rejection reason");
+      return;
+    }
+
+    setIsRejecting(true);
+    try {
+      await acceptMutation.mutateAsync({ 
+        isAccept: false, 
+        remark: rejectionReason 
+      });
+    } finally {
+      setIsRejecting(false);
+      setShowRejectModal(false);
+      setRejectionReason("");
+    }
+  };
+
 
   // Status badge class
   const getStatusBadgeClass = (status: string) => {
@@ -109,6 +195,38 @@ export default function ViewRequestPage() {
 
   return (
     <div className="bg-white p-3 border border-black mb-3 text-black">
+       {showRejectModal && (
+     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Enter Rejection Reason</h2>
+            <textarea
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+              rows={4}
+              placeholder="Please specify the reason for rejection..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectionReason("");
+                }}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitRejection}
+                disabled={isRejecting}
+                className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
+              >
+                {isRejecting ? "Submitting..." : "Submit Rejection"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">
           Block Request Details
@@ -119,16 +237,25 @@ export default function ViewRequestPage() {
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
             Back to List
-          </Link>
-          {request.status === "PENDING" && !request.managerAcceptance && (
-            <button
-              onClick={handleAccept}
-              disabled={isAccepting}
-              className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-            >
-              {isAccepting ? "Accepting..." : "Accept Request"}
-            </button>
-          )}
+          </Link>{request.status === "PENDING" && !request.managerAcceptance && (
+  <>
+    <button
+      onClick={handleAccept}  // Accept
+      disabled={isAccepting || isRejecting}
+      className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
+    >
+      {isAccepting ? "Accepting..." : "Accept Request"}
+    </button>
+    <button
+      onClick={handleReject}  // Reject
+      disabled={isAccepting || isRejecting}
+      className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
+    >
+      {isRejecting  ? "Rejecting..." : "Reject Request"}
+    </button>
+  </>
+)}
+
         </div>
       </div>
 
@@ -210,7 +337,7 @@ export default function ViewRequestPage() {
                 <tr>
                   <td className="py-1 font-medium">Work Location:</td>
                   <td className="py-1">
-                    {request.workLocationFrom} to {request.workLocationTo}
+                    {request.workLocationFrom}
                   </td>
                 </tr>
               ) : null}
