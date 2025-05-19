@@ -1408,7 +1408,7 @@ export default function CreateBlockRequestPage() {
               </div>
             </div>
           )} */}
-          {session?.user.department === "S&T" && (
+          {/* {session?.user.department === "S&T" && (
             <div className="form-group col-span-3">
               <label className="block text-sm font-medium text-black mb-1">
                 Route <span className="text-red-600">*</span>
@@ -1462,7 +1462,7 @@ export default function CreateBlockRequestPage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
           {session?.user.department === "TRD" && (
             <div className="form-group col-span-3">
@@ -2264,6 +2264,69 @@ export default function CreateBlockRequestPage() {
             </div>
           </div>
         </div>
+        {session?.user.department === "S&T" && (
+          <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
+            <div className="form-group col-span-3">
+              <label className="block text-sm font-medium text-black mb-1">
+                Route <span className="text-red-600">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeFrom"
+                  >
+                    From Location
+                  </label>
+                  <input
+                    id="routeFrom"
+                    name="routeFrom"
+                    value={formData.routeFrom || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{
+                      color: "black",
+                      fontSize: "14px",
+                      borderColor: errors.routeFrom ? "#dc2626" : "#45526c",
+                    }}
+                    aria-label="Route from location"
+                  />
+                  {errors.routeFrom && (
+                    <span className="text-xs text-red-700 font-medium mt-1 block">
+                      {errors.routeFrom}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label
+                    className="block text-xs font-medium text-black mb-1"
+                    htmlFor="routeTo"
+                  >
+                    To Location
+                  </label>
+                  <input
+                    id="routeTo"
+                    name="routeTo"
+                    value={formData.routeTo || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{
+                      color: "black",
+                      fontSize: "14px",
+                      borderColor: errors.routeTo ? "#dc2626" : "#45526c",
+                    }}
+                    aria-label="Route to location"
+                  />
+                  {errors.routeTo && (
+                    <span className="text-xs text-red-700 font-medium mt-1 block">
+                      {errors.routeTo}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
           <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
             Preferred Time (Click On the Clock To Select)
@@ -2840,8 +2903,9 @@ export default function CreateBlockRequestPage() {
                     {formSubmitting ? "Submitting..." : "Submit Block Request"}
                   </button>
                 </div>
-              </>
-            )}
+              )}
+            </>
+          )}
           {session?.user.department === "TRD" && (
             <div>
               <label className="block text-sm font-medium text-black mb-1">
@@ -2869,7 +2933,35 @@ export default function CreateBlockRequestPage() {
             </div>
           )}
         </div>
-
+        <div className="form-group col-span-2 mt-5">
+          <label className="block text-sm font-medium text-black mb-1">
+            Remarks
+          </label>
+          <textarea
+            name="requestremarks"
+            value={formData.requestremarks || ""}
+            onChange={handleInputChange}
+            className="gov-input"
+            style={{
+              color: "black",
+              minHeight: "80px",
+              width: "100%",
+              fontSize: "14px",
+            }}
+            placeholder="Enter any additional remarks"
+            aria-label="Request remarks"
+          ></textarea>
+        </div>
+        <div className="flex justify-center mt-5">
+          <button
+            type="submit"
+            className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
+            disabled={formSubmitting}
+            aria-label="Submit block request form"
+          >
+            {formSubmitting ? "Submitting..." : "Submit Block Request"}
+          </button>
+        </div>
         <ConfirmationDialog
           isOpen={showConfirmation}
           onClose={() => setShowConfirmation(false)}
