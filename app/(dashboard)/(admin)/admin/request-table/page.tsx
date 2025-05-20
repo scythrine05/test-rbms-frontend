@@ -6,13 +6,17 @@ import { managerService, UserRequest } from "@/app/service/api/manager";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAcceptUserRequest } from "@/app/service/mutation/admin";
+import {
+  useAcceptUserRequest,
+  useApproveAllPendingRequests,
+} from "@/app/service/mutation/admin";
 
 export default function RequestTablePage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const acceptMutation = useAcceptUserRequest();
+  const approveAllMutation = useApproveAllPendingRequests();
 
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
@@ -50,7 +54,17 @@ export default function RequestTablePage() {
         return "";
     }
   };
-
+  const handleApproveAllPending = async () => {
+    if (confirm("Are you sure you want to approve all pending requests?")) {
+      try {
+        await approveAllMutation.mutateAsync();
+        alert("All pending requests approved successfully");
+      } catch (error) {
+        console.error("Failed to approve all requests:", error);
+        alert("Failed to approve all requests. Please try again.");
+      }
+    }
+  };
   // Handle accept/reject request
   const handleRequestAction = async (id: string, accept: boolean) => {
     if (
@@ -79,7 +93,7 @@ export default function RequestTablePage() {
   const filteredRequests =
     data?.data?.requests?.filter((request: UserRequest) => {
       if (statusFilter === "ALL") return true;
-      return request.status === statusFilter;
+      return request.adminRequestStatus === statusFilter;
     }) || [];
 
   if (isLoading) {
@@ -89,6 +103,13 @@ export default function RequestTablePage() {
       </div>
     );
   }
+  const corridorRequests = filteredRequests.filter(
+    (request) => request.corridorType === "Corridor"
+  );
+
+  const nonCorridorRequests = filteredRequests.filter(
+    (request) => request.corridorType !== "Corridor"
+  );
 
   if (error) {
     return (
@@ -107,6 +128,12 @@ export default function RequestTablePage() {
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Block Requests</h1>
         <div className="flex gap-2">
+          <button
+            onClick={handleApproveAllPending}
+            className="px-3 py-1 text-sm bg-blue-600 text-white border border-black"
+          >
+            Save
+          </button>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -114,137 +141,277 @@ export default function RequestTablePage() {
           >
             <option value="ALL">All Status</option>
             <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
+            <option value="ACCEPTED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
         </div>
       </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-black">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Date
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Major Section
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Depot
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Block Section
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Line
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Time
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Corridor Type
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Work Type
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Activity
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                S&T Approval
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Status
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRequests.map((request: UserRequest) => (
-              <tr key={request.id} className="hover:bg-gray-50">
-                <td className="border border-black p-1 text-sm">
-                  {formatDate(request.date)}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.selectedSection}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.selectedDepo}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.missionBlock}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.processedLineSections?.[0]?.lineName || "N/A"}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {formatTime(request.demandTimeFrom)} -{" "}
-                  {formatTime(request.demandTimeTo)}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.corridorTypeSelection ||
-                    request.corridorType ||
-                    "N/A"}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.workType}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.activity}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <span
-                    className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.sntDisconnectionRequired === undefined
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+          Corridor Requests
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-black">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Date
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Major Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Depot
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Block Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Line
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Time
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Corridor Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Work Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Activity
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  S&T Approval
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Status
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {corridorRequests.map((request: UserRequest) => (
+                <tr key={request.id} className="hover:bg-gray-50">
+                  <td className="border border-black p-1 text-sm">
+                    {formatDate(request.date)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedSection}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedDepo}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.missionBlock}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.processedLineSections?.[0]?.lineName || "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {formatTime(request.demandTimeFrom)} -{" "}
+                    {formatTime(request.demandTimeTo)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.corridorTypeSelection ||
+                      request.corridorType ||
+                      "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.workType}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.activity}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
+                        request.sntDisconnectionRequired === undefined
+                          ? "NAN"
+                          : request.sntDisconnectionRequired
+                          ? request.DisconnAcceptance || "PENDING"
+                          : "NAN"
+                      )}`}
+                    >
+                      {request.sntDisconnectionRequired === undefined
                         ? "NAN"
                         : request.sntDisconnectionRequired
                         ? request.DisconnAcceptance || "PENDING"
-                        : "NAN"
-                    )}`}
-                  >
-                    {request.sntDisconnectionRequired === undefined
-                      ? "NAN"
-                      : request.sntDisconnectionRequired
-                      ? request.DisconnAcceptance || "PENDING"
-                      : "NAN"}
-                  </span>
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <span
-                    className={`px-2 py-0.5 text-xs ${
-                      request.adminAcceptance
-                        ? "bg-green-100 text-green-800 border border-black"
-                        : "bg-red-100 text-red-800 border border-black"
-                    }`}
-                  >
-                    {request.adminAcceptance ? "Approved" : "Rejected"}
-                  </span>
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/view-request/${request.id}`}
-                      className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                        : "NAN"}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded ${
+                        request.adminRequestStatus === "ACCEPTED"
+                          ? "bg-green-100 text-green-800 border border-green-300"
+                          : request.adminRequestStatus === "REJECTED"
+                          ? "bg-red-100 text-red-800 border border-red-300"
+                          : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                      }`}
                     >
-                      View
-                    </Link>
-                    {request.adminAcceptance === true && (
-                      <button
-                        onClick={() => handleRequestAction(request.id, false)}
-                        className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                      {request.adminRequestStatus}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/view-request/${request.id}`}
+                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
                       >
-                        Reject
-                      </button>
-                    )}
-                  </div>
-                </td>
+                        View
+                      </Link>
+                      {request.adminRequestStatus === "PENDING" && (
+                        <button
+                          onClick={() => handleRequestAction(request.id, false)}
+                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+          Urgent & Non-Corridor Requests
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-black">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Date
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Major Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Depot
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Block Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Line
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Time
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Corridor Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Work Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Activity
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  S&T Approval
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Status
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {nonCorridorRequests.map((request: UserRequest) => (
+                <tr key={request.id} className="hover:bg-gray-50">
+                  <td className="border border-black p-1 text-sm">
+                    {formatDate(request.date)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedSection}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedDepo}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.missionBlock}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.processedLineSections?.[0]?.lineName || "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {formatTime(request.demandTimeFrom)} -{" "}
+                    {formatTime(request.demandTimeTo)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.corridorTypeSelection ||
+                      request.corridorType ||
+                      "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.workType}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.activity}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
+                        request.sntDisconnectionRequired === undefined
+                          ? "NAN"
+                          : request.sntDisconnectionRequired
+                          ? request.DisconnAcceptance || "PENDING"
+                          : "NAN"
+                      )}`}
+                    >
+                      {request.sntDisconnectionRequired === undefined
+                        ? "NAN"
+                        : request.sntDisconnectionRequired
+                        ? request.DisconnAcceptance || "PENDING"
+                        : "NAN"}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded ${
+                        request.adminRequestStatus === "ACCEPTED"
+                          ? "bg-green-100 text-green-800 border border-green-300"
+                          : request.adminRequestStatus === "REJECTED"
+                          ? "bg-red-100 text-red-800 border border-red-300"
+                          : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                      }`}
+                    >
+                      {request.adminRequestStatus}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/view-request/${request.id}`}
+                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                      >
+                        View
+                      </Link>
+                      {request.adminRequestStatus === "PENDING" && (
+                        <button
+                          onClick={() => handleRequestAction(request.id, false)}
+                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pagination */}

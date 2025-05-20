@@ -33,6 +33,7 @@ export interface UsersResponse {
 }
 
 export interface UserRequest {
+    adminRequestStatus: string;
     selectedStream: any;
     id: string;
     date: string;

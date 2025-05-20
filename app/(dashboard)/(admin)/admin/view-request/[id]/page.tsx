@@ -118,7 +118,7 @@ export default function ViewRequestPage() {
           >
             Back to List
           </Link>
-          {request.adminAcceptance === true && (
+          {request.adminRequestStatus === "PENDING" && (
             <button
               onClick={() => handleRequestAction(false)}
               disabled={isProcessing}

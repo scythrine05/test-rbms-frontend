@@ -12,3 +12,14 @@ export const useAcceptUserRequest = () => {
         },
     });
 };
+
+export const useApproveAllPendingRequests = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: () => adminService.approveAllPendingRequests(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["requests"] });
+    },
+  });
+};
