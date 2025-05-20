@@ -2874,7 +2874,7 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </div>
                 )}
-                <div className="form-group col-span-2 mt-5">
+                {/* <div className="form-group col-span-2 mt-5">
                   <label className="block text-sm font-medium text-black mb-1">
                     Remarks
                   </label>
@@ -2902,7 +2902,7 @@ export default function CreateBlockRequestPage() {
                   >
                     {formSubmitting ? "Submitting..." : "Submit Block Request"}
                   </button>
-                </div>             
+                </div>              */}
             </>
           )}
           {session?.user.department === "TRD" && (
