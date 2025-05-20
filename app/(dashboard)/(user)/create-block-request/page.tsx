@@ -2902,8 +2902,7 @@ export default function CreateBlockRequestPage() {
                   >
                     {formSubmitting ? "Submitting..." : "Submit Block Request"}
                   </button>
-                </div>
-              )}
+                </div>             
             </>
           )}
           {session?.user.department === "TRD" && (

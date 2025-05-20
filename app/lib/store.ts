@@ -4338,12 +4338,12 @@ export const streamData = {
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
     "both direction not affected": [],
   },
-  "KRR-YD": {
-    "up direction affected": [],
-    "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
-    "both direction not affected": [],
-  },
+  // "KRR-YD": {
+  //   "up direction affected": [],
+  //   "down direction affected": [],
+  //   "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+  //   "both direction not affected": [],
+  // },
   "VEI-YD": {
     "up direction affected": [],
     "down direction affected": [],
@@ -5217,7 +5217,7 @@ export let lineData = {
   "KMD-YD": ["Single"],
   "PGR-YD": ["Single"],
   "MPLM-YD": ["Single"],
-  "KRR-YD": ["Single"],
+  // "KRR-YD": ["Single"],
   "VRQ-YD": ["Single"],
   "MYU-YD": ["Single"],
   "MMH-YD": ["Single"],
