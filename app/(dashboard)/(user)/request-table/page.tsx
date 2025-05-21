@@ -12,6 +12,8 @@ import { format, parseISO, addDays, startOfWeek, endOfWeek } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useUpdateOtherRequest, useDeleteUserRequest } from "@/app/service/mutation/user-request";
 import { Toaster, toast } from "react-hot-toast";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 
 // Components
 const Pagination = ({
@@ -253,6 +255,9 @@ export default function RequestTablePage() {
   const [tooltipPos, setTooltipPos] = useState<TooltipPosition | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Used to trigger refetching data
+  const { isUrgentMode } = useUrgentMode();
+  const [requests, setRequests] = useState<RequestItem[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
   // Get user session for role-based features
   const { data: session } = useSession();
@@ -313,14 +318,16 @@ export default function RequestTablePage() {
     return startOfWeek(now, { weekStartsOn: 1 }); // Start from Monday
   });
 
-  // Calculate week range
-  const weekRange: DateRangeFilter = {
-    startDate: format(currentWeekStart, "yyyy-MM-dd"),
-    endDate: format(
-      endOfWeek(currentWeekStart, { weekStartsOn: 1 }),
-      "yyyy-MM-dd"
-    ),
-  };
+  // Calculate date range based on mode
+  const dateRange: DateRangeFilter = isUrgentMode 
+    ? {
+        startDate: format(new Date(), "yyyy-MM-dd"),
+        endDate: format(addDays(new Date(), 2), "yyyy-MM-dd")
+      }
+    : {
+        startDate: format(currentWeekStart, "yyyy-MM-dd"),
+        endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
+      };
 
   // Get weekly requests for both compact and Gantt views
   const {
@@ -328,17 +335,86 @@ export default function RequestTablePage() {
     isLoading: isWeeklyLoading,
     error: weeklyError,
     refetch: refetchWeeklyData,
-  } = useGetWeeklyUserRequests(weekRange);
+  } = useGetWeeklyUserRequests(dateRange);
 
-  // Refetch data when refreshTrigger changes
-  useEffect(() => {
-    refetchWeeklyData();
-  }, [refetchWeeklyData, refreshTrigger]);
+  // Generate dates for display
+  const displayDates = isUrgentMode
+    ? Array.from({ length: 3 }, (_, i) => {
+        const date = addDays(new Date(), i);
+        return {
+          date,
+          formattedDate: format(date, "dd-MM-yyyy"),
+          dayOfWeek: format(date, "E"),
+        };
+      })
+    : Array.from({ length: 7 }, (_, i) => {
+        const date = addDays(currentWeekStart, i);
+        return {
+          date,
+          formattedDate: format(date, "dd-MM-yyyy"),
+          dayOfWeek: format(date, "E"),
+        };
+      });
+
+  // Function to navigate to previous period
+  const goToPreviousPeriod = () => {
+    if (isUrgentMode) {
+      // In urgent mode, we don't allow going back as it's always current 3 days
+      return;
+    }
+    setCurrentWeekStart((prevDate) => addDays(prevDate, -7));
+  };
+
+  // Function to navigate to next period
+  const goToNextPeriod = () => {
+    if (isUrgentMode) {
+      // In urgent mode, we don't allow going forward as it's always current 3 days
+      return;
+    }
+    setCurrentWeekStart((prevDate) => addDays(prevDate, 7));
+  };
+
+  // Filter requests based on urgent mode and showAll state
+  const filteredRequests = showAll 
+    ? weeklyData?.data?.requests || []
+    : weeklyData?.data?.requests?.filter(request => {
+        if (isUrgentMode) {
+          return request.corridorType === "Urgent Block" || request.workType === "EMERGENCY";
+        } else {
+          return request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+        }
+      }) || [];
 
   // Process weekly data for pagination in compact view
   const [paginatedRequests, setPaginatedRequests] = useState<RequestItem[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [filteredWeeklyRequests, setFilteredWeeklyRequests] = useState<RequestItem[]>([]);
+
+  useEffect(() => {
+    if (weeklyData?.data?.requests) {
+      // Filter requests to only include those within the current week
+      const filteredRequests = weeklyData.data.requests.filter(request => {
+        try {
+          const requestDate = parseISO(request.date);
+          const startDate = parseISO(dateRange.startDate);
+          const endDate = parseISO(dateRange.endDate);
+
+          // Check if request date falls within current week range
+          return requestDate >= startDate && requestDate <= endDate;
+        } catch (error) {
+          console.error("Date parsing error:", error);
+          return false;
+        }
+      });
+
+      setFilteredWeeklyRequests(filteredRequests);
+
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      setPaginatedRequests(filteredRequests.slice(start, end));
+      setTotalPages(Math.ceil(filteredRequests.length / pageSize));
+    }
+  }, [weeklyData, currentPage, pageSize, dateRange.startDate, dateRange.endDate]);
 
   // Click outside handler for tooltips
   useEffect(() => {
@@ -359,52 +435,6 @@ export default function RequestTablePage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [openTooltip, showInfoPanel]);
-
-  useEffect(() => {
-    if (weeklyData?.data?.requests) {
-      // Filter requests to only include those within the current week
-      const filteredRequests = weeklyData.data.requests.filter(request => {
-        try {
-          const requestDate = parseISO(request.date);
-          const startDate = parseISO(weekRange.startDate);
-          const endDate = parseISO(weekRange.endDate);
-
-          // Check if request date falls within current week range
-          return requestDate >= startDate && requestDate <= endDate;
-        } catch (error) {
-          console.error("Date parsing error:", error);
-          return false;
-        }
-      });
-
-      setFilteredWeeklyRequests(filteredRequests);
-
-      const start = (currentPage - 1) * pageSize;
-      const end = start + pageSize;
-      setPaginatedRequests(filteredRequests.slice(start, end));
-      setTotalPages(Math.ceil(filteredRequests.length / pageSize));
-    }
-  }, [weeklyData, currentPage, pageSize, weekRange.startDate, weekRange.endDate]);
-
-  // Function to navigate to previous week
-  const goToPreviousWeek = () => {
-    setCurrentWeekStart((prevDate) => addDays(prevDate, -7));
-  };
-
-  // Function to navigate to next week
-  const goToNextWeek = () => {
-    setCurrentWeekStart((prevDate) => addDays(prevDate, 7));
-  };
-
-  // Generate dates for the week (Monday to Sunday)
-  const weekDates = Array.from({ length: 7 }, (_, i) => {
-    const date = addDays(currentWeekStart, i);
-    return {
-      date,
-      formattedDate: format(date, "dd-MM-yyyy"),
-      dayOfWeek: format(date, "E"),
-    };
-  });
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -1177,72 +1207,77 @@ export default function RequestTablePage() {
       <div className="bg-white p-3 border border-black mb-3">
         <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
           <h1 className="text-lg font-bold text-[#13529e]">
-            Summary of Block Requisitions
+            {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
           </h1>
-          <div className="flex items-center">
-            <InfoCorner />
-            <Link
-              href="/create-block-request"
-              className="ml-2 px-3 py-1 text-sm bg-[#13529e] text-white border border-black"
-            >
-              Create New Block
-            </Link>
-          </div>
+          <ShowAllToggle 
+            showAll={showAll} 
+            onToggle={() => setShowAll(!showAll)} 
+            isUrgentMode={isUrgentMode}
+          />
         </div>
 
-        {/* View toggle */}
-        <div className="flex justify-between items-center mb-3 border-b border-black pb-3">
-          <div className="space-x-1">
-            <button
-              onClick={() => setViewType("compact")}
-              className={`px-3 py-1 text-sm border border-black ${viewType === "compact"
-                ? "bg-[#13529e] text-white"
-                : "bg-white text-[#13529e]"
-                }`}
-            >
-              Compact View
-            </button>
-            <button
-              onClick={() => setViewType("gantt")}
-              className={`px-3 py-1 text-sm border border-black ${viewType === "gantt"
-                ? "bg-[#13529e] text-white"
-                : "bg-white text-[#13529e]"
-                }`}
-            >
-              Gantt View
-            </button>
+        {/* View toggle - only show in normal mode */}
+        {!isUrgentMode && (
+          <div className="flex justify-between items-center mb-3 border-b border-black pb-3">
+            <div className="space-x-1">
+              <button
+                onClick={() => setViewType("compact")}
+                className={`px-3 py-1 text-sm border border-black ${viewType === "compact"
+                  ? "bg-[#13529e] text-white"
+                  : "bg-white text-[#13529e]"
+                  }`}
+              >
+                Compact View
+              </button>
+              <button
+                onClick={() => setViewType("gantt")}
+                className={`px-3 py-1 text-sm border border-black ${viewType === "gantt"
+                  ? "bg-[#13529e] text-white"
+                  : "bg-white text-[#13529e]"
+                  }`}
+              >
+                Gantt View
+              </button>
+            </div>
+            <div>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="p-1 text-sm border border-black bg-white text-black"
+              >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={50}>50 per page</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="p-1 text-sm border border-black bg-white text-black"
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
-          </div>
-        </div>
+        )}
 
-        {/* Week selector - now visible for both views */}
+        {/* Period selector */}
         <div className="flex justify-between items-center mb-3 text-sm border-b border-black pb-2">
-          <button
-            onClick={goToPreviousWeek}
-            className="px-2 py-1 bg-white text-[#13529e] border border-black text-sm"
-          >
-            &lt; Prev Week
-          </button>
+          {!isUrgentMode && (
+            <button
+              onClick={goToPreviousPeriod}
+              className="px-2 py-1 bg-white text-[#13529e] border border-black text-sm"
+            >
+              &lt; Prev Week
+            </button>
+          )}
           <div className="font-medium text-black bg-gray-100 px-3 py-1 border border-black">
-            Current Week: {format(parseISO(weekRange.startDate), "dd-MM-yyyy")} to {format(parseISO(weekRange.endDate), "dd-MM-yyyy")}
+            {isUrgentMode 
+              ? "Next 3 Days: Today to " + format(addDays(new Date(), 2), "dd-MM-yyyy")
+              : `Current Week: ${format(parseISO(dateRange.startDate), "dd-MM-yyyy")} to ${format(parseISO(dateRange.endDate), "dd-MM-yyyy")}`
+            }
           </div>
-          <button
-            onClick={goToNextWeek}
-            className="px-2 py-1 bg-white text-[#13529e] border border-black text-sm"
-          >
-            Next Week &gt;
-          </button>
+          {!isUrgentMode && (
+            <button
+              onClick={goToNextPeriod}
+              className="px-2 py-1 bg-white text-[#13529e] border border-black text-sm"
+            >
+              Next Week &gt;
+            </button>
+          )}
         </div>
 
         {viewType === "compact" ? (
@@ -1312,7 +1347,7 @@ export default function RequestTablePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedRequests.map((request) => (
+                    {filteredRequests.map((request) => (
                       <tr
                         key={`compact-${request.id}-${request.date}`}
                         className="hover:bg-gray-50"
@@ -1379,7 +1414,7 @@ export default function RequestTablePage() {
                   <div className="w-[20%] min-w-32 flex-shrink-0 p-1 font-medium bg-gray-100 border-r border-black">
                     Block Section
                   </div>
-                  {weekDates.map((dateInfo) => (
+                  {displayDates.map((dateInfo) => (
                     <div
                       key={`date-${dateInfo.formattedDate}`}
                       className="flex-1 min-w-14 p-1 text-center border-r border-black bg-gray-100"
@@ -1430,7 +1465,7 @@ export default function RequestTablePage() {
                         {blockSection}
                       </div>
 
-                      {weekDates.map((dateInfo) => {
+                      {displayDates.map((dateInfo) => {
                         const dateStr = format(dateInfo.date, "yyyy-MM-dd");
                         const requestsForDay = requests.filter((request) => {
                           // Compare dates using yyyy-MM-dd format for consistency

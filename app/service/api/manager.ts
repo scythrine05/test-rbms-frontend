@@ -160,13 +160,25 @@ export const managerService = {
     /**
      * Get all user requests with pagination
      */
-    getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
-        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
+    getUserRequests: async (page: number = 1, dateRange?: { startDate: string; endDate: string }): Promise<UserRequestsResponse> => {
+        const queryParams = new URLSearchParams();
+        queryParams.append('page', page.toString());
+        if (dateRange) {
+            queryParams.append('startDate', dateRange.startDate);
+            queryParams.append('endDate', dateRange.endDate);
+        }
+        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?${queryParams.toString()}`);
         return response.data;
     },
 
-    getUserRequestsByAdmin: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
-        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}`);
+    getUserRequestsByAdmin: async (page: number = 1, dateRange?: { startDate: string; endDate: string }): Promise<UserRequestsResponse> => {
+        const queryParams = new URLSearchParams();
+        queryParams.append('page', page.toString());
+        if (dateRange) {
+            queryParams.append('startDate', dateRange.startDate);
+            queryParams.append('endDate', dateRange.endDate);
+        }
+        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?${queryParams.toString()}`);
         return response.data;
     },
 

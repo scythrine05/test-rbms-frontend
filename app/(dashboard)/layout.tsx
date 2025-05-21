@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Sidebar } from "../components/ui/sidebar";
+import { UrgentModeProvider, useUrgentMode } from "../context/UrgentModeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,14 +19,11 @@ const metadata: Metadata = {
   description: "Southern Railway Employee Portal Dashboard",
 };
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isUrgentMode, toggleUrgentMode } = useUrgentMode();
 
   // Handle sidebar visibility based on screen size
   useEffect(() => {
@@ -52,19 +50,30 @@ export default function DashboardLayout({
     router.push("/auth/login");
   };
 
+  // Define theme colors based on mode
+  const themeColors = {
+    primary: isUrgentMode ? '#dc2626' : '#3277BC', // Red for urgent, Blue for normal
+    hover: isUrgentMode ? '#b91c1c' : '#2c6cb0', // Darker red for urgent, Darker blue for normal
+    text: isUrgentMode ? '#991b1b' : '#13529e', // Dark red for urgent, Dark blue for normal
+  };
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} font-sans bg-gray-50 min-h-screen`}
       >
         <div className="flex flex-col min-h-screen">
-          {/* Navbar - Responsive with blue color scheme */}
-          <nav className="bg-[#3277BC] text-white h-12 md:h-10 flex items-center px-4 shadow-sm z-30 sticky top-0">
+          {/* Navbar - Responsive with dynamic color scheme */}
+          <nav 
+            className={`text-white h-12 md:h-10 flex items-center px-4 shadow-sm z-30 sticky top-0 transition-colors duration-200`}
+            style={{ backgroundColor: themeColors.primary }}
+          >
             {/* Mobile menu toggle */}
             <button
               data-sidebar-toggle
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden mr-2 p-1 rounded-md hover:bg-[#2c6cb0]"
+              className="md:hidden mr-2 p-1 rounded-md hover:bg-opacity-80"
+              style={{ backgroundColor: themeColors.hover }}
               aria-label="Toggle menu"
             >
               <svg
@@ -86,7 +95,21 @@ export default function DashboardLayout({
             <span className="ml-2 md:ml-3 text-xs text-white/80 truncate">
               Employee Portal
             </span>
-            <div className="ml-auto flex gap-2 md:gap-4 text-xs">
+
+            {/* Urgent Mode Toggle */}
+            <div className="ml-auto flex items-center gap-4">
+              <button
+                onClick={toggleUrgentMode}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+                  isUrgentMode 
+                    ? 'bg-white text-red-600 hover:bg-red-50' 
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+                aria-label={isUrgentMode ? "Switch to normal mode" : "Switch to urgent mode"}
+              >
+                {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
+              </button>
+
               <Link
                 href="/dashboard"
                 className="hover:underline hidden sm:block"
@@ -104,12 +127,14 @@ export default function DashboardLayout({
               </button>
             </div>
           </nav>
+
           <div className="flex flex-1 bg-white relative">
             {/* Sidebar Component */}
             <div className="fixed top-[48px] md:top-[40px] left-0 h-[calc(100vh-48px)] md:h-[calc(100vh-40px)] z-20">
               <Sidebar
                 isSidebarOpen={isSidebarOpen}
                 setIsSidebarOpen={setIsSidebarOpen}
+                isUrgentMode={isUrgentMode}
               />
             </div>
 
@@ -118,6 +143,7 @@ export default function DashboardLayout({
               {children}
             </main>
           </div>
+
           {/* Footer - Responsive */}
           <footer className="bg-white border-t border-gray-200 py-2 md:py-3 text-center text-xs text-gray-500 mt-auto">
             <p className="px-4">
@@ -128,5 +154,17 @@ export default function DashboardLayout({
         </div>
       </body>
     </html>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <UrgentModeProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </UrgentModeProvider>
   );
 }

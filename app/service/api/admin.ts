@@ -53,10 +53,16 @@ saveOptimizedRequestsStatus: async (requestIds: string[]) => {
 },
 
 
-getUserRequests: async (page: number, limit: number) => {
+getUserRequests: async (page: number, dateRange?: { startDate: string; endDate: string }) => {
   try {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    if (dateRange) {
+      queryParams.append('startDate', dateRange.startDate);
+      queryParams.append('endDate', dateRange.endDate);
+    }
     const response = await axiosInstance.get("/api/user-request/user-data", {
-      params: { page, limit },
+      params: Object.fromEntries(queryParams)
     });
     return response.data; // { requests: [], total, page, totalPages }
   } catch (error) {

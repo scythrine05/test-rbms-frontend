@@ -3,19 +3,34 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 
 export default function RequestTablePage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const { isUrgentMode } = useUrgentMode();
+  const [showAll, setShowAll] = useState(false);
 
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter],
-    queryFn: () => managerService.getUserRequests(page),
+    queryKey: ["requests", page, statusFilter, isUrgentMode],
+    queryFn: () => {
+      if (isUrgentMode) {
+        // For urgent mode, get requests for next 3 days
+        const today = new Date();
+        const endDate = addDays(today, 2);
+        return managerService.getUserRequests(1, {
+          startDate: format(today, "yyyy-MM-dd"),
+          endDate: format(endDate, "yyyy-MM-dd")
+        });
+      }
+      return managerService.getUserRequests(page);
+    },
   });
 
   // Format date
@@ -54,12 +69,16 @@ export default function RequestTablePage() {
     setPage(newPage);
   };
 
-  // Filter requests based on status
-  const filteredRequests =
-    data?.data?.requests?.filter((request: UserRequest) => {
-      if (statusFilter === "ALL") return true;
-      return request.status === statusFilter;
-    }) || [];
+  // Filter requests based on status and urgent mode
+  const filteredRequests = showAll 
+    ? data?.data?.requests || []
+    : data?.data?.requests?.filter((request: UserRequest) => {
+        const statusMatch = statusFilter === "ALL" || request.status === statusFilter;
+        const urgentMatch = isUrgentMode 
+          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY")
+          : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
+        return statusMatch && urgentMatch;
+      }) || [];
 
   if (isLoading) {
     return (
@@ -84,7 +103,9 @@ export default function RequestTablePage() {
   return (
     <div className="bg-white p-3 border border-black mb-3">
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">Block Requests</h1>
+        <h1 className="text-lg font-bold text-[#13529e]">
+          {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
+        </h1>
         <div className="flex gap-2">
           <select
             value={statusFilter}
@@ -96,8 +117,26 @@ export default function RequestTablePage() {
             <option value="APPROVED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
+          <ShowAllToggle 
+            showAll={showAll} 
+            onToggle={() => setShowAll(!showAll)} 
+            isUrgentMode={isUrgentMode}
+          />
         </div>
       </div>
+
+      {/* Urgent mode description and date range */}
+      {isUrgentMode && (
+        <div className="mb-4">
+          <div className="text-sm text-gray-600 mb-2">
+            <p className="font-medium">Urgent Mode Active</p>
+            <p>Showing urgent block requests and emergency work types for the next 3 days.</p>
+          </div>
+          <div className="text-sm text-gray-600">
+            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 2), "dd-MM-yyyy")}
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-black">
@@ -235,8 +274,8 @@ export default function RequestTablePage() {
         </table>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Pagination - only show in normal mode */}
+      {!isUrgentMode && totalPages > 1 && (
         <div className="mt-4 flex justify-center gap-2">
           <button
             onClick={() => handlePageChange(page - 1)}

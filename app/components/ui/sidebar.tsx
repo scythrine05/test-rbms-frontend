@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -14,6 +15,15 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const { isUrgentMode } = useUrgentMode();
+
+  // Define theme colors based on mode
+  const themeColors = {
+    primary: isUrgentMode ? '#dc2626' : '#3277BC', // Red for urgent, Blue for normal
+    hover: isUrgentMode ? '#b91c1c' : '#2c6cb0', // Darker red for urgent, Darker blue for normal
+    text: isUrgentMode ? '#991b1b' : '#13529e', // Dark red for urgent, Dark blue for normal
+    bg: isUrgentMode ? '#fef2f2' : '#f8fafc', // Light red for urgent, Light blue for normal
+  };
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -22,6 +32,14 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
 
   const isActive = (path: string) => {
     return pathname === path;
+  };
+
+  const getLinkClasses = (path: string) => {
+    const baseClasses = "flex items-center px-4 py-2 text-sm transition-colors duration-200";
+    const activeClasses = isActive(path)
+      ? `bg-white text-[${themeColors.text}] font-medium`
+      : `text-gray-600 hover:bg-white hover:text-[${themeColors.text}]`;
+    return `${baseClasses} ${activeClasses}`;
   };
 
   const userMenuItems = [
@@ -367,11 +385,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center py-1.5 px-3 border-l-4 mb-px text-sm ${
-                  isActive(item.path)
-                    ? "border-l-[#13529e] bg-blue-50 text-[#13529e] font-medium"
-                    : "border-l-transparent text-gray-700 hover:bg-gray-50"
-                }`}
+                className={getLinkClasses(item.path)}
               >
                 <span
                   className={
@@ -394,11 +408,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center py-1.5 px-3 border-l-4 mb-px text-sm ${
-                  isActive(item.path)
-                    ? "border-l-[#13529e] bg-blue-50 text-[#13529e] font-medium"
-                    : "border-l-transparent text-gray-700 hover:bg-gray-50"
-                }`}
+                className={getLinkClasses(item.path)}
               >
                 <span
                   className={
@@ -419,11 +429,7 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center py-1.5 px-3 border-l-4 mb-px text-sm ${
-                  isActive(item.path)
-                    ? "border-l-[#13529e] bg-blue-50 text-[#13529e] font-medium"
-                    : "border-l-transparent text-gray-700 hover:bg-gray-50"
-                }`}
+                className={getLinkClasses(item.path)}
               >
                 <span
                   className={
