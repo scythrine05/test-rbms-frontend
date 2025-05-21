@@ -1,4 +1,4 @@
-import axiosInstance from "@/app/utils/axiosInstance";
+import axiosInstance from '@/app/utils/axiosInstance';
 
 export const adminService = {
   acceptUserRequest: async (id: string, accept: boolean) => {
@@ -11,7 +11,7 @@ export const adminService = {
   getApprovedRequests: async (
     startDate: string,
     endDate: string,
-    page: number = 1
+    page: number = 1,
   ) => {
     const response = await axiosInstance.get(
       `/api/user-request/admin/approved?startDate=${startDate}&endDate=${endDate}&page=${page}`
@@ -53,23 +53,81 @@ saveOptimizedRequestsStatus: async (requestIds: string[]) => {
 },
 
 
-getUserRequests: async (page: number, dateRange?: { startDate: string; endDate: string }) => {
+getUserRequests: async (page: number, limit: number,startDate: string,
+    endDate: string,) => {
   try {
     const queryParams = new URLSearchParams();
     queryParams.append('page', page.toString());
-    if (dateRange) {
-      queryParams.append('startDate', dateRange.startDate);
-      queryParams.append('endDate', dateRange.endDate);
+    queryParams.append('limit', limit.toString());
+    if (startDate && endDate) {
+      queryParams.append('startDate', startDate);
+      queryParams.append('endDate', endDate);
     }
     const response = await axiosInstance.get("/api/user-request/user-data", {
-      params: Object.fromEntries(queryParams)
+      params: { page, limit,startDate,endDate },
     });
-    return response.data; // { requests: [], total, page, totalPages }
+    return response.data; 
   } catch (error) {
-    // Handle error appropriately (logging, transforming, etc.)
     console.error("Error fetching user requests:", error);
-    throw error; // Re-throw to let the caller handle it
+    throw error; 
   }
-}
+},
+
+updateRequestStatus: async (requestId: string, status: 'yes' | 'no',reason:string) => {
+  try {
+    const response = await axiosInstance.post("/api/user-request/updatedStatus", {
+      requestId,  
+      status,
+      reason
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error updating user status:", error);
+    throw new Error(error.response?.data?.message || "Failed to update status");
+  }
+},
+
+
+updateUserResponse: async (requestId: string, userResponse:string,reason:string) => {
+  try {
+    const response = await axiosInstance.post("/api/user-request/userResponse", {
+      requestId,  
+      userResponse,
+      reason
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error updating user status:", error);
+    throw new Error(error.response?.data?.message || "Failed to update status");
+  }
+},
+
+
+// In your adminService
+updateOptimizeTimes: async (data: {
+  requestId: string;
+  optimizeTimeFrom: string;
+  optimizeTimeTo: string;
+}) => {
+  try {
+    // Validate the datetime strings
+    const fromDate = new Date(data.optimizeTimeFrom);
+    const toDate = new Date(data.optimizeTimeTo);
+    
+    if (isNaN(fromDate.getTime())) throw new Error("Invalid optimizeTimeFrom");
+    if (isNaN(toDate.getTime())) throw new Error("Invalid optimizeTimeTo");
+
+    const response = await axiosInstance.post("/api/user-request/updateOptimizeTimes", {
+      requestId: data.requestId,
+      optimizeTimeFrom: fromDate.toISOString(),
+      optimizeTimeTo: toDate.toISOString()
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error updating optimize times:", error);
+    throw new Error(error.response?.data?.message || "Failed to update optimize times");
+  }
+},
+
 
 };

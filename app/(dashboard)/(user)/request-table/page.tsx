@@ -322,7 +322,7 @@ export default function RequestTablePage() {
   const dateRange: DateRangeFilter = isUrgentMode 
     ? {
         startDate: format(new Date(), "yyyy-MM-dd"),
-        endDate: format(addDays(new Date(), 2), "yyyy-MM-dd")
+        endDate: format(addDays(new Date(), 1), "yyyy-MM-dd")
       }
     : {
         startDate: format(currentWeekStart, "yyyy-MM-dd"),
@@ -339,7 +339,7 @@ export default function RequestTablePage() {
 
   // Generate dates for display
   const displayDates = isUrgentMode
-    ? Array.from({ length: 3 }, (_, i) => {
+    ? Array.from({ length: 1 }, (_, i) => {
         const date = addDays(new Date(), i);
         return {
           date,
@@ -359,7 +359,7 @@ export default function RequestTablePage() {
   // Function to navigate to previous period
   const goToPreviousPeriod = () => {
     if (isUrgentMode) {
-      // In urgent mode, we don't allow going back as it's always current 3 days
+      // In urgent mode, we don't allow going back as it's always current day
       return;
     }
     setCurrentWeekStart((prevDate) => addDays(prevDate, -7));
@@ -368,7 +368,7 @@ export default function RequestTablePage() {
   // Function to navigate to next period
   const goToNextPeriod = () => {
     if (isUrgentMode) {
-      // In urgent mode, we don't allow going forward as it's always current 3 days
+      // In urgent mode, we don't allow going forward as it's always current day
       return;
     }
     setCurrentWeekStart((prevDate) => addDays(prevDate, 7));
@@ -379,7 +379,8 @@ export default function RequestTablePage() {
     ? weeklyData?.data?.requests || []
     : weeklyData?.data?.requests?.filter(request => {
         if (isUrgentMode) {
-          return request.corridorType === "Urgent Block" || request.workType === "EMERGENCY";
+          return (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
+                 format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd");
         } else {
           return request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
         }
@@ -1266,7 +1267,7 @@ export default function RequestTablePage() {
           )}
           <div className="font-medium text-black bg-gray-100 px-3 py-1 border border-black">
             {isUrgentMode 
-              ? "Next 3 Days: Today to " + format(addDays(new Date(), 2), "dd-MM-yyyy")
+              ? "Next Day: " + format(addDays(new Date(), 1), "dd-MM-yyyy")
               : `Current Week: ${format(parseISO(dateRange.startDate), "dd-MM-yyyy")} to ${format(parseISO(dateRange.endDate), "dd-MM-yyyy")}`
             }
           </div>

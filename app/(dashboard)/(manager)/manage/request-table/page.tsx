@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO, addDays } from "date-fns";
+import { format, parseISO, addDays, subDays, startOfWeek, endOfWeek } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
@@ -11,26 +11,43 @@ import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 
 export default function RequestTablePage() {
   const router = useRouter();
-  const [page, setPage] = useState(1);
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    // Set initial week start to last Saturday
+    const today = new Date();
+    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
+    return startOfWeek(lastSaturday, { weekStartsOn: 6 }); // 6 is Saturday
+  });
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const { isUrgentMode } = useUrgentMode();
   const [showAll, setShowAll] = useState(false);
+  const [page, setPage] = useState(1);
 
-  // Fetch requests data with pagination
+  // Calculate week range (Saturday to Friday)
+  const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+
+  // Fetch requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter, isUrgentMode],
+    queryKey: ["requests", page, statusFilter,weekStart, weekEnd,isUrgentMode],
     queryFn: () => {
       if (isUrgentMode) {
-        // For urgent mode, get requests for next 3 days
+        // For urgent mode, get requests for next day
         const today = new Date();
-        const endDate = addDays(today, 2);
-        return managerService.getUserRequests(1, {
-          startDate: format(today, "yyyy-MM-dd"),
-          endDate: format(endDate, "yyyy-MM-dd")
-        });
+        const endDate = addDays(today, 1);
+        return managerService.getUserRequestsByWeek(
+          1,
+          10,
+          format(today, "yyyy-MM-dd"),
+          format(endDate, "yyyy-MM-dd")
+        );
       }
-      return managerService.getUserRequests(page);
-    },
+      return managerService.getUserRequestsByWeek(
+      page, 
+      10, // limit
+      weekStart.toISOString(),
+      weekEnd.toISOString()
+    )
+  }
   });
 
   // Format date
@@ -64,9 +81,14 @@ export default function RequestTablePage() {
     }
   };
 
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  // Handle week navigation
+  const handleWeekChange = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setCurrentWeekStart((prev) => subDays(prev, 7));
+    } else {
+      setCurrentWeekStart((prev) => addDays(prev, 7));
+    }
+    setPage(1); // Reset to first page when changing weeks
   };
 
   // Filter requests based on status and urgent mode
@@ -75,7 +97,8 @@ export default function RequestTablePage() {
     : data?.data?.requests?.filter((request: UserRequest) => {
         const statusMatch = statusFilter === "ALL" || request.status === statusFilter;
         const urgentMatch = isUrgentMode 
-          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY")
+          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
+            format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd")
           : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
         return statusMatch && urgentMatch;
       }) || [];
@@ -98,7 +121,7 @@ export default function RequestTablePage() {
     );
   }
 
-  const totalPages = data?.data?.totalPages || 1;
+  const totalPages = data?.data.totalPages || 1;
 
   return (
     <div className="bg-white p-3 border border-black mb-3">
@@ -130,14 +153,47 @@ export default function RequestTablePage() {
         <div className="mb-4">
           <div className="text-sm text-gray-600 mb-2">
             <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the next 3 days.</p>
+            <p>Showing urgent block requests and emergency work types for the next day.</p>
           </div>
           <div className="text-sm text-gray-600">
-            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 2), "dd-MM-yyyy")}
+            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
           </div>
         </div>
       )}
 
+      {/* Urgent mode description and date range */}
+      {isUrgentMode && (
+        <div className="mb-4">
+          <div className="text-sm text-gray-600 mb-2">
+            <p className="font-medium">Urgent Mode Active</p>
+            <p>Showing urgent block requests and emergency work types for the next day.</p>
+          </div>
+          <div className="text-sm text-gray-600">
+            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
+          </div>
+        </div>
+      )}
+
+      {/* Week Navigation - Updated to show Saturday-Friday range */}
+      <div className="mt-4 flex justify-center gap-2 mb-4">
+        <button
+          onClick={() => handleWeekChange("prev")}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+        >
+          Previous Week
+        </button>
+        <span className="px-3 py-1 text-sm">
+          {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
+        </span>
+        <button
+          onClick={() => handleWeekChange("next")}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+        >
+          Next Week
+        </button>
+      </div>
+
+      {/* Rest of the table and pagination remains the same */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-black">
           <thead>
@@ -180,6 +236,7 @@ export default function RequestTablePage() {
           <tbody>
             {filteredRequests.map((request: UserRequest) => (
               <tr key={request.id} className="hover:bg-gray-50">
+                {/* Table cells remain exactly the same */}
                 <td className="border border-black p-1 text-sm">
                   {formatDate(request.date)}
                 </td>
@@ -192,9 +249,6 @@ export default function RequestTablePage() {
                 <td className="border border-black p-1 text-sm">
                   {request.missionBlock}
                 </td>
-                {/* <td className="border border-black p-1 text-sm">
-                  {request.processedLineSections?.[0]?.lineName || "N/A"}
-                </td> */}
                 <td className="border border-black p-1 text-sm">
                   {(() => {
                     if (
@@ -233,7 +287,6 @@ export default function RequestTablePage() {
                     return "N/A";
                   })()}
                 </td>
-
                 <td className="border border-black p-1 text-sm">
                   {formatTime(request.demandTimeFrom)} -{" "}
                   {formatTime(request.demandTimeTo)}
@@ -278,7 +331,7 @@ export default function RequestTablePage() {
       {!isUrgentMode && totalPages > 1 && (
         <div className="mt-4 flex justify-center gap-2">
           <button
-            onClick={() => handlePageChange(page - 1)}
+            onClick={() => setPage(page - 1)}
             disabled={page === 1}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
           >
@@ -288,7 +341,7 @@ export default function RequestTablePage() {
             Page {page} of {totalPages}
           </span>
           <button
-            onClick={() => handlePageChange(page + 1)}
+            onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
           >

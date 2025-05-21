@@ -27,9 +27,9 @@ export default function RequestTablePage() {
     queryKey: ["requests", page, statusFilter, isUrgentMode],
     queryFn: () => {
       if (isUrgentMode) {
-        // For urgent mode, get requests for next 3 days
+        // For urgent mode, get requests for next day
         const today = new Date();
-        const endDate = addDays(today, 2);
+        const endDate = addDays(today, 1);
         return managerService.getUserRequestsByAdmin(1, {
           startDate: format(today, "yyyy-MM-dd"),
           endDate: format(endDate, "yyyy-MM-dd")
@@ -110,7 +110,8 @@ export default function RequestTablePage() {
     : data?.data?.requests?.filter((request: UserRequest) => {
         const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
         const urgentMatch = isUrgentMode 
-          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY")
+          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
+            format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd")
           : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
         return statusMatch && urgentMatch;
       }) || [];
@@ -128,7 +129,7 @@ export default function RequestTablePage() {
   );
 
   const nonCorridorRequests = filteredRequests.filter(
-    (request) => request.corridorType !== "Corridor"
+    (request) => request.corridorType === "Outside Corridor"
   );
 
   if (error) {
@@ -179,10 +180,10 @@ export default function RequestTablePage() {
         <div className="mb-4">
           <div className="text-sm text-gray-600 mb-2">
             <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the next 3 days.</p>
+            <p>Showing urgent block requests and emergency work types for the next day.</p>
           </div>
           <div className="text-sm text-gray-600">
-            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 2), "dd-MM-yyyy")}
+            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
           </div>
         </div>
       )}
@@ -323,7 +324,7 @@ export default function RequestTablePage() {
 
       <div>
         <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-          Urgent & Non-Corridor Requests
+           Non-Corridor Requests
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-black">
