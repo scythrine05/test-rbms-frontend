@@ -193,8 +193,8 @@ getUserRequestsByWeek: async (
   );
   return response.data;
 },
-    getUserRequestsByAdmin: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
-        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}`);
+    getUserRequestsByAdmin: async (page: number = 1, limit: number = 10, startDate: string, endDate: string): Promise<UserRequestsResponse> => {
+        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
         return response.data;
     },
 

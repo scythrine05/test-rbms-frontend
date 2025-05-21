@@ -56,6 +56,13 @@ saveOptimizedRequestsStatus: async (requestIds: string[]) => {
 getUserRequests: async (page: number, limit: number,startDate: string,
     endDate: string,) => {
   try {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (startDate && endDate) {
+      queryParams.append('startDate', startDate);
+      queryParams.append('endDate', endDate);
+    }
     const response = await axiosInstance.get("/api/user-request/user-data", {
       params: { page, limit,startDate,endDate },
     });
