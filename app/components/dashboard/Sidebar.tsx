@@ -17,7 +17,7 @@ const NavItem = ({ icon, label, path, active = false }: NavItemProps) => (
       href={path}
       className={`flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer ${
         active 
-          ? 'bg-[#F37A1F] text-white' 
+          ? 'bg-[#D65A00] text-white' 
           : 'text-black hover:bg-orange-100'
       }`}
     >

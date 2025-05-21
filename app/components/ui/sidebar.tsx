@@ -37,7 +37,9 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   const getLinkClasses = (path: string) => {
     const baseClasses = "flex items-center px-4 py-2 text-sm transition-colors duration-200";
     const activeClasses = isActive(path)
-      ? `bg-white text-[${themeColors.text}] font-medium`
+      ? isUrgentMode 
+        ? 'bg-red-700 text-white font-medium'
+        : `bg-white text-[${themeColors.text}] font-medium`
       : `text-gray-600 hover:bg-white hover:text-[${themeColors.text}]`;
     return `${baseClasses} ${activeClasses}`;
   };
@@ -430,7 +432,11 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               >
                 <span
                   className={
-                    isActive(item.path) ? "text-[#13529e]" : "text-gray-500"
+                    isActive(item.path) 
+                      ? isUrgentMode 
+                        ? "text-white" 
+                        : "text-[#13529e]"
+                      : "text-gray-500"
                   }
                 >
                   {item.icon}
@@ -453,7 +459,11 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               >
                 <span
                   className={
-                    isActive(item.path) ? "text-[#13529e]" : "text-gray-500"
+                    isActive(item.path) 
+                      ? isUrgentMode 
+                        ? "text-white" 
+                        : "text-[#13529e]"
+                      : "text-gray-500"
                   }
                 >
                   {item.icon}
@@ -474,7 +484,11 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
               >
                 <span
                   className={
-                    isActive(item.path) ? "text-[#13529e]" : "text-gray-500"
+                    isActive(item.path) 
+                      ? isUrgentMode 
+                        ? "text-white" 
+                        : "text-[#13529e]"
+                      : "text-gray-500"
                   }
                 >
                   {item.icon}
