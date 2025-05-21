@@ -128,6 +128,9 @@ export default function RequestTablePage() {
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">
           {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
+          {isUrgentMode && <div className="text-sm text-gray-600 mb-2">
+            <p>Block requests and emergency work types for the next day.</p>
+          </div>}
         </h1>
         <div className="flex gap-2">
           <select
@@ -151,31 +154,15 @@ export default function RequestTablePage() {
       {/* Urgent mode description and date range */}
       {isUrgentMode && (
         <div className="mb-4">
-          <div className="text-sm text-gray-600 mb-2">
-            <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the next day.</p>
-          </div>
           <div className="text-sm text-gray-600">
-            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
-          </div>
-        </div>
-      )}
-
-      {/* Urgent mode description and date range */}
-      {isUrgentMode && (
-        <div className="mb-4">
-          <div className="text-sm text-gray-600 mb-2">
-            <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the next day.</p>
-          </div>
-          <div className="text-sm text-gray-600">
-            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
+            Showing Requests for Date : {format(addDays(new Date(), 1), "dd-MM-yyyy")}
           </div>
         </div>
       )}
 
       {/* Week Navigation - Updated to show Saturday-Friday range */}
-      <div className="mt-4 flex justify-center gap-2 mb-4">
+      {!isUrgentMode && (
+      <div className="mt-4 flex justify-center gap-2 mb-4 text-black">
         <button
           onClick={() => handleWeekChange("prev")}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
@@ -192,6 +179,7 @@ export default function RequestTablePage() {
           Next Week
         </button>
       </div>
+      )}
 
       {/* Rest of the table and pagination remains the same */}
       <div className="overflow-x-auto">
