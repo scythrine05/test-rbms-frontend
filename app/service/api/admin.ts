@@ -1,4 +1,4 @@
-import axiosInstance from "@/app/utils/axiosInstance";
+import axiosInstance from '@/app/utils/axiosInstance';
 
 export const adminService = {
   acceptUserRequest: async (id: string, accept: boolean) => {
