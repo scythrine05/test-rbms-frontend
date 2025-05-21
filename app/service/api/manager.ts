@@ -33,6 +33,11 @@ export interface UsersResponse {
 }
 
 export interface UserRequest {
+    userStatus: string;
+    optimizeStatus: boolean;
+    userResponse: string;
+    isSanctioned: boolean;
+    adminRequestStatus: string;
     selectedStream: any;
     id: string;
     date: string;
@@ -54,6 +59,8 @@ export interface UserRequest {
     selectedLine: string | null;
     optimisedTimeFrom?: string;
     optimisedTimeTo?: string;
+    optimizeTimeFrom?:string;
+    optimizeTimeTo?:string,
     sigDisconnection: boolean;
     elementarySection: string;
     elementarySectionTo: string | null;
@@ -159,11 +166,33 @@ export const managerService = {
     /**
      * Get all user requests with pagination
      */
-    getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
-        const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
-        return response.data;
-    },
+    // getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
+    //     const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
+    //     return response.data;
+    // },
+getUserRequestsByWeek: async (
+  page: number = 1, 
+  limit: number = 10,
+  startDate: string,
+  endDate: string,
+  status?: string
+): Promise<UserRequestsResponse> => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+    startDate,
+    endDate
+  });
+  
+  if (status) {
+    params.append('status', status);
+  }
 
+  const response = await axiosInstance.get<UserRequestsResponse>(
+    `/api/user-request/manager/users-requests?${params.toString()}`
+  );
+  return response.data;
+},
     getUserRequestsByAdmin: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
         const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}`);
         return response.data;
