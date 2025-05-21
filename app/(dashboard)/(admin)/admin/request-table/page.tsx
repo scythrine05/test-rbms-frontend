@@ -108,7 +108,7 @@ export default function RequestTablePage() {
   );
 
   const nonCorridorRequests = filteredRequests.filter(
-    (request) => request.corridorType !== "Corridor"
+    (request) => request.corridorType === "Outside Corridor"
   );
 
   if (error) {
@@ -282,7 +282,7 @@ export default function RequestTablePage() {
 
       <div>
         <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-          Urgent & Non-Corridor Requests
+           Non-Corridor Requests
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-black">

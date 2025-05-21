@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/app/service/api/admin";
 import {
   format,
@@ -14,18 +14,22 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserRequest } from "@/app/service/api/manager";
-import { useOptimizeRequests } from "@/app/service/query/optimise";
-import { flattenRecords } from "@/app/lib/optimse";
 
 export default function OptimiseTablePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    // Set initial week start to last Saturday
     const today = new Date();
     const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
-    return startOfWeek(lastSaturday, { weekStartsOn: 6 }); // 6 is Saturday
+    return startOfWeek(lastSaturday, { weekStartsOn: 6 });
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [timeFrom, setTimeFrom] = useState("");
+  const [timeTo, setTimeTo] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
 
   // Calculate week range
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
@@ -45,35 +49,32 @@ export default function OptimiseTablePage() {
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
     null
   );
-  //   const optimizeMutation = useOptimizeRequests();
 
+  // Mutation for updating optimized times
+  const updateOptimizedTimes = useMutation({
+    mutationFn: (data: {
+      requestId: string;
+      optimizeTimeFrom: string;
+      optimizeTimeTo: string;
+      sendToSanction?: boolean;
+    }) => adminService.updateOptimizeTimes(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["approved-requests", page, currentWeekStart],
+      });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      setEditingId(null);
+      setShowConfirmation(false);
+    },
+    onError: (error) => {
+      console.error("Error updating times:", error);
+      alert("Failed to update times. Please try again.");
+      setShowConfirmation(false);
+    },
+  });
 
-const handleSendOptimizedRequests = async () => {
-  try {
-    // Get all request IDs from the current data
-    const requestIds = data?.data?.requests?.map((request: UserRequest) => request.id) || [];
-    
-    if (requestIds.length === 0) {
-      alert("No requests to optimize");
-      return;
-    }
-
-    const response = await adminService.saveOptimizedRequestsStatus(requestIds);
-    if (response.success) {
-      alert("Optimization status updated successfully!");
-    } else {
-      alert("Failed to update optimization status");
-    }
-  } catch (err) {
-    console.error("Failed to update optimization status", err);
-    alert("Error updating optimization status. Please try again.");
-  }
-};
-
-
-
-
-  // Format date
+  // Format date and time helpers
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "dd-MM-yyyy");
@@ -82,7 +83,6 @@ const handleSendOptimizedRequests = async () => {
     }
   };
 
-  // Format time
   const formatTime = (dateString: string) => {
     try {
       return format(parseISO(dateString), "HH:mm");
@@ -91,22 +91,76 @@ const handleSendOptimizedRequests = async () => {
     }
   };
 
-  // Handle week navigation
   const handleWeekChange = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setCurrentWeekStart((prev) => subDays(prev, 7));
-    } else {
-      setCurrentWeekStart((prev) => addDays(prev, 7));
-    }
-    setPage(1); // Reset to first page when changing weeks
+    setCurrentWeekStart((prev) =>
+      direction === "prev" ? subDays(prev, 7) : addDays(prev, 7)
+    );
+    setPage(1);
   };
 
-  // Preprocess function (placeholder for now)
-  const preprocessRequests = async (
-    requests: UserRequest[]
-  ): Promise<UserRequest[]> => {
-    // TODO: Add preprocessing logic here
-    return requests;
+  // Edit functionality
+  const handleEditClick = (request: UserRequest) => {
+    setEditingId(request.id);
+    setTimeFrom(
+      request.optimizeTimeFrom
+        ? format(parseISO(request.optimizeTimeFrom), "HH:mm")
+        : ""
+    );
+    setTimeTo(
+      request.optimizeTimeTo
+        ? format(parseISO(request.optimizeTimeTo), "HH:mm")
+        : ""
+    );
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setTimeFrom("");
+    setTimeTo("");
+  };
+
+  const handleUpdateClick = (requestId: string) => {
+    if (!timeFrom || !timeTo) {
+      alert("Please enter both start and end times");
+      return;
+    }
+
+    setCurrentRequestId(requestId);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmUpdate = (sendToSanction: boolean) => {
+    if (!currentRequestId) return;
+
+    const request = data?.data?.requests?.find(
+      (r: UserRequest) => r.id === currentRequestId
+    );
+    if (!request) return;
+
+    try {
+      const datePart = request.date.split("T")[0];
+      const optimizeTimeFrom = new Date(
+        `${datePart}T${timeFrom}:00`
+      ).toISOString();
+      const optimizeTimeTo = new Date(`${datePart}T${timeTo}:00`).toISOString();
+
+      if (isNaN(new Date(optimizeTimeFrom).getTime())) {
+        throw new Error("Invalid start time");
+      }
+      if (isNaN(new Date(optimizeTimeTo).getTime())) {
+        throw new Error("Invalid end time");
+      }
+
+      updateOptimizedTimes.mutate({
+        requestId: currentRequestId,
+        optimizeTimeFrom,
+        optimizeTimeTo,
+        sendToSanction,
+      });
+    } catch (error) {
+      console.error("Error formatting dates:", error);
+      alert("Invalid time format. Please use HH:MM format (e.g., 14:30)");
+    }
   };
 
   if (isLoading) {
@@ -130,8 +184,46 @@ const handleSendOptimizedRequests = async () => {
   const totalPages = data?.data?.totalPages || 1;
 
   return (
-    <div className="bg-white p-3 border border-black ">
-      <div className="border-b-2 border-[#13529e] pb-3  flex justify-between items-center">
+    <div className="bg-white p-3 border border-black">
+      {showSuccess && (
+        <div className="fixed top-20 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+          Times updated successfully!
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-bold mb-4">Confirm Update</h3>
+            <p className="mb-6">
+              Are you sure you want to save and send this request to Sanction
+              table?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => handleConfirmUpdate(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={updateOptimizedTimes.isPending}
+              >
+                {updateOptimizedTimes.isPending
+                  ? "Processing..."
+                  : "Save & Send to Sanction"}
+              </button>
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                disabled={updateOptimizedTimes.isPending}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header and week navigation */}
+      <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
         <div className="flex gap-2">
           <button
@@ -152,16 +244,7 @@ const handleSendOptimizedRequests = async () => {
         </div>
       </div>
 
-      <div className="flex justify-end py-2 gap-2">
-        <button
-          onClick={handleSendOptimizedRequests}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer"
-        >
-          Send
-        </button>
-      </div>
-
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-6">
         <table className="w-full border-collapse text-black">
           <thead>
             <tr className="bg-gray-50">
@@ -181,9 +264,6 @@ const handleSendOptimizedRequests = async () => {
                 Line
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Time
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Optimized Time
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
@@ -193,13 +273,19 @@ const handleSendOptimizedRequests = async () => {
                 Activity
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                User Response
+              </th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody>
-            {(optimizedData || data?.data?.requests)?.map(
-              (request: UserRequest) => (
+            {data?.data?.requests
+              ?.filter(
+                (request: UserRequest) => request.optimizeStatus === true
+              )
+              ?.map((request: UserRequest) => (
                 <tr
                   key={`request-${request.id}-${request.date}`}
                   className={`hover:bg-gray-50 ${
@@ -224,17 +310,32 @@ const handleSendOptimizedRequests = async () => {
                       : request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
-                    {formatTime(request.demandTimeFrom)} -{" "}
-                    {formatTime(request.demandTimeTo)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {optimizedData ? (
-                      <>
-                        {request.optimisedTimeFrom || "N/A"} -{" "}
-                        {request.optimisedTimeTo || "N/A"}
-                      </>
+                    {editingId === request.id ? (
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="time"
+                          value={timeFrom}
+                          onChange={(e) => setTimeFrom(e.target.value)}
+                          className="w-20 border p-1 text-sm"
+                        />
+                        <span>-</span>
+                        <input
+                          type="time"
+                          value={timeTo}
+                          onChange={(e) => setTimeTo(e.target.value)}
+                          className="w-20 border p-1 text-sm"
+                        />
+                      </div>
                     ) : (
-                      "N/A"
+                      <>
+                        {request.optimizeTimeFrom
+                          ? formatTime(request.optimizeTimeFrom)
+                          : "N/A"}{" "}
+                        -{" "}
+                        {request.optimizeTimeTo
+                          ? formatTime(request.optimizeTimeTo)
+                          : "N/A"}
+                      </>
                     )}
                   </td>
                   <td className="border border-black p-1 text-sm">
@@ -244,18 +345,54 @@ const handleSendOptimizedRequests = async () => {
                     {request.activity}
                   </td>
                   <td className="border border-black p-1 text-sm">
+                    {request.userStatus === "yes" ? (
+                      <span className="text-green-600">Accepted</span>
+                    ) : request.userStatus === "no" ? (
+                      <span className="text-red-600">Rejected</span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
                     <div className="flex gap-2">
-                      <Link
-                        href={`/admin/view-request/${request.id}`}
-                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                      >
-                        View
-                      </Link>
+                      {editingId === request.id ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdateClick(request.id)}
+                            className="px-2 py-1 text-xs bg-blue-500 text-white border border-black"
+                            disabled={updateOptimizedTimes.isPending}
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-2 py-1 text-xs bg-gray-500 text-white border border-black"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {!request.isSanctioned && (
+                            <button
+                              onClick={() => handleEditClick(request)}
+                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black"
+                            >
+                              Edit
+                            </button>
+                          )}
+                          <Link
+                            href={`/admin/view-request/${request.id}`}
+                            className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                          >
+                            View
+                          </Link>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
-              )
-            )}
+              ))}
           </tbody>
         </table>
       </div>

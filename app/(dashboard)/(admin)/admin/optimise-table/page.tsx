@@ -48,6 +48,27 @@ export default function OptimiseTablePage() {
   );
   const optimizeMutation = useOptimizeRequests();
 
+  const handleSendOptimizedRequests = async () => {
+    try {
+      const requestIds =
+        data?.data?.requests?.map((request: UserRequest) => request.id) || [];
+      if (requestIds.length === 0) {
+        alert("No requests to optimize");
+        return;
+      }
+      const response = await adminService.saveOptimizedRequestsStatus(
+        requestIds
+      );
+      if (response.success) {
+        alert("Optimization status updated successfully!");
+      } else {
+        alert("Failed to update optimization status");
+      }
+    } catch (err) {
+      console.error("Failed to update optimization status", err);
+      alert("Error updating optimization status. Please try again.");
+    }
+  };
   // Format date
   const formatDate = (dateString: string) => {
     try {
@@ -213,6 +234,12 @@ export default function OptimiseTablePage() {
         >
           Optimise
         </button>
+        <button
+          onClick={handleSendOptimizedRequests}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer"
+        >
+          Send
+        </button>
         {optimizedData && (
           <button
             onClick={handleDownloadCSV}
@@ -222,7 +249,6 @@ export default function OptimiseTablePage() {
           </button>
         )}
       </div>
-
       {/* Optimization Dialog */}
       {isOptimizeDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-black">
@@ -298,64 +324,61 @@ export default function OptimiseTablePage() {
             </tr>
           </thead>
           <tbody>
-            {(optimizedData || data?.data?.requests)?.map(
-              (request: UserRequest) => (
-                <tr
-                  key={`request-${request.id}-${request.date}`}
-                  className={`hover:bg-gray-50 ${
-                    optimizedData ? "bg-green-50" : ""
-                  }`}
-                >
-                  <td className="border border-black p-1 text-sm">
-                    {formatDate(request.date)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedSection}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedDepo}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.missionBlock}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {optimizedData
-                      ? request.selectedLine
-                      : request.processedLineSections?.[0]?.lineName || "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {formatTime(request.demandTimeFrom)} -{" "}
-                    {formatTime(request.demandTimeTo)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {optimizedData ? (
-                      <>
-                        {request.optimisedTimeFrom || "N/A"} -{" "}
-                        {request.optimisedTimeTo || "N/A"}
-                      </>
-                    ) : (
-                      "N/A"
-                    )}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.workType}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.activity}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/view-request/${request.id}`}
-                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                      >
-                        View
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              )
-            )}
+            {data?.data?.requests?.map((request: UserRequest) => (
+              <tr
+                key={`request-${request.id}-${request.date}`}
+                className={`hover:bg-gray-50 ${
+                  request.optimizeTimeFrom&&request.optimizeTimeTo ? "bg-green-50" : ""
+                }`}
+              >
+                <td className="border border-black p-1 text-sm">
+                  {formatDate(request.date)}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.selectedSection}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.selectedDepo}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.missionBlock}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {optimizedData
+                    ? request.selectedLine
+                    : request.processedLineSections?.[0]?.lineName || "N/A"}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {formatTime(request.demandTimeFrom)} -{" "}
+                  {formatTime(request.demandTimeTo)}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.optimizeTimeFrom
+                    ? formatTime(request.optimizeTimeFrom)
+                    : "N/A"}{" "}
+                  -{" "}
+                  {request.optimizeTimeTo
+                    ? formatTime(request.optimizeTimeTo)
+                    : "N/A"}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.workType}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.activity}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/admin/view-request/${request.id}`}
+                      className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
