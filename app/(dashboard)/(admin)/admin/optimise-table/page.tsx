@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { UserRequest } from "@/app/service/api/manager";
 import { useOptimizeRequests } from "@/app/service/query/optimise";
 import { flattenRecords } from "@/app/lib/optimse";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
 export default function OptimiseTablePage() {
   const router = useRouter();
@@ -206,25 +207,13 @@ export default function OptimiseTablePage() {
 
   return (
     <div className="bg-white p-3 border border-black ">
-      <div className="border-b-2 border-[#13529e] pb-3  flex justify-between items-center">
+      <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleWeekChange("prev")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Previous Week
-          </button>
-          <span className="px-3 py-1 text-sm text-black">
-            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
-          </span>
-          <button
-            onClick={() => handleWeekChange("next")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Next Week
-          </button>
-        </div>
+        <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          weekStartsOn={6} // Saturday
+        />
       </div>
 
       <div className="flex justify-end py-2 gap-2">

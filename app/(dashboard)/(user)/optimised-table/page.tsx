@@ -11,9 +11,11 @@ import {
   startOfWeek,
   subDays,
 } from "date-fns";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
+  const { isUrgentMode } = useUrgentMode();
   const [page, setPage] = useState(1);
  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
   const today = new Date();
@@ -172,9 +174,15 @@ export default function OptimiseTablePage() {
             </tr>
           </thead>
           <tbody>
-            {data?.data.requests?.filter((r: any) => r.optimizeStatus === true).length > 0 ? (
+            {data?.data.requests?.filter((r: any) => 
+              r.optimizeStatus === true && 
+              (isUrgentMode ? r.corridorType === "Urgent Block" : r.corridorType !== "Urgent Block")
+            ).length > 0 ? (
               data?.data.requests
-                ?.filter((request: any) => request.optimizeStatus === true)
+                ?.filter((request: any) => 
+                  request.optimizeStatus === true && 
+                  (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
+                )
                 .map((request: any) => (
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="border border-black p-1 text-sm">{formatDate(request.createdAt)}</td>

@@ -4,12 +4,18 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/app/service/api/admin";
 import { addDays, endOfWeek, format, parseISO, startOfWeek, subDays } from "date-fns";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
+  const { isUrgentMode } = useUrgentMode();
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
+    if (isUrgentMode) {
+      return today;
+    }
     const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
     return startOfWeek(lastSaturday, { weekStartsOn: 6 });
   });
@@ -20,8 +26,12 @@ export default function OptimiseTablePage() {
   });
 
   const limit = 30;
-  const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
 
   // Fetch user requests
   const { data, isLoading, error } = useQuery({
@@ -59,7 +69,9 @@ export default function OptimiseTablePage() {
 
   const handleWeekChange = (direction: "prev" | "next") => {
     setCurrentWeekStart((prev) =>
-      direction === "prev" ? subDays(prev, 7) : addDays(prev, 7)
+      direction === "prev" 
+        ? subDays(prev, isUrgentMode ? 1 : 7) 
+        : addDays(prev, isUrgentMode ? 1 : 7)
     );
     setPage(1);
   };
@@ -141,26 +153,12 @@ export default function OptimiseTablePage() {
     <div className="bg-white p-3 border border-black">
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Sanctioned & Optimized Requests</h1>
-      </div>
-
-      <div className="border-b-2 border-[#13529e] pb-3 flex justify-center items-center mt-4">
-        <div className="flex gap-2 items-center">
-          <button
-            onClick={() => handleWeekChange("prev")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Previous Week
-          </button>
-          <span className="px-3 py-1 text-sm text-black">
-            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
-          </span>
-          <button
-            onClick={() => handleWeekChange("next")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Next Week
-          </button>
-        </div>
+        <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          isUrgentMode={isUrgentMode}
+          weekStartsOn={6} // Saturday
+        />
       </div>
 
       <div className="overflow-x-auto">

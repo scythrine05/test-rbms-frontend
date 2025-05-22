@@ -139,14 +139,28 @@ export function useGetWeeklyUserRequests(weekRange: DateRangeFilter) {
  * @param selectedDepo - The selected depo
  * @param page - Page number for pagination
  * @param limit - Number of items per page
+ * @param startDate - Start date for filtering (optional)
+ * @param endDate - End date for filtering (optional)
  * @returns Query result with the other requests data
  */
-export function useGetOtherRequests(selectedDepo: string, page = 1, limit = 10) {
-    return useQuery({
-        queryKey: ['other-requests', selectedDepo, page, limit],
-        queryFn: () => userRequestService.getOtherRequests(selectedDepo, page, limit),
-        enabled: !!selectedDepo,
-    });
+export function useGetOtherRequests(
+  selectedDepo: string, 
+  page = 1, 
+  limit = 10,
+  startDate?: string,
+  endDate?: string
+) {
+  const queryParams = new URLSearchParams();
+  queryParams.append('page', page.toString());
+  queryParams.append('limit', limit.toString());
+  if (startDate) queryParams.append('startDate', startDate);
+  if (endDate) queryParams.append('endDate', endDate);
+
+  return useQuery({
+    queryKey: ['other-requests', selectedDepo, page, limit, startDate, endDate],
+    queryFn: () => userRequestService.getOtherRequests(selectedDepo, page, limit, startDate, endDate),
+    enabled: !!selectedDepo,
+  });
 }
 
 /**

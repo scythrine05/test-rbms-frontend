@@ -21,36 +21,31 @@ export default function RequestTablePage() {
   const approveAllMutation = useApproveAllPendingRequests();
   const { isUrgentMode } = useUrgentMode();
   const [showAll, setShowAll] = useState(false);
- const limit = 30;
+  const [limit] = useState(30);
+
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
     queryKey: ["requests", page, statusFilter, isUrgentMode],
-queryFn: () => {
-  if (isUrgentMode) {
-    const today = new Date();
-    const endDate = addDays(today, 1);
-    return managerService.getUserRequestsByAdmin(
-      1, 
-      limit, 
-      format(today, "yyyy-MM-dd"), 
-      format(endDate, "yyyy-MM-dd")
-    );
-  }
-  return managerService.getUserRequestsByAdmin(page, limit);
-},
-    // queryFn: () => {
-    //   if (isUrgentMode) {
-    //     // For urgent mode, get requests for next day
-    //     const today = new Date();
-    //     const endDate = addDays(today, 1);
-    //     return managerService.getUserRequestsByAdmin(1, {
-    //       page,
-    //       startDate: format(today, "yyyy-MM-dd"),
-    //       endDate: format(endDate, "yyyy-MM-dd")
-    //     });
-    //   }
-    //   return managerService.getUserRequestsByAdmin(page);
-    // },
+    queryFn: () => {
+      if (isUrgentMode) {
+        const today = new Date();
+        const endDate = addDays(today, 1);
+        return managerService.getUserRequestsByAdmin(
+          1,
+          limit,
+          format(today, "yyyy-MM-dd"),
+          format(endDate, "yyyy-MM-dd"),
+          statusFilter !== "ALL" ? statusFilter : undefined
+        );
+      }
+      return managerService.getUserRequestsByAdmin(
+        page,
+        limit,
+        undefined,
+        undefined,
+        statusFilter !== "ALL" ? statusFilter : undefined
+      );
+    }
   });
 
   // Format date
@@ -124,9 +119,8 @@ queryFn: () => {
     : data?.data?.requests?.filter((request: UserRequest) => {
         const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
         const urgentMatch = isUrgentMode 
-          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
-            format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd")
-          : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
+          ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+          : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
         return statusMatch && urgentMatch;
       }) || [];
 

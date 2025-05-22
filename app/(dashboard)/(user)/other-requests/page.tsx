@@ -4,9 +4,19 @@ import { useState } from "react";
 import { useGetOtherRequests } from "@/app/service/query/user-request";
 import { useUpdateOtherRequest } from "@/app/service/mutation/user-request";
 import Link from "next/link";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import { Loader } from "@/app/components/ui/Loader";
 import { useSession } from "next-auth/react";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { RequestItem } from "@/app/service/query/user-request";
+
+// Define TooltipPosition interface
+interface TooltipPosition {
+  x: number;
+  y: number;
+  placement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+}
 
 // Helper function to format dates
 const formatDate = (dateString: string) => {
@@ -71,15 +81,44 @@ const Pagination = ({
 };
 
 export default function OtherRequestsPage() {
+  const { isUrgentMode } = useUrgentMode();
   const { data: session } = useSession();
+  const userRole = session?.user?.role || "USER";
+
+  // State for pagination and view type
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [viewType, setViewType] = useState<"compact" | "gantt">("compact");
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState<TooltipPosition | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [requests, setRequests] = useState<RequestItem[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // State for rejection dialog
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectRemarks, setRejectRemarks] = useState("");
   const [selectedRequestId, setSelectedRequestId] = useState("");
 
+  // State for week selection
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
+    const today = new Date();
+    return isUrgentMode ? today : startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
+  });
+
   // Get the depot from session data
   const selectedDepo = session?.user?.depot || "";
+
+  // Calculate week range
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : endOfWeek(currentWeekStart, { weekStartsOn: 1 });
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
 
   // Get other requests data
   const {
@@ -87,10 +126,26 @@ export default function OtherRequestsPage() {
     isLoading,
     error,
     refetch
-  } = useGetOtherRequests(selectedDepo, currentPage, pageSize);
+  } = useGetOtherRequests(
+    selectedDepo, 
+    currentPage, 
+    pageSize,
+    format(weekStart, "yyyy-MM-dd"),
+    format(weekEnd, "yyyy-MM-dd")
+  );
 
   // Update other request mutation
   const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
+
+  // Handle week change
+  const handleWeekChange = (direction: "prev" | "next") => {
+    setCurrentWeekStart((prev) =>
+      direction === "prev" 
+        ? subDays(prev, isUrgentMode ? 1 : 7) 
+        : addDays(prev, isUrgentMode ? 1 : 7)
+    );
+    setCurrentPage(1); // Reset to first page when changing weeks
+  };
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -171,8 +226,14 @@ export default function OtherRequestsPage() {
 
   return (
     <div className="bg-white p-3 border border-black mb-3">
-      <div className="border-b-2 border-[#13529e] pb-3 mb-4">
+      <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Other Requests</h1>
+        <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          isUrgentMode={isUrgentMode}
+          weekStartsOn={1} // Monday
+        />
       </div>
 
       <div className="flex justify-end mb-3">
