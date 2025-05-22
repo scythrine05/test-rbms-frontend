@@ -857,9 +857,9 @@ export default function CreateBlockRequestPage() {
         ? formatTimeToDatetime(formData.date || "", formData.demandTimeTo)
         : "",
       processedLineSections: processedSectionsWithDefaults,
-      sntDisconnectionRequired: formData.sntDisconnectionRequired,
-      powerBlockRequired: formData.powerBlockRequired,
-      freshCautionRequired: formData.freshCautionRequired,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired??false,
+      powerBlockRequired: formData.powerBlockRequired??false,
+      freshCautionRequired: formData.freshCautionRequired??false,
       freshCautionLocationFrom: formData.freshCautionLocationFrom,
       freshCautionLocationTo: formData.freshCautionLocationTo,
       freshCautionSpeed: formData.freshCautionSpeed,
