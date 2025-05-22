@@ -89,15 +89,25 @@ export const userRequestService = {
    * @param selectedDepo - The selected depo
    * @param page - Page number for pagination
    * @param limit - Number of items per page
+   * @param startDate - Start date for filtering (optional)
+   * @param endDate - End date for filtering (optional)
    * @returns Promise with the response
    */
   getOtherRequests: async (
     selectedDepo: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    startDate?: string,
+    endDate?: string
   ): Promise<RequestResponse> => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (startDate) queryParams.append('startDate', startDate);
+    if (endDate) queryParams.append('endDate', endDate);
+
     const response = await axiosInstance.get<RequestResponse>(
-      `/api/user-request/other/${selectedDepo}?page=${page}&limit=${limit}`
+      `/api/user-request/other/${selectedDepo}?${queryParams.toString()}`
     );
     return response.data;
   },
@@ -124,6 +134,37 @@ export const userRequestService = {
         : undefined;
 
     const response = await axiosInstance.put<UserRequestResponse>(url, body);
+    return response.data;
+  },
+
+  /**
+   * Get user requests with pagination and date filtering
+   * @param page - Page number for pagination
+   * @param limit - Number of items per page
+   * @param startDate - Start date for filtering (YYYY-MM-DD)
+   * @param endDate - End date for filtering (YYYY-MM-DD)
+   * @param status - Optional status filter
+   * @returns Promise with the response
+   */
+  getUserRequests: async (
+    page: number = 1,
+    limit: number = 10,
+    startDate?: string,
+    endDate?: string,
+    status?: string
+  ): Promise<RequestResponse> => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (status) params.append('status', status);
+
+    const response = await axiosInstance.get<RequestResponse>(
+      `/api/user-request/user?${params.toString()}`
+    );
     return response.data;
   },
 };

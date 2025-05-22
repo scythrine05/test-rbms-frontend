@@ -21,6 +21,7 @@ export default function RequestTablePage() {
   const { isUrgentMode } = useUrgentMode();
   const [showAll, setShowAll] = useState(false);
   const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   // Calculate week range (Saturday to Friday)
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
@@ -28,26 +29,28 @@ export default function RequestTablePage() {
 
   // Fetch requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter,weekStart, weekEnd,isUrgentMode],
+    queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode],
     queryFn: () => {
       if (isUrgentMode) {
         // For urgent mode, get requests for next day
         const today = new Date();
         const endDate = addDays(today, 1);
-        return managerService.getUserRequestsByWeek(
+        return managerService.getUserRequestsByManager(
           1,
-          10,
+          limit,
           format(today, "yyyy-MM-dd"),
-          format(endDate, "yyyy-MM-dd")
+          format(endDate, "yyyy-MM-dd"),
+          statusFilter !== "ALL" ? statusFilter : undefined
         );
       }
-      return managerService.getUserRequestsByWeek(
-      page, 
-      10, // limit
-      weekStart.toISOString(),
-      weekEnd.toISOString()
-    )
-  }
+      return managerService.getUserRequestsByManager(
+        page,
+        limit,
+        format(weekStart, "yyyy-MM-dd"),
+        format(weekEnd, "yyyy-MM-dd"),
+        statusFilter !== "ALL" ? statusFilter : undefined
+      );
+    }
   });
 
   // Format date

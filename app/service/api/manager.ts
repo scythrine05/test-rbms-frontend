@@ -166,52 +166,114 @@ export const managerService = {
     /**
      * Get all user requests with pagination
      */
-    // getUserRequests: async (page: number = 1, limit: number = 10): Promise<UserRequestsResponse> => {
-    //     const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/manager/users-requests?page=${page}&limit=${limit}`);
-    //     return response.data;
-    // },
-getUserRequestsByWeek: async (
-  page: number = 1, 
-  limit: number = 10,
-  startDate: string,
-  endDate: string,
-  status?: string
-): Promise<UserRequestsResponse> => {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    startDate,
-    endDate
-  });
-  
-  if (status) {
-    params.append('status', status);
-  }
+    getUserRequests: async (
+        page: number = 1,
+        limit: number = 10,
+        startDate?: string,
+        endDate?: string,
+        status?: string
+    ): Promise<UserRequestsResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (status) params.append('status', status);
 
-  const response = await axiosInstance.get<UserRequestsResponse>(
-    `/api/user-request/manager/users-requests?${params.toString()}`
-  );
-  return response.data;
-},
-    // getUserRequestsByAdmin: async (page: number = 1, limit: number = 10, startDate: string, endDate: string): Promise<UserRequestsResponse> => {
-    //     const response = await axiosInstance.get<UserRequestsResponse>(`/api/user-request/admin/users-requests?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
-    //     return response.data;
-    // },
-getUserRequestsByAdmin: async (
-  page: number = 1,
-  limit: number = 10,
-  startDate?: string,  // Make these optional
-  endDate?: string
-): Promise<UserRequestsResponse> => {
-  let url = `/api/user-request/admin/users-requests?page=${page}&limit=${limit}`;
-  
-  if (startDate && endDate) {
-    url += `&startDate=${startDate}&endDate=${endDate}`;
-  }
-  
-  const response = await axiosInstance.get<UserRequestsResponse>(url);
-  return response.data;
-},
+        const response = await axiosInstance.get<UserRequestsResponse>(
+            `/api/user-request/user?${params.toString()}`
+        );
+        return response.data;
+    },
+
+    getUserRequestsByManager: async (
+        page: number = 1,
+        limit: number = 10,
+        startDate?: string,
+        endDate?: string,
+        status?: string
+    ): Promise<UserRequestsResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (status) params.append('status', status);
+
+        const response = await axiosInstance.get<UserRequestsResponse>(
+            `/api/requests/manager/requests?${params.toString()}`
+        );
+        return response.data;
+    },
+
+    getOtherRequests: async (
+        selectedDepo: string,
+        page: number = 1,
+        limit: number = 10,
+        startDate?: string,
+        endDate?: string
+    ): Promise<UserRequestsResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await axiosInstance.get<UserRequestsResponse>(
+            `/api/requests/other/${selectedDepo}?${params.toString()}`
+        );
+        return response.data;
+    },
+
+    getTrdRequests: async (
+        selectedDepo: string,
+        page: number = 1,
+        limit: number = 10,
+        startDate?: string,
+        endDate?: string
+    ): Promise<UserRequestsResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await axiosInstance.get<UserRequestsResponse>(
+            `/api/requests/trd/${selectedDepo}?${params.toString()}`
+        );
+        return response.data;
+    },
+
+    getUserRequestsByAdmin: async (
+        page: number = 1,
+        limit: number = 10,
+        startDate?: string,
+        endDate?: string,
+        status?: string
+    ): Promise<UserRequestsResponse> => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+        
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (status) params.append('status', status);
+
+        const response = await axiosInstance.get<UserRequestsResponse>(
+            `/api/requests/admin/users-requests?${params.toString()}`
+        );
+        return response.data;
+    },
+
     /**
      * Accept a user request
      */
