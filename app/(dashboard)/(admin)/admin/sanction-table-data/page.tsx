@@ -121,6 +121,8 @@ export default function OptimiseTablePage() {
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Work Type</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Activity</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">User Response</th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">Reason For Not availed</th>
+
             </tr>
           </thead>
           <tbody>
@@ -157,6 +159,9 @@ export default function OptimiseTablePage() {
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.availedResponse}
                   </td>
                 </tr>
               ))

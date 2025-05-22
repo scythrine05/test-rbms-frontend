@@ -53,6 +53,16 @@ saveOptimizedRequestsStatus: async (requestIds: string[]) => {
 },
 
 
+
+sanctionOptimisedRequests: async (requestIds :any) => {
+  const response = await axiosInstance.put(
+    '/api/user-request/admin/sanction', 
+    { requestIds }
+  );
+  return response.data;
+},
+
+
 getUserRequests: async (page: number, limit: number,startDate: string,
     endDate: string,) => {
   try {
@@ -88,6 +98,9 @@ updateRequestStatus: async (requestId: string, status: 'yes' | 'no',reason:strin
 },
 
 
+
+
+
 updateUserResponse: async (requestId: string, userResponse:string,reason:string) => {
   try {
     const response = await axiosInstance.post("/api/user-request/userResponse", {
@@ -100,6 +113,10 @@ updateUserResponse: async (requestId: string, userResponse:string,reason:string)
     console.error("Error updating user status:", error);
     throw new Error(error.response?.data?.message || "Failed to update status");
   }
+},
+
+updateSanctionStatus: (requestIds: string[]) => {
+  return axiosInstance.post("/api/user-request/updateSanctionStatus", { requestIds });
 },
 
 

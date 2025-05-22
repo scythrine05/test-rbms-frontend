@@ -28,8 +28,6 @@ export default function OptimiseTablePage() {
   const [timeFrom, setTimeFrom] = useState("");
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
 
   // Calculate week range
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
@@ -50,13 +48,50 @@ export default function OptimiseTablePage() {
     null
   );
 
+  // Add this with your other mutations
+  const updateSanctionStatus = useMutation({
+    mutationFn: (requestIds: string[]) =>
+      adminService.updateSanctionStatus(requestIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["approved-requests", page, currentWeekStart],
+      });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    },
+    onError: (error) => {
+      console.error("Error updating sanction status:", error);
+      alert("Failed to update sanction status. Please try again.");
+    },
+  });
+
+const handleSendClick = () => {
+  // Get all request IDs that are optimized but not yet sanctioned
+  const requestIds = data?.data?.requests
+    ?.filter((request: UserRequest) => 
+      request.optimizeStatus === true && 
+      !request.isSanctioned &&
+      request.optimizeTimeFrom && 
+      request.optimizeTimeTo
+    )
+    ?.map((request: UserRequest) => request.id);
+
+  if (!requestIds || requestIds.length === 0) {
+    alert("No valid requests available to send for sanction (must have optimized times)");
+    return;
+  }
+
+  if (confirm(`Are you sure you want to send ${requestIds.length} request(s) for sanction?`)) {
+    updateSanctionStatus.mutate(requestIds);
+  }
+};
+
   // Mutation for updating optimized times
   const updateOptimizedTimes = useMutation({
     mutationFn: (data: {
       requestId: string;
       optimizeTimeFrom: string;
       optimizeTimeTo: string;
-      sendToSanction?: boolean;
     }) => adminService.updateOptimizeTimes(data),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -65,12 +100,10 @@ export default function OptimiseTablePage() {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       setEditingId(null);
-      setShowConfirmation(false);
     },
     onError: (error) => {
       console.error("Error updating times:", error);
       alert("Failed to update times. Please try again.");
-      setShowConfirmation(false);
     },
   });
 
@@ -102,13 +135,13 @@ export default function OptimiseTablePage() {
   const handleEditClick = (request: UserRequest) => {
     setEditingId(request.id);
     setTimeFrom(
-      request.optimizeTimeFrom
-        ? format(parseISO(request.optimizeTimeFrom), "HH:mm")
+      request.optimizeData?.optimizeTimeFrom
+        ? format(parseISO(request.optimizeData.optimizeTimeFrom), "HH:mm")
         : ""
     );
     setTimeTo(
-      request.optimizeTimeTo
-        ? format(parseISO(request.optimizeTimeTo), "HH:mm")
+      request.optimizeData?.optimizeTimeTo
+        ? format(parseISO(request.optimizeData.optimizeTimeTo), "HH:mm")
         : ""
     );
   };
@@ -125,15 +158,8 @@ export default function OptimiseTablePage() {
       return;
     }
 
-    setCurrentRequestId(requestId);
-    setShowConfirmation(true);
-  };
-
-  const handleConfirmUpdate = (sendToSanction: boolean) => {
-    if (!currentRequestId) return;
-
     const request = data?.data?.requests?.find(
-      (r: UserRequest) => r.id === currentRequestId
+      (r: UserRequest) => r.id === requestId
     );
     if (!request) return;
 
@@ -152,10 +178,9 @@ export default function OptimiseTablePage() {
       }
 
       updateOptimizedTimes.mutate({
-        requestId: currentRequestId,
+        requestId,
         optimizeTimeFrom,
         optimizeTimeTo,
-        sendToSanction,
       });
     } catch (error) {
       console.error("Error formatting dates:", error);
@@ -191,40 +216,9 @@ export default function OptimiseTablePage() {
         </div>
       )}
 
-      {/* Confirmation Modal */}
-      {showConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4">Confirm Update</h3>
-            <p className="mb-6">
-              Are you sure you want to save and send this request to Sanction
-              table?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => handleConfirmUpdate(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                disabled={updateOptimizedTimes.isPending}
-              >
-                {updateOptimizedTimes.isPending
-                  ? "Processing..."
-                  : "Save & Send to Sanction"}
-              </button>
-              <button
-                onClick={() => setShowConfirmation(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                disabled={updateOptimizedTimes.isPending}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Header and week navigation */}
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
+        <h1 className="text-lg font-bold text-[#13529e]">Optimise Table</h1>
         <div className="flex gap-2">
           <button
             onClick={() => handleWeekChange("prev")}
@@ -243,8 +237,17 @@ export default function OptimiseTablePage() {
           </button>
         </div>
       </div>
+      <div className="flex justify-end py-2">
+        <button
+          onClick={handleSendClick}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer"
+          disabled={updateSanctionStatus.isPending}
+        >
+          {updateSanctionStatus.isPending ? "Sending..." : "Send"}
+        </button>
+      </div>
 
-      <div className="overflow-x-auto mt-6">
+      <div className="overflow-x-auto mt-1">
         <table className="w-full border-collapse text-black">
           <thead>
             <tr className="bg-gray-50">
@@ -274,6 +277,9 @@ export default function OptimiseTablePage() {
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 User Response
+              </th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                Reason For Rejection
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 Actions
@@ -328,12 +334,12 @@ export default function OptimiseTablePage() {
                       </div>
                     ) : (
                       <>
-                        {request.optimizeTimeFrom
-                          ? formatTime(request.optimizeTimeFrom)
+                        {request.optimizeData?.optimizeTimeFrom
+                          ? formatTime(request.optimizeData.optimizeTimeFrom)
                           : "N/A"}{" "}
                         -{" "}
-                        {request.optimizeTimeTo
-                          ? formatTime(request.optimizeTimeTo)
+                        {request.optimizeData?.optimizeTimeTo
+                          ? formatTime(request.optimizeData.optimizeTimeTo)
                           : "N/A"}
                       </>
                     )}
@@ -354,6 +360,9 @@ export default function OptimiseTablePage() {
                     )}
                   </td>
                   <td className="border border-black p-1 text-sm">
+                    {request.reasonFroReject}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
                     <div className="flex gap-2">
                       {editingId === request.id ? (
                         <>
@@ -362,7 +371,9 @@ export default function OptimiseTablePage() {
                             className="px-2 py-1 text-xs bg-blue-500 text-white border border-black"
                             disabled={updateOptimizedTimes.isPending}
                           >
-                            Update
+                            {updateOptimizedTimes.isPending
+                              ? "Processing..."
+                              : "Update"}
                           </button>
                           <button
                             onClick={handleCancelEdit}
