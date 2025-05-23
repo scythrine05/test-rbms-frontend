@@ -214,9 +214,9 @@ export default function OptimiseTablePage() {
                     {request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
-                    {request.optimizeTimeFrom && request.optimizeTimeTo
-                      ? `${formatTime(request.optimizeTimeFrom)} - ${formatTime(
-                          request.optimizeTimeTo
+                    {request.sanctionedTimeFrom && request.sanctionedTimeTo
+                      ? `${formatTime(request.sanctionedTimeFrom)} - ${formatTime(
+                          request.sanctionedTimeTo
                         )}`
                       : "N/A"}
                   </td>

@@ -53,6 +53,16 @@ saveOptimizedRequestsStatus: async (requestIds: string[]) => {
 },
 
 
+
+sanctionOptimisedRequests: async (requestIds :any) => {
+  const response = await axiosInstance.put(
+    '/api/user-request/admin/sanction', 
+    { requestIds }
+  );
+  return response.data;
+},
+
+
 getUserRequests: async (page: number, limit: number,startDate: string,
     endDate: string,) => {
   try {
@@ -88,6 +98,9 @@ updateRequestStatus: async (requestId: string, status: 'yes' | 'no',reason:strin
 },
 
 
+
+
+
 updateUserResponse: async (requestId: string, userResponse:string,reason:string) => {
   try {
     const response = await axiosInstance.post("/api/user-request/userResponse", {
@@ -102,6 +115,21 @@ updateUserResponse: async (requestId: string, userResponse:string,reason:string)
   }
 },
 
+updateSanctionStatus: async (requests:any) => {
+  try {
+    const response = await axiosInstance.post("/api/user-request/updateSanctionStatus", 
+      { requests } // Send as { requests: [...] }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error in updateSanctionStatus:', error);
+    throw error;
+  }
+},
+// In your adminService.ts
+deleteRequest: async (requestId: string) => {
+  return axiosInstance.delete(`/api/user-request/delet-optimiseData/${requestId}`);
+},
 
 // In your adminService
 updateOptimizeTimes: async (data: {

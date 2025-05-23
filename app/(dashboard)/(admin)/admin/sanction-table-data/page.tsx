@@ -121,6 +121,8 @@ export default function OptimiseTablePage() {
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Work Type</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Activity</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">User Response</th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">Reason For Not availed</th>
+
             </tr>
           </thead>
           <tbody>
@@ -146,8 +148,8 @@ export default function OptimiseTablePage() {
                     {request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
-                    {request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : "N/A"} -{" "}
-                    {request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : "N/A"}
+                    {request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A"} -{" "}
+                    {request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.workType}
@@ -157,6 +159,9 @@ export default function OptimiseTablePage() {
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.availedResponse}
                   </td>
                 </tr>
               ))
