@@ -210,7 +210,7 @@ export const managerService = {
         if (status) params.append('status', status);
 
         const response = await axiosInstance.get<UserRequestsResponse>(
-            `/api/requests/manager/requests?${params.toString()}`
+            `/api/user-request/manager/users-requests?${params.toString()}`
         );
         return response.data;
     },
