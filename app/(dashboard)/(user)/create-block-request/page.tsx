@@ -906,11 +906,14 @@ export default function CreateBlockRequestPage() {
             selectedStream: "",
             demandTimeFrom: "",
             demandTimeTo: "",
+            workLocationFrom: "",
+            workLocationTo: "",
           });
           setBlockSectionValue([]);
           setCustomActivity("");
           setPowerBlockRequirements([]);
           setSntDisconnectionRequirements([]);
+          alert("Block request created successfully!");
           setFormSubmitting(false);
         },
         onError: (error) => {

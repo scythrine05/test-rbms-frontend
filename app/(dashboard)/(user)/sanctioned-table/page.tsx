@@ -26,11 +26,11 @@ export default function OptimiseTablePage() {
   });
 
   const limit = 30;
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
 
   // Fetch user requests
@@ -67,14 +67,29 @@ export default function OptimiseTablePage() {
     },
   });
 
-  const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) =>
-      direction === "prev" 
-        ? subDays(prev, isUrgentMode ? 1 : 7) 
-        : addDays(prev, isUrgentMode ? 1 : 7)
-    );
-    setPage(1);
+  const goToPreviousPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return subDays(prevDate, 1);
+      }
+      // For weekly view, go back 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return subDays(weekStart, 7);
+    });
   };
+
+  // Function to navigate to next period
+  const goToNextPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return addDays(prevDate, 1);
+      }
+      // For weekly view, go forward 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return addDays(weekStart, 7);
+    });
+  };
+
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -162,9 +177,14 @@ export default function OptimiseTablePage() {
         <h1 className="text-lg font-bold text-[#13529e]">Sanctioned & Optimized Requests</h1>
         <WeeklySwitcher
           currentWeekStart={currentWeekStart}
-          onWeekChange={handleWeekChange}
+          onWeekChange={(direction) => {
+            if (direction === "prev") {
+              goToPreviousPeriod();
+            } else {
+              goToNextPeriod();
+            }
+          }}
           isUrgentMode={isUrgentMode}
-          weekStartsOn={6} // Saturday
         />
       </div>
 
@@ -226,8 +246,8 @@ export default function OptimiseTablePage() {
                   <td className="border border-black p-1 text-sm">
                     {request.sanctionedTimeFrom && request.sanctionedTimeTo
                       ? `${formatTime(request.sanctionedTimeFrom)} - ${formatTime(
-                          request.sanctionedTimeTo
-                        )}`
+                        request.sanctionedTimeTo
+                      )}`
                       : "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
@@ -241,11 +261,10 @@ export default function OptimiseTablePage() {
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse ? (
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        request.userResponse === "availed" 
-                          ? "bg-green-100 text-green-800" 
+                      <span className={`px-2 py-1 text-xs rounded ${request.userResponse === "availed"
+                          ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
-                      }`}>
+                        }`}>
                         {request.userResponse === "availed" ? "Availed" : "Not Availed"}
                         {request.notAvailedReason && request.userResponse === "not availed" && (
                           <div className="text-xs mt-1 text-gray-600">
@@ -260,8 +279,8 @@ export default function OptimiseTablePage() {
                           disabled={updateUserResponse.isPending}
                           className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 disabled:opacity-50"
                         >
-                          {updateUserResponse.variables?.requestId === request.id && 
-                           updateUserResponse.variables?.userResponse === "availed"
+                          {updateUserResponse.variables?.requestId === request.id &&
+                            updateUserResponse.variables?.userResponse === "availed"
                             ? "Processing..."
                             : "Availed"}
                         </button>
@@ -270,8 +289,8 @@ export default function OptimiseTablePage() {
                           disabled={updateUserResponse.isPending}
                           className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 disabled:opacity-50"
                         >
-                          {updateUserResponse.variables?.requestId === request.id && 
-                           updateUserResponse.variables?.userResponse === "not availed"
+                          {updateUserResponse.variables?.requestId === request.id &&
+                            updateUserResponse.variables?.userResponse === "not availed"
                             ? "Processing..."
                             : "Not Availed"}
                         </button>

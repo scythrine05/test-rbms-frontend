@@ -12,16 +12,16 @@ import {
   subDays,
 } from "date-fns";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
   const { isUrgentMode } = useUrgentMode();
   const [page, setPage] = useState(1);
- const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-  const today = new Date();
-  const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
-  return startOfWeek(lastSaturday, { weekStartsOn: 6 });
-});
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
+    const now = new Date();
+    return isUrgentMode ? now : startOfWeek(now, { weekStartsOn: 1 }); // Start from Monday
+  });
   const [rejectionData, setRejectionData] = useState({
     showModal: false,
     requestId: null as string | null,
@@ -51,8 +51,8 @@ export default function OptimiseTablePage() {
   // Add debugging logs
   console.log('API Response:', data?.data.requests);
   console.log('Is Urgent Mode:', isUrgentMode);
-  console.log('Filtered Requests:', data?.data.requests?.filter((request: any) => 
-    request.optimizeStatus === true && 
+  console.log('Filtered Requests:', data?.data.requests?.filter((request: any) =>
+    request.optimizeStatus === true &&
     (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
   ));
 
@@ -88,11 +88,27 @@ export default function OptimiseTablePage() {
     }
   };
 
-  const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) =>
-      direction === "prev" ? subDays(prev, 7) : addDays(prev, 7)
-    );
-    setPage(1);
+  const goToPreviousPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return subDays(prevDate, 1);
+      }
+      // For weekly view, go back 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return subDays(weekStart, 7);
+    });
+  };
+
+  // Function to navigate to next period
+  const goToNextPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return addDays(prevDate, 1);
+      }
+      // For weekly view, go forward 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return addDays(weekStart, 7);
+    });
   };
 
   const handleAccept = (requestId: string) => {
@@ -148,21 +164,17 @@ export default function OptimiseTablePage() {
       </div>
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-center items-center mt-4">
         <div className="flex gap-2 items-center">
-          <button
-            onClick={() => handleWeekChange("prev")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Previous Week
-          </button>
-          <span className="px-3 py-1 text-sm text-black">
-            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
-          </span>
-          <button
-            onClick={() => handleWeekChange("next")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Next Week
-          </button>
+          <WeeklySwitcher
+            currentWeekStart={currentWeekStart}
+            onWeekChange={(direction) => {
+              if (direction === "prev") {
+                goToPreviousPeriod();
+              } else {
+                goToNextPeriod();
+              }
+            }}
+            isUrgentMode={isUrgentMode}
+          />
         </div>
       </div>
 
@@ -182,13 +194,13 @@ export default function OptimiseTablePage() {
             </tr>
           </thead>
           <tbody>
-            {data?.data.requests?.filter((request: any) => 
-              request.optimizeStatus === true && 
+            {data?.data.requests?.filter((request: any) =>
+              request.optimizeStatus === true &&
               (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
             ).length > 0 ? (
               data?.data.requests
-                ?.filter((request: any) => 
-                  request.optimizeStatus === true && 
+                ?.filter((request: any) =>
+                  request.optimizeStatus === true &&
                   (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
                 )
                 .map((request: any) => (
@@ -215,18 +227,17 @@ export default function OptimiseTablePage() {
                               (updateRequestStatus.variables?.requestId === request.id &&
                                 updateRequestStatus.variables?.status === "yes")
                             }
-                            className={`px-2 py-1 text-white text-xs rounded ${
-                              request.userStatus === "yes"
-                                ? "bg-gray-400 cursor-default"
-                                : "bg-green-500 hover:bg-green-600"
-                            } disabled:opacity-50`}
+                            className={`px-2 py-1 text-white text-xs rounded ${request.userStatus === "yes"
+                              ? "bg-gray-400 cursor-default"
+                              : "bg-green-500 hover:bg-green-600"
+                              } disabled:opacity-50`}
                           >
                             {request.userStatus === "yes"
                               ? "Accepted"
                               : updateRequestStatus.variables?.requestId === request.id &&
                                 updateRequestStatus.variables?.status === "yes"
-                              ? "Processing..."
-                              : "Accept"}
+                                ? "Processing..."
+                                : "Accept"}
                           </button>
                         )}
                         {request.userStatus !== "yes" && (
@@ -237,18 +248,17 @@ export default function OptimiseTablePage() {
                               (updateRequestStatus.variables?.requestId === request.id &&
                                 updateRequestStatus.variables?.status === "no")
                             }
-                            className={`px-2 py-1 text-white text-xs rounded ${
-                              request.userStatus === "no"
-                                ? "bg-gray-400 cursor-default"
-                                : "bg-red-500 hover:bg-red-600"
-                            } disabled:opacity-50`}
+                            className={`px-2 py-1 text-white text-xs rounded ${request.userStatus === "no"
+                              ? "bg-gray-400 cursor-default"
+                              : "bg-red-500 hover:bg-red-600"
+                              } disabled:opacity-50`}
                           >
                             {request.userStatus === "no"
                               ? "Rejected"
                               : updateRequestStatus.variables?.requestId === request.id &&
                                 updateRequestStatus.variables?.status === "no"
-                              ? "Processing..."
-                              : "Reject"}
+                                ? "Processing..."
+                                : "Reject"}
                           </button>
                         )}
                       </div>
