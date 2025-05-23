@@ -15,9 +15,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserRequest } from "@/app/service/api/manager";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 export default function OptimiseTablePage() {
   const router = useRouter();
+  const { isUrgentMode } = useUrgentMode();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -36,7 +38,7 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, currentWeekStart],
+    queryKey: ["approved-requests", page, currentWeekStart, isUrgentMode],
     queryFn: () =>
       adminService.getOptimizeRequests(
         format(weekStart, "yyyy-MM-dd"),
@@ -44,6 +46,15 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
         page
       ),
   });
+
+  // Filter requests based on urgent mode and optimization status
+  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
+    const urgentMatch = isUrgentMode 
+      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+    
+    return urgentMatch && request.optimizeStatus === true;
+  }) || [];
 
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
     null
@@ -263,8 +274,15 @@ const handleDelete = (requestId: string) => {
       )}
 
       {/* Header and week navigation */}
-      <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
+      <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-bold text-[#13529e]">
+            Optimized Requests
+          </h1>
+          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
+            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
+          </span>
+        </div>
         <WeeklySwitcher
           currentWeekStart={currentWeekStart}
           onWeekChange={handleWeekChange}
@@ -321,142 +339,138 @@ const handleDelete = (requestId: string) => {
             </tr>
           </thead>
           <tbody>
-            {data?.data?.requests
-              ?.filter(
-                (request: UserRequest) => request.optimizeStatus === true
-              )
-              ?.map((request: UserRequest) => (
-                <tr
-                  key={`request-${request.id}-${request.date}`}
-                  className={`hover:bg-gray-50 ${
-                    optimizedData ? "bg-green-50" : ""
-                  }`}
-                >
-                  <td className="border border-black p-1 text-sm">
-                    {formatDate(request.date)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedSection}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedDepo}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.missionBlock}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {optimizedData
-                      ? request.selectedLine
-                      : request.processedLineSections?.[0]?.lineName || "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {editingId === request.id ? (
-                      <div className="flex gap-1 items-center">
-                        <input
-                          type="time"
-                          value={timeFrom}
-                          onChange={(e) => setTimeFrom(e.target.value)}
-                          className="w-20 border p-1 text-sm"
-                        />
-                        <span>-</span>
-                        <input
-                          type="time"
-                          value={timeTo}
-                          onChange={(e) => setTimeTo(e.target.value)}
-                          className="w-20 border p-1 text-sm"
-                        />
-                      </div>
-                    ) : request.isSanctioned ? (
-                      <>
-                        {request?.optimizeTimeFrom
-                          ? formatTime(request?.optimizeTimeFrom)
-                          : "N/A"}{" "}
-                        -{" "}
-                        {request?.optimizeTimeTo
-                          ? formatTime(request?.optimizeTimeTo)
-                          : "N/A"}
-                      </>
-                    ) : (
-                      <>
-                        {request.optimizeData?.optimizeTimeFrom
-                          ? formatTime(request.optimizeData.optimizeTimeFrom)
-                          : "N/A"}{" "}
-                        -{" "}
-                        {request.optimizeData?.optimizeTimeTo
-                          ? formatTime(request.optimizeData.optimizeTimeTo)
-                          : "N/A"}
-                      </>
-                    )}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.workType}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.activity}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.userStatus === "yes" ? (
-                      <span className="text-green-600">Accepted</span>
-                    ) : request.userStatus === "no" ? (
-                      <span className="text-red-600">Rejected</span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.reasonFroReject}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    <div className="flex gap-2">
-                      {editingId === request.id ? (
-                        <>
-                          <button
-                            onClick={() => handleUpdateClick(request.id)}
-                            className="px-2 py-1 text-xs bg-blue-500 text-white border border-black"
-                            disabled={updateOptimizedTimes.isPending}
-                          >
-                            {updateOptimizedTimes.isPending
-                              ? "Processing..."
-                              : "Update"}
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="px-2 py-1 text-xs bg-gray-500 text-white border border-black"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {!request.isSanctioned && (
-                            <button
-                              onClick={() => handleEditClick(request)}
-                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black"
-                            >
-                              Edit
-                            </button>
-                          )}
-                          <Link
-                            href={`/admin/view-request/${request.id}`}
-                            className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                          >
-                            View
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(request.id)}
-                            className="px-2 py-1 text-xs bg-red-500 text-white border border-black"
-                            disabled={deletingIds.has(request.id)}
-                          >
-                            {deletingIds.has(request.id)
-                              ? "Deleting..."
-                              : "Delete"}
-                          </button>
-                        </>
-                      )}
+            {filteredRequests.map((request: UserRequest) => (
+              <tr
+                key={`request-${request.id}-${request.date}`}
+                className={`hover:bg-gray-50 ${
+                  optimizedData ? "bg-green-50" : ""
+                }`}
+              >
+                <td className="border border-black p-1 text-sm">
+                  {formatDate(request.date)}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.selectedSection}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.selectedDepo}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.missionBlock}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {optimizedData
+                    ? request.selectedLine
+                    : request.processedLineSections?.[0]?.lineName || "N/A"}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {editingId === request.id ? (
+                    <div className="flex gap-1 items-center">
+                      <input
+                        type="time"
+                        value={timeFrom}
+                        onChange={(e) => setTimeFrom(e.target.value)}
+                        className="w-20 border p-1 text-sm"
+                      />
+                      <span>-</span>
+                      <input
+                        type="time"
+                        value={timeTo}
+                        onChange={(e) => setTimeTo(e.target.value)}
+                        className="w-20 border p-1 text-sm"
+                      />
                     </div>
-                  </td>
-                </tr>
-              ))}
+                  ) : request.isSanctioned ? (
+                    <>
+                      {request?.optimizeTimeFrom
+                        ? formatTime(request?.optimizeTimeFrom)
+                        : "N/A"}{" "}
+                      -{" "}
+                      {request?.optimizeTimeTo
+                        ? formatTime(request?.optimizeTimeTo)
+                        : "N/A"}
+                    </>
+                  ) : (
+                    <>
+                      {request.optimizeData?.optimizeTimeFrom
+                        ? formatTime(request.optimizeData.optimizeTimeFrom)
+                        : "N/A"}{" "}
+                      -{" "}
+                      {request.optimizeData?.optimizeTimeTo
+                        ? formatTime(request.optimizeData.optimizeTimeTo)
+                        : "N/A"}
+                    </>
+                  )}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.workType}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.activity}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.userStatus === "yes" ? (
+                    <span className="text-green-600">Accepted</span>
+                  ) : request.userStatus === "no" ? (
+                    <span className="text-red-600">Rejected</span>
+                  ) : (
+                    "-"
+                  )}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  {request.reasonFroReject}
+                </td>
+                <td className="border border-black p-1 text-sm">
+                  <div className="flex gap-2">
+                    {editingId === request.id ? (
+                      <>
+                        <button
+                          onClick={() => handleUpdateClick(request.id)}
+                          className="px-2 py-1 text-xs bg-blue-500 text-white border border-black"
+                          disabled={updateOptimizedTimes.isPending}
+                        >
+                          {updateOptimizedTimes.isPending
+                            ? "Processing..."
+                            : "Update"}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="px-2 py-1 text-xs bg-gray-500 text-white border border-black"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {!request.isSanctioned && (
+                          <button
+                            onClick={() => handleEditClick(request)}
+                            className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        <Link
+                          href={`/admin/view-request/${request.id}`}
+                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(request.id)}
+                          className="px-2 py-1 text-xs bg-red-500 text-white border border-black"
+                          disabled={deletingIds.has(request.id)}
+                        >
+                          {deletingIds.has(request.id)
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

@@ -17,9 +17,11 @@ import { UserRequest } from "@/app/service/api/manager";
 import { useOptimizeRequests } from "@/app/service/query/optimise";
 import { flattenRecords } from "@/app/lib/optimse";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 export default function OptimiseTablePage() {
   const router = useRouter();
+  const { isUrgentMode } = useUrgentMode();
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     // Set initial week start to last Saturday
@@ -34,7 +36,7 @@ export default function OptimiseTablePage() {
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, currentWeekStart],
+    queryKey: ["approved-requests", page, currentWeekStart, isUrgentMode],
     queryFn: () =>
       adminService.getApprovedRequests(
         format(weekStart, "yyyy-MM-dd"),
@@ -42,6 +44,13 @@ export default function OptimiseTablePage() {
         page
       ),
   });
+
+  // Filter requests based on urgent mode
+  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
+    return isUrgentMode 
+      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+  }) || [];
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
@@ -242,10 +251,30 @@ export default function OptimiseTablePage() {
       {isOptimizeDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-black">
           <div className="bg-white p-6 w-full max-w-md border border-black">
-            <div className="border-b-2 border-[#13529e] pb-3 mb-4">
-              <h2 className="text-lg font-bold text-[#13529e]">
-                Optimize Requests
-              </h2>
+            <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <h2 className="text-lg font-bold text-[#13529e]">
+                  Optimize Requests
+                </h2>
+                <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
+                  {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsOptimizeDialogOpen(false)}
+                  className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleOptimize}
+                  disabled={optimizeMutation.isPending}
+                  className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
+                >
+                  {optimizeMutation.isPending ? "Optimizing..." : "Optimize"}
+                </button>
+              </div>
             </div>
             <div className="mb-4 space-y-2">
               <p>Are you sure you want to optimize the requests for:</p>
@@ -256,21 +285,6 @@ export default function OptimiseTablePage() {
               <p className="font-medium">
                 Total Requests: {data?.data?.requests?.length || 0}
               </p>
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsOptimizeDialogOpen(false)}
-                className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleOptimize}
-                disabled={optimizeMutation.isPending}
-                className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-              >
-                {optimizeMutation.isPending ? "Optimizing..." : "Optimize"}
-              </button>
             </div>
           </div>
         </div>
@@ -313,7 +327,7 @@ export default function OptimiseTablePage() {
             </tr>
           </thead>
           <tbody>
-            {data?.data?.requests?.map((request: UserRequest) => (
+            {filteredRequests.map((request: UserRequest) => (
               <tr
                 key={`request-${request.id}-${request.date}`}
                 className={`hover:bg-gray-50 ${

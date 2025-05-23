@@ -154,15 +154,17 @@ export default function RequestTablePage() {
 
 
   // Filter requests based on status and urgent mode
-  const filteredRequests = showAll 
-    ? data?.data?.requests || []
-    : data?.data?.requests?.filter((request: UserRequest) => {
-        const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
-        const urgentMatch = isUrgentMode 
-          ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-          : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-        return statusMatch && urgentMatch;
-      }) || [];
+  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
+    // Always filter by urgent/normal mode
+    const urgentMatch = isUrgentMode 
+      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+    
+    // Only apply status filter if showAll is false
+    const statusMatch = showAll || statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
+    
+    return urgentMatch && statusMatch;
+  }) || [];
 
   if (isLoading) {
     return (
@@ -199,9 +201,14 @@ export default function RequestTablePage() {
   return (
     <div className="bg-white p-3 border border-black mb-3">
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">
-          {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-bold text-[#13529e]">
+            {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
+          </h1>
+          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
+            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
+          </span>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={handleApproveAllPending}
@@ -241,6 +248,18 @@ export default function RequestTablePage() {
           </div>
           <div className="text-sm text-gray-600">
             Date: {format(currentWeekStart, "dd-MM-yyyy")}
+          </div>
+        </div>
+      )}
+
+      {!isUrgentMode && (
+        <div className="mb-4">
+          <div className="text-sm text-gray-600 mb-2">
+            <p className="font-medium">Normal Mode Active</p>
+            <p>Showing regular block requests for the selected week.</p>
+          </div>
+          <div className="text-sm text-gray-600">
+            Week: {format(weekStart, "dd-MM-yyyy")} to {format(weekEnd, "dd-MM-yyyy")}
           </div>
         </div>
       )}

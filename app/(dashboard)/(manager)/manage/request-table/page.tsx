@@ -17,6 +17,7 @@ export default function RequestTablePage() {
     const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
     return startOfWeek(lastSaturday, { weekStartsOn: 6 }); // 6 is Saturday
   });
+  const [selectedDate, setSelectedDate] = useState(() => addDays(new Date(), 1)); // Default to next day
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const { isUrgentMode } = useUrgentMode();
   const [showAll, setShowAll] = useState(false);
@@ -29,17 +30,16 @@ export default function RequestTablePage() {
 
   // Fetch requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode],
+    queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode, selectedDate],
     queryFn: () => {
       if (isUrgentMode) {
-        // For urgent mode, get requests for next day
-        const today = new Date();
-        const endDate = addDays(today, 1);
+        // For urgent mode, get requests for selected date
+        // Use the same date for both start and end to get exactly that day's data
         return managerService.getUserRequestsByManager(
           1,
           limit,
-          format(today, "yyyy-MM-dd"),
-          format(endDate, "yyyy-MM-dd"),
+          format(selectedDate, "yyyy-MM-dd"),
+          format(selectedDate, "yyyy-MM-dd"),
           statusFilter !== "ALL" ? statusFilter : undefined
         );
       }
@@ -92,6 +92,16 @@ export default function RequestTablePage() {
       setCurrentWeekStart((prev) => addDays(prev, 7));
     }
     setPage(1); // Reset to first page when changing weeks
+  };
+
+  // Handle day navigation for urgent mode
+  const handleDayChange = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setSelectedDate((prev) => subDays(prev, 1));
+    } else {
+      setSelectedDate((prev) => addDays(prev, 1));
+    }
+    setPage(1); // Reset to first page when changing days
   };
 
   // Filter requests based on status and urgent mode
@@ -157,8 +167,25 @@ export default function RequestTablePage() {
       {/* Urgent mode description and date range */}
       {isUrgentMode && (
         <div className="mb-4">
-          <div className="text-sm text-gray-600">
-            Showing Requests for Date : {format(addDays(new Date(), 1), "dd-MM-yyyy")}
+          <div className="text-sm text-gray-600 mb-2">
+            Showing Requests for Date : {format(selectedDate, "dd-MM-yyyy")}
+          </div>
+          <div className="flex justify-center gap-2 text-black">
+            <button
+              onClick={() => handleDayChange("prev")}
+              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+            >
+              Previous Day
+            </button>
+            <span className="px-3 py-1 text-sm">
+              {format(selectedDate, "dd MMM yyyy")}
+            </span>
+            <button
+              onClick={() => handleDayChange("next")}
+              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+            >
+              Next Day
+            </button>
           </div>
         </div>
       )}
@@ -186,136 +213,146 @@ export default function RequestTablePage() {
 
       {/* Rest of the table and pagination remains the same */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-black">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Date
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Major Section
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Depot
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Block Section
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Line
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Time
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Corridor Type
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Work Type
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Activity
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Status
-              </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRequests.map((request: UserRequest) => (
-              <tr key={request.id} className="hover:bg-gray-50">
-                {/* Table cells remain exactly the same */}
-                <td className="border border-black p-1 text-sm">
-                  {formatDate(request.date)}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.selectedSection}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.selectedDepo}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.missionBlock}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {(() => {
-                    if (
-                      request.processedLineSections &&
-                      Array.isArray(request.processedLineSections) &&
-                      request.processedLineSections.length > 0
-                    ) {
-                      const regularSection = request.processedLineSections.find(
-                        (section) => section.type === "regular"
-                      );
-                      if (regularSection && regularSection.lineName) {
-                        return regularSection.lineName;
-                      }
+        {filteredRequests.length === 0 ? (
+          <div className="text-center py-5 text-gray-600">
+            {isUrgentMode 
+              ? `There are no requests for ${format(selectedDate, "dd MMM yyyy")}`
+              : `There are no requests for the week of ${format(weekStart, "dd MMM")} - ${format(weekEnd, "dd MMM yyyy")}`
+            }
+          </div>
+        ) : (
+          <>
+            <table className="w-full border-collapse text-black">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Date
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Major Section
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Depot
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Block Section
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Line
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Time
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Corridor Type
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Work Type
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Activity
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Status
+                  </th>
+                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRequests.map((request: UserRequest) => (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="border border-black p-1 text-sm">
+                      {formatDate(request.date)}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.selectedSection}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.selectedDepo}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.missionBlock}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {(() => {
+                        if (
+                          request.processedLineSections &&
+                          Array.isArray(request.processedLineSections) &&
+                          request.processedLineSections.length > 0
+                        ) {
+                          const regularSection = request.processedLineSections.find(
+                            (section) => section.type === "regular"
+                          );
+                          if (regularSection && regularSection.lineName) {
+                            return regularSection.lineName;
+                          }
 
-                      const yardSection = request.processedLineSections.find(
-                        (section) => section.type === "yard"
-                      );
-                      if (yardSection) {
-                        if (yardSection.stream && yardSection.road) {
-                          return `${yardSection.stream}/${yardSection.road}`;
+                          const yardSection = request.processedLineSections.find(
+                            (section) => section.type === "yard"
+                          );
+                          if (yardSection) {
+                            if (yardSection.stream && yardSection.road) {
+                              return `${yardSection.stream}/${yardSection.road}`;
+                            }
+                            if (yardSection.stream) {
+                              return yardSection.stream;
+                            }
+                          }
+
+                          const firstSection = request.processedLineSections[0];
+                          if (firstSection.lineName) return firstSection.lineName;
+                          if (firstSection.stream) return firstSection.stream;
                         }
-                        if (yardSection.stream) {
-                          return yardSection.stream;
+
+                        if (request.selectedStream) {
+                          return request.selectedStream;
                         }
-                      }
 
-                      const firstSection = request.processedLineSections[0];
-                      if (firstSection.lineName) return firstSection.lineName;
-                      if (firstSection.stream) return firstSection.stream;
-                    }
-
-                    if (request.selectedStream) {
-                      return request.selectedStream;
-                    }
-
-                    return "N/A";
-                  })()}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {formatTime(request.demandTimeFrom)} -{" "}
-                  {formatTime(request.demandTimeTo)}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.corridorTypeSelection ||
-                    request.corridorType ||
-                    "N/A"}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.workType}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.activity}
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <span
-                    className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                      request.status
-                    )}`}
-                  >
-                    {request.status}
-                  </span>
-                </td>
-                <td className="border border-black p-1 text-sm">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/manage/view-request/${request.id}`}
-                      className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                        return "N/A";
+                      })()}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.corridorTypeSelection ||
+                        request.corridorType ||
+                        "N/A"}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.workType}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      {request.activity}
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      <span
+                        className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
+                          request.status
+                        )}`}
+                      >
+                        {request.status}
+                      </span>
+                    </td>
+                    <td className="border border-black p-1 text-sm">
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/manage/view-request/${request.id}`}
+                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
 
       {/* Pagination - only show in normal mode */}

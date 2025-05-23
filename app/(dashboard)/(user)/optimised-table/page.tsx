@@ -193,7 +193,7 @@ export default function OptimiseTablePage() {
                 )
                 .map((request: any) => (
                   <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="border border-black p-1 text-sm">{formatDate(request.createdAt)}</td>
+                    <td className="border border-black p-1 text-sm">{formatDate(request.date)}</td>
                     <td className="border border-black p-1 text-sm">{request.selectedSection || "N/A"}</td>
                     <td className="border border-black p-1 text-sm">{request.selectedDepo || "N/A"}</td>
                     <td className="border border-black p-1 text-sm">{request.missionBlock || "N/A"}</td>

@@ -12,9 +12,11 @@ import {
   endOfWeek,
 } from "date-fns";
 import { UserRequest } from "@/app/service/api/manager";
+import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
+  const { isUrgentMode } = useUrgentMode();
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
@@ -39,7 +41,14 @@ export default function OptimiseTablePage() {
 
   // Filter data to only show sanctioned requests
   const sanctionedRequests = data?.data?.requests?.filter(
-    (request: UserRequest) => request.isSanctioned
+    (request: UserRequest) => {
+      const isSanctioned = request.isSanctioned;
+      if (isUrgentMode) {
+        return isSanctioned; // Show all sanctioned requests in urgent mode
+      } else {
+        return isSanctioned && request.corridorType !== "Urgent Block"; // Exclude urgent requests in normal mode
+      }
+    }
   ) || [];
 
   // Format date and time helpers
@@ -120,6 +129,7 @@ export default function OptimiseTablePage() {
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Optimized Time</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Work Type</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Activity</th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">Corridor Type</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">User Response</th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">Reason For Not availed</th>
 
@@ -158,6 +168,9 @@ export default function OptimiseTablePage() {
                     {request.activity}
                   </td>
                   <td className="border border-black p-1 text-sm">
+                    {request.corridorType || "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
                     {request.userResponse}
                   </td>
                   <td className="border border-black p-1 text-sm">
@@ -167,7 +180,7 @@ export default function OptimiseTablePage() {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="border border-black p-1 text-sm text-center py-4">
+                <td colSpan={11} className="border border-black p-1 text-sm text-center py-4">
                   No sanctioned requests found for this period
                 </td>
               </tr>

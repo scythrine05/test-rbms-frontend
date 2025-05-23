@@ -144,7 +144,14 @@ export default function OptimiseTablePage() {
 
   // Filter optimized requests that are sanctioned
   const sanctionedOptimizedRequests = data?.data.requests?.filter(
-    (request: any) => request.optimizeStatus === true && request.isSanctioned === true
+    (request: any) => {
+      const isSanctioned = request.isSanctioned;
+      if (isUrgentMode) {
+        return isSanctioned; // Show all sanctioned requests in urgent mode
+      } else {
+        return isSanctioned && request.corridorType !== "Urgent Block"; // Exclude urgent requests in normal mode
+      }
+    }
   );
 
   const totalPages = data?.data.totalPages || 1;
@@ -190,6 +197,9 @@ export default function OptimiseTablePage() {
                 Activity
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                Corridor Type
+              </th>
+              <th className="border border-black p-1 text-left text-sm font-medium text-black">
                 User Response
               </th>
             </tr>
@@ -199,7 +209,7 @@ export default function OptimiseTablePage() {
               sanctionedOptimizedRequests.map((request: any) => (
                 <tr key={request.id} className="hover:bg-gray-50">
                   <td className="border border-black p-1 text-sm">
-                    {formatDate(request.createdAt)}
+                    {formatDate(request.date)}
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.selectedSection || "N/A"}
@@ -225,6 +235,9 @@ export default function OptimiseTablePage() {
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.activity || "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.corridorType || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse ? (
@@ -270,7 +283,7 @@ export default function OptimiseTablePage() {
             ) : (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   className="border border-black p-1 text-sm text-center"
                 >
                   No sanctioned and optimized requests found
