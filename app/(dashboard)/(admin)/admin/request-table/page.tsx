@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO, addDays } from "date-fns";
+import { format, parseISO, addDays, startOfWeek, subDays, endOfWeek } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,6 +12,8 @@ import {
 } from "@/app/service/mutation/admin";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useGetAdminRequests } from "@/app/service/query/user-request";
 
 export default function RequestTablePage() {
   const router = useRouter();
@@ -23,9 +25,23 @@ export default function RequestTablePage() {
   const [showAll, setShowAll] = useState(false);
   const [limit] = useState(30);
 
+   // State for week selection
+   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
+    const today = new Date();
+    return isUrgentMode ? today : startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
+  });
+
+  // Calculate week range
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : endOfWeek(currentWeekStart, { weekStartsOn: 1 });
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
+
   // Fetch requests data with pagination
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter, isUrgentMode],
+    queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode],
     queryFn: () => {
       if (isUrgentMode) {
         const today = new Date();
@@ -41,8 +57,8 @@ export default function RequestTablePage() {
       return managerService.getUserRequestsByAdmin(
         page,
         limit,
-        undefined,
-        undefined,
+        format(weekStart, "yyyy-MM-dd"),
+        format(weekEnd, "yyyy-MM-dd"),
         statusFilter !== "ALL" ? statusFilter : undefined
       );
     }
@@ -113,6 +129,16 @@ export default function RequestTablePage() {
     setPage(newPage);
   };
 
+  const handleWeekChange = (direction: "prev" | "next") => {
+    setCurrentWeekStart((prev) =>
+      direction === "prev" 
+        ? subDays(prev, isUrgentMode ? 1 : 7) 
+        : addDays(prev, isUrgentMode ? 1 : 7)
+    );
+    setPage(1); // Reset to first page when changing weeks
+  };
+
+
   // Filter requests based on status and urgent mode
   const filteredRequests = showAll 
     ? data?.data?.requests || []
@@ -182,7 +208,12 @@ export default function RequestTablePage() {
           isUrgentMode={isUrgentMode}
         />
       </div>
-
+      <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          isUrgentMode={isUrgentMode}
+          weekStartsOn={1} // Monday
+        />
       {/* Urgent mode description and date range */}
       {isUrgentMode && (
         <div className="mb-4">
