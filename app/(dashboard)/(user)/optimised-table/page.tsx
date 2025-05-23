@@ -48,6 +48,14 @@ export default function OptimiseTablePage() {
       ),
   });
 
+  // Add debugging logs
+  console.log('API Response:', data?.data.requests);
+  console.log('Is Urgent Mode:', isUrgentMode);
+  console.log('Filtered Requests:', data?.data.requests?.filter((request: any) => 
+    request.optimizeStatus === true && 
+    (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
+  ));
+
   const updateRequestStatus = useMutation({
     mutationFn: ({
       requestId,
@@ -174,9 +182,9 @@ export default function OptimiseTablePage() {
             </tr>
           </thead>
           <tbody>
-            {data?.data.requests?.filter((r: any) => 
-              r.optimizeStatus === true && 
-              (isUrgentMode ? r.corridorType === "Urgent Block" : r.corridorType !== "Urgent Block")
+            {data?.data.requests?.filter((request: any) => 
+              request.optimizeStatus === true && 
+              (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
             ).length > 0 ? (
               data?.data.requests
                 ?.filter((request: any) => 

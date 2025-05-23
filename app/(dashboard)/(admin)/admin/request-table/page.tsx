@@ -13,7 +13,6 @@ import {
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
-import { useGetAdminRequests } from "@/app/service/query/user-request";
 
 export default function RequestTablePage() {
   const router = useRouter();
@@ -43,22 +42,30 @@ export default function RequestTablePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode],
     queryFn: () => {
+      const dateRange = isUrgentMode 
+    ? {
+        startDate: format(currentWeekStart, "yyyy-MM-dd"),
+        endDate: format(currentWeekStart, "yyyy-MM-dd")  // Use same day for both start and end in urgent mode
+      }
+    : {
+        startDate: format(currentWeekStart, "yyyy-MM-dd"),
+        endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
+      };
+
       if (isUrgentMode) {
-        const today = new Date();
-        const endDate = addDays(today, 1);
         return managerService.getUserRequestsByAdmin(
           1,
           limit,
-          format(today, "yyyy-MM-dd"),
-          format(endDate, "yyyy-MM-dd"),
+          dateRange.startDate,
+          dateRange.endDate,
           statusFilter !== "ALL" ? statusFilter : undefined
         );
       }
       return managerService.getUserRequestsByAdmin(
         page,
         limit,
-        format(weekStart, "yyyy-MM-dd"),
-        format(weekEnd, "yyyy-MM-dd"),
+        dateRange.startDate,
+        dateRange.endDate,
         statusFilter !== "ALL" ? statusFilter : undefined
       );
     }
@@ -130,11 +137,18 @@ export default function RequestTablePage() {
   };
 
   const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) =>
-      direction === "prev" 
-        ? subDays(prev, isUrgentMode ? 1 : 7) 
-        : addDays(prev, isUrgentMode ? 1 : 7)
-    );
+    setCurrentWeekStart((prev) => {
+      if (isUrgentMode) {
+        return direction === "prev" 
+          ? subDays(prev, 1)
+          : addDays(prev, 1);
+      } else {
+        // In normal mode, move by weeks
+        return direction === "prev"
+          ? subDays(prev, 7)
+          : addDays(prev, 7);
+      }
+    });
     setPage(1); // Reset to first page when changing weeks
   };
 
@@ -164,6 +178,10 @@ export default function RequestTablePage() {
 
   const nonCorridorRequests = filteredRequests.filter(
     (request) => request.corridorType === "Outside Corridor"
+  );
+
+  const urgentRequests = filteredRequests.filter(
+    (request) => request.corridorType === "Urgent Block"
   );
 
   if (error) {
@@ -219,15 +237,152 @@ export default function RequestTablePage() {
         <div className="mb-4">
           <div className="text-sm text-gray-600 mb-2">
             <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the next day.</p>
+            <p>Showing urgent block requests and emergency work types for the selected day.</p>
           </div>
           <div className="text-sm text-gray-600">
-            Date Range: {format(new Date(), "dd-MM-yyyy")} to {format(addDays(new Date(), 1), "dd-MM-yyyy")}
+            Date: {format(currentWeekStart, "dd-MM-yyyy")}
           </div>
         </div>
       )}
 
-      <div className="mb-8">
+      {isUrgentMode && <>
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+            Urgent Block Requests
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-black">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Date
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Major Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Depot
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Block Section
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Line
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Time
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Corridor Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Work Type
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Activity
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  S&T Approval
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Status
+                </th>
+                <th className="border border-black p-1 text-left text-sm font-medium text-black">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {urgentRequests.map((request: UserRequest) => (
+                <tr key={request.id} className="hover:bg-gray-50">
+                  <td className="border border-black p-1 text-sm">
+                    {formatDate(request.date)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedSection}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.selectedDepo}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.missionBlock}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.processedLineSections?.[0]?.lineName || "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {formatTime(request.demandTimeFrom)} -{" "}
+                    {formatTime(request.demandTimeTo)}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.corridorTypeSelection ||
+                      request.corridorType ||
+                      "N/A"}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.workType}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    {request.activity}
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
+                        request.sntDisconnectionRequired === undefined
+                          ? "NAN"
+                          : request.sntDisconnectionRequired
+                          ? request.DisconnAcceptance || "PENDING"
+                          : "NAN"
+                      )}`}
+                    >
+                      {request.sntDisconnectionRequired === undefined
+                        ? "NAN"
+                        : request.sntDisconnectionRequired
+                        ? request.DisconnAcceptance || "PENDING"
+                        : "NAN"}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <span
+                      className={`px-2 py-0.5 text-xs rounded ${
+                        request.adminRequestStatus === "ACCEPTED"
+                          ? "bg-green-100 text-green-800 border border-green-300"
+                          : request.adminRequestStatus === "REJECTED"
+                          ? "bg-red-100 text-red-800 border border-red-300"
+                          : "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                      }`}
+                    >
+                      {request.adminRequestStatus}
+                    </span>
+                  </td>
+                  <td className="border border-black p-1 text-sm">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/view-request/${request.id}`}
+                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                      >
+                        View
+                      </Link>
+                      {request.adminRequestStatus === "PENDING" && (
+                        <button
+                          onClick={() => handleRequestAction(request.id, false)}
+                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>}
+
+      {!isUrgentMode && <>
+        <div className="mb-8">
         <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
           Corridor Requests
         </h2>
@@ -494,6 +649,7 @@ export default function RequestTablePage() {
           </table>
         </div>
       </div>
+      </>}
 
       {/* Pagination - only show in normal mode */}
       {!isUrgentMode && totalPages > 1 && (
