@@ -29,7 +29,7 @@ export default function OptimiseTablePage() {
   const [timeFrom, setTimeFrom] = useState("");
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-
+const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   // Calculate week range
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
   const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
@@ -48,11 +48,15 @@ export default function OptimiseTablePage() {
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
     null
   );
-
+  interface SanctionRequest {
+    id: string;
+    optimizeTimeFrom: string;
+    optimizeTimeTo: string;
+  }
   // Add this with your other mutations
   const updateSanctionStatus = useMutation({
-    mutationFn: (requestIds: string[]) =>
-      adminService.updateSanctionStatus(requestIds),
+    mutationFn: (requests: SanctionRequest[]) =>
+      adminService.updateSanctionStatus(requests),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["approved-requests", page, currentWeekStart],
@@ -66,26 +70,32 @@ export default function OptimiseTablePage() {
     },
   });
 
-const handleSendClick = () => {
-  // Get all request IDs that are optimized but not yet sanctioned
-  const requestIds = data?.data?.requests
-    ?.filter((request: UserRequest) => 
-      request.optimizeStatus === true && 
-      !request.isSanctioned &&
-      request.optimizeTimeFrom && 
-      request.optimizeTimeTo
-    )
-    ?.map((request: UserRequest) => request.id);
+  const handleSendClick = () => {
+    const requestsToSanction = data?.data?.requests
+      ?.filter(
+        (request: UserRequest) =>
+          request.optimizeStatus === true &&
+          !request.isSanctioned &&
+          request?.optimizeData?.optimizeTimeFrom &&
+          request?.optimizeData?.optimizeTimeTo
+      )
+      ?.map(
+        (request: UserRequest): SanctionRequest => ({
+          id: request.id,
+          optimizeTimeFrom: request.optimizeData.optimizeTimeFrom,
+          optimizeTimeTo: request.optimizeData.optimizeTimeTo,
+        })
+      );
 
-  if (!requestIds || requestIds.length === 0) {
-    alert("No valid requests available to send for sanction (must have optimized times)");
-    return;
-  }
+    if (!requestsToSanction || requestsToSanction.length === 0) {
+      alert("No valid requests available to send for sanction");
+      return;
+    }
 
-  if (confirm(`Are you sure you want to send ${requestIds.length} request(s) for sanction?`)) {
-    updateSanctionStatus.mutate(requestIds);
-  }
-};
+    if (confirm(`Send ${requestsToSanction.length} request(s) for sanction?`)) {
+      updateSanctionStatus.mutate(requestsToSanction);
+    }
+  };
 
   // Mutation for updating optimized times
   const updateOptimizedTimes = useMutation({
@@ -152,6 +162,41 @@ const handleSendClick = () => {
     setTimeFrom("");
     setTimeTo("");
   };
+
+  // Add this with your other mutations
+ const deleteRequestMutation = useMutation({
+  mutationFn: (requestId: string) => adminService.deleteRequest(requestId),
+  onMutate: (requestId) => {
+    setDeletingIds(prev => new Set(prev).add(requestId));
+  },
+  onSuccess: (_, requestId) => {
+    queryClient.invalidateQueries({
+      queryKey: ["approved-requests", page, currentWeekStart],
+    });
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+    setDeletingIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(requestId);
+      return newSet;
+    });
+  },
+  onError: (error, requestId) => {
+    console.error("Error deleting request:", error);
+    alert("Failed to delete request. Please try again.");
+    setDeletingIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(requestId);
+      return newSet;
+    });
+  },
+});
+
+const handleDelete = (requestId: string) => {
+  if (confirm("Are you sure you want to delete this request?")) {
+    deleteRequestMutation.mutate(requestId);
+  }
+};
 
   const handleUpdateClick = (requestId: string) => {
     if (!timeFrom || !timeTo) {
@@ -321,6 +366,16 @@ const handleSendClick = () => {
                           className="w-20 border p-1 text-sm"
                         />
                       </div>
+                    ) : request.isSanctioned ? (
+                      <>
+                        {request?.optimizeTimeFrom
+                          ? formatTime(request?.optimizeTimeFrom)
+                          : "N/A"}{" "}
+                        -{" "}
+                        {request?.optimizeTimeTo
+                          ? formatTime(request?.optimizeTimeTo)
+                          : "N/A"}
+                      </>
                     ) : (
                       <>
                         {request.optimizeData?.optimizeTimeFrom
@@ -387,6 +442,15 @@ const handleSendClick = () => {
                           >
                             View
                           </Link>
+                          <button
+                            onClick={() => handleDelete(request.id)}
+                            className="px-2 py-1 text-xs bg-red-500 text-white border border-black"
+                            disabled={deletingIds.has(request.id)}
+                          >
+                            {deletingIds.has(request.id)
+                              ? "Deleting..."
+                              : "Delete"}
+                          </button>
                         </>
                       )}
                     </div>

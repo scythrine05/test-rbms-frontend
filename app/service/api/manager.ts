@@ -33,6 +33,8 @@ export interface UsersResponse {
 }
 
 export interface UserRequest {
+    sanctionedTimeTo: any;
+    sanctionedTimeFrom: any;
     optimizeData: any;
     availedResponse: string;
     reasonFroReject: string;

@@ -115,10 +115,21 @@ updateUserResponse: async (requestId: string, userResponse:string,reason:string)
   }
 },
 
-updateSanctionStatus: (requestIds: string[]) => {
-  return axiosInstance.post("/api/user-request/updateSanctionStatus", { requestIds });
+updateSanctionStatus: async (requests:any) => {
+  try {
+    const response = await axiosInstance.post("/api/user-request/updateSanctionStatus", 
+      { requests } // Send as { requests: [...] }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error in updateSanctionStatus:', error);
+    throw error;
+  }
 },
-
+// In your adminService.ts
+deleteRequest: async (requestId: string) => {
+  return axiosInstance.delete(`/api/user-request/delet-optimiseData/${requestId}`);
+},
 
 // In your adminService
 updateOptimizeTimes: async (data: {

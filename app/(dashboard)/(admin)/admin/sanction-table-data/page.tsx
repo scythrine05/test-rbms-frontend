@@ -148,8 +148,8 @@ export default function OptimiseTablePage() {
                     {request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
-                    {request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : "N/A"} -{" "}
-                    {request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : "N/A"}
+                    {request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A"} -{" "}
+                    {request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.workType}
