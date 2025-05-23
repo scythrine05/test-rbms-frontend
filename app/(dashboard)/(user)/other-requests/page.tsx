@@ -113,11 +113,11 @@ export default function OtherRequestsPage() {
   const selectedDepo = session?.user?.depot || "";
 
   // Calculate week range
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : endOfWeek(currentWeekStart, { weekStartsOn: 1 });
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
 
   // Get other requests data
@@ -127,8 +127,8 @@ export default function OtherRequestsPage() {
     error,
     refetch
   } = useGetOtherRequests(
-    selectedDepo, 
-    currentPage, 
+    selectedDepo,
+    currentPage,
     pageSize,
     format(weekStart, "yyyy-MM-dd"),
     format(weekEnd, "yyyy-MM-dd")
@@ -138,14 +138,29 @@ export default function OtherRequestsPage() {
   const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
 
   // Handle week change
-  const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) =>
-      direction === "prev" 
-        ? subDays(prev, isUrgentMode ? 1 : 7) 
-        : addDays(prev, isUrgentMode ? 1 : 7)
-    );
-    setCurrentPage(1); // Reset to first page when changing weeks
+  const goToPreviousPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return subDays(prevDate, 1);
+      }
+      // For weekly view, go back 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return subDays(weekStart, 7);
+    });
   };
+
+  // Function to navigate to next period
+  const goToNextPeriod = () => {
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        return addDays(prevDate, 1);
+      }
+      // For weekly view, go forward 7 days from the start of the current week
+      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
+      return addDays(weekStart, 7);
+    });
+  };
+
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -230,9 +245,14 @@ export default function OtherRequestsPage() {
         <h1 className="text-lg font-bold text-[#13529e]">Other Requests</h1>
         <WeeklySwitcher
           currentWeekStart={currentWeekStart}
-          onWeekChange={handleWeekChange}
+          onWeekChange={(direction) => {
+            if (direction === "prev") {
+              goToPreviousPeriod();
+            } else {
+              goToNextPeriod();
+            }
+          }}
           isUrgentMode={isUrgentMode}
-          weekStartsOn={1} // Monday
         />
       </div>
 
@@ -412,7 +432,7 @@ export default function OtherRequestsPage() {
       )}
 
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1">
-        © {new Date().getFullYear()} Indian Railways. All Rights Reserved. 
+        © {new Date().getFullYear()} Indian Railways. All Rights Reserved.
       </div>
     </div>
   );
