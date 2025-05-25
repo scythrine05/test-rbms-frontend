@@ -3399,439 +3399,562 @@ export let Activity = {
 
 
 export let streamData = {
-  "MAS-YD": { "up": [], "down": [], "both": ["Rd 1", "Rd 2", "Rd 2A", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11"] },
-  "AJJ-YD": { "up": [], "down": [], "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 1A", "Rd 10", "Rd 11"] },
-  "KBT-YD": { "up": ["Rd 3", "Rd 6"], "down": ["Rd 1", "Rd 2", "Rd 5"], "both": ["Rd 4"] },
-  "TO-YD": { "up": ["Rd 3", "Rd 6", "Rd 7"], "down": ["Rd 2", "Rd 5"], "both": ["Rd 1", "Rd 4"] },
-  "CTRE-YD": { "up": ["Rd 3"], "down": ["Rd 1", "Rd 2"], "both": ["Rd 4"] },
-  "AJJN-YD": { "up": [], "down": [], "both": ["Rd 1", "Rd 2", "Rd 3"] },
-  "MLPM-YD": { "up": [], "down": [], "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"] },
-  "MASS-YD": { "up": [], "down": [], "both": ["Rd 12", "Rd 13", "Rd 14", "Rd 15", "Rd 16"] },
-  "BBQ-YD": { "up": ["Rd 2", "Rd 4"], "down": ["Rd 1", "Rd 3"], "both": ["Rd 5", "Rd 6", "Rd 7"] },
-  "VPY-YD": { "up": ["Rd 1", "Rd 2"], "down": ["Rd 3", "Rd 4"], "both": [] },
-  "VLK-YD": { "up": ["Rd 2", "Rd 4"], "down": ["Rd 3"], "both": ["Rd 1"] },
-  "ABU-YD": { "up": ["Rd 3", "Rd 4", "Rd 6"], "down": ["Rd 2", "Rd 5"], "both": ["Rd 1", "Rd 7"] },
+  "MAS-YD": {
+    "Up Direction Affected": [], "Down Direction Affected": [], "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 2A", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11"],
+    "Both Direction Not Affected": []
+  },
+  "AJJ-YD": {
+    "Up Direction Affected": [], "Down Direction Affected": [], "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 1A", "Rd 10", "Rd 11"],
+    "Both Direction Not Affected": []
+  },
+  "KBT-YD": {
+    "Up Direction Affected": ["Rd 3", "Rd 6"], "Down Direction Affected": ["Rd 1", "Rd 2", "Rd 5"], "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
+  },
+  "TO-YD": {
+    "Up Direction Affected": ["Rd 3", "Rd 6", "Rd 7"], "Down Direction Affected": ["Rd 2", "Rd 5"], "Both Direction Affected": ["Rd 1", "Rd 4"],
+    "Both Direction Not Affected": []
+  },
+  "CTRE-YD": {
+    "Up Direction Affected": ["Rd 3"], "Down Direction Affected": ["Rd 1", "Rd 2"], "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
+  },
+  "AJJN-YD": {
+    "Up Direction Affected": [], "Down Direction Affected": [], "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
+  },
+  "MLPM-YD": {
+    "Up Direction Affected": [], "Down Direction Affected": [], "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "Both Direction Not Affected": []
+  },
+  "MASS-YD": {
+    "Up Direction Affected": [], "Down Direction Affected": [], "Both Direction Affected": ["Rd 12", "Rd 13", "Rd 14", "Rd 15", "Rd 16"],
+    "Both Direction Not Affected": []
+  },
+  "BBQ-YD": {
+    "Up Direction Affected": ["Rd 2", "Rd 4"], "Down Direction Affected": ["Rd 1", "Rd 3"], "Both Direction Affected": ["Rd 5", "Rd 6", "Rd 7"],
+    "Both Direction Not Affected": []
+  },
+  "VPY-YD": {
+    "Up Direction Affected": ["Rd 1", "Rd 2"], "Down Direction Affected": ["Rd 3", "Rd 4"], "Both Direction Affected": [],
+    "Both Direction Not Affected": []
+  },
+  "VLK-YD": {
+    "Up Direction Affected": ["Rd 2", "Rd 4"], "Down Direction Affected": ["Rd 3"], "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
+  },
+  "ABU-YD": {
+    "Up Direction Affected": ["Rd 3", "Rd 4", "Rd 6"], "Down Direction Affected": ["Rd 2", "Rd 5"], "Both Direction Affected": ["Rd 1", "Rd 7"],
+    "Both Direction Not Affected": []
+  },
   "AVD-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "PAB-YD": {
-    "up": ["Rd 2", "Rd 4"],
-    "down": ["Rd 1", "Rd 3"],
-    "both": ["Rd 5"]
+    "Up Direction Affected": ["Rd 2", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 3"],
+    "Both Direction Affected": ["Rd 5"],
+    "Both Direction Not Affected": []
   },
   "PTMS-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   },
   "TI-YD": {
-    "up": ["Rd 3", "Rd 6", "Rd 7"],
-    "down": ["Rd 1", "Rd 2", "Rd 5"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3", "Rd 6", "Rd 7"],
+    "Down Direction Affected": ["Rd 1", "Rd 2", "Rd 5"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "TRL-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6"],
+    "Both Direction Not Affected": []
   },
   "MDVE-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "SHU-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "TUG-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "WJR-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 3"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 3"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "MCN-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4", "Rd 5", "Rd 6"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4", "Rd 5", "Rd 6"],
+    "Both Direction Not Affected": []
   },
   "THL-YD": {
-    "up": ["Rd 1"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 1"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "SVUR-YD": {
-    "up": ["Rd 4", "Rd 5"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 3"]
+    "Up Direction Affected": ["Rd 4", "Rd 5"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 3"],
+    "Both Direction Not Affected": []
   },
   "KPD-YD": {
-    "up": ["Rd 4"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10"]
+    "Up Direction Affected": ["Rd 4"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10"],
+    "Both Direction Not Affected": []
   },
   "LTI-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "KVN-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "GYM-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
-   "VLT-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+  "VLT-YD": {
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "MPI-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "PCKM-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 3"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 3"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "AB-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "VGM-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "VN-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "KDY-YD": {
-    "up": ["Rd 1"],
-    "down": ["Rd 2", "Rd 3"],
-    "both": []
+    "Up Direction Affected": ["Rd 1"],
+    "Down Direction Affected": ["Rd 2", "Rd 3"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "JTJ-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11", "Rd 12", "Rd 13", "Rd 14"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11", "Rd 12", "Rd 13", "Rd 14"],
+    "Both Direction Not Affected": []
   },
   "KOK-YD": {
-    "up": ["Rd 1", "Rd 3", "Rd 5"],
-    "down": ["Rd 2", "Rd 4", "Rd 6"],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 3", "Rd 5"],
+    "Down Direction Affected": ["Rd 2", "Rd 4", "Rd 6"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "TNP-YD": {
-    "up": ["Rd 1", "Rd 3", "Rd 5"],
-    "down": ["Rd 2", "Rd 4", "Rd 6"],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 3", "Rd 5"],
+    "Down Direction Affected": ["Rd 2", "Rd 4", "Rd 6"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "TVT-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3"],
-    "both": ["Rd 1A", "Rd 1", "Rd 4", "Rd 5"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3"],
+    "Both Direction Affected": ["Rd 1A", "Rd 1", "Rd 4", "Rd 5"],
+    "Both Direction Not Affected": []
   },
   "ENR-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1", "Rd 4", "Rd 5", "Rd 6", "Rd 7"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1", "Rd 4", "Rd 5", "Rd 6", "Rd 7"],
+    "Both Direction Not Affected": []
   },
   "AIPP-YD": {
-    "up": ["Rd 2", "Rd 4"],
-    "down": ["Rd 1", "Rd 3"],
-    "both": []
+    "Up Direction Affected": ["Rd 2", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 3"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "AIP-YD": {
-    "up": ["Rd 2", "Rd 4"],
-    "down": ["Rd 1", "Rd 3"],
-    "both": ["Rd 5", "Rd 6"]
+    "Up Direction Affected": ["Rd 2", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 3"],
+    "Both Direction Affected": ["Rd 5", "Rd 6"],
+    "Both Direction Not Affected": []
   },
   "MJR-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "PON-YD": {
-    "up": ["Rd 4", "Rd 5"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 3"]
+    "Up Direction Affected": ["Rd 4", "Rd 5"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 3"],
+    "Both Direction Not Affected": []
   },
   "KVP-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": []
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "GPD-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 3"],
-    "both": ["Rd 4", "Rd 5", "Rd 6"]
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 3"],
+    "Both Direction Affected": ["Rd 4", "Rd 5", "Rd 6"],
+    "Both Direction Not Affected": []
   },
   "ELR-YD": {
-    "up": ["Rd 1", "Rd 2", "Rd 3"],
-    "down": ["Rd 4", "Rd 5", "Rd 6"],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Down Direction Affected": ["Rd 4", "Rd 5", "Rd 6"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "AKM-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": []
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "TAD-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "SPE-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "PEL-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": []
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "DVR-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "NYP-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "PYA-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "ODR-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "WST-YD": {
-    "up": ["Rd 2", "Rd 4"],
-    "down": ["Rd 1", "Rd 3"],
-    "both": []
+    "Up Direction Affected": ["Rd 2", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 3"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "RPM-YD": {
-    "up": ["Rd 3", "Rd 5"],
-    "down": ["Rd 2", "Rd 4", "Rd 6"],
-    "both": ["Rd 1", "Rd 7", "Rd 8"]
+    "Up Direction Affected": ["Rd 3", "Rd 5"],
+    "Down Direction Affected": ["Rd 2", "Rd 4", "Rd 6"],
+    "Both Direction Affected": ["Rd 1", "Rd 7", "Rd 8"],
+    "Both Direction Not Affected": []
   },
   "MSB-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9"],
+    "Both Direction Not Affected": []
   },
   "MPK-YD": {
-    "up": [],
-    "down": ["Rd 2"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "MS-YD": {
-    "up": [],
-    "down": ["Rd 10"],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 11"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": ["Rd 10"],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 11"],
+    "Both Direction Not Affected": []
   },
   "MKK-YD": {
-    "up": ["Rd 5"],
-    "down": ["Rd 4"],
-    "both": ["Rd 1", "Rd 2", "Rd 3"]
+    "Up Direction Affected": ["Rd 5"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "STM-YD": {
-    "up": ["Rd 5"],
-    "down": ["Rd 4"],
-    "both": ["Rd 1", "Rd 2", "Rd 3"]
+    "Up Direction Affected": ["Rd 5"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "PV-YD": {
-    "up": ["Rd 5"],
-    "down": ["Rd 4"],
-    "both": ["Rd 1", "Rd 2", "Rd 3"]
+    "Up Direction Affected": ["Rd 5"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "TBM-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9", "Rd 10", "Rd 11"],
+    "Both Direction Not Affected": []
   },
   "VDR-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 4"],
-    "both": ["Rd 1", "Rd 3"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 1", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "GI-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2", "Rd 4", "Rd 5"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2", "Rd 4", "Rd 5"],
+    "Both Direction Not Affected": []
   },
   "CTM-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1", "Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1", "Rd 4"],
+    "Both Direction Not Affected": []
   },
   "SKL-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 2"],
-    "both": ["Rd 1", "Rd 4", "Rd 5"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 2"],
+    "Both Direction Affected": ["Rd 1", "Rd 4", "Rd 5"],
+    "Both Direction Not Affected": []
   },
   "CGL-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8"],
+    "Both Direction Not Affected": []
   },
   "OV-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "KGZ-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "MMK-YD": {
-    "up": ["Rd 2", "Rd 4"],
-    "down": ["Rd 3"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2", "Rd 4"],
+    "Down Direction Affected": ["Rd 3"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "MLMR-YD": {
-    "up": ["Rd 1"],
-    "down": [],
-    "both": ["Rd 2", "Rd 3", "Rd 4"]
+    "Up Direction Affected": ["Rd 1"],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 2", "Rd 3", "Rd 4"],
+    "Both Direction Not Affected": []
   },
   "TZD-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "OLA-YD": {
-    "up": ["Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 3"]
+    "Up Direction Affected": ["Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 3"],
+    "Both Direction Not Affected": []
   },
   "TMV-YD": {
-    "up": ["Rd 3"],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   },
   "MTL-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": []
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "PEI-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 3", "Rd 4"],
-    "both": ["Rd 1"]
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 3", "Rd 4"],
+    "Both Direction Affected": ["Rd 1"],
+    "Both Direction Not Affected": []
   },
   "VVN-YD": {
-    "up": ["Rd 3"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": ["Rd 4"]
+    "Up Direction Affected": ["Rd 3"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": ["Rd 4"],
+    "Both Direction Not Affected": []
   },
   "MYP-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5"],
+    "Both Direction Not Affected": []
   },
   "TRT-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "POI-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 4"],
-    "both": ["Rd 3"]
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 3"],
+    "Both Direction Not Affected": []
   },
   "NG-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": ["Rd 4"],
-    "both": ["Rd 3"]
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": ["Rd 4"],
+    "Both Direction Affected": ["Rd 3"],
+    "Both Direction Not Affected": []
   },
   "VGA-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "PUT-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "TDK-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1", "Rd 2"],
-    "both": []
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "SVF-YD": {
-    "up": ["Rd 1", "Rd 2"],
-    "down": [],
-    "both": []
+    "Up Direction Affected": ["Rd 1", "Rd 2"],
+    "Down Direction Affected": [],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "PUDI-YD": {
-    "up": ["Rd 3", "Rd 4"],
-    "down": ["Rd 1"],
-    "both": ["Rd 2"]
+    "Up Direction Affected": ["Rd 3", "Rd 4"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": ["Rd 2"],
+    "Both Direction Not Affected": []
   },
   "PALR-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   },
   "WJ-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   },
   "CJ(E)-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "CJ(O)-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2", "Rd 3"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "Both Direction Not Affected": []
   },
   "TMLP-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   },
   "MCPK-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 1"],
-    "both": []
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "MTMY-YD": {
-    "up": ["Rd 2"],
-    "down": ["Rd 1"],
-    "both": []
+    "Up Direction Affected": ["Rd 2"],
+    "Down Direction Affected": ["Rd 1"],
+    "Both Direction Affected": [],
+    "Both Direction Not Affected": []
   },
   "VLCY-YD": {
-    "up": [],
-    "down": [],
-    "both": ["Rd 1", "Rd 2"]
+    "Up Direction Affected": [],
+    "Down Direction Affected": [],
+    "Both Direction Affected": ["Rd 1", "Rd 2"],
+    "Both Direction Not Affected": []
   }
 };
+
+
+
 
 
 
