@@ -4056,7 +4056,7 @@ export let lineData = {
   'KBT-TO': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
   'TO-AJJ': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
   'MAS-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
-  'BBQ-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast],
+  'BBQ-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
   'MASS-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
   'MMCC-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
   'VPY-YD': ['Up slow', 'Down slow', 'Up fast', 'Down fast'],
