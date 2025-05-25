@@ -3296,7 +3296,7 @@ export let blockSection = {
 
 
 export let workType = {
-  'S&T': ['Gear', 'Tw', 'Lt'],
+  'S&T': ['Gear'],
   'ENGG': ['Machine', 'Non-Machine'],
   'TRD': ['Tw', 'Lt'],
 };

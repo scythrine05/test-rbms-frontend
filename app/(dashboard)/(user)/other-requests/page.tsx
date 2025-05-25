@@ -292,6 +292,12 @@ export default function OtherRequestsPage() {
     );
   };
 
+  // Add this function to handle "View Details"
+  const handleViewDetails = (request: any) => {
+    // Example: Navigate to a details page using the request id
+    router.push(`/dashboard/other-requests/${request.id}`);
+  };
+
   if (isLoading) {
     return <Loader name="other requests" />;
   }
