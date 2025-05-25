@@ -4232,7 +4232,7 @@ export let lineData = {
   'PYA-ODR': ['UP line', 'Down line'],
   'ODR-GDR': ['UP line', 'Down line'],
   'MMC-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
-  'MAS-YD': [['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
+  'MAS-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
   'KOK-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
   'TNP-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
   'TVT-YD': ['UP slow', 'Down Slow', 'UP fast', 'Down Fast'],
