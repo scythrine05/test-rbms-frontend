@@ -7,6 +7,81 @@ import { addDays, endOfWeek, format, parseISO, startOfWeek, subDays } from "date
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 
+// Header icons for tables
+const HeaderIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case "id":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M5.5 9.5A2.5 2.5 0 018 12V8.5H5.5v1zm0 0V8.5H8V12a2.5 2.5 0 01-2.5-2.5zM12 12v-1.5h-1.5V12H12zm-1.5-3V12H12V9h-1.5zm3.5.5v1h1.5V8h-5v1.5h2V12h1.5V9.5h1z" clipRule="evenodd" />
+        </svg>
+      );
+    case "date":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+        </svg>
+      );
+    case "section":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      );
+    case "time":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+        </svg>
+      );
+    case "work":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
+          <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
+        </svg>
+      );
+    case "disconnection":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+        </svg>
+      );
+    case "status":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+      );
+    case "corridor":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+        </svg>
+      );
+    case "action":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+// Column header component
+const ColumnHeader = ({ icon, title, showFilter = false }: { icon: string; title: string; showFilter?: boolean }) => {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center">
+        <HeaderIcon type={icon} />
+        <span>{title}</span>
+      </div>
+    </div>
+  );
+};
+
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
   const { isUrgentMode } = useUrgentMode();
@@ -16,8 +91,8 @@ export default function OptimiseTablePage() {
     if (isUrgentMode) {
       return today;
     }
-    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
-    return startOfWeek(lastSaturday, { weekStartsOn: 6 });
+    // Start from Monday of current week
+    return startOfWeek(today, { weekStartsOn: 1 });
   });
   const [notAvailedData, setNotAvailedData] = useState({
     showModal: false,
@@ -26,12 +101,18 @@ export default function OptimiseTablePage() {
   });
 
   const limit = 30;
-  const weekEnd = isUrgentMode
-    ? currentWeekStart
-    : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekStart = isUrgentMode
-    ? currentWeekStart
-    : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // For urgent mode, use the same day for start and end
+  // For non-urgent mode, use Monday to Sunday
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday)
+
+  // Add debug logging for date range
+  console.log('Date Range:', format(weekStart, "yyyy-MM-dd"), 'to', format(weekEnd, "yyyy-MM-dd"));
+  console.log('Is Urgent Mode:', isUrgentMode);
 
   // Fetch user requests
   const { data, isLoading, error } = useQuery({
@@ -67,29 +148,35 @@ export default function OptimiseTablePage() {
     },
   });
 
+  // Function to navigate to previous period (day for urgent, week for non-urgent)
   const goToPreviousPeriod = () => {
     setCurrentWeekStart((prevDate) => {
       if (isUrgentMode) {
+        // In urgent mode, just go to previous day
         return subDays(prevDate, 1);
+      } else {
+        // In non-urgent mode, go to previous week
+        // Ensure we're starting from Monday
+        const monday = startOfWeek(prevDate, { weekStartsOn: 1 });
+        return subDays(monday, 7);
       }
-      // For weekly view, go back 7 days from the start of the current week
-      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
-      return subDays(weekStart, 7);
     });
   };
 
-  // Function to navigate to next period
+  // Function to navigate to next period (day for urgent, week for non-urgent)
   const goToNextPeriod = () => {
     setCurrentWeekStart((prevDate) => {
       if (isUrgentMode) {
+        // In urgent mode, just go to next day
         return addDays(prevDate, 1);
+      } else {
+        // In non-urgent mode, go to next week
+        // Ensure we're starting from Monday
+        const monday = startOfWeek(prevDate, { weekStartsOn: 1 });
+        return addDays(monday, 7);
       }
-      // For weekly view, go forward 7 days from the start of the current week
-      const weekStart = startOfWeek(prevDate, { weekStartsOn: 1 });
-      return addDays(weekStart, 7);
     });
   };
-
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -191,36 +278,36 @@ export default function OptimiseTablePage() {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-black">
           <thead>
-            <tr className="bg-gray-50">
+            <tr className="bg-gray-100">
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Date
+                <ColumnHeader icon="date" title="Date" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Major Section
+                <ColumnHeader icon="section" title="Major Section" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Depot
+                <ColumnHeader icon="section" title="Depot" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Block Section
+                <ColumnHeader icon="section" title="Block Section" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Line
+                <ColumnHeader icon="section" title="Line" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Optimized Time
+                <ColumnHeader icon="time" title="Optimized Time" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Work Type
+                <ColumnHeader icon="work" title="Work Type" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Activity
+                <ColumnHeader icon="work" title="Activity" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                Corridor Type
+                <ColumnHeader icon="corridor" title="Corridor Type" />
               </th>
               <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                User Response
+                <ColumnHeader icon="status" title="User Response" />
               </th>
             </tr>
           </thead>
@@ -261,10 +348,20 @@ export default function OptimiseTablePage() {
                   </td>
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse ? (
-                      <span className={`px-2 py-1 text-xs rounded ${request.userResponse === "availed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                      <span className={`px-2 py-1 text-xs rounded border ${request.userResponse === "availed"
+                          ? "bg-green-100 text-green-800 border-green-800"
+                          : "bg-red-100 text-red-800 border-red-800"
                         }`}>
+                        {request.userResponse === "availed" && (
+                          <svg className="w-3 h-3 mr-1 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        {request.userResponse !== "availed" && (
+                          <svg className="w-3 h-3 mr-1 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        )}
                         {request.userResponse === "availed" ? "Availed" : "Not Availed"}
                         {request.notAvailedReason && request.userResponse === "not availed" && (
                           <div className="text-xs mt-1 text-gray-600">
@@ -277,8 +374,11 @@ export default function OptimiseTablePage() {
                         <button
                           onClick={() => handleAvailed(request.id)}
                           disabled={updateUserResponse.isPending}
-                          className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 disabled:opacity-50"
+                          className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 disabled:opacity-50 border border-green-700 flex items-center"
                         >
+                          <svg className="w-2 h-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
                           {updateUserResponse.variables?.requestId === request.id &&
                             updateUserResponse.variables?.userResponse === "availed"
                             ? "Processing..."
@@ -287,8 +387,11 @@ export default function OptimiseTablePage() {
                         <button
                           onClick={() => handleNotAvailedClick(request.id)}
                           disabled={updateUserResponse.isPending}
-                          className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 disabled:opacity-50"
+                          className="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 disabled:opacity-50 border border-red-700 flex items-center"
                         >
+                          <svg className="w-2 h-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
                           {updateUserResponse.variables?.requestId === request.id &&
                             updateUserResponse.variables?.userResponse === "not availed"
                             ? "Processing..."

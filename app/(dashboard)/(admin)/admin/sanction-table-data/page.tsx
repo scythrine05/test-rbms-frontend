@@ -20,13 +20,25 @@ export default function OptimiseTablePage() {
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
-    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
-    return startOfWeek(lastSaturday, { weekStartsOn: 6 });
+    if (isUrgentMode) {
+      return today;
+    }
+    // Start from Monday of current week
+    return startOfWeek(today, { weekStartsOn: 1 });
   });
 
-  // Calculate week range
-  const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // For urgent mode, use the same day for start and end
+  // For non-urgent mode, use Monday to Sunday
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday）
+
+  // Add debug logging for date range
+  console.log('Date Range:', format(weekStart, "yyyy-MM-dd"), 'to', format(weekEnd, "yyyy-MM-dd"));
+  console.log('Is Urgent Mode:', isUrgentMode);
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
@@ -56,7 +68,7 @@ export default function OptimiseTablePage() {
     try {
       return format(parseISO(dateString), "dd-MM-yyyy");
     } catch {
-      return "Invalid date";
+      return dateString;
     }
   };
 
@@ -68,9 +80,20 @@ export default function OptimiseTablePage() {
     }
   };
 
+  // Function to navigate to previous or next period (day for urgent, week for non-urgent)
   const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart(prev => direction === "prev" ? subDays(prev, 7) : addDays(prev, 7));
-    setPage(1);
+    setCurrentWeekStart((prevDate) => {
+      if (isUrgentMode) {
+        // In urgent mode, navigate by day
+        return direction === "prev" ? subDays(prevDate, 1) : addDays(prevDate, 1);
+      } else {
+        // In non-urgent mode, navigate by week
+        // Ensure we're starting from Monday
+        const monday = startOfWeek(prevDate, { weekStartsOn: 1 });
+        return direction === "prev" ? subDays(monday, 7) : addDays(monday, 7);
+      }
+    });
+    setPage(1); // Reset to first page when changing periods
   };
 
   if (isLoading) {

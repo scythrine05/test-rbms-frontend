@@ -3169,7 +3169,7 @@ export let blockSection = {
     "NGT-VLNK", "NGT-YD", "VLNK-YD"
   ],
   'TVR- KKDI': [
-    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT", 
+    "TVR-TNK", "TNK-TTP", "TTP-AMM", "AMM-PKT",
     "PKT-PVI", "PVI-AYI", "AYI-ATQ", "ATQ-PYK", "PYK-KKDI", "TVR-YD", "TNK-YD", "TTP-YD", "TAM-YD",
     "AMM-YD", "PKT-YD", "PVI-YD", "AYI-YD", "ATQ-YD", "PYK-YD", "KKDI-YD"
   ],
@@ -3949,7 +3949,7 @@ export const streamData = {
     "both direction not affected": []
   },
 
-"MDKI-YD": {
+  "MDKI-YD": {
     "up direction affected": [],
     "down direction affected": [],
     "both direction affected": ["Rd 1", "Rd 2", "Rd 3", "Rd 4", "Rd 5", "Rd 6", "Rd 7", "Rd 8", "Rd 9"],
@@ -4979,7 +4979,7 @@ export let lineData = {
 
   // POY-CNV Section
   "POY-CNV": ["Single"],
-    // JTJ-ED Section
+  // JTJ-ED Section
   "JTJ-TPT": ["UP", "DN"],
   "TPT-KEY": ["UP", "DN"],
   "KEY-SLY": ["UP", "DN"],
@@ -5235,7 +5235,7 @@ export let lineData = {
   // "VEI-PALM": ["Single"],
   // "PALM-EDU": ["Single"],
   // "EDU-DG": ["Single"],
-  
+
   // KRR-DG Section (Yard Connections)
   // "KRR-YD": ["Single"],
   // "VEI-YD": ["Single"],
@@ -5322,10 +5322,17 @@ export let lineData = {
 
 
 export const depot: DepotStructure = {
+  // TEST
+  "MAS-GDR": {
+    'ENGG': ["TPJ", "LLI", "ALU", "A/VRI"],
+    'S&T': ["TPJ", "ALU", "VRI", "VM"],
+    'TRD': ["RRI", "Lines", "VRI/A", "VRI/B", "VM"]
+  },
+
   "TPJ-VM": {
-    'ENGG': ["TPJ","LLI","ALU","A/VRI"],
-    'S&T': ["TPJ", "ALU","VRI","VM"],
-    'TRD': ["RRI","Lines","VRI/A","VRI/B","VM"]
+    'ENGG': ["TPJ", "LLI", "ALU", "A/VRI"],
+    'S&T': ["TPJ", "ALU", "VRI", "VM"],
+    'TRD': ["RRI", "Lines", "VRI/A", "VRI/B", "VM"]
   },
 
   "VM-MV": {
@@ -5389,7 +5396,7 @@ export const depot: DepotStructure = {
   },
 
   "TVR- KKDI": {
-    'TRD': ["TVR","PKT"],
+    'TRD': ["TVR", "PKT"],
     'S&T': ["TVR"],
     'ENGG': ["PKT", "TTP", "B/TVR"]
   },
@@ -5399,7 +5406,7 @@ export const depot: DepotStructure = {
     'S&T': ["TVR"],
     'ENGG': ["TTP"]
   },
-"PTJ-SRR": {
+  "PTJ-SRR": {
     'ENGG': ["PTJ/W", "PGT/E", "PGT/W", "SRR"],
     'S&T': ["PGT", "SRR"],
     'TRD': ["PGT", "SRR"]
@@ -5545,10 +5552,13 @@ export const depotOnLocation = {
     "CS", "CHV", "ULL", "MAQ", "PAY", "KGQ", "NIL", "AAM", "POY",
     "PGTN", "KLGD"
   ],
-   "SA": [
-    "SA", "ED", "BQI", "SLY", "MAP", "TPT", "N/SA", "S/SA", "TUP", "CBE", "E/PTJ", 
-    "KMD", "PLI", "TP", "W/KRR", "KRR", "KRR/E", "CHSM", "VRI", "ATU", "MTDM", 
+  "SA": [
+    "SA", "ED", "BQI", "SLY", "MAP", "TPT", "N/SA", "S/SA", "TUP", "CBE", "E/PTJ",
+    "KMD", "PLI", "TP", "W/KRR", "KRR", "KRR/E", "CHSM", "VRI", "ATU", "MTDM",
     "NMKL", "KRR", "PTJ", "CBF", "ONR"
+  ],
+  "MAS": [
+    "MAS", "AJJ", "AJJN", "AJP"
   ]
 }
 
