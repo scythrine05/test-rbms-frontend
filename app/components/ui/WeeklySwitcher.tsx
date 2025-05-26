@@ -1,4 +1,4 @@
-import { format, endOfWeek, Day } from "date-fns";
+import { format, endOfWeek, startOfWeek, Day } from "date-fns";
 
 interface PeriodSwitcherProps {
   currentWeekStart: Date;
@@ -17,8 +17,10 @@ export function WeeklySwitcher({
     if (isUrgentMode) {
       return format(currentWeekStart, "dd-MM-yyyy");
     }
-    const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn });
-    return `${format(currentWeekStart, "dd-MM-yyyy")} to ${format(weekEnd, "dd-MM-yyyy")}`;
+    // In non-urgent mode, ensure we're using the start of the week
+    const weekStart = startOfWeek(currentWeekStart, { weekStartsOn });
+    const weekEnd = endOfWeek(weekStart, { weekStartsOn });
+    return `${format(weekStart, "dd-MM-yyyy")} to ${format(weekEnd, "dd-MM-yyyy")}`;
   };
 
   return (

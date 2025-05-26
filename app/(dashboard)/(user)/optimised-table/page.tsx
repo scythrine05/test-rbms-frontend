@@ -95,19 +95,25 @@ export default function OptimiseTablePage() {
     ? currentWeekStart 
     : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday)
 
+  // In urgent mode, we use the same date for both start and end dates
+  // This ensures we only get data for a single day in urgent mode
+  const apiStartDate = format(weekStart, "yyyy-MM-dd");
+  const apiEndDate = isUrgentMode ? apiStartDate : format(weekEnd, "yyyy-MM-dd");
+
   const { data, isLoading, error } = useQuery({
     queryKey: [
       "user-requests",
       page,
-      format(weekStart, "yyyy-MM-dd"),
-      format(weekEnd, "yyyy-MM-dd"),
+      apiStartDate,
+      apiEndDate,
+      isUrgentMode, // Add isUrgentMode to query key to refresh when mode changes
     ],
     queryFn: () =>
       adminService.getUserRequests(
         page,
         limit,
-        format(weekStart, "yyyy-MM-dd"),
-        format(weekEnd, "yyyy-MM-dd")
+        apiStartDate,
+        apiEndDate
       ),
   });
 
@@ -115,6 +121,10 @@ export default function OptimiseTablePage() {
   console.log('API Response:', data?.data.requests);
   console.log('Is Urgent Mode:', isUrgentMode);
   console.log('Date Range:', format(weekStart, "yyyy-MM-dd"), 'to', format(weekEnd, "yyyy-MM-dd"));
+  console.log('Current Date/Time:', new Date().toISOString());
+  console.log('Date Display:', isUrgentMode ? 
+    format(currentWeekStart, "dd-MM-yyyy") : 
+    `${format(weekStart, "dd-MM-yyyy")} to ${format(weekEnd, "dd-MM-yyyy")}`);
   console.log('Filtered Requests:', data?.data.requests?.filter((request: any) =>
     request.optimizeStatus === true &&
     (isUrgentMode ? request.corridorType === "Urgent Block" : request.corridorType !== "Urgent Block")
@@ -245,6 +255,7 @@ export default function OptimiseTablePage() {
               }
             }}
             isUrgentMode={isUrgentMode}
+            weekStartsOn={1}
           />
         </div>
       </div>

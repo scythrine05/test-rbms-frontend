@@ -32,17 +32,28 @@ export default function OptimiseTablePage() {
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
-  // Calculate week range
-  const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // Calculate date range based on urgent mode
+  // For urgent mode, use the same day for start and end
+  // For non-urgent mode, use week range (Saturday to Friday)
+  const weekStart = isUrgentMode 
+    ? currentWeekStart 
+    : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  const weekEnd = isUrgentMode 
+    ? currentWeekStart 
+    : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+
+  // In urgent mode, we use the same date for both start and end dates
+  // This ensures we only get data for a single day in urgent mode
+  const apiStartDate = format(weekStart, "yyyy-MM-dd");
+  const apiEndDate = isUrgentMode ? apiStartDate : format(weekEnd, "yyyy-MM-dd");
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, currentWeekStart, isUrgentMode],
+    queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
     queryFn: () =>
       adminService.getOptimizeRequests(
-        format(weekStart, "yyyy-MM-dd"),
-        format(weekEnd, "yyyy-MM-dd"),
+        apiStartDate,
+        apiEndDate,
         page
       ),
   });
@@ -146,10 +157,17 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
     }
   };
 
+  // Function to navigate to previous/next period (day for urgent, week for non-urgent)
   const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) =>
-      direction === "prev" ? subDays(prev, 7) : addDays(prev, 7)
-    );
+    setCurrentWeekStart((prev) => {
+      if (isUrgentMode) {
+        // In urgent mode, move by single days
+        return direction === "prev" ? subDays(prev, 1) : addDays(prev, 1);
+      } else {
+        // In non-urgent mode, move by weeks
+        return direction === "prev" ? subDays(prev, 7) : addDays(prev, 7);
+      }
+    });
     setPage(1);
   };
 
@@ -286,6 +304,7 @@ const handleDelete = (requestId: string) => {
         <WeeklySwitcher
           currentWeekStart={currentWeekStart}
           onWeekChange={handleWeekChange}
+          isUrgentMode={isUrgentMode}
           weekStartsOn={6} // Saturday
         />
       </div>

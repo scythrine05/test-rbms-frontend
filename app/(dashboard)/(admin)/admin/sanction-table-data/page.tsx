@@ -13,6 +13,7 @@ import {
 } from "date-fns";
 import { UserRequest } from "@/app/service/api/manager";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
@@ -20,33 +21,37 @@ export default function OptimiseTablePage() {
   const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
-    if (isUrgentMode) {
-      return today;
-    }
-    // Start from Monday of current week
-    return startOfWeek(today, { weekStartsOn: 1 });
+    // Calculate last Saturday as the start of the week, like in optimised-table-data
+    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
+    return startOfWeek(lastSaturday, { weekStartsOn: 6 });
   });
 
   // For urgent mode, use the same day for start and end
-  // For non-urgent mode, use Monday to Sunday
+  // For non-urgent mode, use Saturday to Friday (matching optimised-table-data)
   const weekStart = isUrgentMode 
     ? currentWeekStart 
-    : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
+    : startOfWeek(currentWeekStart, { weekStartsOn: 6 }); // Explicitly start from Saturday
   const weekEnd = isUrgentMode 
     ? currentWeekStart 
-    : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday）
+    : endOfWeek(weekStart, { weekStartsOn: 6 }); // Explicitly end on Friday
+
+  // In urgent mode, we use the same date for both start and end dates
+  // This ensures we only get data for a single day in urgent mode
+  const apiStartDate = format(weekStart, "yyyy-MM-dd");
+  const apiEndDate = isUrgentMode ? apiStartDate : format(weekEnd, "yyyy-MM-dd");
 
   // Add debug logging for date range
-  console.log('Date Range:', format(weekStart, "yyyy-MM-dd"), 'to', format(weekEnd, "yyyy-MM-dd"));
+  console.log('Date Range:', apiStartDate, 'to', apiEndDate);
   console.log('Is Urgent Mode:', isUrgentMode);
+  console.log('Current Date/Time:', new Date().toISOString());
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, currentWeekStart],
+    queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
     queryFn: () =>
       adminService.getOptimizeRequests(
-        format(weekStart, "yyyy-MM-dd"),
-        format(weekEnd, "yyyy-MM-dd"),
+        apiStartDate,
+        apiEndDate,
         page
       ),
   });
@@ -120,24 +125,18 @@ export default function OptimiseTablePage() {
     <div className="bg-white p-3 border border-black">
       {/* Header and week navigation */}
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">Sanctioned Requests</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleWeekChange("prev")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Previous Week
-          </button>
-          <span className="px-3 py-1 text-sm text-black">
-            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-bold text-[#13529e]">Sanctioned Requests</h1>
+          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
+            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
           </span>
-          <button
-            onClick={() => handleWeekChange("next")}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-          >
-            Next Week
-          </button>
         </div>
+        <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          isUrgentMode={isUrgentMode}
+          weekStartsOn={6}
+        />
       </div>
 
       <div className="overflow-x-auto">
