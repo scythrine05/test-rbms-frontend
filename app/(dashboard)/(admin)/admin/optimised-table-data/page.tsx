@@ -31,41 +31,48 @@ export default function OptimiseTablePage() {
   const [timeFrom, setTimeFrom] = useState("");
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   // Calculate date range based on urgent mode
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use week range (Saturday to Friday)
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
 
   // In urgent mode, we use the same date for both start and end dates
   // This ensures we only get data for a single day in urgent mode
   const apiStartDate = format(weekStart, "yyyy-MM-dd");
-  const apiEndDate = isUrgentMode ? apiStartDate : format(weekEnd, "yyyy-MM-dd");
+  const apiEndDate = isUrgentMode
+    ? apiStartDate
+    : format(weekEnd, "yyyy-MM-dd");
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
+    queryKey: [
+      "approved-requests",
+      page,
+      apiStartDate,
+      apiEndDate,
+      isUrgentMode,
+    ],
     queryFn: () =>
-      adminService.getOptimizeRequests(
-        apiStartDate,
-        apiEndDate,
-        page
-      ),
+      adminService.getOptimizeRequests(apiStartDate, apiEndDate, page),
   });
 
   // Filter requests based on urgent mode and optimization status
-  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const urgentMatch = isUrgentMode 
-      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-    
-    return urgentMatch && request.optimizeStatus === true;
-  }) || [];
+  const filteredRequests =
+    data?.data?.requests?.filter((request: UserRequest) => {
+      const urgentMatch = isUrgentMode
+        ? request.corridorType === "Urgent Block" ||
+          request.workType === "EMERGENCY"
+        : request.corridorType !== "Urgent Block" &&
+          request.workType !== "EMERGENCY";
+
+      return urgentMatch && request.optimizeStatus === true;
+    }) || [];
 
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
     null
@@ -126,10 +133,45 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
       optimizeTimeFrom: string;
       optimizeTimeTo: string;
     }) => adminService.updateOptimizeTimes(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Direct update of the query data to ensure UI reflects changes immediately
+      queryClient.setQueryData(
+        ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          const updatedRequests = oldData.data.requests.map((req: UserRequest) => {
+            if (req.id === response.data.id) {
+              // Update both direct properties and optimizeData object
+              return {
+                ...req,
+                optimizeTimeFrom: response.data.optimizeTimeFrom,
+                optimizeTimeTo: response.data.optimizeTimeTo,
+                optimizeData: {
+                  ...req.optimizeData,
+                  optimizeTimeFrom: response.data.optimizeTimeFrom,
+                  optimizeTimeTo: response.data.optimizeTimeTo
+                }
+              };
+            }
+            return req;
+          });
+          
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              requests: updatedRequests
+            }
+          };
+        }
+      );
+      
+      // Also invalidate queries to ensure data stays in sync
       queryClient.invalidateQueries({
-        queryKey: ["approved-requests", page, currentWeekStart],
+        queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
       });
+      
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
       setEditingId(null);
@@ -151,9 +193,17 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const formatTime = (dateString: string) => {
     try {
-      return format(parseISO(dateString), "HH:mm");
-    } catch {
-      return dateString;
+      // Parse the ISO string and get the hours and minutes
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+      
+      // Format as 24-hour time (HH:mm)
+      const hours = date.getUTCHours().toString().padStart(2, '0');
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error("Error formatting time:", error, dateString);
+      return "N/A";
     }
   };
 
@@ -176,12 +226,12 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
     setEditingId(request.id);
     setTimeFrom(
       request.optimizeData?.optimizeTimeFrom
-        ? format(parseISO(request.optimizeData.optimizeTimeFrom), "HH:mm")
+        ? formatTime(request.optimizeData.optimizeTimeFrom)
         : ""
     );
     setTimeTo(
       request.optimizeData?.optimizeTimeTo
-        ? format(parseISO(request.optimizeData.optimizeTimeTo), "HH:mm")
+        ? formatTime(request.optimizeData.optimizeTimeTo)
         : ""
     );
   };
@@ -193,39 +243,39 @@ const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   };
 
   // Add this with your other mutations
- const deleteRequestMutation = useMutation({
-  mutationFn: (requestId: string) => adminService.deleteRequest(requestId),
-  onMutate: (requestId) => {
-    setDeletingIds(prev => new Set(prev).add(requestId));
-  },
-  onSuccess: (_, requestId) => {
-    queryClient.invalidateQueries({
-      queryKey: ["approved-requests", page, currentWeekStart],
-    });
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-    setDeletingIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(requestId);
-      return newSet;
-    });
-  },
-  onError: (error, requestId) => {
-    console.error("Error deleting request:", error);
-    alert("Failed to delete request. Please try again.");
-    setDeletingIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(requestId);
-      return newSet;
-    });
-  },
-});
+  const deleteRequestMutation = useMutation({
+    mutationFn: (requestId: string) => adminService.deleteRequest(requestId),
+    onMutate: (requestId) => {
+      setDeletingIds((prev) => new Set(prev).add(requestId));
+    },
+    onSuccess: (_, requestId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["approved-requests", page, currentWeekStart],
+      });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(requestId);
+        return newSet;
+      });
+    },
+    onError: (error, requestId) => {
+      console.error("Error deleting request:", error);
+      alert("Failed to delete request. Please try again.");
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(requestId);
+        return newSet;
+      });
+    },
+  });
 
-const handleDelete = (requestId: string) => {
-  if (confirm("Are you sure you want to delete this request?")) {
-    deleteRequestMutation.mutate(requestId);
-  }
-};
+  const handleDelete = (requestId: string) => {
+    if (confirm("Are you sure you want to delete this request?")) {
+      deleteRequestMutation.mutate(requestId);
+    }
+  };
 
   const handleUpdateClick = (requestId: string) => {
     if (!timeFrom || !timeTo) {
@@ -240,10 +290,31 @@ const handleDelete = (requestId: string) => {
 
     try {
       const datePart = request.date.split("T")[0];
-      const optimizeTimeFrom = new Date(
-        `${datePart}T${timeFrom}:00`
-      ).toISOString();
-      const optimizeTimeTo = new Date(`${datePart}T${timeTo}:00`).toISOString();
+      // Create ISO strings preserving the exact time input by user
+      const [fromHours, fromMinutes] = timeFrom.split(':');
+      const [toHours, toMinutes] = timeTo.split(':');
+      
+      // Create date objects with UTC time to avoid timezone conversion issues
+      const fromDate = new Date();
+      fromDate.setUTCFullYear(parseInt(datePart.split('-')[0]));
+      fromDate.setUTCMonth(parseInt(datePart.split('-')[1]) - 1);
+      fromDate.setUTCDate(parseInt(datePart.split('-')[2]));
+      fromDate.setUTCHours(parseInt(fromHours));
+      fromDate.setUTCMinutes(parseInt(fromMinutes));
+      fromDate.setUTCSeconds(0);
+      fromDate.setUTCMilliseconds(0);
+      
+      const toDate = new Date();
+      toDate.setUTCFullYear(parseInt(datePart.split('-')[0]));
+      toDate.setUTCMonth(parseInt(datePart.split('-')[1]) - 1);
+      toDate.setUTCDate(parseInt(datePart.split('-')[2]));
+      toDate.setUTCHours(parseInt(toHours));
+      toDate.setUTCMinutes(parseInt(toMinutes));
+      toDate.setUTCSeconds(0);
+      toDate.setUTCMilliseconds(0);
+      
+      const optimizeTimeFrom = fromDate.toISOString();
+      const optimizeTimeTo = toDate.toISOString();
 
       if (isNaN(new Date(optimizeTimeFrom).getTime())) {
         throw new Error("Invalid start time");
@@ -297,8 +368,14 @@ const handleDelete = (requestId: string) => {
           <h1 className="text-lg font-bold text-[#13529e]">
             Optimized Requests
           </h1>
-          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
-            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
+          <span
+            className={`px-3 py-1 text-sm rounded-full ${
+              isUrgentMode
+                ? "bg-red-100 text-red-800"
+                : "bg-blue-100 text-blue-800"
+            } border border-black`}
+          >
+            {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
           </span>
         </div>
         <WeeklySwitcher
@@ -399,24 +476,19 @@ const handleDelete = (requestId: string) => {
                         className="w-20 border p-1 text-sm"
                       />
                     </div>
-                  ) : request.isSanctioned ? (
-                    <>
-                      {request?.optimizeTimeFrom
-                        ? formatTime(request?.optimizeTimeFrom)
-                        : "N/A"}{" "}
-                      -{" "}
-                      {request?.optimizeTimeTo
-                        ? formatTime(request?.optimizeTimeTo)
-                        : "N/A"}
-                    </>
                   ) : (
                     <>
+                      {/* Handle both data structures and prioritize optimizeData if it exists */}
                       {request.optimizeData?.optimizeTimeFrom
                         ? formatTime(request.optimizeData.optimizeTimeFrom)
+                        : request?.optimizeTimeFrom
+                        ? formatTime(request?.optimizeTimeFrom)
                         : "N/A"}{" "}
                       -{" "}
                       {request.optimizeData?.optimizeTimeTo
                         ? formatTime(request.optimizeData.optimizeTimeTo)
+                        : request?.optimizeTimeTo
+                        ? formatTime(request?.optimizeTimeTo)
                         : "N/A"}
                     </>
                   )}

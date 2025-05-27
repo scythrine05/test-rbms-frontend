@@ -227,9 +227,17 @@ export default function OptimiseTablePage() {
   // Format time
   const formatTime = (dateString: string) => {
     try {
-      return format(parseISO(dateString), "HH:mm");
-    } catch {
-      return dateString;
+      // Parse the ISO string and get the hours and minutes
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+      
+      // Format as 24-hour time (HH:mm)
+      const hours = date.getUTCHours().toString().padStart(2, '0');
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error("Error formatting time:", error, dateString);
+      return "N/A";
     }
   };
 
