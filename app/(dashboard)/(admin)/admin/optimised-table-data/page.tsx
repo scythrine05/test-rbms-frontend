@@ -578,7 +578,7 @@ export default function OptimiseTablePage() {
                   {formatTime(request.demandTimeFrom)} -{" "}
                   {formatTime(request.demandTimeTo)}
                 </td>
-                <td className="border border-black p-2 text-sm">
+                {/* <td className="border border-black p-2 text-sm">
                   {editingId === request.id ? (
                     <div className="flex gap-1 items-center">
                       <input
@@ -597,6 +597,35 @@ export default function OptimiseTablePage() {
                     </div>
                   ) : (
                     getOptimisedTime(request)
+                  )}
+                </td> */}
+                <td className="border border-black p-1 text-sm">
+                  {editingId === request.id ? (
+                    <div className="flex gap-1 items-center">
+                      <input
+                        type="time"
+                        value={timeFrom}
+                        onChange={(e) => setTimeFrom(e.target.value)}
+                        className="w-20 border p-1 text-sm"
+                      />
+                      <span>-</span>
+                      <input
+                        type="time"
+                        value={timeTo}
+                        onChange={(e) => setTimeTo(e.target.value)}
+                        className="w-20 border p-1 text-sm"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {request.optimizeData?.isEdited
+                        ? formatTime(request.optimizeData.optimizeTimeFrom)
+                        : formatTime(request.optimizeTimeFrom || "N/A")}{" "}
+                      -{" "}
+                      {request.optimizeData?.isEdited
+                        ? formatTime(request.optimizeData.optimizeTimeTo)
+                        : formatTime(request.optimizeTimeTo || "N/A")}
+                    </>
                   )}
                 </td>
                 <td className="border border-black p-2 text-sm">
