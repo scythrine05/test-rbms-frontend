@@ -14,6 +14,7 @@ export let MajorSection = {
   "TVC": ["SRR-CHTS", "TCR-GUV", "ERS-KTYM-KYJ", "ERS-ALLP-KYJ", "KYJ-QLN", "QLN-TVC", "TVC-NCJ", "NCJ-TEN", "NCJ-CAPE"]
 };
 
+
 // export let MajorSection = {
 //   MAS: ["MAS-GDR", "MAS-AJJ", "AJJ-KPD", "KPD-JTJ", "AJJ-RU", "AJJ-CGL", "MSB-VM", "MSB-VLCY"],
 //   TPJ: ["TPJ-VM", "VM-MV", "TPJ-MV", "TJ-KIK", "MV-TVR", "NMJ-MQ", "VM-PDY", "KPD-VM", "CUPJ-VRI", "TPJ-TP", "NGT-VLNK", "TVR-KKDI", "TTP-AGX"],
@@ -3230,6 +3231,7 @@ export let blockSection = {
     "VVN-MYP",
     "MYP-VM",
     "MS-YD",
+    "MSB-YD",
     "MKK-YD",
     "MBM-YD",
     "STM-YD",
@@ -3307,10 +3309,16 @@ export let blockSection = {
     "NG-YD",
     "VAG-YD",
     "PUT-YD",
+    "SVF-YD",
     "TDK-YD",
     "PUDI-YD",
     "RU-YD"
   ],
+  'MSB-VLCY':
+    ["MSB-MCPK",
+      "MCPK-MTMY",
+      "MTMY-VLCY"
+    ],
 };
 
 
@@ -3320,14 +3328,6 @@ export let workType = {
   'ENGG': ['Machine', 'Non-Machine'],
   'TRD': ['Tw', 'Lt'],
 };
-
-
-
-
-
-
-
-
 
 export let Activity = {
   'Gear': ['Point', 'EI', 'Signal', 'DC Track', 'AFTC', 'SSDAC', 'MSDAC', 'Panel', 'LC Gate Mechanical', 'LC Gate ELB', 'Emergency Sliding Boom', 'IPS', 'Conventional power supply equipment', 'System Integrity Test of each PI/EI/RRI stations', 'Cable Insulation testing (cable meggering) for one station.', 'DLBI- SGE', 'TLBI-FM Inst', 'UFSBI', 'Fuse', 'EKT'],
