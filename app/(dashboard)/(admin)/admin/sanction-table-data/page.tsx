@@ -15,6 +15,82 @@ import { UserRequest } from "@/app/service/api/manager";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
+// Header icons for tables
+const HeaderIcon = ({ type }: { type: string }) => {
+  switch (type) {
+    case "date":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg>
+      );
+    case "section":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+      );
+    case "line":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+      );
+    case "time":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+      );
+    case "work":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /><path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" /></svg>
+      );
+    case "corridor":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5z" /></svg>
+      );
+    case "user":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a5 5 0 100 10A5 5 0 0010 2zm-7 16a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+      );
+    case "reason":
+      return (
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M18 13V7a2 2 0 00-2-2H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2zm-2 0H4V7h12v6z" /></svg>
+      );
+    default:
+      return null;
+  }
+};
+
+const ColumnHeader = ({ icon, title }: { icon: string; title: string }) => (
+  <div className="flex items-center">
+    <HeaderIcon type={icon} />
+    <span>{title}</span>
+  </div>
+);
+
+const getLineOrRoad = (request: UserRequest) => {
+  if (
+    request.processedLineSections &&
+    Array.isArray(request.processedLineSections) &&
+    request.processedLineSections.length > 0
+  ) {
+    return request.processedLineSections
+      .map((section) => {
+        if (section.type === "yard") {
+          if (section.stream && section.road) {
+            return `${section.stream}/${section.road}`;
+          }
+          if (section.stream) {
+            return section.stream;
+          }
+          if (section.road) {
+            return section.road;
+          }
+        } else if (section.lineName) {
+          return section.lineName;
+        }
+        return null;
+      })
+      .filter(Boolean)
+      .join(", ") || "N/A";
+  }
+  return "N/A";
+};
+
 export default function OptimiseTablePage() {
   const queryClient = useQueryClient();
   const { isUrgentMode } = useUrgentMode();
@@ -28,11 +104,11 @@ export default function OptimiseTablePage() {
 
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use Saturday to Friday (matching optimised-table-data)
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 6 }); // Explicitly start from Saturday
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : endOfWeek(weekStart, { weekStartsOn: 6 }); // Explicitly end on Friday
 
   // In urgent mode, we use the same date for both start and end dates
@@ -139,70 +215,43 @@ export default function OptimiseTablePage() {
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-black">
-          <thead>
+      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-2">
+        <table className="w-full border-collapse text-black bg-white">
+          <thead className="sticky top-0 z-10 bg-gray-100 shadow">
             <tr className="bg-gray-50">
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Date</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Major Section</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Depot</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Block Section</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Line</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Optimized Time</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Work Type</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Activity</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Corridor Type</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">User Response</th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">Reason For Not availed</th>
-
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="date" title="Date" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="Major Section" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="Depot" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="Block Section" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="line" title="Line / Road" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="time" title="Sanctioned Time" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="work" title="Work Type" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="work" title="Activity" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="corridor" title="Corridor Type" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="user" title="User Response" /></th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="reason" title="Reason For Not availed" /></th>
             </tr>
           </thead>
           <tbody>
             {sanctionedRequests.length > 0 ? (
               sanctionedRequests.map((request: UserRequest) => (
-                <tr 
-                  key={`request-${request.id}-${request.date}`} 
-                  className="hover:bg-gray-50"
-                >
-                  <td className="border border-black p-1 text-sm">
-                    {formatDate(request.date)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedSection}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedDepo}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.missionBlock}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.processedLineSections?.[0]?.lineName || "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A"} -{" "}
-                    {request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.workType}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.activity}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.corridorType || "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.userResponse}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.availedResponse}
-                  </td>
+                <tr key={`request-${request.id}-${request.date}`} className="hover:bg-blue-50 transition-colors">
+                  <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
+                  <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
+                  <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
+                  <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
+                  <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
+                  <td className="border border-black p-2 text-sm">{request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A"} - {request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A"}</td>
+                  <td className="border border-black p-2 text-sm">{request.workType}</td>
+                  <td className="border border-black p-2 text-sm">{request.activity}</td>
+                  <td className="border border-black p-2 text-sm">{request.corridorType || "N/A"}</td>
+                  <td className="border border-black p-2 text-sm">{request.userResponse}</td>
+                  <td className="border border-black p-2 text-sm">{request.availedResponse}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={11} className="border border-black p-1 text-sm text-center py-4">
+                <td colSpan={11} className="border border-black p-2 text-sm text-center py-4">
                   No sanctioned requests found for this period
                 </td>
               </tr>

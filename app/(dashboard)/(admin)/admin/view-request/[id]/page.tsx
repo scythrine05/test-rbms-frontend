@@ -33,9 +33,16 @@ export default function ViewRequestPage() {
 
   const formatTime = (dateString: string) => {
     try {
-      return format(parseISO(dateString), "HH:mm");
-    } catch {
-      return "Invalid time";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+
+      // Format as 24-hour time (HH:mm) using UTC
+      const hours = date.getUTCHours().toString().padStart(2, '0');
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error("Error formatting time:", error, dateString);
+      return "N/A";
     }
   };
 
@@ -43,8 +50,7 @@ export default function ViewRequestPage() {
   const handleRequestAction = async (accept: boolean) => {
     if (
       confirm(
-        `Are you sure you want to ${
-          accept ? "approve" : "reject"
+        `Are you sure you want to ${accept ? "approve" : "reject"
         } this request?`
       )
     ) {
@@ -136,16 +142,16 @@ export default function ViewRequestPage() {
             request.sntDisconnectionRequired === undefined
               ? "NAN"
               : request.sntDisconnectionRequired
-              ? request.DisconnAcceptance || "PENDING"
-              : "NAN"
+                ? request.DisconnAcceptance || "PENDING"
+                : "NAN"
           )}`}
         >
           S&T Approval:{" "}
           {request.sntDisconnectionRequired === undefined
             ? "NAN"
             : request.sntDisconnectionRequired
-            ? request.DisconnAcceptance || "PENDING"
-            : "NAN"}
+              ? request.DisconnAcceptance || "PENDING"
+              : "NAN"}
         </span>
       </div>
 

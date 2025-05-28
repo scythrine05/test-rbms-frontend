@@ -65,9 +65,16 @@ export default function RequestTablePage() {
   // Format time
   const formatTime = (dateString: string) => {
     try {
-      return format(parseISO(dateString), "HH:mm");
-    } catch {
-      return "Invalid time";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+
+      // Format as 24-hour time (HH:mm) using UTC
+      const hours = date.getUTCHours().toString().padStart(2, '0');
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.error("Error formatting time:", error, dateString);
+      return "N/A";
     }
   };
 
@@ -105,16 +112,16 @@ export default function RequestTablePage() {
   };
 
   // Filter requests based on status and urgent mode
-  const filteredRequests = showAll 
+  const filteredRequests = showAll
     ? data?.data?.requests || []
     : data?.data?.requests?.filter((request: UserRequest) => {
-        const statusMatch = statusFilter === "ALL" || request.status === statusFilter;
-        const urgentMatch = isUrgentMode 
-          ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
-            format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd")
-          : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
-        return statusMatch && urgentMatch;
-      }) || [];
+      const statusMatch = statusFilter === "ALL" || request.status === statusFilter;
+      const urgentMatch = isUrgentMode
+        ? (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") &&
+        format(parseISO(request.date), "yyyy-MM-dd") === format(addDays(new Date(), 1), "yyyy-MM-dd")
+        : (request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY");
+      return statusMatch && urgentMatch;
+    }) || [];
 
   if (isLoading) {
     return (
@@ -156,9 +163,9 @@ export default function RequestTablePage() {
             <option value="APPROVED">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
-          <ShowAllToggle 
-            showAll={showAll} 
-            onToggle={() => setShowAll(!showAll)} 
+          <ShowAllToggle
+            showAll={showAll}
+            onToggle={() => setShowAll(!showAll)}
             isUrgentMode={isUrgentMode}
           />
         </div>
@@ -192,30 +199,30 @@ export default function RequestTablePage() {
 
       {/* Week Navigation - Updated to show Saturday-Friday range */}
       {!isUrgentMode && (
-      <div className="mt-4 flex justify-center gap-2 mb-4 text-black">
-        <button
-          onClick={() => handleWeekChange("prev")}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-        >
-          Previous Week
-        </button>
-        <span className="px-3 py-1 text-sm">
-          {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
-        </span>
-        <button
-          onClick={() => handleWeekChange("next")}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
-        >
-          Next Week
-        </button>
-      </div>
+        <div className="mt-4 flex justify-center gap-2 mb-4 text-black">
+          <button
+            onClick={() => handleWeekChange("prev")}
+            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+          >
+            Previous Week
+          </button>
+          <span className="px-3 py-1 text-sm">
+            {format(weekStart, "dd MMM")} - {format(weekEnd, "dd MMM yyyy")}
+          </span>
+          <button
+            onClick={() => handleWeekChange("next")}
+            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
+          >
+            Next Week
+          </button>
+        </div>
       )}
 
       {/* Rest of the table and pagination remains the same */}
       <div className="overflow-x-auto">
         {filteredRequests.length === 0 ? (
           <div className="text-center py-5 text-gray-600">
-            {isUrgentMode 
+            {isUrgentMode
               ? `There are no requests for ${format(selectedDate, "dd MMM yyyy")}`
               : `There are no requests for the week of ${format(weekStart, "dd MMM")} - ${format(weekEnd, "dd MMM yyyy")}`
             }

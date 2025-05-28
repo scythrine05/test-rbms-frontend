@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/app/service/api/admin";
 import {
   format,
@@ -138,43 +138,70 @@ const ColumnHeader = ({
   );
 };
 
+// Helper to get line/road display for a request
+const getLineOrRoad = (request: UserRequest) => {
+  if (
+    request.processedLineSections &&
+    Array.isArray(request.processedLineSections) &&
+    request.processedLineSections.length > 0
+  ) {
+    return request.processedLineSections
+      .map((section) => {
+        if (section.type === "yard") {
+          if (section.stream && section.road) {
+            return `${section.stream}/${section.road}`;
+          }
+          if (section.stream) {
+            return section.stream;
+          }
+          if (section.road) {
+            return section.road;
+          }
+        } else if (section.lineName) {
+          return section.lineName;
+        }
+        return null;
+      })
+      .filter(Boolean)
+      .join(", ") || "N/A";
+  }
+  return "N/A";
+};
+
 export default function OptimiseTablePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isUrgentMode } = useUrgentMode();
-  const [page, setPage] = useState(1);
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     if (isUrgentMode) {
       return today;
     }
-    // Start from Monday of current week
     return startOfWeek(today, { weekStartsOn: 1 });
   });
+
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDate, setEditDate] = useState("");
+  const [timeFrom, setTimeFrom] = useState("");
+  const [timeTo, setTimeTo] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use Monday to Sunday
   const weekStart = isUrgentMode
     ? currentWeekStart
-    : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
-  const weekEnd = isUrgentMode ? currentWeekStart : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday)
-
-  // Add debug logging for date range
-  console.log(
-    "Date Range:",
-    format(weekStart, "yyyy-MM-dd"),
-    "to",
-    format(weekEnd, "yyyy-MM-dd")
-  );
-  console.log("Is Urgent Mode:", isUrgentMode);
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
+  const weekEnd = isUrgentMode ? currentWeekStart : addDays(weekStart, 6);
 
   // Fetch approved requests data
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, currentWeekStart, isUrgentMode],
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["approved-requests", currentWeekStart, isUrgentMode],
     queryFn: () =>
       adminService.getApprovedRequests(
         format(weekStart, "yyyy-MM-dd"),
         format(weekEnd, "yyyy-MM-dd"),
-        page
+        5000
       ),
   });
 
@@ -183,16 +210,105 @@ export default function OptimiseTablePage() {
     data?.data?.requests?.filter((request: UserRequest) => {
       return isUrgentMode
         ? request.corridorType === "Urgent Block" ||
-            request.workType === "EMERGENCY"
+        request.workType === "EMERGENCY"
         : request.corridorType !== "Urgent Block" &&
-            request.workType !== "EMERGENCY";
+        request.workType !== "EMERGENCY";
     }) || [];
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
-  const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
-    null
-  );
+  const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(null);
   const optimizeMutation = useOptimizeRequests();
+
+  // Edit functionality
+  const handleEditClick = (request: UserRequest) => {
+    setEditingId(request.id);
+    setEditDate(request.date.split("T")[0]);
+    setTimeFrom(
+      request.optimizeTimeFrom
+        ? formatTime(request.optimizeTimeFrom)
+        : ""
+    );
+    setTimeTo(
+      request.optimizeTimeTo
+        ? formatTime(request.optimizeTimeTo)
+        : ""
+    );
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditDate("");
+    setTimeFrom("");
+    setTimeTo("");
+  };
+
+  // Update mutation
+  const updateOptimizedTimes = useMutation({
+    mutationFn: (data: {
+      requestId: string;
+      newDate: string;
+      optimizeTimeFrom: string;
+      optimizeTimeTo: string;
+    }) => adminService.updateRequest(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["approved-requests", currentWeekStart],
+      });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+      setEditingId(null);
+    },
+    onError: (error) => {
+      console.error("Error updating times:", error);
+      alert("Failed to update. Please check your inputs and try again.");
+    },
+  });
+
+  // Helper function to format time for backend
+  const formatForBackend = (date: Date) => {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00.000Z`;
+  };
+
+  // Helper function to format date for backend
+  const formatDateForBackend = (date: Date) => {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T00:00:00.000Z`;
+  };
+
+  // Helper function to pad numbers with leading zero
+  const pad = (num: number) => num.toString().padStart(2, '0');
+
+  const handleUpdateClick = (requestId: string) => {
+    if (!editDate || !timeFrom || !timeTo) {
+      alert("Please fill all fields: Date, Start Time, and End Time");
+      return;
+    }
+
+    try {
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+      if (!timeRegex.test(timeFrom) || !timeRegex.test(timeTo)) {
+        throw new Error("Time must be in HH:mm format (e.g., 14:30)");
+      }
+
+      // Create Date objects in local time
+      const localFrom = new Date(`${editDate}T${timeFrom}`);
+      const localTo = new Date(`${editDate}T${timeTo}`);
+      const localDate = new Date(editDate);
+
+      // Convert to ISO strings without timezone adjustment
+      const optimizeTimeFromISO = formatForBackend(localFrom);
+      const optimizeTimeToISO = formatForBackend(localTo);
+      const dateISO = formatDateForBackend(localDate);
+
+      updateOptimizedTimes.mutate({
+        requestId,
+        newDate: dateISO,
+        optimizeTimeFrom: optimizeTimeFromISO,
+        optimizeTimeTo: optimizeTimeToISO,
+      });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Invalid input");
+    }
+  };
 
   const handleSendOptimizedRequests = async () => {
     try {
@@ -215,6 +331,7 @@ export default function OptimiseTablePage() {
       alert("Error updating optimization status. Please try again.");
     }
   };
+
   // Format date
   const formatDate = (dateString: string) => {
     try {
@@ -230,7 +347,7 @@ export default function OptimiseTablePage() {
       // Parse the ISO string and get the hours and minutes
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "N/A";
-      
+
       // Format as 24-hour time (HH:mm)
       const hours = date.getUTCHours().toString().padStart(2, '0');
       const minutes = date.getUTCMinutes().toString().padStart(2, '0');
@@ -256,15 +373,6 @@ export default function OptimiseTablePage() {
         return direction === "prev" ? subDays(monday, 7) : addDays(monday, 7);
       }
     });
-    setPage(1); // Reset to first page when changing periods
-  };
-
-  // Preprocess function (placeholder for now)
-  const preprocessRequests = async (
-    requests: UserRequest[]
-  ): Promise<UserRequest[]> => {
-    // TODO: Add preprocessing logic here
-    return requests;
   };
 
   const handleOptimize = async () => {
@@ -317,8 +425,7 @@ export default function OptimiseTablePage() {
         `${formatTime(request.demandTimeFrom)} - ${formatTime(
           request.demandTimeTo
         )}`,
-        `${request.optimisedTimeFrom || "N/A"} - ${
-          request.optimisedTimeTo || "N/A"
+        `${request.optimisedTimeFrom || "N/A"} - ${request.optimisedTimeTo || "N/A"
         }`,
         request.workType,
         request.activity,
@@ -364,17 +471,41 @@ export default function OptimiseTablePage() {
     );
   }
 
-  const totalPages = data?.data?.totalPages || 1;
-
   return (
-    <div className="bg-white p-3 border border-black ">
+    <div className="bg-white p-3 border border-black">
+      {showSuccess && (
+        <div className="fixed top-20 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+          Operation successful!
+        </div>
+      )}
+
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
-        <WeeklySwitcher
-          currentWeekStart={currentWeekStart}
-          onWeekChange={handleWeekChange}
-          weekStartsOn={6} // Saturday
-        />
+        {isUrgentMode ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleWeekChange("prev")}
+              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-800"
+            >
+              Previous Day
+            </button>
+            <span className="text-sm font-medium text-black">
+              Date: {format(currentWeekStart, "dd-MM-yyyy")}
+            </span>
+            <button
+              onClick={() => handleWeekChange("next")}
+              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-800"
+            >
+              Next Day
+            </button>
+          </div>
+        ) : (
+          <WeeklySwitcher
+            currentWeekStart={currentWeekStart}
+            onWeekChange={handleWeekChange}
+            weekStartsOn={6}
+          />
+        )}
       </div>
 
       <div className="flex justify-end py-2 gap-2">
@@ -398,7 +529,7 @@ export default function OptimiseTablePage() {
           <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path
               fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
               clipRule="evenodd"
             />
           </svg>
@@ -424,6 +555,7 @@ export default function OptimiseTablePage() {
           </button>
         )}
       </div>
+
       {/* Optimization Dialog */}
       {isOptimizeDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-black">
@@ -434,11 +566,10 @@ export default function OptimiseTablePage() {
                   Optimize Requests
                 </h2>
                 <span
-                  className={`px-3 py-1 text-sm rounded-full ${
-                    isUrgentMode
-                      ? "bg-red-100 text-red-800"
-                      : "bg-blue-100 text-blue-800"
-                  } border border-black`}
+                  className={`px-3 py-1 text-sm rounded-full ${isUrgentMode
+                    ? "bg-red-100 text-red-800"
+                    : "bg-blue-100 text-blue-800"
+                    } border border-black`}
                 >
                   {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
                 </span>
@@ -473,38 +604,38 @@ export default function OptimiseTablePage() {
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-black">
-          <thead>
+      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+        <table className="w-full border-collapse text-black bg-white">
+          <thead className="sticky top-0 z-10 bg-gray-100 shadow">
             <tr className="bg-gray-50">
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="date" title="Date" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="section" title="Major Section" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="section" title="Depot" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="section" title="Block Section" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                <ColumnHeader icon="line" title="Line" />
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="line" title="Line / Road" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="time" title="Time" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="time" title="Optimized Time" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="work" title="Work Type" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="work" title="Activity" />
               </th>
-              <th className="border border-black p-1 text-left text-sm font-medium text-black">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                 <ColumnHeader icon="action" title="Actions" />
               </th>
             </tr>
@@ -513,98 +644,125 @@ export default function OptimiseTablePage() {
             {filteredRequests.map((request: UserRequest) => (
               <tr
                 key={`request-${request.id}-${request.date}`}
-                className={`hover:bg-gray-50 ${
-                  request.optimizeTimeFrom && request.optimizeTimeTo
-                    ? "bg-green-50"
-                    : ""
-                }`}
+                className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                  ? "bg-green-50"
+                  : ""
+                  }`}
               >
-                <td className="border border-black p-1 text-sm">
-                  {formatDate(request.date)}
+                <td className="border border-black p-2 text-sm">
+                  {editingId === request.id ? (
+                    <input
+                      type="date"
+                      value={editDate}
+                      onChange={(e) => setEditDate(e.target.value)}
+                      className="w-28 border p-1 text-sm rounded"
+                    />
+                  ) : (
+                    formatDate(request.date)
+                  )}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {request.selectedSection}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {request.selectedDepo}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {request.missionBlock}
                 </td>
-                <td className="border border-black p-1 text-sm">
-                  {optimizedData
-                    ? request.selectedLine
-                    : request.processedLineSections?.[0]?.lineName || "N/A"}
+                <td className="border border-black p-2 text-sm">
+                  {getLineOrRoad(request)}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {formatTime(request.demandTimeFrom)} -{" "}
                   {formatTime(request.demandTimeTo)}
                 </td>
-                <td className="border border-black p-1 text-sm">
-                  {request.optimizeTimeFrom
-                    ? formatTime(request.optimizeTimeFrom)
-                    : "N/A"}{" "}
-                  -{" "}
-                  {request.optimizeTimeTo
-                    ? formatTime(request.optimizeTimeTo)
-                    : "N/A"}
+                <td className="border border-black p-2 text-sm">
+                  {editingId === request.id ? (
+                    <div className="flex gap-1 items-center">
+                      <input
+                        type="time"
+                        value={timeFrom}
+                        onChange={(e) => setTimeFrom(e.target.value)}
+                        className="w-20 border p-1 text-sm rounded"
+                      />
+                      <span>-</span>
+                      <input
+                        type="time"
+                        value={timeTo}
+                        onChange={(e) => setTimeTo(e.target.value)}
+                        className="w-20 border p-1 text-sm rounded"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {request.optimizeTimeFrom
+                        ? formatTime(request.optimizeTimeFrom)
+                        : "N/A"}{" "}
+                      -{" "}
+                      {request.optimizeTimeTo
+                        ? formatTime(request.optimizeTimeTo)
+                        : "N/A"}
+                    </>
+                  )}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {request.workType}
                 </td>
-                <td className="border border-black p-1 text-sm">
+                <td className="border border-black p-2 text-sm">
                   {request.activity}
                 </td>
-                <td className="border border-black p-1 text-sm">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/view-request/${request.id}`}
-                      className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                    >
-                      <svg
-                        className="w-3 h-3 mr-1"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                <td className="border border-black p-2 text-sm">
+                  {editingId === request.id ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleUpdateClick(request.id)}
+                        className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                        disabled={updateOptimizedTimes.isPending}
                       >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      View
-                    </Link>
-                  </div>
+                        {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/view-request/${request.id}`}
+                        className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
+                      >
+                        <svg
+                          className="w-3 h-3 mr-1"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path
+                            fillRule="evenodd"
+                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        View
+                      </Link>
+                      <button
+                        onClick={() => handleEditClick(request)}
+                        className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          <button
-            onClick={() => setPage(page - 1)}
-            disabled={page === 1}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-3 py-1 text-sm">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(page + 1)}
-            disabled={page === totalPages}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
 
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
         © {new Date().getFullYear()} Indian Railways
