@@ -217,7 +217,7 @@ export default function OptimiseTablePage() {
           currentWeekStart={currentWeekStart}
           onWeekChange={handleWeekChange}
           isUrgentMode={isUrgentMode}
-          weekStartsOn={6}
+          weekStartsOn={1}
         />
       </div>
 

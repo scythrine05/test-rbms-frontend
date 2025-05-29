@@ -503,7 +503,7 @@ export default function OptimiseTablePage() {
           <WeeklySwitcher
             currentWeekStart={currentWeekStart}
             onWeekChange={handleWeekChange}
-            weekStartsOn={6}
+            weekStartsOn={1}
           />
         )}
       </div>

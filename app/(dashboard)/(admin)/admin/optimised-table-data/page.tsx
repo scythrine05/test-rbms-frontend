@@ -181,13 +181,20 @@ export default function OptimiseTablePage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
-  // Calculate date range based on urgent mode
-  const weekStart = isUrgentMode
-    ? currentWeekStart
-    : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // // Calculate date range based on urgent mode
+  // const weekStart = isUrgentMode
+  //   ? currentWeekStart
+  //   : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // const weekEnd = isUrgentMode
+  //   ? currentWeekStart
+  //   : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+
   const weekEnd = isUrgentMode
     ? currentWeekStart
-    : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+    : endOfWeek(currentWeekStart, { weekStartsOn: 1 });
+  const weekStart = isUrgentMode
+    ? currentWeekStart
+    : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
 
   const apiStartDate = format(weekStart, "yyyy-MM-dd");
   const apiEndDate = isUrgentMode
@@ -493,7 +500,7 @@ export default function OptimiseTablePage() {
           <WeeklySwitcher
             currentWeekStart={currentWeekStart}
             onWeekChange={handleWeekChange}
-            weekStartsOn={6}
+            weekStartsOn={1}
           />
         )}
       </div>

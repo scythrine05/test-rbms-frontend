@@ -88,11 +88,11 @@ export default function OptimiseTablePage() {
   const limit = 30;
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use Monday to Sunday
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday)
 
   // In urgent mode, we use the same date for both start and end dates
@@ -122,8 +122,8 @@ export default function OptimiseTablePage() {
   console.log('Is Urgent Mode:', isUrgentMode);
   console.log('Date Range:', format(weekStart, "yyyy-MM-dd"), 'to', format(weekEnd, "yyyy-MM-dd"));
   console.log('Current Date/Time:', new Date().toISOString());
-  console.log('Date Display:', isUrgentMode ? 
-    format(currentWeekStart, "dd-MM-yyyy") : 
+  console.log('Date Display:', isUrgentMode ?
+    format(currentWeekStart, "dd-MM-yyyy") :
     `${format(weekStart, "dd-MM-yyyy")} to ${format(weekEnd, "dd-MM-yyyy")}`);
   console.log('Filtered Requests:', data?.data.requests?.filter((request: any) =>
     request.optimizeStatus === true &&
@@ -310,9 +310,14 @@ export default function OptimiseTablePage() {
                     <td className="border border-black p-1 text-sm">{request.selectedDepo || "N/A"}</td>
                     <td className="border border-black p-1 text-sm">{request.missionBlock || "N/A"}</td>
                     <td className="border border-black p-1 text-sm">{request.processedLineSections?.[0]?.lineName || "N/A"}</td>
-                    <td className="border border-black p-1 text-sm">
+                    {/* <td className="border border-black p-1 text-sm">
                       {request.optimizeTimeFrom && request.optimizeTimeTo
                         ? `${formatTime(request.optimizeTimeFrom)} - ${formatTime(request.optimizeTimeTo)}`
+                        : "N/A"}
+                    </td> */}
+                    <td className="border border-black p-1 text-sm">
+                      {request.optimizeTimeFrom && request.optimizeTimeTo
+                        ? `${new Date(request.optimizeTimeFrom).toISOString().substring(11, 16)} - ${new Date(request.optimizeTimeTo).toISOString().substring(11, 16)}`
                         : "N/A"}
                     </td>
                     <td className="border border-black p-1 text-sm">{request.workType || "N/A"}</td>
@@ -340,7 +345,7 @@ export default function OptimiseTablePage() {
                                 Accepted
                               </>
                             ) : updateRequestStatus.variables?.requestId === request.id &&
-                               updateRequestStatus.variables?.status === "yes" ? (
+                              updateRequestStatus.variables?.status === "yes" ? (
                               <>
                                 <svg className="w-3 h-3 mr-1 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -379,7 +384,7 @@ export default function OptimiseTablePage() {
                                 Rejected
                               </>
                             ) : updateRequestStatus.variables?.requestId === request.id &&
-                               updateRequestStatus.variables?.status === "no" ? (
+                              updateRequestStatus.variables?.status === "no" ? (
                               <>
                                 <svg className="w-3 h-3 mr-1 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

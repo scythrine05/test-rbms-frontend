@@ -103,11 +103,11 @@ export default function OptimiseTablePage() {
   const limit = 30;
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use Monday to Sunday
-  const weekStart = isUrgentMode 
-    ? currentWeekStart 
+  const weekStart = isUrgentMode
+    ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Explicitly start from Monday
-  const weekEnd = isUrgentMode 
-    ? currentWeekStart 
+  const weekEnd = isUrgentMode
+    ? currentWeekStart
     : addDays(weekStart, 6); // Explicitly end on Sunday (6 days after Monday)
 
   // Add debug logging for date range
@@ -330,11 +330,16 @@ export default function OptimiseTablePage() {
                   <td className="border border-black p-1 text-sm">
                     {request.processedLineSections?.[0]?.lineName || "N/A"}
                   </td>
-                  <td className="border border-black p-1 text-sm">
+                  {/* <td className="border border-black p-1 text-sm">
                     {request.sanctionedTimeFrom && request.sanctionedTimeTo
                       ? `${formatTime(request.sanctionedTimeFrom)} - ${formatTime(
                         request.sanctionedTimeTo
                       )}`
+                      : "N/A"}
+                  </td> */}
+                  <td className="border border-black p-1 text-sm">
+                    {request.sanctionedTimeFrom && request.sanctionedTimeTo
+                      ? `${new Date(request.sanctionedTimeFrom).toISOString().substring(11, 16)} - ${new Date(request.sanctionedTimeTo).toISOString().substring(11, 16)}`
                       : "N/A"}
                   </td>
                   <td className="border border-black p-1 text-sm">
@@ -349,8 +354,8 @@ export default function OptimiseTablePage() {
                   <td className="border border-black p-1 text-sm">
                     {request.userResponse ? (
                       <span className={`px-2 py-1 text-xs rounded border ${request.userResponse === "availed"
-                          ? "bg-green-100 text-green-800 border-green-800"
-                          : "bg-red-100 text-red-800 border-red-800"
+                        ? "bg-green-100 text-green-800 border-green-800"
+                        : "bg-red-100 text-red-800 border-red-800"
                         }`}>
                         {request.userResponse === "availed" && (
                           <svg className="w-3 h-3 mr-1 inline-block" viewBox="0 0 20 20" fill="currentColor">

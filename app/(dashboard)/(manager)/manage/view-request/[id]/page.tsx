@@ -36,22 +36,22 @@ export default function ViewRequestPage() {
   //     alert("Failed to accept request. Please try again.");
   //   },
   // });
-// const acceptMutation = useMutation({
-//   mutationFn: (isAccept: boolean) => 
-//     managerService.acceptUserRequest(id, isAccept),  // Pass the decision to the API
-//   onSuccess: () => {
-//     queryClient.invalidateQueries({ queryKey: ["request", id] });
-//     queryClient.invalidateQueries({ queryKey: ["requests"] });
-//     alert("Request processed successfully");
-//     router.push("/manage/request-table");
-//   },
-//   onError: (error) => {
-//     console.error("Failed to process request:", error);
-//     alert("Failed to process request. Please try again.");
-//   },
-// });
- const acceptMutation = useMutation({
-    mutationFn: ({ isAccept, remark }: { isAccept: boolean; remark?: string }) => 
+  // const acceptMutation = useMutation({
+  //   mutationFn: (isAccept: boolean) => 
+  //     managerService.acceptUserRequest(id, isAccept),  // Pass the decision to the API
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["request", id] });
+  //     queryClient.invalidateQueries({ queryKey: ["requests"] });
+  //     alert("Request processed successfully");
+  //     router.push("/manage/request-table");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Failed to process request:", error);
+  //     alert("Failed to process request. Please try again.");
+  //   },
+  // });
+  const acceptMutation = useMutation({
+    mutationFn: ({ isAccept, remark }: { isAccept: boolean; remark?: string }) =>
       managerService.acceptUserRequest(id, isAccept, remark),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["request", id] });
@@ -93,26 +93,26 @@ export default function ViewRequestPage() {
   //   }
   // };
 
-// Handle accept or reject request
-// const handleAcceptReject = async (isAccept: boolean) => {
-//   const action = isAccept ? "accept" : "reject";
-//   if (confirm(`Are you sure you want to ${action} this request?`)) {
-//     if (isAccept) {
-//       setIsAccepting(true);
-//     } else {
-//       setIsRejecting(true);
-//     }
-//     try {
-//       await acceptMutation.mutateAsync(isAccept);
-//     } finally {
-//       if (isAccept) {
-//         setIsAccepting(false);
-//       } else {
-//         setIsRejecting(false);
-//       }
-//     }
-//   }
-// };
+  // Handle accept or reject request
+  // const handleAcceptReject = async (isAccept: boolean) => {
+  //   const action = isAccept ? "accept" : "reject";
+  //   if (confirm(`Are you sure you want to ${action} this request?`)) {
+  //     if (isAccept) {
+  //       setIsAccepting(true);
+  //     } else {
+  //       setIsRejecting(true);
+  //     }
+  //     try {
+  //       await acceptMutation.mutateAsync(isAccept);
+  //     } finally {
+  //       if (isAccept) {
+  //         setIsAccepting(false);
+  //       } else {
+  //         setIsRejecting(false);
+  //       }
+  //     }
+  //   }
+  // };
   // Handle accept request
   const handleAccept = async () => {
     if (confirm("Are you sure you want to accept this request?")) {
@@ -138,9 +138,9 @@ export default function ViewRequestPage() {
 
     setIsRejecting(true);
     try {
-      await acceptMutation.mutateAsync({ 
-        isAccept: false, 
-        remark: rejectionReason 
+      await acceptMutation.mutateAsync({
+        isAccept: false,
+        remark: rejectionReason
       });
     } finally {
       setIsRejecting(false);
@@ -195,8 +195,8 @@ export default function ViewRequestPage() {
 
   return (
     <div className="bg-white p-3 border border-black mb-3 text-black">
-       {showRejectModal && (
-     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
+      {showRejectModal && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Enter Rejection Reason</h2>
             <textarea
@@ -238,23 +238,23 @@ export default function ViewRequestPage() {
           >
             Back to List
           </Link>{request.status === "PENDING" && !request.managerAcceptance && (
-  <>
-    <button
-      onClick={handleAccept}  // Accept
-      disabled={isAccepting || isRejecting}
-      className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-    >
-      {isAccepting ? "Accepting..." : "Accept Request"}
-    </button>
-    <button
-      onClick={handleReject}  // Reject
-      disabled={isAccepting || isRejecting}
-      className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
-    >
-      {isRejecting  ? "Rejecting..." : "Reject Request"}
-    </button>
-  </>
-)}
+            <>
+              <button
+                onClick={handleAccept}  // Accept
+                disabled={isAccepting || isRejecting}
+                className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
+              >
+                {isAccepting ? "Accepting..." : "Accept Request"}
+              </button>
+              <button
+                onClick={handleReject}  // Reject
+                disabled={isAccepting || isRejecting}
+                className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
+              >
+                {isRejecting ? "Rejecting..." : "Reject Request"}
+              </button>
+            </>
+          )}
 
         </div>
       </div>
@@ -324,9 +324,14 @@ export default function ViewRequestPage() {
               </tr>
               <tr>
                 <td className="py-1 font-medium">Time:</td>
-                <td className="py-1">
+                {/* <td className="py-1">
                   {formatTime(request.demandTimeFrom)} to{" "}
                   {formatTime(request.demandTimeTo)}
+                </td> */}
+                <td className="py-1">
+                  {request.demandTimeFrom && request.demandTimeTo
+                    ? `${new Date(request.demandTimeFrom).toISOString().substring(11, 16)} to ${new Date(request.demandTimeTo).toISOString().substring(11, 16)}`
+                    : "N/A"}
                 </td>
               </tr>
               <tr>
