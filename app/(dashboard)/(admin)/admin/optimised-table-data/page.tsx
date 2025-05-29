@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/app/service/api/admin";
 import {
@@ -12,7 +12,7 @@ import {
   endOfWeek,
 } from "date-fns";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserRequest } from "@/app/service/api/manager";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
@@ -168,9 +168,14 @@ const getLineOrRoad = (request: UserRequest) => {
 
 export default function OptimiseTablePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isUrgentMode } = useUrgentMode();
   const queryClient = useQueryClient();
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      return new Date(dateParam);
+    }
     const today = new Date();
     const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
     return startOfWeek(lastSaturday, { weekStartsOn: 6 });
@@ -181,13 +186,12 @@ export default function OptimiseTablePage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
-  // // Calculate date range based on urgent mode
-  // const weekStart = isUrgentMode
-  //   ? currentWeekStart
-  //   : startOfWeek(currentWeekStart, { weekStartsOn: 6 });
-  // const weekEnd = isUrgentMode
-  //   ? currentWeekStart
-  //   : endOfWeek(currentWeekStart, { weekStartsOn: 6 });
+  // Update URL when currentWeekStart changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
+    router.push(`?${params.toString()}`, { scroll: false });
+  }, [currentWeekStart, router, searchParams]);
 
   const weekEnd = isUrgentMode
     ? currentWeekStart
@@ -213,6 +217,15 @@ export default function OptimiseTablePage() {
 
   // TEMP: Show all requests for debugging
   const filteredRequests = data?.data?.requests || [];
+
+  // Separate corridor and non-corridor requests
+  const corridorRequests = filteredRequests.filter(
+    (request: UserRequest) => request.corridorType === "Corridor"
+  );
+
+  const nonCorridorRequests = filteredRequests.filter(
+    (request: UserRequest) => request.corridorType === "Outside Corridor"
+  );
 
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(null);
 
@@ -521,147 +534,299 @@ export default function OptimiseTablePage() {
         </button>
       </div>
 
-      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-        <table className="w-full border-collapse text-black bg-white">
-          <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-            <tr className="bg-gray-50">
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="date" title="Date" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Major Section" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Depot" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Block Section" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="line" title="Line / Road" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="time" title="Time" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="time" title="Optimized Time" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="work" title="Work Type" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="work" title="Activity" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="action" title="Actions" />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRequests.map((request: UserRequest) => (
-              <tr
-                key={`request-${request.id}-${request.date}`}
-                className={`hover:bg-blue-50 transition-colors ${request.optimizeData?.optimizeTimeFrom && request.optimizeData?.optimizeTimeTo
-                  ? "bg-green-50"
-                  : ""
-                  }`}
-              >
-                <td className="border border-black p-2 text-sm">
-                  {formatDate(request.date)}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {request.selectedSection}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {request.selectedDepo}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {request.missionBlock}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {getLineOrRoad(request)}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {formatTime(request.demandTimeFrom)} -{" "}
-                  {formatTime(request.demandTimeTo)}
-                </td>
-                {/* <td className="border border-black p-2 text-sm">
-                  {editingId === request.id ? (
-                    <div className="flex gap-1 items-center">
-                      <input
-                        type="time"
-                        value={timeFrom}
-                        onChange={(e) => setTimeFrom(e.target.value)}
-                        className="w-20 border p-1 text-sm rounded"
-                      />
-                      <span>-</span>
-                      <input
-                        type="time"
-                        value={timeTo}
-                        onChange={(e) => setTimeTo(e.target.value)}
-                        className="w-20 border p-1 text-sm rounded"
-                      />
-                    </div>
-                  ) : (
-                    getOptimisedTime(request)
-                  )}
-                </td> */}
-                <td className="border border-black p-1 text-sm">
-                  {editingId === request.id ? (
-                    <div className="flex gap-1 items-center">
-                      <input
-                        type="time"
-                        value={timeFrom}
-                        onChange={(e) => setTimeFrom(e.target.value)}
-                        className="w-20 border p-1 text-sm"
-                      />
-                      <span>-</span>
-                      <input
-                        type="time"
-                        value={timeTo}
-                        onChange={(e) => setTimeTo(e.target.value)}
-                        className="w-20 border p-1 text-sm"
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      {request.optimizeData?.isEdited
-                        ? formatTime(request.optimizeData.optimizeTimeFrom)
-                        : formatTime(request.optimizeTimeFrom || "N/A")}{" "}
-                      -{" "}
-                      {request.optimizeData?.isEdited
-                        ? formatTime(request.optimizeData.optimizeTimeTo)
-                        : formatTime(request.optimizeTimeTo || "N/A")}
-                    </>
-                  )}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {request.workType}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {request.activity}
-                </td>
-                <td className="border border-black p-2 text-sm">
-                  {editingId === request.id ? (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdateClick(request.id)}
-                        className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                        disabled={updateOptimizedTimes.isPending}
-                      >
-                        {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
+      {!isUrgentMode && (
+        <>
+          {/* Corridor Requests Table */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+              Corridor Requests
+            </h2>
+            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+              <table className="w-full border-collapse text-black bg-white">
+                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+                  <tr className="bg-gray-50">
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="date" title="Date" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Major Section" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Depot" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Block Section" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="line" title="Line / Road" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="time" title="Optimized Time" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="Work Type" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="Activity" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="action" title="Actions" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {corridorRequests.map((request: UserRequest) => (
+                    <tr
+                      key={`request-${request.id}-${request.date}`}
+                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                        ? "bg-green-50"
+                        : ""
+                        }`}
+                    >
+                      <td className="border border-black p-2 text-sm">
+                        {formatDate(request.date)}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedSection}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedDepo}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.missionBlock}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {getLineOrRoad(request)}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.optimizeTimeFrom
+                          ? formatTime(request.optimizeTimeFrom)
+                          : "N/A"}{" "}
+                        -{" "}
+                        {request.optimizeTimeTo
+                          ? formatTime(request.optimizeTimeTo)
+                          : "N/A"}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.workType}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.activity}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/view-request/${request.id}?from=optimised-table-data`}
+                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
+                          >
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path
+                                fillRule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            View
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Non-Corridor Requests Table */}
+          <div>
+            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+              Non-Corridor Requests
+            </h2>
+            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+              <table className="w-full border-collapse text-black bg-white">
+                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+                  <tr className="bg-gray-50">
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="date" title="Date" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Major Section" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Depot" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="section" title="Block Section" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="line" title="Line / Road" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="time" title="Optimized Time" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="Work Type" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="Activity" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="action" title="Actions" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {nonCorridorRequests.map((request: UserRequest) => (
+                    <tr
+                      key={`request-${request.id}-${request.date}`}
+                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                        ? "bg-green-50"
+                        : ""
+                        }`}
+                    >
+                      <td className="border border-black p-2 text-sm">
+                        {formatDate(request.date)}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedSection}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedDepo}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.missionBlock}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {getLineOrRoad(request)}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.optimizeTimeFrom
+                          ? formatTime(request.optimizeTimeFrom)
+                          : "N/A"}{" "}
+                        -{" "}
+                        {request.optimizeTimeTo
+                          ? formatTime(request.optimizeTimeTo)
+                          : "N/A"}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.workType}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.activity}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/view-request/${request.id}?from=optimised-table-data`}
+                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
+                          >
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path
+                                fillRule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            View
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isUrgentMode && (
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+          <table className="w-full border-collapse text-black bg-white">
+            <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+              <tr className="bg-gray-50">
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="date" title="Date" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Major Section" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Depot" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Block Section" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="line" title="Line / Road" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="time" title="Optimized Time" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="work" title="Work Type" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="work" title="Activity" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="action" title="Actions" />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.map((request: UserRequest) => (
+                <tr
+                  key={`request-${request.id}-${request.date}`}
+                  className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                    ? "bg-green-50"
+                    : ""
+                    }`}
+                >
+                  <td className="border border-black p-2 text-sm">
+                    {formatDate(request.date)}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.selectedSection}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.selectedDepo}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.missionBlock}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {getLineOrRoad(request)}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.optimizeTimeFrom
+                      ? formatTime(request.optimizeTimeFrom)
+                      : "N/A"}{" "}
+                    -{" "}
+                    {request.optimizeTimeTo
+                      ? formatTime(request.optimizeTimeTo)
+                      : "N/A"}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.workType}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
+                    {request.activity}
+                  </td>
+                  <td className="border border-black p-2 text-sm">
                     <div className="flex gap-2">
                       <Link
-                        href={`/admin/view-request/${request.id}`}
+                        href={`/admin/view-request/${request.id}?from=optimised-table-data`}
                         className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
                       >
                         <svg
@@ -678,27 +843,14 @@ export default function OptimiseTablePage() {
                         </svg>
                         View
                       </Link>
-                      <button
-                        onClick={() => handleEditClick(request)}
-                        className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(request.id)}
-                        disabled={deletingIds.has(request.id)}
-                        className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                      >
-                        {deletingIds.has(request.id) ? "Deleting..." : "Delete"}
-                      </button>
                     </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
         © {new Date().getFullYear()} Indian Railways

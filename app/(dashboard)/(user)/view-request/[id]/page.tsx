@@ -1,6 +1,6 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
@@ -9,8 +9,24 @@ import { useState } from "react";
 export default function ViewRequestPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const id = params.id as string;
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Get the source page from URL parameter or default to request-table
+  const sourcePage = searchParams.get('from') || 'request-table';
+
+  // Get the date parameter or use the request's date
+  const getBackUrl = (request: any) => {
+    const date = format(new Date(request.date), 'yyyy-MM-dd');
+    switch (sourcePage) {
+      case 'other-requests':
+        return `/other-requests?date=${date}`;
+      default:
+        return `/request-table?date=${date}`;
+    }
+  };
 
   // Fetch request data
   const { data, isLoading, error } = useQuery({
@@ -27,22 +43,22 @@ export default function ViewRequestPage() {
     }
   };
 
- const formatTime = (dateString: string): string => {
-  if (!dateString) return "Invalid time";
-  
-  try {
-    // Handle both full ISO strings and time-only strings
-    const timePart = dateString.includes('T') 
-      ? dateString.split('T')[1] 
-      : dateString;
-    
-    // Extract just the hours and minutes
-    const [hours, minutes] = timePart.split(':');
-    return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0').substring(0, 2)}`;
-  } catch {
-    return "Invalid time";
-  }
-};
+  const formatTime = (dateString: string): string => {
+    if (!dateString) return "Invalid time";
+
+    try {
+      // Handle both full ISO strings and time-only strings
+      const timePart = dateString.includes('T')
+        ? dateString.split('T')[1]
+        : dateString;
+
+      // Extract just the hours and minutes
+      const [hours, minutes] = timePart.split(':');
+      return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0').substring(0, 2)}`;
+    } catch {
+      return "Invalid time";
+    }
+  };
 
 
   // Handle delete request
@@ -118,7 +134,7 @@ export default function ViewRequestPage() {
         </h1>
         <div className="flex gap-2">
           <Link
-            href="/request-table"
+            href={data?.data ? getBackUrl(data.data) : '/request-table'}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
             Back to List
@@ -304,12 +320,12 @@ export default function ViewRequestPage() {
                   </td>
                 </tr>
               )}
-               <tr>
-                  <td className="py-1 font-medium">Elementary Section:</td>
-                  <td className="py-1">
-                    {request.elementarySection}
-                  </td>
-                </tr>
+              <tr>
+                <td className="py-1 font-medium">Elementary Section:</td>
+                <td className="py-1">
+                  {request.elementarySection}
+                </td>
+              </tr>
               <tr>
                 <td className="py-1 font-medium">
                   S&T Disconnection Required:
@@ -330,13 +346,13 @@ export default function ViewRequestPage() {
                     </td>
                   </tr>
                 )}
-                <tr>
-                      <td className="py-1 font-medium">S&T Lines:</td>
-                      <td className="py-1">
-                        {request.sntDisconnectionLineFrom} to{" "}
-                        {request.sntDisconnectionLineTo}
-                      </td>
-                    </tr>
+              <tr>
+                <td className="py-1 font-medium">S&T Lines:</td>
+                <td className="py-1">
+                  {request.sntDisconnectionLineFrom} to{" "}
+                  {request.sntDisconnectionLineTo}
+                </td>
+              </tr>
               {/* <tr>
                 <td className="py-1 font-medium">Caution Required :</td>
                 <td className="py-1">
@@ -385,13 +401,13 @@ export default function ViewRequestPage() {
                       </td>
                     </tr>
                   )}
-                   <tr>
-                      <td className="py-1 font-medium">Adjacent lines affected:</td>
-                      <td className="py-1">
-                        {request.adjacentLinesAffected} 
-                        
-                      </td>
-                    </tr>
+                  <tr>
+                    <td className="py-1 font-medium">Adjacent lines affected:</td>
+                    <td className="py-1">
+                      {request.adjacentLinesAffected}
+
+                    </td>
+                  </tr>
                 </>
               )}
               {request.repercussions && (

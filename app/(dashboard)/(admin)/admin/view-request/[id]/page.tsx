@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
 import { format, parseISO } from "date-fns";
@@ -11,10 +11,29 @@ import { useAcceptUserRequest } from "@/app/service/mutation/admin";
 export default function ViewRequestPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const id = params.id as string;
   const [isProcessing, setIsProcessing] = useState(false);
   const acceptMutation = useAcceptUserRequest();
+
+  // Get the source page from URL parameter or default to optimise-table
+  const sourcePage = searchParams.get('from') || 'optimise-table';
+
+  // Get the date parameter or use the request's date
+  const getBackUrl = (request: any) => {
+    const date = format(new Date(request.date), 'yyyy-MM-dd');
+    switch (sourcePage) {
+      case 'optimised-table-data':
+        return `/admin/optimised-table-data?date=${date}`;
+      case 'sanction-table-data':
+        return `/admin/sanction-table-data?date=${date}`;
+      case 'request-table':
+        return `/admin/request-table?date=${date}`;
+      default:
+        return `/admin/optimise-table?date=${date}`;
+    }
+  };
 
   // Fetch request data
   const { data, isLoading, error } = useQuery({
@@ -119,7 +138,7 @@ export default function ViewRequestPage() {
         </h1>
         <div className="flex gap-2">
           <Link
-            href="/admin/request-table"
+            href={data?.data ? getBackUrl(data.data) : '/admin/optimise-table'}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
             Back to List

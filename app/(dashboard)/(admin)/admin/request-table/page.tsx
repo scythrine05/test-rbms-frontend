@@ -383,7 +383,7 @@ export default function RequestTablePage() {
                   <td className="border border-black p-1 text-sm">
                     <div className="flex gap-2">
                       <Link
-                        href={`/admin/view-request/${request.id}`}
+                        href={`/admin/view-request/${request.id}?from=request-table`}
                         className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
                       >
                         View
@@ -517,7 +517,7 @@ export default function RequestTablePage() {
                     <td className="border border-black p-1 text-sm">
                       <div className="flex gap-2">
                         <Link
-                          href={`/admin/view-request/${request.id}`}
+                          href={`/admin/view-request/${request.id}?from=request-table`}
                           className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
                         >
                           View
@@ -650,7 +650,7 @@ export default function RequestTablePage() {
                     <td className="border border-black p-1 text-sm">
                       <div className="flex gap-2">
                         <Link
-                          href={`/admin/view-request/${request.id}`}
+                          href={`/admin/view-request/${request.id}?from=request-table`}
                           className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
                         >
                           View

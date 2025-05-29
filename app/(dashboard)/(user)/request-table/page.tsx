@@ -323,15 +323,15 @@ export default function RequestTablePage() {
   });
 
   // Calculate date range based on mode
-  const dateRange: DateRangeFilter = isUrgentMode 
+  const dateRange: DateRangeFilter = isUrgentMode
     ? {
-        startDate: format(currentWeekStart, "yyyy-MM-dd"),
-        endDate: format(currentWeekStart, "yyyy-MM-dd")
-      }
+      startDate: format(currentWeekStart, "yyyy-MM-dd"),
+      endDate: format(currentWeekStart, "yyyy-MM-dd")
+    }
     : {
-        startDate: format(currentWeekStart, "yyyy-MM-dd"),
-        endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
-      };
+      startDate: format(currentWeekStart, "yyyy-MM-dd"),
+      endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
+    };
 
   // Get weekly requests for both compact and Gantt views
   const {
@@ -367,21 +367,21 @@ export default function RequestTablePage() {
   // Generate dates for display
   const displayDates = isUrgentMode
     ? Array.from({ length: 1 }, (_, i) => {
-        const date = addDays(new Date(), i);
-        return {
-          date,
-          formattedDate: format(date, "dd-MM-yyyy"),
-          dayOfWeek: format(date, "E"),
-        };
-      })
+      const date = addDays(new Date(), i);
+      return {
+        date,
+        formattedDate: format(date, "dd-MM-yyyy"),
+        dayOfWeek: format(date, "E"),
+      };
+    })
     : Array.from({ length: 7 }, (_, i) => {
-        const date = addDays(currentWeekStart, i);
-        return {
-          date,
-          formattedDate: format(date, "dd-MM-yyyy"),
-          dayOfWeek: format(date, "E"),
-        };
-      });
+      const date = addDays(currentWeekStart, i);
+      return {
+        date,
+        formattedDate: format(date, "dd-MM-yyyy"),
+        dayOfWeek: format(date, "E"),
+      };
+    });
 
   // Function to navigate to previous period
   const goToPreviousPeriod = () => {
@@ -408,15 +408,15 @@ export default function RequestTablePage() {
   };
 
   // Filter requests based on urgent mode and showAll state
-  const filteredRequests = showAll 
+  const filteredRequests = showAll
     ? weeklyData?.data?.requests || []
     : weeklyData?.data?.requests?.filter(request => {
-        if (isUrgentMode) {
-          return request.corridorType === "Urgent Block" || request.workType === "EMERGENCY";
-        } else {
-          return request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-        }
-      }) || [];
+      if (isUrgentMode) {
+        return request.corridorType === "Urgent Block" || request.workType === "EMERGENCY";
+      } else {
+        return request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+      }
+    }) || [];
 
   // Process weekly data for pagination in compact view
   const [paginatedRequests, setPaginatedRequests] = useState<RequestItem[]>([]);
@@ -427,7 +427,7 @@ export default function RequestTablePage() {
     // Use data from the API response instead of weeklyData
     if (data?.data?.requests) {
       const requests = data.data.requests;
-      
+
       // Filter requests based on urgent mode
       const filteredRequests = requests.filter(request => {
         if (isUrgentMode) {
@@ -536,10 +536,10 @@ export default function RequestTablePage() {
           <div className="text-gray-700 my-1">
             {getStatusDetails(status)}
           </div>
-          {status==="REJECTED"&&<div className="text-gray-700 my-1">
+          {status === "REJECTED" && <div className="text-gray-700 my-1">
             Reason for reject - {request.remarkByManager}
           </div>}
-          
+
         </div>
 
         <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 border-t border-gray-200 pt-2">
@@ -1067,7 +1067,7 @@ export default function RequestTablePage() {
     return (
       <div className="flex flex-wrap gap-1">
         <Link
-          href={`/view-request/${request.id}`}
+          href={`/view-request/${request.id}?from=request-table`}
           className="px-1 py-0.5 text-[8px] bg-[#13529e] text-white border border-black rounded"
         >
           View
@@ -1235,9 +1235,9 @@ export default function RequestTablePage() {
           <h1 className="text-lg font-bold text-[#13529e]">
             {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
           </h1>
-          <ShowAllToggle 
-            showAll={showAll} 
-            onToggle={() => setShowAll(!showAll)} 
+          <ShowAllToggle
+            showAll={showAll}
+            onToggle={() => setShowAll(!showAll)}
             isUrgentMode={isUrgentMode}
           />
         </div>
