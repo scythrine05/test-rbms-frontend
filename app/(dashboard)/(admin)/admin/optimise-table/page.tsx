@@ -398,8 +398,15 @@ export default function OptimiseTablePage() {
 
     try {
       // Preprocess the requests
-      const preprocessedRequests = await flattenRecords(data.data.requests);
+      //const preprocessedRequests = await flattenRecords(data.data.requests);
+      const requestsToOptimize = data.data.requests.filter((request: UserRequest) => {
+      return isUrgentMode
+        ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+        : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+      });
 
+      // Then preprocess the filtered requests
+      const preprocessedRequests = await flattenRecords(requestsToOptimize);
       // Call optimization API
       const result = await optimizeMutation.mutateAsync(preprocessedRequests);
 
