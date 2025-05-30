@@ -404,8 +404,15 @@ export default function OptimiseTablePage() {
       const result = await optimizeMutation.mutateAsync(preprocessedRequests);
 
       if (result.optimizedData) {
-        await adminService.saveOptimizedRequests(result.optimizedData);
-        setOptimizedData(result.optimizedData);
+        // Process the optimized data to handle "WrongRequest" values
+        const processedOptimizedData = result.optimizedData.map(request => ({
+          ...request,
+          optimisedTimeFrom: request.optimisedTimeFrom === "WrongRequest" ? undefined : request.optimisedTimeFrom,
+          optimisedTimeTo: request.optimisedTimeTo === "WrongRequest" ? undefined : request.optimisedTimeTo
+        })) as UserRequest[];
+
+        await adminService.saveOptimizedRequests(processedOptimizedData);
+        setOptimizedData(processedOptimizedData);
         setIsOptimizeDialogOpen(false);
       } else {
         alert("Failed to optimize requests");
@@ -721,11 +728,11 @@ export default function OptimiseTablePage() {
                           </div>
                         ) : (
                           <>
-                            {request.optimizeTimeFrom
+                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
                               ? formatTime(request.optimizeTimeFrom)
                               : "N/A"}{" "}
                             -{" "}
-                            {request.optimizeTimeTo
+                            {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
                               ? formatTime(request.optimizeTimeTo)
                               : "N/A"}
                           </>
@@ -887,11 +894,11 @@ export default function OptimiseTablePage() {
                           </div>
                         ) : (
                           <>
-                            {request.optimizeTimeFrom
+                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
                               ? formatTime(request.optimizeTimeFrom)
                               : "N/A"}{" "}
                             -{" "}
-                            {request.optimizeTimeTo
+                            {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
                               ? formatTime(request.optimizeTimeTo)
                               : "N/A"}
                           </>
@@ -1051,11 +1058,11 @@ export default function OptimiseTablePage() {
                       </div>
                     ) : (
                       <>
-                        {request.optimizeTimeFrom
+                        {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
                           ? formatTime(request.optimizeTimeFrom)
                           : "N/A"}{" "}
                         -{" "}
-                        {request.optimizeTimeTo
+                        {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
                           ? formatTime(request.optimizeTimeTo)
                           : "N/A"}
                       </>

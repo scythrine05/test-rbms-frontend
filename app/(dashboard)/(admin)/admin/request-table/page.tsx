@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
 import { format, parseISO, addDays, startOfWeek, subDays, endOfWeek } from "date-fns";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   useAcceptUserRequest,
   useApproveAllPendingRequests,
@@ -15,20 +15,33 @@ import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
 export default function RequestTablePage() {
+  // Context hooks
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isUrgentMode } = useUrgentMode();
+
+  // State hooks
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [limit] = useState(30);
+  const [activeTab, setActiveTab] = useState<'corridor' | 'non-corridor'>('corridor');
+
+  // Initialize currentWeekStart from URL parameter or default to current date
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      const parsedDate = new Date(dateParam);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    }
+    const today = new Date();
+    return isUrgentMode ? today : startOfWeek(today, { weekStartsOn: 1 });
+  });
+
+  // Mutation hooks
   const acceptMutation = useAcceptUserRequest();
   const approveAllMutation = useApproveAllPendingRequests();
-  const { isUrgentMode } = useUrgentMode();
-  const [showAll, setShowAll] = useState(false);
-  const [limit] = useState(30);
-
-  // State for week selection
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
-    const today = new Date();
-    return isUrgentMode ? today : startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-  });
 
   // Calculate week range
   const weekEnd = isUrgentMode
@@ -38,32 +51,30 @@ export default function RequestTablePage() {
     ? currentWeekStart
     : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
 
-  // Fetch requests data with pagination
+  // Update URL when currentWeekStart changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
+    router.push(`?${params.toString()}`, { scroll: false });
+  }, [currentWeekStart, router]);
+
+  // Fetch requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, statusFilter, weekStart, weekEnd, isUrgentMode],
+    queryKey: ["requests", statusFilter, weekStart, weekEnd, isUrgentMode],
     queryFn: () => {
       const dateRange = isUrgentMode
         ? {
           startDate: format(currentWeekStart, "yyyy-MM-dd"),
-          endDate: format(currentWeekStart, "yyyy-MM-dd")  // Use same day for both start and end in urgent mode
+          endDate: format(currentWeekStart, "yyyy-MM-dd")
         }
         : {
           startDate: format(currentWeekStart, "yyyy-MM-dd"),
           endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
         };
 
-      if (isUrgentMode) {
-        return managerService.getUserRequestsByAdmin(
-          1,
-          limit,
-          dateRange.startDate,
-          dateRange.endDate,
-          statusFilter !== "ALL" ? statusFilter : undefined
-        );
-      }
       return managerService.getUserRequestsByAdmin(
-        page,
-        limit,
+        1,
+        1000,
         dateRange.startDate,
         dateRange.endDate,
         statusFilter !== "ALL" ? statusFilter : undefined
@@ -71,7 +82,7 @@ export default function RequestTablePage() {
     }
   });
 
-  // Format date
+  // Helper functions
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), "dd-MM-yyyy");
@@ -80,13 +91,11 @@ export default function RequestTablePage() {
     }
   };
 
-  // Format time
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "N/A";
 
-      // Format as 24-hour time (HH:mm) using UTC
       const hours = date.getUTCHours().toString().padStart(2, '0');
       const minutes = date.getUTCMinutes().toString().padStart(2, '0');
       return `${hours}:${minutes}`;
@@ -96,7 +105,6 @@ export default function RequestTablePage() {
     }
   };
 
-  // Status badge class
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "ACCEPTED":
@@ -108,6 +116,37 @@ export default function RequestTablePage() {
         return "";
     }
   };
+
+  const getLineOrRoad = (request: UserRequest) => {
+    if (
+      request.processedLineSections &&
+      Array.isArray(request.processedLineSections) &&
+      request.processedLineSections.length > 0
+    ) {
+      return request.processedLineSections
+        .map((section) => {
+          if (section.type === "yard") {
+            if (section.stream && section.road) {
+              return `${section.stream}/${section.road}`;
+            }
+            if (section.stream) {
+              return section.stream;
+            }
+            if (section.road) {
+              return section.road;
+            }
+          } else if (section.lineName) {
+            return section.lineName;
+          }
+          return null;
+        })
+        .filter(Boolean)
+        .join(", ") || "N/A";
+    }
+    return "N/A";
+  };
+
+  // Event handlers
   const handleApproveAllPending = async () => {
     if (confirm("Are you sure you want to approve all pending requests?")) {
       try {
@@ -119,12 +158,11 @@ export default function RequestTablePage() {
       }
     }
   };
-  // Handle accept/reject request
+
   const handleRequestAction = async (id: string, accept: boolean) => {
     if (
       confirm(
-        `Are you sure you want to ${accept ? "approve" : "reject"
-        } this request?`
+        `Are you sure you want to ${accept ? "approve" : "reject"} this request?`
       )
     ) {
       try {
@@ -137,11 +175,6 @@ export default function RequestTablePage() {
     }
   };
 
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
   const handleWeekChange = (direction: "prev" | "next") => {
     setCurrentWeekStart((prev) => {
       if (isUrgentMode) {
@@ -149,36 +182,24 @@ export default function RequestTablePage() {
           ? subDays(prev, 1)
           : addDays(prev, 1);
       } else {
-        // In normal mode, move by weeks
         return direction === "prev"
           ? subDays(prev, 7)
           : addDays(prev, 7);
       }
     });
-    setPage(1); // Reset to first page when changing weeks
+    setPage(1);
   };
-
 
   // Filter requests based on status and urgent mode
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    // Always filter by urgent/normal mode
     const urgentMatch = isUrgentMode
       ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
       : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
 
-    // Only apply status filter if showAll is false
-    const statusMatch = showAll || statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
+    const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
 
     return urgentMatch && statusMatch;
   }) || [];
-
-  if (isLoading) {
-    return (
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5">Loading requests...</div>
-      </div>
-    );
-  }
 
   const corridorRequests = filteredRequests.filter(
     (request) => request.corridorType === "Corridor"
@@ -192,6 +213,14 @@ export default function RequestTablePage() {
     (request) => request.corridorType === "Urgent Block"
   );
 
+  if (isLoading) {
+    return (
+      <div className="bg-white p-3 border border-black mb-3">
+        <div className="text-center py-5">Loading requests...</div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -201,8 +230,6 @@ export default function RequestTablePage() {
       </div>
     );
   }
-
-  const totalPages = data?.data?.totalPages || 1;
 
   return (
     <div className="bg-white p-3 border border-black mb-3">
@@ -218,7 +245,7 @@ export default function RequestTablePage() {
         <div className="flex gap-2">
           <button
             onClick={handleApproveAllPending}
-            className="px-3 py-1 text-sm bg-blue-600 text-white border border-black"
+            className="px-3 py-1 text-sm bg-blue-600 text-white border border-black hover:bg-blue-700"
           >
             Save
           </button>
@@ -233,20 +260,17 @@ export default function RequestTablePage() {
             <option value="REJECTED">Rejected</option>
           </select>
         </div>
-        <ShowAllToggle
-          showAll={showAll}
-          onToggle={() => setShowAll(!showAll)}
-          isUrgentMode={isUrgentMode}
-        />
       </div>
+
       <WeeklySwitcher
         currentWeekStart={currentWeekStart}
         onWeekChange={handleWeekChange}
         isUrgentMode={isUrgentMode}
-        weekStartsOn={1} // Monday
+        weekStartsOn={1}
       />
-      {/* Urgent mode description and date range */}
-      {isUrgentMode && (
+
+      {/* Mode description and date range */}
+      {isUrgentMode ? (
         <div className="mb-4">
           <div className="text-sm text-gray-600 mb-2">
             <p className="font-medium">Urgent Mode Active</p>
@@ -256,9 +280,7 @@ export default function RequestTablePage() {
             Date: {format(currentWeekStart, "dd-MM-yyyy")}
           </div>
         </div>
-      )}
-
-      {!isUrgentMode && (
+      ) : (
         <div className="mb-4">
           <div className="text-sm text-gray-600 mb-2">
             <p className="font-medium">Normal Mode Active</p>
@@ -270,262 +292,177 @@ export default function RequestTablePage() {
         </div>
       )}
 
-      {isUrgentMode && <>
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-            Urgent Block Requests
-          </h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-black">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Date
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Major Section
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Depot
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Block Section
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Line
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Time
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Corridor Type
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Work Type
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Activity
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  S&T Approval
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Status
-                </th>
-                <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {urgentRequests.map((request: UserRequest) => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="border border-black p-1 text-sm">
-                    {formatDate(request.date)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedSection}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.selectedDepo}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.missionBlock}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.processedLineSections?.[0]?.lineName || "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {formatTime(request.demandTimeFrom)} -{" "}
-                    {formatTime(request.demandTimeTo)}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.corridorTypeSelection ||
-                      request.corridorType ||
-                      "N/A"}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.workType}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    {request.activity}
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    <span
-                      className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                        request.sntDisconnectionRequired === undefined
-                          ? "NAN"
-                          : request.sntDisconnectionRequired
-                            ? request.DisconnAcceptance || "PENDING"
-                            : "NAN"
-                      )}`}
-                    >
-                      {request.sntDisconnectionRequired === undefined
-                        ? "NAN"
-                        : request.sntDisconnectionRequired
-                          ? request.DisconnAcceptance || "PENDING"
-                          : "NAN"}
-                    </span>
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    <span
-                      className={`px-2 py-0.5 text-xs rounded ${request.adminRequestStatus === "ACCEPTED"
-                        ? "bg-green-100 text-green-800 border border-green-300"
-                        : request.adminRequestStatus === "REJECTED"
-                          ? "bg-red-100 text-red-800 border border-red-300"
-                          : "bg-yellow-100 text-yellow-800 border border-yellow-300"
-                        }`}
-                    >
-                      {request.adminRequestStatus}
-                    </span>
-                  </td>
-                  <td className="border border-black p-1 text-sm">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/view-request/${request.id}?from=request-table`}
-                        className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                      >
-                        View
-                      </Link>
-                      {request.adminRequestStatus === "PENDING" && (
-                        <button
-                          onClick={() => handleRequestAction(request.id, false)}
-                          className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
-                        >
-                          Reject
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>}
+      {!isUrgentMode && (
+        <div className="space-y-4">
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab('corridor')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'corridor'
+                  ? 'border-[#13529e] text-[#13529e]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                Corridor Requests
+                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                  {corridorRequests.length}
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab('non-corridor')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'non-corridor'
+                  ? 'border-[#13529e] text-[#13529e]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                Non-Corridor Requests
+                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                  {nonCorridorRequests.length}
+                </span>
+              </button>
+            </nav>
+          </div>
 
-      {!isUrgentMode && <>
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-            Corridor Requests
-          </h2>
-          <div className="overflow-x-auto">
+          {/* Tab Content */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
+              <table className="w-full border-collapse text-black">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Date</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Major Section</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Depot</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Block Section</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Line / Road</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Time</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Work Type</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Activity</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">S&T Approval</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Status</th>
+                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(activeTab === 'corridor' ? corridorRequests : nonCorridorRequests).map((request: UserRequest) => (
+                    <tr key={request.id} className="hover:bg-gray-50">
+                      <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
+                      <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
+                      <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
+                      <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
+                      <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
+                      <td className="border border-black p-2 text-sm">
+                        {formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}
+                      </td>
+                      <td className="border border-black p-2 text-sm">{request.workType}</td>
+                      <td className="border border-black p-2 text-sm">{request.activity}</td>
+                      <td className="border border-black p-2 text-sm">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN")}`}>
+                          {request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN"}
+                        </span>
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.adminRequestStatus)}`}>
+                          {request.adminRequestStatus}
+                        </span>
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/view-request/${request.id}?from=request-table`}
+                            className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black hover:bg-[#0e4080] flex items-center"
+                          >
+                            <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                            </svg>
+                            View
+                          </Link>
+                          {request.adminRequestStatus === "PENDING" && (
+                            <button
+                              onClick={() => handleRequestAction(request.id, false)}
+                              className="px-2 py-1 text-xs bg-red-600 text-white border border-black hover:bg-red-700"
+                            >
+                              Reject
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isUrgentMode && (
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-[#13529e]">
+              Urgent Block Requests
+              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                {urgentRequests.length}
+              </span>
+            </h2>
+          </div>
+          <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
             <table className="w-full border-collapse text-black">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Date
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Major Section
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Depot
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Block Section
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Line
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Time
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Corridor Type
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Work Type
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Activity
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    S&T Approval
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Status
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Actions
-                  </th>
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Date</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Major Section</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Depot</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Block Section</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Line / Road</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Time</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Work Type</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Activity</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">S&T Approval</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Status</th>
+                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {corridorRequests.map((request: UserRequest) => (
+                {urgentRequests.map((request: UserRequest) => (
                   <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="border border-black p-1 text-sm">
-                      {formatDate(request.date)}
+                    <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
+                    <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
+                    <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
+                    <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
+                    <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
+                    <td className="border border-black p-2 text-sm">
+                      {formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}
                     </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.selectedSection}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.selectedDepo}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.missionBlock}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.processedLineSections?.[0]?.lineName || "N/A"}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {formatTime(request.demandTimeFrom)} -{" "}
-                      {formatTime(request.demandTimeTo)}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.corridorTypeSelection ||
-                        request.corridorType ||
-                        "N/A"}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.workType}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.activity}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      <span
-                        className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                          request.sntDisconnectionRequired === undefined
-                            ? "NAN"
-                            : request.sntDisconnectionRequired
-                              ? request.DisconnAcceptance || "PENDING"
-                              : "NAN"
-                        )}`}
-                      >
-                        {request.sntDisconnectionRequired === undefined
-                          ? "NAN"
-                          : request.sntDisconnectionRequired
-                            ? request.DisconnAcceptance || "PENDING"
-                            : "NAN"}
+                    <td className="border border-black p-2 text-sm">{request.workType}</td>
+                    <td className="border border-black p-2 text-sm">{request.activity}</td>
+                    <td className="border border-black p-2 text-sm">
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN")}`}>
+                        {request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN"}
                       </span>
                     </td>
-                    <td className="border border-black p-1 text-sm">
-                      <span
-                        className={`px-2 py-0.5 text-xs rounded ${request.adminRequestStatus === "ACCEPTED"
-                          ? "bg-green-100 text-green-800 border border-green-300"
-                          : request.adminRequestStatus === "REJECTED"
-                            ? "bg-red-100 text-red-800 border border-red-300"
-                            : "bg-yellow-100 text-yellow-800 border border-yellow-300"
-                          }`}
-                      >
+                    <td className="border border-black p-2 text-sm">
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.adminRequestStatus)}`}>
                         {request.adminRequestStatus}
                       </span>
                     </td>
-                    <td className="border border-black p-1 text-sm">
+                    <td className="border border-black p-2 text-sm">
                       <div className="flex gap-2">
                         <Link
                           href={`/admin/view-request/${request.id}?from=request-table`}
-                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
+                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black hover:bg-[#0e4080] flex items-center"
                         >
+                          <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                          </svg>
                           View
                         </Link>
                         {request.adminRequestStatus === "PENDING" && (
                           <button
                             onClick={() => handleRequestAction(request.id, false)}
-                            className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
+                            className="px-2 py-1 text-xs bg-red-600 text-white border border-black hover:bg-red-700"
                           >
                             Reject
                           </button>
@@ -537,162 +474,6 @@ export default function RequestTablePage() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-            Non-Corridor Requests
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-black">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Date
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Major Section
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Depot
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Block Section
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Line
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Time
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Corridor Type
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Work Type
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Activity
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    S&T Approval
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Status
-                  </th>
-                  <th className="border border-black p-1 text-left text-sm font-medium text-black">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {nonCorridorRequests.map((request: UserRequest) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="border border-black p-1 text-sm">
-                      {formatDate(request.date)}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.selectedSection}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.selectedDepo}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.missionBlock}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.processedLineSections?.[0]?.lineName || "N/A"}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {formatTime(request.demandTimeFrom)} -{" "}
-                      {formatTime(request.demandTimeTo)}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.corridorTypeSelection ||
-                        request.corridorType ||
-                        "N/A"}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.workType}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      {request.activity}
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      <span
-                        className={`px-2 py-0.5 text-xs ${getStatusBadgeClass(
-                          request.sntDisconnectionRequired === undefined
-                            ? "NAN"
-                            : request.sntDisconnectionRequired
-                              ? request.DisconnAcceptance || "PENDING"
-                              : "NAN"
-                        )}`}
-                      >
-                        {request.sntDisconnectionRequired === undefined
-                          ? "NAN"
-                          : request.sntDisconnectionRequired
-                            ? request.DisconnAcceptance || "PENDING"
-                            : "NAN"}
-                      </span>
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      <span
-                        className={`px-2 py-0.5 text-xs rounded ${request.adminRequestStatus === "ACCEPTED"
-                          ? "bg-green-100 text-green-800 border border-green-300"
-                          : request.adminRequestStatus === "REJECTED"
-                            ? "bg-red-100 text-red-800 border border-red-300"
-                            : "bg-yellow-100 text-yellow-800 border border-yellow-300"
-                          }`}
-                      >
-                        {request.adminRequestStatus}
-                      </span>
-                    </td>
-                    <td className="border border-black p-1 text-sm">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/admin/view-request/${request.id}?from=request-table`}
-                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black"
-                        >
-                          View
-                        </Link>
-                        {request.adminRequestStatus === "PENDING" && (
-                          <button
-                            onClick={() => handleRequestAction(request.id, false)}
-                            className="px-2 py-1 text-xs bg-red-600 text-white border border-black"
-                          >
-                            Reject
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </>}
-
-      {/* Pagination - only show in normal mode */}
-      {!isUrgentMode && totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          <button
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-3 py-1 text-sm">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page === totalPages}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Next
-          </button>
         </div>
       )}
 
