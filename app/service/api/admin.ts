@@ -21,10 +21,11 @@ export const adminService = {
   getOptimizeRequests: async (
     startDate: string,
     endDate: string,
-    page: number = 1
+    page: number = 1,
+    limit: number
   ) => {
     const response = await axiosInstance.get(
-      `/api/user-request/admin/optimized?startDate=${startDate}&endDate=${endDate}&page=${page}`
+      `/api/user-request/admin/optimized?startDate=${startDate}&endDate=${endDate}&page=${page}&limit=${limit}`
     );
     return response.data;
   },

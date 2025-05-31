@@ -140,7 +140,7 @@ export default function OptimiseTablePage() {
   console.log('Date Range:', apiStartDate, 'to', apiEndDate);
   console.log('Is Urgent Mode:', isUrgentMode);
   console.log('Current Date/Time:', new Date().toISOString());
-
+  const limit = 5000;
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
     queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
@@ -148,7 +148,8 @@ export default function OptimiseTablePage() {
       adminService.getOptimizeRequests(
         apiStartDate,
         apiEndDate,
-        page
+        page,
+        limit
       ),
   });
 

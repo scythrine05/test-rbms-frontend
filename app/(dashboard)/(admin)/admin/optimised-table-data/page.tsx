@@ -204,12 +204,13 @@ export default function OptimiseTablePage() {
   const apiEndDate = isUrgentMode
     ? apiStartDate
     : format(weekEnd, "yyyy-MM-dd");
+  const limit = 5000;
 
   // Fetch approved requests data
   const { data, isLoading, error } = useQuery({
     queryKey: ["approved-requests", apiStartDate, apiEndDate, isUrgentMode],
     queryFn: () =>
-      adminService.getOptimizeRequests(apiStartDate, apiEndDate, 1),
+      adminService.getOptimizeRequests(apiStartDate, apiEndDate, 1, limit),
   });
 
   // DEBUG: Log API data
