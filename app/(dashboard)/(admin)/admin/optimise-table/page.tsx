@@ -411,12 +411,12 @@ export default function OptimiseTablePage() {
       const result = await optimizeMutation.mutateAsync(preprocessedRequests);
 
       if (result.optimizedData) {
-        // Process the optimized data to handle "WrongRequest" values
-        const processedOptimizedData = result.optimizedData.map(request => ({
-          ...request,
-          optimisedTimeFrom: request.optimisedTimeFrom === "WrongRequest" ? undefined : request.optimisedTimeFrom,
-          optimisedTimeTo: request.optimisedTimeTo === "WrongRequest" ? undefined : request.optimisedTimeTo
-        })) as UserRequest[];
+      // Process the optimized data to handle "WrongRequest" values by setting to "00:00"
+      const processedOptimizedData = result.optimizedData.map(request => ({
+        ...request,
+        optimisedTimeFrom: request.optimisedTimeFrom === "Wrong Request" ? "00:00" : request.optimisedTimeFrom,
+        optimisedTimeTo: request.optimisedTimeTo === "Wrong Request" ? "00:00" : request.optimisedTimeTo
+      })) as UserRequest[];
 
         await adminService.saveOptimizedRequests(processedOptimizedData);
         setOptimizedData(processedOptimizedData);
@@ -735,11 +735,11 @@ export default function OptimiseTablePage() {
                           </div>
                         ) : (
                           <>
-                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
+                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "Wrong Request"
                               ? formatTime(request.optimizeTimeFrom)
                               : "N/A"}{" "}
                             -{" "}
-                            {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
+                            {request.optimizeTimeTo && request.optimizeTimeTo !== "Wrong Request"
                               ? formatTime(request.optimizeTimeTo)
                               : "N/A"}
                           </>
