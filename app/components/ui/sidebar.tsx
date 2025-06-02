@@ -253,6 +253,46 @@ export const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         </svg>
       ),
     },
+     {
+      name: "Optimised Table",
+      path: "/manage/optimised-table",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4 mr-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 6h16M4 10h16M4 14h16M4 18h16"
+          />
+        </svg>
+      ),
+    },
+     {
+      name: "Sanctioned Table",
+      path: "/manage/sanctioned-table",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4 mr-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 6h16M4 10h16M4 14h16M4 18h16"
+          />
+        </svg>
+      ),
+    },
   ];
 
   const adminMenuItems = [

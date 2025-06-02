@@ -295,5 +295,26 @@ acceptUserRequest: async (id: string, isAccept: boolean, remark?: string): Promi
     getUserRequestById: async (id: string): Promise<{ status: boolean; data: UserRequest }> => {
         const response = await axiosInstance.get(`/api/user-request/${id}`);
         return response.data;
-    }
+    },
+
+
+     getManagerUserRequests: async (page: number, limit: number, startDate: string,
+        endDate: string,) => {
+        try {
+          const queryParams = new URLSearchParams();
+          queryParams.append('page', page.toString());
+          queryParams.append('limit', limit.toString());
+          if (startDate && endDate) {
+            queryParams.append('startDate', startDate);
+            queryParams.append('endDate', endDate);
+          }
+          const response = await axiosInstance.get("/api/user-request/manager/manager-optimise-status", {
+            params: { page, limit, startDate, endDate },
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching user requests:", error);
+          throw error;
+        }
+      },
 };

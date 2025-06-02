@@ -236,9 +236,14 @@ export default function ViewRequestPage() {
               {request.workLocationFrom ? (
                 <tr>
                   <td className="py-1 font-medium">Work Location:</td>
-                  <td className="py-1">
+                  {/* <td className="py-1">
                     {request.workLocationFrom} to {request.workLocationTo}
-                  </td>
+                  </td> */}
+                  <td className="py-1">
+  {request.workLocationFrom && request.workLocationTo
+    ? `${request.workLocationFrom} to ${request.workLocationTo}`
+    :  `${request.workLocationFrom}`}
+</td>
                 </tr>
               ) : null}
             </tbody>
@@ -348,10 +353,15 @@ export default function ViewRequestPage() {
                 )}
               <tr>
                 <td className="py-1 font-medium">S&T Lines:</td>
-                <td className="py-1">
+                {/* <td className="py-1">
                   {request.sntDisconnectionLineFrom} to{" "}
                   {request.sntDisconnectionLineTo}
-                </td>
+                </td> */}
+                <td className="py-1">
+  {request.sntDisconnectionLineFrom && request.sntDisconnectionLineTo
+    ? `${request.sntDisconnectionLineFrom} to ${request.sntDisconnectionLineTo}`
+    : "-"}
+</td>
               </tr>
               {/* <tr>
                 <td className="py-1 font-medium">Caution Required :</td>
