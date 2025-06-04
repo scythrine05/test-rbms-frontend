@@ -202,6 +202,92 @@ export default function OptimiseTablePage() {
     setPage(1); // Reset to first page when changing periods
   };
 
+  const getAdjacentLinesAffected = (request: UserRequest): string => {
+    if (request.adjacentLinesAffected) {
+      return request.adjacentLinesAffected;
+    }
+
+    if (request.processedLineSections) {
+      const affectedLines = request.processedLineSections.map(section => {
+        if (section.type === 'yard') {
+          return section.otherRoads;
+        }
+        return section.otherLines;
+      }).filter(Boolean).join(", ");
+
+      return affectedLines || "N/A";
+    }
+
+    return "N/A";
+  };
+
+  const handleDownloadCSV = () => {
+    if (!data?.data?.requests) return;
+
+    // Get the current filtered requests
+    const requestsToDownload = filteredRequests;
+
+    // Create CSV headers
+    const headers = [
+      "Date",
+      "Major Section",
+      "Depot",
+      "Block Section",
+      "Line/Road",
+      "Adjacent Lines Affected",
+      "Work Type",
+      "Corridor Type",
+      "Activity",
+      "Demanded Time From",
+      "Demanded Time To",
+      "Optimized Time From",
+      "Optimized Time To",
+      "Sanctioned Time From",
+      "Sanctioned Time To",
+      "Requested By",
+      "Department",
+      "Description"
+    ];
+
+    // Create CSV rows
+    const rows = requestsToDownload.map((request: UserRequest) => [
+      formatDate(request.date),
+      request.selectedSection || "N/A",
+      request.selectedDepo || "N/A",
+      request.missionBlock || "N/A",
+      getLineOrRoad(request),
+      request.adjacentLinesAffected || getAdjacentLinesAffected(request),
+      request.workType || "N/A",
+      request.corridorType || "N/A",
+      request.activity || "N/A",
+      formatTime(request.demandTimeFrom || ""),
+      formatTime(request.demandTimeTo || ""),
+      formatTime(request.optimizeTimeFrom || ""),
+      formatTime(request.optimizeTimeTo || ""),
+      formatTime(request.sanctionedTimeFrom || ""),
+      formatTime(request.sanctionedTimeTo || ""),
+      request.user?.name || "N/A",
+      request.selectedDepartment || "N/A",
+      request.requestremarks || "N/A"
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `sanctioned_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -232,12 +318,20 @@ export default function OptimiseTablePage() {
             {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
           </span>
         </div>
-        <WeeklySwitcher
-          currentWeekStart={currentWeekStart}
-          onWeekChange={handleWeekChange}
-          isUrgentMode={isUrgentMode}
-          weekStartsOn={1}
-        />
+        <div className="flex gap-2">
+          <button
+            onClick={handleDownloadCSV}
+            className="px-3 py-1 text-sm bg-green-600 text-white border border-black hover:bg-green-700"
+          >
+            Download CSV
+          </button>
+          <WeeklySwitcher
+            currentWeekStart={currentWeekStart}
+            onWeekChange={handleWeekChange}
+            isUrgentMode={isUrgentMode}
+            weekStartsOn={1}
+          />
+        </div>
       </div>
 
       {!isUrgentMode && (

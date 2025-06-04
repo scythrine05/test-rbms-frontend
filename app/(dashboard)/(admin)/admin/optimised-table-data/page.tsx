@@ -464,6 +464,88 @@ export default function OptimiseTablePage() {
     return "N/A";
   };
 
+  const getAdjacentLinesAffected = (request: UserRequest): string => {
+    if (request.adjacentLinesAffected) {
+      return request.adjacentLinesAffected;
+    }
+
+    if (request.processedLineSections) {
+      const affectedLines = request.processedLineSections.map(section => {
+        if (section.type === 'yard') {
+          return section.otherRoads;
+        }
+        return section.otherLines;
+      }).filter(Boolean).join(", ");
+
+      return affectedLines || "N/A";
+    }
+
+    return "N/A";
+  };
+
+  const handleDownloadCSV = () => {
+    if (!data?.data?.requests) return;
+
+    // Get the current filtered requests
+    const requestsToDownload = filteredRequests;
+
+    // Create CSV headers
+    const headers = [
+      "Date",
+      "Major Section",
+      "Depot",
+      "Block Section",
+      "Line/Road",
+      "Adjacent Lines Affected",
+      "Work Type",
+      "Corridor Type",
+      "Activity",
+      "Demanded Time From",
+      "Demanded Time To",
+      "Optimized Time From",
+      "Optimized Time To",
+      "Requested By",
+      "Department",
+      "Description"
+    ];
+
+    // Create CSV rows
+    const rows = requestsToDownload.map((request: UserRequest) => [
+      formatDate(request.date),
+      request.selectedSection || "N/A",
+      request.selectedDepo || "N/A",
+      request.missionBlock || "N/A",
+      getLineOrRoad(request),
+      request.adjacentLinesAffected || getAdjacentLinesAffected(request),
+      request.workType || "N/A",
+      request.corridorType || "N/A",
+      request.activity || "N/A",
+      formatTime(request.demandTimeFrom || ""),
+      formatTime(request.demandTimeTo || ""),
+      formatTime(request.optimizeTimeFrom || ""),
+      formatTime(request.optimizeTimeTo || ""),
+      request.user?.name || "N/A",
+      request.selectedDepartment || "N/A",
+      request.requestremarks || "N/A"
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `optimized_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -521,17 +603,16 @@ export default function OptimiseTablePage() {
 
       <div className="flex justify-end py-2 gap-2">
         <button
-          onClick={handleSendClick}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+          onClick={handleDownloadCSV}
+          className="px-3 py-1 text-sm bg-green-600 text-white border border-black hover:bg-green-700"
         >
-          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Send for Sanction
+          Download CSV
+        </button>
+        <button
+          onClick={handleSendClick}
+          className="px-3 py-1 text-sm bg-blue-600 text-white border border-black hover:bg-blue-700"
+        >
+          Send
         </button>
       </div>
 

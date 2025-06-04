@@ -168,6 +168,26 @@ const getLineOrRoad = (request: UserRequest) => {
   return "N/A";
 };
 
+// Add this helper function before the handleDownloadCSV function
+const getAdjacentLinesAffected = (request: UserRequest): string => {
+  if (request.adjacentLinesAffected) {
+    return request.adjacentLinesAffected;
+  }
+
+  if (request.processedLineSections) {
+    const affectedLines = request.processedLineSections.map(section => {
+      if (section.type === 'yard') {
+        return section.otherRoads;
+      }
+      return section.otherLines;
+    }).filter(Boolean).join(", ");
+
+    return affectedLines || "N/A";
+  }
+
+  return "N/A";
+};
+
 export default function OptimiseTablePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -400,9 +420,9 @@ export default function OptimiseTablePage() {
       // Preprocess the requests
       //const preprocessedRequests = await flattenRecords(data.data.requests);
       const requestsToOptimize = data.data.requests.filter((request: UserRequest) => {
-      return isUrgentMode
-        ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-        : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+        return isUrgentMode
+          ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+          : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
       });
 
       // Then preprocess the filtered requests
@@ -411,12 +431,12 @@ export default function OptimiseTablePage() {
       const result = await optimizeMutation.mutateAsync(preprocessedRequests);
 
       if (result.optimizedData) {
-      // Process the optimized data to handle "WrongRequest" values by setting to "00:00"
-      const processedOptimizedData = result.optimizedData.map(request => ({
-        ...request,
-        optimisedTimeFrom: request.optimisedTimeFrom === "Wrong Request" ? "00:00" : request.optimisedTimeFrom,
-        optimisedTimeTo: request.optimisedTimeTo === "Wrong Request" ? "00:00" : request.optimisedTimeTo
-      })) as UserRequest[];
+        // Process the optimized data to handle "WrongRequest" values by setting to "00:00"
+        const processedOptimizedData = result.optimizedData.map(request => ({
+          ...request,
+          optimisedTimeFrom: request.optimisedTimeFrom === "Wrong Request" ? "00:00" : request.optimisedTimeFrom,
+          optimisedTimeTo: request.optimisedTimeTo === "Wrong Request" ? "00:00" : request.optimisedTimeTo
+        })) as UserRequest[];
 
         await adminService.saveOptimizedRequests(processedOptimizedData);
         setOptimizedData(processedOptimizedData);
@@ -431,7 +451,10 @@ export default function OptimiseTablePage() {
   };
 
   const handleDownloadCSV = () => {
-    if (!optimizedData) return;
+    if (!data?.data?.requests) return;
+
+    // Get the current filtered requests
+    const requestsToDownload = filteredRequests;
 
     // Create CSV headers
     const headers = [
@@ -439,47 +462,52 @@ export default function OptimiseTablePage() {
       "Major Section",
       "Depot",
       "Block Section",
-      "Line",
-      "Demand Time",
-      "Optimized Time",
+      "Line/Road",
+      "Adjacent Lines Affected",
       "Work Type",
+      "Corridor Type",
       "Activity",
-    ].join(",");
+      "Demanded Time From",
+      "Demanded Time To",
+      "Optimized Time From",
+      "Optimized Time To",
+      "Requested By",
+      "Department",
+      "Description"
+    ];
 
     // Create CSV rows
-    const rows = optimizedData.map((request) =>
-      [
-        formatDate(request.date),
-        request.selectedSection,
-        request.selectedDepo,
-        request.missionBlock,
-        request.processedLineSections?.[0]?.lineName || "N/A",
-        `${formatTime(request.demandTimeFrom)} - ${formatTime(
-          request.demandTimeTo
-        )}`,
-        `${request.optimisedTimeFrom || "N/A"} - ${request.optimisedTimeTo || "N/A"
-        }`,
-        request.workType,
-        request.activity,
-      ].join(",")
-    );
+    const rows = requestsToDownload.map((request: UserRequest) => [
+      formatDate(request.date),
+      request.selectedSection || "N/A",
+      request.selectedDepo || "N/A",
+      request.missionBlock || "N/A",
+      getLineOrRoad(request),
+      request.adjacentLinesAffected || getAdjacentLinesAffected(request),
+      request.workType || "N/A",
+      request.corridorType || "N/A",
+      request.activity || "N/A",
+      formatTime(request.demandTimeFrom || ""),
+      formatTime(request.demandTimeTo || ""),
+      formatTime(request.optimizeTimeFrom || ""),
+      formatTime(request.optimizeTimeTo || ""),
+      request.user?.name || "N/A",
+      request.selectedDepartment || "N/A",
+      request.requestremarks || "N/A"
+    ]);
 
     // Combine headers and rows
-    const csvContent = [headers, ...rows].join("\n");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
+    ].join("\n");
 
     // Create and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `optimized_requests_${format(weekStart, "dd-MMM")}_${format(
-        weekEnd,
-        "dd-MMM"
-      )}.csv`
-    );
-    link.style.visibility = "hidden";
+    link.setAttribute("download", `optimized_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
