@@ -34,7 +34,7 @@ const HeaderIcon = ({ type }: { type: string }) => {
       );
     case "time":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
       );
     case "work":
       return (
@@ -105,6 +105,9 @@ export default function OptimiseTablePage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
+  const [workTypeFilter, setWorkTypeFilter] = useState<string>("ALL");
+  const [activityFilter, setActivityFilter] = useState<string>("ALL");
+  const [timeSlotFilter, setTimeSlotFilter] = useState<string>("ALL");
 
   // Initialize currentWeekStart from URL parameter or default to current date
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -155,13 +158,29 @@ export default function OptimiseTablePage() {
       ),
   });
 
-  // Filter requests based on status and department
+  // Get unique work types and activities for filters
+  const uniqueWorkTypes = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType).filter(Boolean) || [])) as string[];
+  const uniqueActivities = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.activity).filter(Boolean) || [])) as string[];
+
+  // Time slot helper function
+  const getTimeSlot = (timeStr: string) => {
+    if (!timeStr) return "N/A";
+    const hour = new Date(timeStr).getUTCHours();
+    if (hour >= 20 || hour < 4) return "20:00-04:00";
+    if (hour >= 4 && hour < 12) return "04:00-12:00";
+    return "12:00-20:00";
+  };
+
+  // Filter requests based on department and other filters
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
     const departmentMatch = departmentTab === 'all' ||
       (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
         request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
-    return statusMatch && departmentMatch;
+    const workTypeMatch = workTypeFilter === "ALL" || request.workType === workTypeFilter;
+    const activityMatch = activityFilter === "ALL" || request.activity === activityFilter;
+    const timeSlotMatch = timeSlotFilter === "ALL" || getTimeSlot(request.demandTimeFrom) === timeSlotFilter;
+
+    return departmentMatch && workTypeMatch && activityMatch && timeSlotMatch;
   }) || [];
 
   // Separate corridor and non-corridor requests
@@ -349,6 +368,53 @@ export default function OptimiseTablePage() {
             isUrgentMode={isUrgentMode}
             weekStartsOn={1}
           />
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-white p-4 rounded-lg border border-[#13529e] mb-4 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Work Type</label>
+            <select
+              value={workTypeFilter}
+              onChange={(e) => setWorkTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Work Types</option>
+              {uniqueWorkTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Activity</label>
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Activities</option>
+              {uniqueActivities.map((activity) => (
+                <option key={activity} value={activity}>{activity}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Time Slot</label>
+            <select
+              value={timeSlotFilter}
+              onChange={(e) => setTimeSlotFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Time Slots</option>
+              <option value="20:00-04:00">Night (20:00-04:00)</option>
+              <option value="04:00-12:00">Morning (04:00-12:00)</option>
+              <option value="12:00-20:00">Afternoon (12:00-20:00)</option>
+            </select>
+          </div>
         </div>
       </div>
 

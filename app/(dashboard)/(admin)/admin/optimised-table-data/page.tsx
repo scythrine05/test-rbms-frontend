@@ -186,6 +186,9 @@ export default function OptimiseTablePage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
+  const [workTypeFilter, setWorkTypeFilter] = useState<string>("ALL");
+  const [activityFilter, setActivityFilter] = useState<string>("ALL");
+  const [timeSlotFilter, setTimeSlotFilter] = useState<string>("ALL");
 
   // Update URL when currentWeekStart changes
   useEffect(() => {
@@ -217,11 +220,29 @@ export default function OptimiseTablePage() {
   // DEBUG: Log API data
   console.log("API data", data?.data?.requests);
 
-  // Filter requests based on department
+  // Get unique work types and activities for filters
+  const uniqueWorkTypes = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType).filter(Boolean) || [])) as string[];
+  const uniqueActivities = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.activity).filter(Boolean) || [])) as string[];
+
+  // Time slot helper function
+  const getTimeSlot = (timeStr: string) => {
+    if (!timeStr) return "N/A";
+    const hour = new Date(timeStr).getUTCHours();
+    if (hour >= 20 || hour < 4) return "20:00-04:00";
+    if (hour >= 4 && hour < 12) return "04:00-12:00";
+    return "12:00-20:00";
+  };
+
+  // Filter requests based on department and other filters
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    return departmentTab === 'all' ||
+    const departmentMatch = departmentTab === 'all' ||
       (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
         request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
+    const workTypeMatch = workTypeFilter === "ALL" || request.workType === workTypeFilter;
+    const activityMatch = activityFilter === "ALL" || request.activity === activityFilter;
+    const timeSlotMatch = timeSlotFilter === "ALL" || getTimeSlot(request.demandTimeFrom) === timeSlotFilter;
+
+    return departmentMatch && workTypeMatch && activityMatch && timeSlotMatch;
   }) || [];
 
   // Separate corridor and non-corridor requests
@@ -606,6 +627,53 @@ export default function OptimiseTablePage() {
         )}
       </div>
 
+      {/* Filters Section */}
+      <div className="bg-white p-4 rounded-lg border border-[#13529e] mb-4 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Work Type</label>
+            <select
+              value={workTypeFilter}
+              onChange={(e) => setWorkTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Work Types</option>
+              {uniqueWorkTypes.map((type: string) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Activity</label>
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Activities</option>
+              {uniqueActivities.map((activity: string) => (
+                <option key={activity} value={activity}>{activity}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Time Slot</label>
+            <select
+              value={timeSlotFilter}
+              onChange={(e) => setTimeSlotFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Time Slots</option>
+              <option value="20:00-04:00">Night (20:00-04:00)</option>
+              <option value="04:00-12:00">Morning (04:00-12:00)</option>
+              <option value="12:00-20:00">Afternoon (12:00-20:00)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Department Tabs */}
       <div className="border-b border-gray-200 mb-4">
         <nav className="flex space-x-8">
@@ -666,21 +734,6 @@ export default function OptimiseTablePage() {
             </span>
           </button>
         </nav>
-      </div>
-
-      <div className="flex justify-end py-2 gap-2">
-        <button
-          onClick={handleDownloadCSV}
-          className="px-3 py-1 text-sm bg-green-600 text-white border border-black hover:bg-green-700"
-        >
-          Download CSV
-        </button>
-        <button
-          onClick={handleSendClick}
-          className="px-3 py-1 text-sm bg-blue-600 text-white border border-black hover:bg-blue-700"
-        >
-          Send
-        </button>
       </div>
 
       {!isUrgentMode && (

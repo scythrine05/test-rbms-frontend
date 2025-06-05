@@ -26,6 +26,9 @@ export default function RequestTablePage() {
   const [limit] = useState(30);
   const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
   const [corridorTab, setCorridorTab] = useState<'corridor' | 'non-corridor'>('corridor');
+  const [workTypeFilter, setWorkTypeFilter] = useState<string>("ALL");
+  const [activityFilter, setActivityFilter] = useState<string>("ALL");
+  const [timeSlotFilter, setTimeSlotFilter] = useState<string>("ALL");
 
   // Initialize currentWeekStart from URL parameter or default to current date
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -82,6 +85,37 @@ export default function RequestTablePage() {
       );
     }
   });
+
+  // Get unique work types and activities for filters
+  const uniqueWorkTypes = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType) || []));
+  const uniqueActivities = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.activity) || []));
+
+  // Time slot helper function
+  const getTimeSlot = (timeStr: string) => {
+    if (!timeStr) return "N/A";
+    const hour = new Date(timeStr).getUTCHours();
+    if (hour >= 20 || hour < 4) return "20:00-04:00";
+    if (hour >= 4 && hour < 12) return "04:00-12:00";
+    return "12:00-20:00";
+  };
+
+  // Filter requests based on all filters
+  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
+    const urgentMatch = isUrgentMode
+      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
+      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
+
+    const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
+    const departmentMatch = departmentTab === 'all' ||
+      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
+        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
+    const corridorMatch = !isUrgentMode ? (corridorTab === 'corridor' ? request.corridorType === "Corridor" : request.corridorType !== "Corridor") : true;
+    const workTypeMatch = workTypeFilter === "ALL" || request.workType === workTypeFilter;
+    const activityMatch = activityFilter === "ALL" || request.activity === activityFilter;
+    const timeSlotMatch = timeSlotFilter === "ALL" || getTimeSlot(request.demandTimeFrom) === timeSlotFilter;
+
+    return urgentMatch && statusMatch && departmentMatch && corridorMatch && workTypeMatch && activityMatch && timeSlotMatch;
+  }) || [];
 
   // Helper functions
   const formatDate = (dateString: string) => {
@@ -224,23 +258,6 @@ export default function RequestTablePage() {
     setPage(1);
   };
 
-  // Filter requests based on status, urgent mode, and department
-  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const urgentMatch = isUrgentMode
-      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-
-    const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
-
-    const departmentMatch = departmentTab === 'all' ||
-      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
-        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
-
-    const corridorMatch = !isUrgentMode ? (corridorTab === 'corridor' ? request.corridorType === "Corridor" : request.corridorType !== "Corridor") : true;
-
-    return urgentMatch && statusMatch && departmentMatch && corridorMatch;
-  }) || [];
-
   const corridorRequests = filteredRequests.filter(
     (request) => request.corridorType === "Corridor"
   );
@@ -354,16 +371,67 @@ export default function RequestTablePage() {
           >
             Save
           </button>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="gov-input text-sm"
-          >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="ACCEPTED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-white p-4 rounded-lg border border-[#13529e] mb-4 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Status</option>
+              <option value="PENDING">Pending</option>
+              <option value="ACCEPTED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Work Type</label>
+            <select
+              value={workTypeFilter}
+              onChange={(e) => setWorkTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Work Types</option>
+              {uniqueWorkTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Activity</label>
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Activities</option>
+              {uniqueActivities.map((activity) => (
+                <option key={activity} value={activity}>{activity}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[#13529e]">Time Slot</label>
+            <select
+              value={timeSlotFilter}
+              onChange={(e) => setTimeSlotFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
+            >
+              <option value="ALL">All Time Slots</option>
+              <option value="20:00-04:00">Night (20:00-04:00)</option>
+              <option value="04:00-12:00">Morning (04:00-12:00)</option>
+              <option value="12:00-20:00">Afternoon (12:00-20:00)</option>
+            </select>
+          </div>
         </div>
       </div>
 
