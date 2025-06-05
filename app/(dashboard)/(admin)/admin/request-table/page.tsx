@@ -24,7 +24,8 @@ export default function RequestTablePage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [limit] = useState(30);
-  const [activeTab, setActiveTab] = useState<'corridor' | 'non-corridor'>('corridor');
+  const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
+  const [corridorTab, setCorridorTab] = useState<'corridor' | 'non-corridor'>('corridor');
 
   // Initialize currentWeekStart from URL parameter or default to current date
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -167,13 +168,27 @@ export default function RequestTablePage() {
 
   // Event handlers
   const handleApproveAllPending = async () => {
-    if (confirm("Are you sure you want to approve all pending requests?")) {
+    if (confirm("Are you sure you want to approve all pending requests shown in this view?")) {
       try {
-        await approveAllMutation.mutateAsync();
-        alert("All pending requests approved successfully");
+        // Get the current filtered requests that are pending
+        const requestsToApprove = filteredRequests
+          .filter((request: UserRequest) => request.adminRequestStatus === "PENDING")
+          .map((request: UserRequest) => request.id);
+
+        if (requestsToApprove.length === 0) {
+          alert("No pending requests to approve in the current view.");
+          return;
+        }
+
+        // Approve each request in the filtered list
+        for (const id of requestsToApprove) {
+          await acceptMutation.mutateAsync({ id, accept: true });
+        }
+
+        alert(`Successfully approved ${requestsToApprove.length} pending requests from the current view.`);
       } catch (error) {
-        console.error("Failed to approve all requests:", error);
-        alert("Failed to approve all requests. Please try again.");
+        console.error("Failed to approve requests:", error);
+        alert("Failed to approve requests. Please try again.");
       }
     }
   };
@@ -209,7 +224,7 @@ export default function RequestTablePage() {
     setPage(1);
   };
 
-  // Filter requests based on status and urgent mode
+  // Filter requests based on status, urgent mode, and department
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
     const urgentMatch = isUrgentMode
       ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
@@ -217,7 +232,13 @@ export default function RequestTablePage() {
 
     const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
 
-    return urgentMatch && statusMatch;
+    const departmentMatch = departmentTab === 'all' ||
+      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
+        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
+
+    const corridorMatch = !isUrgentMode ? (corridorTab === 'corridor' ? request.corridorType === "Corridor" : request.corridorType !== "Corridor") : true;
+
+    return urgentMatch && statusMatch && departmentMatch && corridorMatch;
   }) || [];
 
   const corridorRequests = filteredRequests.filter(
@@ -376,14 +397,76 @@ export default function RequestTablePage() {
         </div>
       )}
 
+      {/* Department Tabs */}
+      <div className="border-b border-gray-200 mb-4">
+        <nav className="flex space-x-8">
+          <button
+            onClick={() => setDepartmentTab('all')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'all'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            All Requests
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY").length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY").length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('engg')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'engg'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Engineering
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('trd')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'trd'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            TRD
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('snt')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'snt'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            S&T
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0}
+            </span>
+          </button>
+        </nav>
+      </div>
+
       {!isUrgentMode && (
         <div className="space-y-4">
           {/* Tabs */}
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8">
               <button
-                onClick={() => setActiveTab('corridor')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'corridor'
+                onClick={() => setCorridorTab('corridor')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${corridorTab === 'corridor'
                   ? 'border-[#13529e] text-[#13529e]'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
@@ -394,8 +477,8 @@ export default function RequestTablePage() {
                 </span>
               </button>
               <button
-                onClick={() => setActiveTab('non-corridor')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'non-corridor'
+                onClick={() => setCorridorTab('non-corridor')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${corridorTab === 'non-corridor'
                   ? 'border-[#13529e] text-[#13529e]'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
@@ -428,7 +511,7 @@ export default function RequestTablePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(activeTab === 'corridor' ? corridorRequests : nonCorridorRequests).map((request: UserRequest) => (
+                  {(corridorTab === 'corridor' ? corridorRequests : nonCorridorRequests).map((request: UserRequest) => (
                     <tr key={request.id} className="hover:bg-gray-50">
                       <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
                       <td className="border border-black p-2 text-sm">{request.selectedSection}</td>

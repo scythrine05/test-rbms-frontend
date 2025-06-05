@@ -185,13 +185,14 @@ export default function OptimiseTablePage() {
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
 
   // Update URL when currentWeekStart changes
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
     router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentWeekStart, router, searchParams]);
+  }, [currentWeekStart, router]);
 
   const weekEnd = isUrgentMode
     ? currentWeekStart
@@ -216,8 +217,12 @@ export default function OptimiseTablePage() {
   // DEBUG: Log API data
   console.log("API data", data?.data?.requests);
 
-  // TEMP: Show all requests for debugging
-  const filteredRequests = data?.data?.requests || [];
+  // Filter requests based on department
+  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
+    return departmentTab === 'all' ||
+      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
+        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
+  }) || [];
 
   // Separate corridor and non-corridor requests
   const corridorRequests = filteredRequests.filter(
@@ -599,6 +604,68 @@ export default function OptimiseTablePage() {
             weekStartsOn={1}
           />
         )}
+      </div>
+
+      {/* Department Tabs */}
+      <div className="border-b border-gray-200 mb-4">
+        <nav className="flex space-x-8">
+          <button
+            onClick={() => setDepartmentTab('all')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'all'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            All Requests
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY").length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY").length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('engg')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'engg'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Engineering
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('trd')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'trd'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            TRD
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0}
+            </span>
+          </button>
+          <button
+            onClick={() => setDepartmentTab('snt')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'snt'
+              ? 'border-[#13529e] text-[#13529e]'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            S&T
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+              {isUrgentMode
+                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0
+                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0}
+            </span>
+          </button>
+        </nav>
       </div>
 
       <div className="flex justify-end py-2 gap-2">
