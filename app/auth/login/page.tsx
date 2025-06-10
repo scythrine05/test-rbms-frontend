@@ -1,28 +1,47 @@
 "use client";
 
-import Header from "@/app/components/shared/Header";
-import Footer from "@/app/components/shared/Footer";
 import LoginForm from "@/app/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Header showNavLinks={false} />
-
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <LoginForm />
-
-          <div className="text-center text-xs text-gray-500 mt-6">
-            <p>For technical assistance, please contact</p>
-            <p className="font-medium">
-              IT Support: support@adrig.co.in
-            </p>
-          </div>
+    <div className="min-h-screen flex flex-col items-center justify-between bg-[#c6f5d6] p-2">
+      {/* Header */}
+      <div className="w-full max-w-md mx-auto rounded-lg border-4 border-black bg-yellow-200 mt-2 mb-4 p-2 relative">
+        <img
+          src="/logo without background.png"
+          alt="Indian Railways Logo"
+          className="absolute left-2 top-2 w-12 h-12 object-contain"
+        />
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="text-center text-2xl sm:text-3xl font-extrabold text-[#b07be0] leading-tight mt-2">
+            Railway Block<br />
+            Management System<br />
+            <span className="text-2xl sm:text-3xl font-extrabold">(RBMS)</span>
+          </h1>
         </div>
-      </main>
+      </div>
 
-      <Footer variant="login" />
+      {/* Login Form */}
+      <div className="w-full max-w-md flex-1 flex flex-col justify-center items-center">
+        <LoginForm />
+      </div>
+
+      {/* Yellow oval for developer credit */}
+      <div className="w-full flex justify-center mt-2 mb-2">
+        <div className="bg-yellow-300 rounded-full px-6 py-3 text-center text-xl font-bold text-black shadow-md" style={{ maxWidth: '95vw' }}>
+          App designed & developed by<br />Southern Railway
+        </div>
+      </div>
+
+      {/* Train image at the bottom */}
+      <div className="relative w-full" style={{ height: '60vw', minHeight: '200px', maxHeight: '350px' }}>
+        <img
+          src="/train image.png"
+          alt="Train"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
+          style={{ height: '100vw', width: 'auto', maxWidth: 'unset', maxHeight: 'unset' }}
+        />
+      </div>
     </div>
   );
 }

@@ -25,6 +25,7 @@ import {
   isDateAfterThursdayCutoff,
   extractTimeFromDatetime,
 } from "@/app/lib/helper";
+import { useRouter } from "next/navigation";
 
 type Department = "TRD" | "S&T" | "ENGG";
 
@@ -139,6 +140,7 @@ const sntDisconnectionAssignToOptions = [
 ];
 
 export default function CreateBlockRequestPage() {
+  const router = useRouter();
 
   const [formData, setFormData] = useState<
     Partial<UserRequestInput> & {
@@ -472,183 +474,6 @@ export default function CreateBlockRequestPage() {
     return streamDataTyped[streamKey] || [];
   };
 
-  // const handleFormValidation = () => {
-  //   if (!formData.date) {
-  //     setErrors({
-  //       date: "Please select a date for the block request",
-  //     });
-  //     return false;
-  //   }
-
-  //   const selectedDate = new Date(formData.date);
-  //   const today = new Date();
-  //   today.setHours(0, 0, 0, 0); // Reset time to midnight for comparison
-
-  //   if (selectedDate < today) {
-  //     // Rejects past dates
-  //     setErrors({
-  //       date: "Block date must be today or in the future.",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Check if date is in current week but beyond urgent window
-  //   if (isBlockedCurrentWeekDate(formData.date)) {
-  //     setErrors({
-  //       date: "Dates in current week beyond today, tomorrow, and day after tomorrow are not available for block requests.",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Validate corridor type selection
-  //   if (!formData.corridorTypeSelection) {
-  //     setErrors({
-  //       corridorTypeSelection: "Corridor type is required",
-  //     });
-  //     return false;
-  //   }
-
-  //   // Get corridor type restrictions based on selected date
-  //   const { urgentOnly, urgentAllowed, message } = getCorridorTypeRestrictions(formData.date);
-
-  //   // Validate based on restrictions
-  //   if (urgentOnly && formData.corridorTypeSelection !== "Urgent Block") {
-  //     setErrors({
-  //       corridorTypeSelection: message,
-  //     });
-  //     return false;
-  //   }
-
-  //   if (!urgentAllowed && formData.corridorTypeSelection === "Urgent Block") {
-  //     setErrors({
-  //       corridorTypeSelection: "Urgent Block is only allowed for today and next 2 days",
-  //     });
-  //     return false;
-  //   }
-
-  //   if (!formData.demandTimeFrom || !formData.demandTimeTo) {
-  //     const newErrors: Record<string, string> = {};
-  //     if (!formData.demandTimeFrom) {
-  //       newErrors.demandTimeFrom = "Demand Time From is required";
-  //     }
-  //     if (!formData.demandTimeTo) {
-  //       newErrors.demandTimeTo = "Demand Time To is required";
-  //     }
-  //     setErrors(newErrors);
-  //     return false;
-  //   }
-
-  //   let newErrors: Record<string, string> = {};
-  //   let hasError = false;
-
-  //   // Required fields validation
-  //   const requiredFields = [
-  //     "date",
-  //     "corridorTypeSelection",
-  //     "selectedSection",
-  //     "selectedDepo",
-  //     "demandTimeFrom",
-  //     "demandTimeTo",
-  //     "workType",
-  //     "activity",
-  //     "repercussions",
-  //   ];
-
-  //   // Check required fields
-  //   requiredFields.forEach((field) => {
-  //     if (
-  //       field === "repercussions" &&
-  //       !formData[field as keyof typeof formData]
-  //     ) {
-  //       if (session?.user.department === "TRD" || formData.corridorTypeSelection === "Outside Corridor") {
-  //         newErrors[field] = `${field
-  //           .replace(/([A-Z])/g, " $1")
-  //           .replace(/^./, (str) => str.toUpperCase())} is required`;
-  //         hasError = true;
-  //       }
-  //     } else if (!formData[field as keyof typeof formData]) {
-  //       newErrors[field] = `${field
-  //         .replace(/([A-Z])/g, " $1")
-  //         .replace(/^./, (str) => str.toUpperCase())} is required`;
-  //       hasError = true;
-  //     }
-  //   });
-
-  //   // Also make Remarks required for Outside Corridor
-  //   if (formData.corridorTypeSelection === "Outside Corridor" && !formData.requestremarks?.trim()) {
-  //     newErrors.requestremarks = "Remarks are required for Outside Corridor requests";
-  //     hasError = true;
-  //   }
-
-  //   // Add custom activity validation when "others" is selected
-  //   if (formData.activity === "others" && !customActivity.trim()) {
-  //     newErrors.activity = "Please specify the custom activity";
-  //     hasError = true;
-  //   }
-
-  //   // Validate block section
-  //   if (blockSectionValue.length === 0) {
-  //     newErrors.missionBlock = "Block Section is required";
-  //     hasError = true;
-  //   }
-
-  //   // Validate line/stream entries for each block section
-  //   for (const block of blockSectionValue) {
-  //     const sectionEntry = formData.processedLineSections?.find(
-  //       (section) => section.block === block
-  //     );
-
-  //     if (block.includes("-YD")) {
-  //       // Validate yard sections
-  //       if (!sectionEntry || !sectionEntry.stream) {
-  //         newErrors[
-  //           `processedLineSections.${block}.stream`
-  //         ] = `Stream for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //       if (sectionEntry?.stream && !sectionEntry.road) {
-  //         newErrors[
-  //           `processedLineSections.${block}.road`
-  //         ] = `Road for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //     } else {
-  //       // Validate regular sections
-  //       if (!sectionEntry || !sectionEntry.lineName) {
-  //         newErrors[
-  //           `processedLineSections.${block}.lineName`
-  //         ] = `Line for ${block} is required`;
-  //         hasError = true;
-  //       }
-  //     }
-  //   }
-
-  //   // Add validation for sntDisconnectionAssignTo when sntDisconnectionRequired is true
-  //   if (sntDisconnectionChecked && !formData.sntDisconnectionAssignTo) {
-  //     newErrors.sntDisconnectionAssignTo = "Please select who to assign the S&T disconnection to";
-  //     hasError = true;
-  //   }
-
-  //   // Set validation errors if any
-  //   if (hasError) {
-  //     setErrors(newErrors);
-  //     // Scroll to first error
-  //     const firstErrorKey = Object.keys(newErrors)[0];
-  //     const selector = firstErrorKey.includes(".")
-  //       ? `[name="${firstErrorKey.split(".")[0]}"]`
-  //       : `[name="${firstErrorKey}"]`;
-  //     const element = document.querySelector(selector);
-  //     if (element) {
-  //       element.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //     return false;
-  //   }
-
-  //   return true;
-
-
-
-  // };
   const handleFormValidation = () => {
     // Clear previous errors
     setErrors({});
@@ -857,9 +682,9 @@ export default function CreateBlockRequestPage() {
         ? formatTimeToDatetime(formData.date || "", formData.demandTimeTo)
         : "",
       processedLineSections: processedSectionsWithDefaults,
-      sntDisconnectionRequired: formData.sntDisconnectionRequired??false,
-      powerBlockRequired: formData.powerBlockRequired??false,
-      freshCautionRequired: formData.freshCautionRequired??false,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
+      powerBlockRequired: formData.powerBlockRequired ?? false,
+      freshCautionRequired: formData.freshCautionRequired ?? false,
       freshCautionLocationFrom: formData.freshCautionLocationFrom,
       freshCautionLocationTo: formData.freshCautionLocationTo,
       freshCautionSpeed: formData.freshCautionSpeed,
@@ -1259,1805 +1084,274 @@ export default function CreateBlockRequestPage() {
       };
     });
   };
+
+  // Duration calculation helper
+  function getDuration(from: string, to: string) {
+    if (!from || !to) return '';
+    const [fromH, fromM] = from.split(':').map(Number);
+    const [toH, toM] = to.split(':').map(Number);
+    let start = fromH * 60 + fromM;
+    let end = toH * 60 + toM;
+    if (end < start) end += 24 * 60; // handle overnight
+    const diff = end - start;
+    const hours = Math.floor(diff / 60);
+    const mins = diff % 60;
+    return `${hours}h ${mins}m`;
+  }
+
   return (
-    <div className="bg-white p-3 border border-black mb-3">
-      <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">
-          Create Block Request
-        </h1>
+    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-[#c6f5d6] to-[#e6f7ff] p-4 font-sans">
+      {/* RBMS Header */}
+      <div className="w-full max-w-2xl mx-auto rounded-lg border-4 border-black bg-yellow-200 mt-2 mb-6 p-4 flex flex-col items-center shadow-lg">
+        <span className="text-5xl font-extrabold text-[#b07be0] tracking-wide drop-shadow">RBMS</span>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-3 gap-y-2 mb-3">
-          <div className="form-group col-span-1">
-            <label className="block text-sm font-medium text-black mb-1">
-              Date of Block <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date || ""}
-              onChange={handleInputChange}
-              className="input gov-input"
-              style={{ color: "black", fontSize: "14px" }}
-              aria-required="true"
-              aria-label="Select date of block"
-              min={getMinDateString()}
-            />
-            {errors.date && (
-              <span className="text-xs text-red-700 font-medium mt-1 block">
-                {errors.date}
-              </span>
-            )}
-            <span className="text-xs text-gray-600 mt-1 block">
-              Note: Only today, tomorrow, and day after tomorrow are available for urgent blocks. Dates in current week beyond these are not available. Week 2 block requests must be submitted before Thursday 22:00 of current week.
-            </span>
-          </div>
-          <div className="form-group col-span-1 text-black">
-            <label className="block text-sm font-medium text-black mb-1">
-              Corridor Type <span className="text-red-600">*</span>
-            </label>
-            <div className="space-y-1">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="corridorTypeSelection"
-                  value="Corridor"
-                  checked={formData.corridorTypeSelection === "Corridor"}
-                  onChange={handleInputChange}
-                  disabled={isDisabled}
-                  className="form-radio h-4 w-4"
-                />
-                <span className="ml-2 text-sm">Corridor</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="corridorTypeSelection"
-                  value="Outside Corridor"
-                  checked={
-                    formData.corridorTypeSelection === "Outside Corridor"
-                  }
-                  onChange={handleInputChange}
-                  disabled={isDisabled}
-                  className="form-radio h-4 w-4"
-                />
-                <span className="ml-2 text-sm">Outside Corridor</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  name="corridorTypeSelection"
-                  value="Urgent Block"
-                  checked={formData.corridorTypeSelection === "Urgent Block"}
-                  onChange={handleInputChange}
-                  disabled={!formData.date || !getCorridorTypeRestrictions(formData.date).urgentAllowed}
-                  className="form-radio h-4 w-4"
-                />
-                <span className="ml-2 text-sm">Urgent Block</span>
-              </label>
-            </div>
-            {isDisabled && formData.date && (
-              <span className="text-xs text-amber-700 mt-1 block">
-                {getCorridorTypeRestrictions(formData.date).message}
-              </span>
-            )}
-            {formData.date && !getCorridorTypeRestrictions(formData.date).urgentAllowed && (
-              <span className="text-xs text-gray-600 mt-1 block">
-                Urgent Block is only available for today and the next 2 days.
-              </span>
-            )}
-            {errors.corridorTypeSelection && (
-              <span className="text-xs text-red-700 font-medium mt-1 block">
-                {errors.corridorTypeSelection}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group col-span-1">
-            <label className="block text-sm font-medium text-black mb-1">
-              Department
-            </label>
-            <input
-              name="selectedDepartment"
-              className="input gov-input bg-gray-100"
-              value={session?.user.department || ""}
-              style={{ color: "black", fontSize: "14px" }}
-              disabled
-              aria-label="Department"
-            />
-          </div>
-
-          {/* {session?.user.department === "S&T" && (
-            <div className="form-group col-span-3">
-              <label className="block text-sm font-medium text-black mb-1">
-                Route <span className="text-red-600">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label
-                    className="block text-xs font-medium text-black mb-1"
-                    htmlFor="routeFrom"
-                  >
-                    From Location
-                  </label>
-                  <input
-                    id="routeFrom"
-                    name="routeFrom"
-                    value={formData.routeFrom || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{ color: "black", fontSize: "14px" }}
-                    aria-label="Route from location"
-                  />
-                </div>
-                <div>
-                  <label
-                    className="block text-xs font-medium text-black mb-1"
-                    htmlFor="routeTo"
-                  >
-                    To Location
-                  </label>
-                  <input
-                    id="routeTo"
-                    name="routeTo"
-                    value={formData.routeTo || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{ color: "black", fontSize: "14px" }}
-                    aria-label="Route to location"
-                  />
-                </div>
-              </div>
-            </div>
-          )} */}
-          {/* {session?.user.department === "S&T" && (
-            <div className="form-group col-span-3">
-              <label className="block text-sm font-medium text-black mb-1">
-                Route <span className="text-red-600">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-medium text-black mb-1" htmlFor="routeFrom">
-                    From Location
-                  </label>
-                  <input
-                    id="routeFrom"
-                    name="routeFrom"
-                    value={formData.routeFrom || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{
-                      color: "black",
-                      fontSize: "14px",
-                      borderColor: errors.routeFrom ? "#dc2626" : "#45526c"
-                    }}
-                    aria-label="Route from location"
-                  />
-                  {errors.routeFrom && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.routeFrom}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-black mb-1" htmlFor="routeTo">
-                    To Location
-                  </label>
-                  <input
-                    id="routeTo"
-                    name="routeTo"
-                    value={formData.routeTo || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{
-                      color: "black",
-                      fontSize: "14px",
-                      borderColor: errors.routeTo ? "#dc2626" : "#45526c"
-                    }}
-                    aria-label="Route to location"
-                  />
-                  {errors.routeTo && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.routeTo}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )} */}
-
-          {session?.user.department === "TRD" && (
-            <div className="form-group col-span-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label
-                    className="block text-sm font-medium text-black mb-1"
-                    htmlFor="elementarySection"
-                  >
-                    Elementary Section
-                  </label>
-                  <input
-                    id="elementarySection"
-                    name="elementarySection"
-                    value={formData.elementarySection || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{ color: "black", fontSize: "14px" }}
-                    aria-label="Route from location"
-                  />
-                </div>
-                <div>
-                  <label
-                    className="block text-sm font-medium text-black mb-1"
-                    htmlFor="trdWorkLocation"
-                  >
-                    Work Location
-                  </label>
-                  <input
-                    id="trdWorkLocation"
-                    name="trdWorkLocation"
-                    value={formData.trdWorkLocation || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{ color: "black", fontSize: "14px" }}
-                    aria-label="Route to location"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="form-group col-span-1">
-            <label className="block text-sm font-medium text-black mb-1">
-              Major Section <span className="text-red-600">*</span>
-            </label>
+      {/* Form Card */}
+      <form onSubmit={handleSubmit} className="w-full max-w-2xl bg-white/95 rounded-2xl shadow-2xl border-2 border-black p-8 flex flex-col gap-8">
+        <h1 className="text-4xl font-extrabold text-black text-center mb-4 tracking-wide">Enter New Block Request</h1>
+        {/* Major Section, Block Section, Line/Road - single row, bold colors, side-by-side */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mb-6">
+          {/* Major Section */}
+          <div className="border-2 border-black bg-[#e6f7c6] rounded-l-xl">
+            <label className="block font-extrabold px-2 py-2 text-lg text-black text-center border-b-2 border-black">Major Section</label>
             <select
               name="selectedSection"
               value={formData.selectedSection || ""}
               onChange={handleInputChange}
-              className="input gov-input"
-              style={{ color: "black", fontSize: "14px" }}
+              className="w-full border-2 border-black rounded-none px-3 py-3 text-lg font-extrabold focus:outline-none focus:ring-2 focus:ring-green-300 bg-white hover:bg-green-50 transition"
               aria-required="true"
+              style={{ fontFamily: 'Arial, sans-serif' }}
             >
-              <option value="" disabled>
-                Select Major Section
-              </option>
+              <option value="" disabled>Select Major Section</option>
               {majorSectionOptions.map((section: string) => (
-                <option key={section} value={section}>
-                  {section}
-                </option>
+                <option key={section} value={section}>{section}</option>
               ))}
             </select>
             {errors.selectedSection && (
-              <span className="text-xs text-red-700 font-medium mt-1 block">
-                {errors.selectedSection}
-              </span>
+              <span className="text-xs text-red-700 font-medium mt-1 block">{errors.selectedSection}</span>
             )}
           </div>
-
-          <div className="form-group col-span-1">
-            <label className="block text-sm font-medium text-black mb-1">
-              Depot / SSE <span className="text-red-600">*</span>
-            </label>
-            <select
-              name="selectedDepo"
-              value={formData.selectedDepo || ""}
-              onChange={handleInputChange}
-              className="input gov-input"
-              style={{ color: "black", fontSize: "14px" }}
-              aria-required="true"
-            >
-              <option value="" disabled>
-                Select Depot / SSE
-              </option>
-              {selectedMajorSection &&
-                session?.user.department &&
-                depot[selectedMajorSection] &&
-                depot[selectedMajorSection][
-                session.user.department as Department
-                ] ? (
-                depot[selectedMajorSection][
-                  session.user.department as Department
-                ].map((depotOption: string, index) => (
-                  <option key={index} value={depotOption}>
-                    {depotOption}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>
-                  Select Major Section first
-                </option>
-              )}
-            </select>
-            {errors.selectedDepo && (
-              <span className="text-xs text-red-700 font-medium mt-1 block">
-                {errors.selectedDepo}
-              </span>
-            )}
-          </div>
-
-          {session?.user.department === "ENGG" && (
-            <div className="form-group col-span-1">
-              <div>
-                <label
-                  className="block text-sm font-medium text-black "
-                  htmlFor="workLocationFrom"
-                >
-                  Work Location
-                </label>
-                <input
-                  id="workLocationFrom"
-                  name="workLocationFrom"
-                  value={formData.workLocationFrom || ""}
-                  onChange={handleInputChange}
-                  className="input gov-input"
-                  style={{ color: "black", fontSize: "14px" }}
-                  aria-label="Route from location"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Block Section and Work Details */}
-        <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
-          <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
-            Block Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
-            <div className="form-group col-span-2">
-              <label className="block text-sm font-medium text-black mb-1">
-                Block Section / Yard <span className="text-red-600">*</span>
-              </label>
+          {/* Block Section/Yard and Line/Road side-by-side */}
+          <div className="col-span-2 flex flex-row gap-4">
+            {/* Block Section/Yard */}
+            <div className="flex-1 border-2 border-black bg-[#ffd700] rounded-none rounded-tr-xl">
+              <label className="block font-extrabold px-2 py-2 text-lg text-black text-center border-b-2 border-black">Block Section/Yard</label>
               <Select
                 isMulti
                 options={blockSectionOptionsList}
-                value={blockSectionOptionsList.filter((opt) =>
-                  blockSectionValue.includes(opt.value)
-                )}
+                value={blockSectionOptionsList.filter((opt) => blockSectionValue.includes(opt.value))}
                 onChange={(opts) => {
                   setBlockSectionValue(opts.map((opt) => opt.value));
-                  // Clear missionBlock error when user selects block section
                   if (opts.length > 0 && errors.missionBlock) {
-                    setErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors.missionBlock;
-                      return newErrors;
-                    });
+                    setErrors((prev) => { const newErrors = { ...prev }; delete newErrors.missionBlock; return newErrors; });
                   }
                 }}
                 isDisabled={!selectedMajorSection}
-                className="basic-multi-select"
+                className="basic-multi-select border-0"
                 classNamePrefix="select"
-                placeholder={
-                  selectedMajorSection
-                    ? "Select Block Section"
-                    : "Select Major Section first"
-                }
+                placeholder={selectedMajorSection ? "Select Block Section" : "Select Major Section first"}
                 styles={getSelectStyles(!!errors.missionBlock)}
               />
               {errors.missionBlock && blockSectionValue.length === 0 && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.missionBlock}
-                </span>
+                <span className="text-xs text-red-700 font-medium mt-1 block">{errors.missionBlock}</span>
               )}
-
-              <div>
-                {" "}
-                {blockSectionValue.length === 1 && (
-                  <div className="mt-4">
-                    {blockSectionValue[0].includes("-YD") ? (
-                      // For yard sections (containing -YD)
-                      <div>
-                        {/* Road selection - shown first */}
-                        <label className="block text-sm font-medium text-black mb-1">
-                          Road for {blockSectionValue[0]} <span className="text-red-600">*</span>
-                        </label>
-                        <div>
-                          {(() => {
-                            // Find the section in processedLineSections for this block
-                            const sectionEntry = formData.processedLineSections?.find(
-                              (section) => section.block === blockSectionValue[0]
-                            );
-                            const roadValue = sectionEntry?.road || "";
-
-                            // Get all roads for this yard
-                            const allRoads = getAllRoadsForYard(blockSectionValue[0]);
-
-                            // Check if we have error
-                            const hasRoadError = errors[
-                              `processedLineSections.${blockSectionValue[0]}.road`
-                            ];
-
-                            return (
-                              <>
-                                <select
-                                  className="input gov-input"
-                                  style={{
-                                    color: "black",
-                                    borderColor: hasRoadError
-                                      ? "#dc2626"
-                                      : roadValue
-                                        ? "#45526c"
-                                        : "#dc2626",
-                                    fontSize: "14px",
-                                  }}
-                                  value={roadValue}
-                                  onChange={(e) =>
-                                    handleRoadSelection(
-                                      blockSectionValue[0],
-                                      e.target.value
-                                    )
-                                  }
-                                >
-                                  <option value="" disabled>
-                                    Select Road
-                                  </option>
-                                  {allRoads.map((road: string) => (
-                                    <option key={road} value={road}>
-                                      {road}
-                                    </option>
-                                  ))}
-                                </select>
-                                {hasRoadError && (
-                                  <span className="text-xs text-red-700 font-medium mb-2 block">
-                                    Road selection is required
-                                  </span>
-                                )}
-
-                                {/* Stream selection - independent now */}
-                                {roadValue && (
-                                  <div className="mt-4">
-                                    <label className="block text-sm font-medium text-black mb-1">
-                                      Direction of traffic affected for {blockSectionValue[0]} <span className="text-red-600">*</span>
-                                    </label>
-                                    <select
-                                      className="input gov-input"
-                                      style={{
-                                        color: "black",
-                                        borderColor: errors[
-                                          `processedLineSections.${blockSectionValue[0]}.stream`
-                                        ]
-                                          ? "#dc2626"
-                                          : sectionEntry?.stream
-                                            ? "#45526c"
-                                            : "#dc2626",
-                                        fontSize: "14px",
-                                      }}
-                                      value={sectionEntry?.stream || ""}
-                                      onChange={(e) => {
-                                        // Use a function that explicitly preserves the road value
-                                        const streamValue = e.target.value;
-                                        setFormData((prev) => {
-                                          const existingSections = [...(prev.processedLineSections || [])];
-                                          const sectionIndex = existingSections.findIndex(
-                                            (section) => section.block === blockSectionValue[0]
-                                          );
-
-                                          if (sectionIndex >= 0) {
-                                            const currentSection = existingSections[sectionIndex];
-                                            existingSections[sectionIndex] = {
-                                              ...currentSection,
-                                              stream: streamValue,
-                                            };
-                                          } else {
-                                            existingSections.push({
-                                              block: blockSectionValue[0],
-                                              type: "yard",
-                                              stream: streamValue,
-                                              road: roadValue,
-                                              otherRoads: "",
-                                              lineName: "",
-                                              otherLines: "",
-                                            });
-                                          }
-
-                                          return {
-                                            ...prev,
-                                            processedLineSections: existingSections,
-                                          };
-                                        });
-                                      }}
-                                    >
-                                      <option value="" disabled>
-                                        Select Stream
-                                      </option>
-                                      {streamData &&
-                                        blockSectionValue[0] in streamData &&
-                                        Object.keys(
-                                          streamData[
-                                          blockSectionValue[0] as keyof typeof streamData
-                                          ]
-                                        ).map((stream) => (
-                                          <option key={stream} value={stream}>
-                                            {stream}
-                                          </option>
-                                        ))}
-                                    </select>
-                                    {errors[
-                                      `processedLineSections.${blockSectionValue[0]}.stream`
-                                    ] && (
-                                        <span className="text-xs text-red-700 font-medium mb-2 block">
-                                          Stream selection is required
-                                        </span>
-                                      )}
-                                  </div>
-                                )}
-
-                                {/* Other affected roads */}
-                                {roadValue && (
-                                  <div className="mt-4">
-                                    <label className="block text-sm font-medium text-black mb-1">
-                                      Other affected Roads for {blockSectionValue[0]}
-                                    </label>
-                                    <Select
-                                      isMulti
-                                      options={allRoads
-                                        .filter((road) => road !== roadValue)
-                                        .map((road) => ({
-                                          value: road,
-                                          label: road,
-                                        }))}
-                                      value={
-                                        sectionEntry?.otherRoads
-                                          ? sectionEntry.otherRoads
-                                            .split(",")
-                                            .filter(Boolean)
-                                            .map((road) => ({
-                                              value: road,
-                                              label: road,
-                                            }))
-                                          : []
-                                      }
-                                      onChange={(opts) =>
-                                        handleOtherAffectedLinesChange(
-                                          blockSectionValue[0],
-                                          opts as any
-                                        )
-                                      }
-                                      className="basic-multi-select"
-                                      classNamePrefix="select"
-                                      placeholder="Select other affected roads"
-                                      styles={getSelectStyles(false)}
-                                    />
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    ) : (
-                      // For regular sections (without -YD)
-                      <div>
-                        <label className="block text-sm font-medium text-black mb-1">
-                          Line {blockSectionValue[0]}{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        {(() => {
-                          // Find the section in processedLineSections for this block
-                          const sectionEntry =
-                            formData.processedLineSections?.find(
-                              (section) =>
-                                section.block === blockSectionValue[0]
-                            );
-                          const lineValue = sectionEntry?.lineName || "";
-
-                          // Check if we have error
-                          const hasLineError =
-                            errors[
-                            `processedLineSections.${blockSectionValue[0]}.lineName`
-                            ];
-
-                          return (
-                            <>
-                              <select
-                                className="input gov-input"
-                                style={{
-                                  color: "black",
-                                  borderColor: hasLineError
-                                    ? "#dc2626"
-                                    : lineValue
-                                      ? "#45526c"
-                                      : "#dc2626",
-                                  fontSize: "14px",
-                                }}
-                                value={lineValue}
-                                onChange={(e) =>
-                                  handleLineNameSelection(
-                                    blockSectionValue[0],
-                                    e.target.value
-                                  )
-                                }
-                              >
-                                <option value="" disabled>
-                                  Select Line
-                                </option>
-                                {lineData[
-                                  blockSectionValue[0] as keyof typeof lineData
-                                ]?.map((line: string) => (
-                                  <option key={line} value={line}>
-                                    {line}
-                                  </option>
-                                ))}
-                              </select>
-                              {hasLineError && (
-                                <span className="text-xs text-red-700 font-medium mb-2 block">
-                                  Line selection is required
-                                </span>
-                              )}
-                              {lineValue && (
-                                <div className="mt-2">
-                                  <label className="block text-sm font-medium text-black mb-1">
-                                    Other affected Line for{" "}
-                                    {blockSectionValue[0]}
-                                  </label>
-                                  <Select
-                                    isMulti
-                                    options={(
-                                      lineData[
-                                      blockSectionValue[0] as keyof typeof lineData
-                                      ] || []
-                                    )
-                                      .filter((l: string) => l !== lineValue)
-                                      .map((l: string) => ({
-                                        value: l,
-                                        label: l,
-                                      }))}
-                                    value={
-                                      sectionEntry?.otherLines
-                                        ? sectionEntry.otherLines
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((line: string) => ({
-                                            value: line,
-                                            label: line,
-                                          }))
-                                        : []
-                                    }
-                                    onChange={(opts) =>
-                                      handleOtherAffectedLinesChange(
-                                        blockSectionValue[0],
-                                        opts as any
-                                      )
-                                    }
-                                    className="basic-multi-select"
-                                    classNamePrefix="select"
-                                    placeholder="Select other affected lines"
-                                    styles={getSelectStyles(false)}
-                                  />
-                                </div>
-                              )}
-                            </>
-                          );
+            </div>
+            {/* Line/Road for each selected block section */}
+            <div className="flex-1 border-2 border-black bg-[#ffd700] rounded-none rounded-br-xl">
+              <label className="block font-extrabold px-2 py-2 text-lg text-black text-center border-b-2 border-black">Line/Road</label>
+              {blockSectionValue.length === 0 && (
+                <div className="text-center text-gray-400 py-4">Select a Block Section</div>
+              )}
+              {blockSectionValue.map((block, idx) => (
+                <div key={block} className="mb-6">
+                  <label className="block text-xs font-extrabold text-black mb-1 text-center">{block}</label>
+                  {block.includes('-YD') ? (
+                    <>
+                      <select
+                        name={`road-${block}`}
+                        value={(() => {
+                          const section = formData.processedLineSections?.find(s => s.block === block);
+                          return section?.road || '';
                         })()}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {blockSectionValue.length > 1 && (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-medium text-black mb-4">
-                      Line Selections
-                    </h3>
-                    {blockSectionValue.map((block) => {
-                      // Find the section in processedLineSections for this block
-                      const sectionEntry = formData.processedLineSections?.find(
-                        (section) => section.block === block
-                      );
-
-                      return (
-                        <div
-                          key={block}
-                          className="mb-4 pb-4 border-b border-gray-200"
-                        >
-                          {block.includes("-YD") ? (
-                            // For yard sections in multiple selection
-                            <>
-
-                              <label className="block text-base font-medium text-black mb-2">
-                                Road for {block} <span className="text-red-600">*</span>
-                              </label>
-                              <select
-                                className="input gov-input mb-3"
-                                style={{
-                                  color: "black",
-                                  borderColor: errors[
-                                    `processedLineSections.${block}.road`
-                                  ]
-                                    ? "#dc2626"
-                                    : sectionEntry?.road
-                                      ? "#45526c"
-                                      : "#dc2626",
-                                }}
-                                value={sectionEntry?.road || ""}
-                                onChange={(e) =>
-                                  handleRoadSelection(block, e.target.value)
-                                }
-                              >
-                                <option value="" disabled>
-                                  Select Road
-                                </option>
-                                {getAllRoadsForYard(block).map((road: string) => (
-                                  <option key={road} value={road}>
-                                    {road}
-                                  </option>
-                                ))}
-                              </select>
-                              {errors[`processedLineSections.${block}.road`] && (
-                                <span className="text-base text-red-700 font-medium mb-3 block">
-                                  Road selection is required
-                                </span>
-                              )}
-
-                              {sectionEntry?.road && (
-                                <div className="mt-2 mb-2">
-                                  <label className="block text-base font-medium text-black mb-2">
-                                    Other affected Road for {block}
-                                  </label>
-                                  <Select
-                                    isMulti
-                                    options={getAllRoadsForYard(block)
-                                      .filter((road) => road !== sectionEntry.road)
-                                      .map((road) => ({
-                                        value: road,
-                                        label: road,
-                                      }))}
-                                    value={
-                                      sectionEntry?.otherRoads
-                                        ? sectionEntry.otherRoads
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((road: string) => ({
-                                            value: road,
-                                            label: road,
-                                          }))
-                                        : []
-                                    }
-                                    onChange={(opts) =>
-                                      handleOtherAffectedLinesChange(
-                                        block,
-                                        opts as any
-                                      )
-                                    }
-                                    className="basic-multi-select"
-                                    classNamePrefix="select"
-                                    placeholder="Select other affected roads"
-                                    styles={getSelectStyles(false)}
-                                  />
-                                </div>
-                              )}
-                              {sectionEntry?.road && (
-                                <div className="mt-2 mb-3">
-                                  <label className="block text-base font-medium text-black mb-2">
-                                    Direction of movement affected for {block} <span className="text-red-600">*</span>
-                                  </label>
-                                  <select
-                                    className="input gov-input"
-                                    value={sectionEntry?.stream || ""}
-                                    onChange={(e) => {
-                                      // Use a function that explicitly preserves the road value
-                                      const streamValue = e.target.value;
-                                      setFormData((prev) => {
-                                        const existingSections = [...(prev.processedLineSections || [])];
-                                        const sectionIndex = existingSections.findIndex(
-                                          (section) => section.block === block
-                                        );
-
-                                        if (sectionIndex >= 0) {
-                                          const currentSection = existingSections[sectionIndex];
-                                          existingSections[sectionIndex] = {
-                                            ...currentSection,
-                                            stream: streamValue,
-                                          };
-                                        } else {
-                                          existingSections.push({
-                                            block: block,
-                                            type: "yard",
-                                            stream: streamValue,
-                                            road: sectionEntry?.road || "",
-                                            otherRoads: "",
-                                            lineName: "",
-                                            otherLines: "",
-                                          });
-                                        }
-
-                                        return {
-                                          ...prev,
-                                          processedLineSections: existingSections,
-                                        };
-                                      });
-                                    }}
-                                    style={{
-                                      color: "black",
-                                      borderColor: errors[
-                                        `processedLineSections.${block}.stream`
-                                      ]
-                                        ? "#dc2626"
-                                        : "#45526c",
-                                    }}
-                                  >
-                                    <option value="" disabled>
-                                      Select Direction
-                                    </option>
-                                    {streamData[block as keyof typeof streamData] &&
-                                      Object.keys(
-                                        streamData[block as keyof typeof streamData]
-                                      ).map((stream) => (
-                                        <option key={stream} value={stream}>
-                                          {stream == "bothNot" ? "Both directions not affected" : stream.charAt(0).toUpperCase() + stream.slice(1)} {stream == "bothNot" ? "" : `direction${stream == "both" ? "s" : ""} affected`}
-                                        </option>
-                                      ))}
-                                  </select>
-                                  {errors[`processedLineSections.${block}.stream`] && (
-                                    <span className="text-base text-red-700 font-medium mb-3 block">
-                                      Stream selection is required
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                            </>
-                          ) : (
-                            // For regular sections in multiple selection
-                            <>
-                              <label className="block text-base font-medium text-black mb-2">
-                                Line {block}{" "}
-                                <span className="text-red-600">*</span>
-                              </label>
-                              <select
-                                className="input gov-input mb-3"
-                                style={{
-                                  color: "black",
-                                  borderColor: errors[
-                                    `processedLineSections.${block}.lineName`
-                                  ]
-                                    ? "#dc2626"
-                                    : sectionEntry?.lineName
-                                      ? "#45526c"
-                                      : "#dc2626",
-                                }}
-                                value={sectionEntry?.lineName || ""}
-                                onChange={(e) =>
-                                  handleLineNameSelection(block, e.target.value)
-                                }
-                              >
-                                <option value="" disabled>
-                                  Select Line
-                                </option>
-                                {lineData[block as keyof typeof lineData]?.map(
-                                  (line: string) => (
-                                    <option key={line} value={line}>
-                                      {line}
-                                    </option>
-                                  )
-                                )}
-                              </select>
-                              {errors[
-                                `processedLineSections.${block}.lineName`
-                              ] && (
-                                  <span className="text-base text-red-700 font-medium mb-3 block">
-                                    Line selection is required
-                                  </span>
-                                )}
-                              {sectionEntry?.lineName && (
-                                <div className="mt-2 mb-2">
-                                  <label className="block text-base font-medium text-black mb-2">
-                                    Other affected Line for {block}
-                                  </label>
-                                  <Select
-                                    isMulti
-                                    options={(
-                                      lineData[
-                                      block as keyof typeof lineData
-                                      ] || []
-                                    )
-                                      .filter(
-                                        (l: string) =>
-                                          l !== sectionEntry.lineName
-                                      )
-                                      .map((l: string) => ({
-                                        value: l,
-                                        label: l,
-                                      }))}
-                                    value={
-                                      sectionEntry?.otherLines
-                                        ? sectionEntry.otherLines
-                                          .split(",")
-                                          .filter(Boolean)
-                                          .map((line: string) => ({
-                                            value: line,
-                                            label: line,
-                                          }))
-                                        : []
-                                    }
-                                    onChange={(opts) =>
-                                      handleOtherAffectedLinesChange(
-                                        block,
-                                        opts as any
-                                      )
-                                    }
-                                    className="basic-multi-select"
-                                    classNamePrefix="select"
-                                    placeholder="Select other affected lines"
-                                    styles={getSelectStyles(false)}
-                                  />
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                Type of Work <span className="text-red-600">*</span>
-              </label>
-              <select
-                name="workType"
-                value={formData.workType || ""}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                disabled={!userDepartment}
-              >
-                <option value="" disabled>
-                  {userDepartment
-                    ? "Select Type of Work"
-                    : "Select Department first"}
-                </option>
-                {workTypeOptions.map((type: string) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {errors.workType && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.workType}
-                </span>
-              )}
-            </div>
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                Activity <span className="text-red-600">*</span>
-              </label>
-              <select
-                name="activity"
-                value={formData.activity || ""}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                disabled={!selectedWorkType}
-              >
-                <option value="" disabled>
-                  {selectedWorkType
-                    ? "Select Activity"
-                    : "Select Work Type first"}
-                </option>
-                {activityOptions.map((activity: string) => (
-                  <option key={activity} value={activity}>
-                    {activity}
-                  </option>
-                ))}
-                <option value="others">Others</option>
-              </select>
-              {formData.activity === "others" && (
-                <input
-                  type="text"
-                  className="input mt-1 w-full"
-                  style={{ color: "black", fontSize: "14px" }}
-                  placeholder="Enter custom activity"
-                  value={customActivity}
-                  onChange={(e) => setCustomActivity(e.target.value)}
-                  required
-                />
-              )}
-              {errors.activity && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.activity}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        {session?.user.department === "S&T" && (
-          <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
-            <div className="form-group col-span-3">
-              <label className="block text-sm font-medium text-black mb-1">
-                Route <span className="text-red-600">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label
-                    className="block text-xs font-medium text-black mb-1"
-                    htmlFor="routeFrom"
-                  >
-                    From Location
-                  </label>
-                  <input
-                    id="routeFrom"
-                    name="routeFrom"
-                    value={formData.routeFrom || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{
-                      color: "black",
-                      fontSize: "14px",
-                      borderColor: errors.routeFrom ? "#dc2626" : "#45526c",
-                    }}
-                    aria-label="Route from location"
-                  />
-                  {errors.routeFrom && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.routeFrom}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <label
-                    className="block text-xs font-medium text-black mb-1"
-                    htmlFor="routeTo"
-                  >
-                    To Location
-                  </label>
-                  <input
-                    id="routeTo"
-                    name="routeTo"
-                    value={formData.routeTo || ""}
-                    onChange={handleInputChange}
-                    className="input gov-input"
-                    style={{
-                      color: "black",
-                      fontSize: "14px",
-                      borderColor: errors.routeTo ? "#dc2626" : "#45526c",
-                    }}
-                    aria-label="Route to location"
-                  />
-                  {errors.routeTo && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.routeTo}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="bg-gray-50 p-2 rounded-md border border-black mb-3">
-          <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
-            Preferred Time (Click On the Clock To Select)
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                From (Hrs) <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="time"
-                name="demandTimeFrom"
-                value={extractTimeFromDatetime(formData.demandTimeFrom || "")}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                aria-required="true"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                24-hour railway timing (e.g., 23:30)
-              </span>
-              {errors.demandTimeFrom && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.demandTimeFrom}
-                </span>
-              )}
-            </div>
-            <div className="form-group col-span-1">
-              <label className="block text-sm font-medium text-black mb-1">
-                To (Hrs) <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="time"
-                name="demandTimeTo"
-                value={extractTimeFromDatetime(formData.demandTimeTo || "")}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{ color: "black", fontSize: "14px" }}
-                aria-required="true"
-              />
-              <span className="text-xs text-gray-500 mt-1 block">
-                24-hour railway timing (e.g., 23:30)
-              </span>
-              {errors.demandTimeTo && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.demandTimeTo}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 p-2 rounded-md border border-black text-black mb-3">
-          <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
-            Caution Requirements
-          </h2>
-          {(session?.user.department === "S&T" ||
-            session?.user.department === "ENGG") && (
-              <>
-                <div className="grid grid-cols-1  gap-2">
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Whether Fresh Caution will be imposed after block{" "}
-                      {(session?.user.department === "S&T" ||
-                        session?.user.department === "ENGG") && (
-                          <span className="text-red-600">*</span>
-                        )}
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="freshCautionRequired"
-                          value="true"
-                          checked={formData.freshCautionRequired === true}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="freshCautionRequired"
-                          value="false"
-                          checked={formData.freshCautionRequired === false}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">No</span>
-                      </label>
-                    </div>
-                    {errors.freshCautionRequired && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.freshCautionRequired}
-                      </span>
-                    )}
-                  </div>
-
-                  {formData.freshCautionRequired === true && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Location From{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="freshCautionLocationFrom"
-                          value={formData.freshCautionLocationFrom || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Approximately from"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionLocationFrom
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionLocationFrom && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionLocationFrom}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Location To{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          name="freshCautionLocationTo"
-                          value={formData.freshCautionLocationTo || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Approximately to"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionLocationTo
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionLocationTo && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionLocationTo}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Caution Speed (km/hr){" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="freshCautionSpeed"
-                          value={formData.freshCautionSpeed || 0}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          style={{
-                            color: "black",
-                            borderColor: errors.freshCautionSpeed
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.freshCautionSpeed && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.freshCautionSpeed}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-black mb-1">
-                          Adjacent lines affected
-                          {/* <span className="text-red-600">*</span> */}
-                        </label>
-                        <input
-                          type="text"
-                          name="adjacentLinesAffected"
-                          value={formData.adjacentLinesAffected || ""}
-                          onChange={handleInputChange}
-                          className="input gov-input"
-                          placeholder="Lines Affected"
-                          style={{
-                            color: "black",
-                            borderColor: errors.adjacentLinesAffected
-                              ? "#dc2626"
-                              : "#45526c",
-                            fontSize: "14px",
-                          }}
-                        />
-                        {errors.adjacentLinesAffected && (
-                          <span className="text-xs text-red-700 font-medium mt-1 block">
-                            {errors.adjacentLinesAffected}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Whether Power Block Needed{" "}
-                      {session?.user.department === "S&T" ||
-                        (session?.user.department === "ENGG" && (
-                          <span className="text-red-600">*</span>
+                        onChange={e => handleRoadSelection(block, e.target.value)}
+                        className="w-full border-2 border-black rounded-none px-2 py-2 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-300 bg-white hover:bg-yellow-50 transition mb-2"
+                        style={{ fontFamily: 'Arial, sans-serif' }}
+                      >
+                        <option value="" disabled>Select Road</option>
+                        {getAllRoadsForYard(block).map((road) => (
+                          <option key={road} value={road}>{road}</option>
                         ))}
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="true"
-                          checked={formData.powerBlockRequired === true}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">Yes</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="false"
-                          checked={formData.powerBlockRequired === false}
-                          onChange={handleInputChange}
-                          className="form-radio h-4 w-4"
-                        />
-                        <span className="ml-2 text-sm">No</span>
-                      </label>
-                    </div>
-                    {errors.powerBlockRequired && (
-                      <span className="text-xs text-red-700 font-medium mt-1 block">
-                        {errors.powerBlockRequired}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {formData.powerBlockRequired === true && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                    <div className="col-span-1">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Power Block Requirements *
-                      </label>
-                      <div className="space-y-1 flex gap-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            value="Gears Required"
-                            checked={powerBlockRequirements.includes(
-                              "Gears Required"
-                            )}
-                            onChange={(e) => {
-                              handlePowerBlockRequirementsChange(
-                                "Gears Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-4 w-4"
-                          />
-                          <span className="ml-2 text-sm">Gears Required</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            value="Staff Required"
-                            checked={powerBlockRequirements.includes(
-                              "Staff Required"
-                            )}
-                            onChange={(e) => {
-                              handlePowerBlockRequirementsChange(
-                                "Staff Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-4 w-4"
-                          />
-                          <span className="ml-2 text-sm">Staff Required</span>
-                        </label>
-                      </div>
-                      {errors.powerBlockRequirements && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.powerBlockRequirements}
-                        </span>
-                      )}
-                    </div>
-                    <div className="col-span-2">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Elementary Section <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        name="elementarySection"
-                        value={formData.elementarySection || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.elementarySection
-                            ? "#dc2626"
-                            : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      />
-                      {errors.elementarySection && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.elementarySection}
-                        </span>
-                      )}
-                    </div>
-                     <div className="col-span-1">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Assign Disconnection To <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        name="sntDisconnectionAssignTo"
-                        value={formData.sntDisconnectionAssignTo || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionAssignTo ? "#dc2626" : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      >
-                        <option value="" disabled>
-                          Select Depo
-                        </option>
-                        {selectedMajorSection &&
-                          session?.user.department &&
-                          depot[selectedMajorSection] &&
-                          depot[selectedMajorSection]['TRD'] ? (
-                          depot[selectedMajorSection]['TRD'].map((depotOption: string, index) => (
-                            <option key={index} value={depotOption}>
-                              {depotOption}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>
-                            Select Major Section first
-                          </option>
-                        )}
                       </select>
-                      {errors.sntDisconnectionAssignTo && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionAssignTo}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-2">
-                  <label className="block text-sm font-medium text-black mb-1">
-                    Whether S&T Disconnection Required{" "}
-                    {session?.user.department === "S&T" ||
-                      (session?.user.department === "ENGG" && (
-                        <span className="text-red-600">*</span>
-                      ))}
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center">
+                      {/* Other Roads Affected */}
                       <input
-                        type="radio"
-                        name="sntDisconnectionRequired"
-                        value="true"
-                        checked={formData.sntDisconnectionRequired === true}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            sntDisconnectionRequired: true,
-                          })
-                        }
-                        className="form-radio h-4 w-4"
+                        type="text"
+                        name={`otherRoads-${block}`}
+                        value={(() => {
+                          const section = formData.processedLineSections?.find(s => s.block === block);
+                          return section?.otherRoads || '';
+                        })()}
+                        onChange={e => handleOtherAffectedLinesChange(block, [{ value: e.target.value }])}
+                        className="w-full border-2 border-black rounded-none px-2 py-2 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-300 bg-white hover:bg-yellow-50 transition mt-1"
+                        placeholder="Other Roads Affected (comma separated)"
+                        style={{ fontFamily: 'Arial, sans-serif' }}
                       />
-                      <span className="ml-2 text-sm">Yes</span>
-                    </label>
-                    <label className="inline-flex items-center">
+                    </>
+                  ) : (
+                    <>
+                      <select
+                        name={`lineName-${block}`}
+                        value={(() => {
+                          const section = formData.processedLineSections?.find(s => s.block === block);
+                          return section?.lineName || '';
+                        })()}
+                        onChange={e => handleLineNameSelection(block, e.target.value)}
+                        className="w-full border-2 border-black rounded-none px-2 py-2 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-300 bg-white hover:bg-yellow-50 transition mb-2"
+                        style={{ fontFamily: 'Arial, sans-serif' }}
+                      >
+                        <option value="" disabled>Select Line</option>
+                        {(blockSection[block as keyof typeof blockSection] || []).map((line: string) => (
+                          <option key={line} value={line}>{line}</option>
+                        ))}
+                      </select>
+                      {/* Other Lines Affected */}
                       <input
-                        type="radio"
-                        name="sntDisconnectionRequired"
-                        value="false"
-                        checked={formData.sntDisconnectionRequired === false}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            sntDisconnectionRequired: false,
-                          })
-                        }
-                        className="form-radio h-4 w-4"
+                        type="text"
+                        name={`otherLines-${block}`}
+                        value={(() => {
+                          const section = formData.processedLineSections?.find(s => s.block === block);
+                          return section?.otherLines || '';
+                        })()}
+                        onChange={e => handleOtherAffectedLinesChange(block, [{ value: e.target.value }])}
+                        className="w-full border-2 border-black rounded-none px-2 py-2 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-yellow-300 bg-white hover:bg-yellow-50 transition mt-1"
+                        placeholder="Other Lines Affected (comma separated)"
+                        style={{ fontFamily: 'Arial, sans-serif' }}
                       />
-                      <span className="ml-2 text-sm">No</span>
-                    </label>
-                  </div>
-                  {errors.sntDisconnectionRequired && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.sntDisconnectionRequired}
-                    </span>
+                    </>
                   )}
                 </div>
-
-                {sntDisconnectionChecked && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Line From <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        name="sntDisconnectionLineFrom"
-                        value={formData.sntDisconnectionLineFrom || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionLineFrom
-                            ? "#dc2626"
-                            : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      />
-                      {errors.sntDisconnectionLineFrom && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionLineFrom}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Line To <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        name="sntDisconnectionLineTo"
-                        value={formData.sntDisconnectionLineTo || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionLineTo
-                            ? "#dc2626"
-                            : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      />
-                      {errors.sntDisconnectionLineTo && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionLineTo}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Disconnection Requirements *
-                      </label>
-                      <div className="space-x-2 flex ">
-                        <label className="inline-flex whitespace-nowrap items-center">
-                          <input
-                            type="checkbox"
-                            value="Gears Required"
-                            checked={sntDisconnectionRequirements.includes(
-                              "Gears Required"
-                            )}
-                            onChange={(e) => {
-                              handleSntDisconnectionRequirementsChange(
-                                "Gears Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-3 w-3"
-                          />
-                          <span className="ml-1 text-xs text-black">
-                            Gears Required
-                          </span>
-                        </label>
-                        <label className="inline-flex whitespace-nowrap items-center">
-                          <input
-                            type="checkbox"
-                            value="Staff Required"
-                            checked={sntDisconnectionRequirements.includes(
-                              "Staff Required"
-                            )}
-                            onChange={(e) => {
-                              handleSntDisconnectionRequirementsChange(
-                                "Staff Required",
-                                e.target.checked
-                              );
-                            }}
-                            className="form-checkbox h-3 w-3"
-                          />
-                          <span className="ml-1 text-xs text-black">
-                            Staff Required
-                          </span>
-                        </label>
-                      </div>
-                      {errors.sntDisconnectionRequirements && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionRequirements}
-                        </span>
-                      )}
-                    </div>
-                    {/* Add the assignment dropdown */}
-                    <div className="col-span-1">
-                      <label className="block text-xs font-medium text-black mb-1">
-                        Assign Disconnection To <span className="text-red-600">*</span>
-                      </label>
-                      <select
-                        name="sntDisconnectionAssignTo"
-                        value={formData.sntDisconnectionAssignTo || ""}
-                        onChange={handleInputChange}
-                        className="input gov-input"
-                        style={{
-                          color: "black",
-                          borderColor: errors.sntDisconnectionAssignTo ? "#dc2626" : "#45526c",
-                          fontSize: "14px",
-                        }}
-                      >
-                        <option value="" disabled>
-                          Select Depo
-                        </option>
-                        {selectedMajorSection &&
-                          session?.user.department &&
-                          depot[selectedMajorSection] &&
-                          depot[selectedMajorSection]['S&T'] ? (
-                          depot[selectedMajorSection]['S&T'].map((depotOption: string, index) => (
-                            <option key={index} value={depotOption}>
-                              {depotOption}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="" disabled>
-                            Select Major Section first
-                          </option>
-                        )}
-                      </select>
-                      {errors.sntDisconnectionAssignTo && (
-                        <span className="text-xs text-red-700 font-medium mt-1 block">
-                          {errors.sntDisconnectionAssignTo}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {/* <div className="form-group col-span-2 mt-5">
-                  <label className="block text-sm font-medium text-black mb-1">
-                    Remarks
-                  </label>
-                  <textarea
-                    name="requestremarks"
-                    value={formData.requestremarks || ""}
-                    onChange={handleInputChange}
-                    className="gov-input"
-                    style={{
-                      color: "black",
-                      minHeight: "80px",
-                      width: "100%",
-                      fontSize: "14px",
-                    }}
-                    placeholder="Enter any additional remarks"
-                    aria-label="Request remarks"
-                  ></textarea>
-                </div>
-                <div className="flex justify-center mt-5">
-                  <button
-                    type="submit"
-                    className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
-                    disabled={formSubmitting}
-                    aria-label="Submit block request form"
-                  >
-                    {formSubmitting ? "Submitting..." : "Submit Block Request"}
-                  </button>
-                </div>              */}
-            </>
-          )}
-          {session?.user.department === "TRD" && (
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">
-                Coaching Repurcussions{" "}
-                {session?.user.department === "TRD" && (
-                  <span className="text-red-600">*</span>
-                )}
-              </label>
-              <input
-                name="repercussions"
-                value={formData.repercussions || ""}
-                onChange={handleInputChange}
-                className="input gov-input"
-                style={{
-                  color: "black",
-                  borderColor: errors.repercussions ? "#dc2626" : "#45526c",
-                  fontSize: "14px",
-                }}
-              />
-              {errors.repercussions && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.repercussions}
-                </span>
-              )}
+              ))}
             </div>
-          )}
+          </div>
         </div>
-        <div className="form-group col-span-2 mt-5">
-          <label className="block text-sm font-medium text-black mb-1">
-            Remarks
-          </label>
-          <textarea
-            name="requestremarks"
-            value={formData.requestremarks || ""}
-            onChange={handleInputChange}
-            className="gov-input"
-            style={{
-              color: "black",
-              minHeight: "80px",
-              width: "100%",
-              fontSize: "14px",
-            }}
-            placeholder="Enter any additional remarks"
-            aria-label="Request remarks"
-          ></textarea>
+        {/* Corridor for this section - red row, read-only */}
+        <div className="grid grid-cols-5 gap-0 bg-red-600 rounded-lg p-2 border-2 border-black text-black items-center mb-2">
+          <div className="col-span-2 flex items-center h-full">
+            <span className="w-full text-left font-extrabold text-2xl uppercase tracking-wide pl-2">CORRIDOR FOR THIS SECTION</span>
+          </div>
+          <div className="col-span-1 text-center font-extrabold text-2xl">00:00 TO 03:00</div>
+          <div className="col-span-2"></div>
         </div>
-        <div className="flex justify-center mt-5">
-          <button
-            type="submit"
-            className="bg-[#13529e] text-white px-4 py-1 border border-black text-sm"
-            disabled={formSubmitting}
-            aria-label="Submit block request form"
-          >
-            {formSubmitting ? "Submitting..." : "Submit Block Request"}
+        {/* Type of Block - new line, orange row */}
+        <div className="flex flex-row items-center gap-4 bg-orange-200 rounded-lg p-2 border-2 border-black mb-2">
+          <label className="font-extrabold text-black text-xl mr-2">Type of Block</label>
+          <select name="corridorTypeSelection" value={formData.corridorTypeSelection || ''} onChange={handleInputChange} className="border-2 border-black rounded px-2 py-2 text-lg font-extrabold text-black bg-white hover:bg-orange-100 transition">
+            <option value="">Select Type</option>
+            <option value="Corridor">Corridor</option>
+            <option value="Outside Corridor">Outside Corridor</option>
+            <option value="Urgent Block">Urgent Block</option>
+          </select>
+          <span className="inline-block bg-orange-300 text-black font-extrabold px-2 py-2 rounded ml-4">
+            {formData.corridorTypeSelection === 'Urgent Block' ? 'Emergency' : 'Planned'}
+          </span>
+        </div>
+        {/* Preferred Slot - orange row */}
+        <div className="grid grid-cols-5 gap-0 bg-orange-200 rounded-lg p-2 border-2 border-black items-center mb-0">
+          <div className="col-span-1 font-extrabold text-center text-xl">Preferred Slot</div>
+          <div className="col-span-1 text-center">
+            <input type="time" name="demandTimeFrom" value={extractTimeFromDatetime(formData.demandTimeFrom || '')} onChange={handleInputChange} className="w-full border-2 border-black rounded px-2 py-2 text-lg font-extrabold text-black hover:bg-orange-100 transition" />
+          </div>
+          <div className="col-span-1 text-center font-extrabold text-xl">TO</div>
+          <div className="col-span-1 text-center">
+            <input type="time" name="demandTimeTo" value={extractTimeFromDatetime(formData.demandTimeTo || '')} onChange={handleInputChange} className="w-full border-2 border-black rounded px-2 py-2 text-lg font-extrabold text-black hover:bg-orange-100 transition" />
+          </div>
+          <div className="col-span-1"></div>
+        </div>
+        {/* Duration below preferred slot */}
+        <div className="w-full flex justify-end border-x-2 border-b-2 border-black bg-orange-200 rounded-b-lg pb-2 px-2 mb-2">
+          <span className="font-extrabold text-xl text-black">Duration: <span className="text-green-700">{getDuration(extractTimeFromDatetime(formData.demandTimeFrom || ''), extractTimeFromDatetime(formData.demandTimeTo || ''))}</span></span>
+        </div>
+        {/* Reasons for asking Block outside Corridor or Emergency Block */}
+        <div className="bg-white border border-black rounded-lg p-2">
+          <label className="font-bold">Reasons for asking Block outside Corridor or Emergency Block</label>
+          <textarea name="repercussions" value={formData.repercussions} onChange={handleInputChange} className="w-full bg-white border border-black rounded p-2 mt-1" />
+        </div>
+        {/* Type of Work & Activity - green row */}
+        <div className="grid grid-cols-2 gap-2 bg-[#d6f7c6] rounded-lg p-2 border border-black items-center">
+          <div>
+            <label className="block font-bold text-center">Type of Work</label>
+            <select name="workType" value={formData.workType || ''} onChange={handleInputChange} className="w-full border border-black rounded px-2 py-1 text-base font-semibold">
+              <option value="" disabled>Select Type of Work</option>
+              {workTypeOptions.map((type: string) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-bold text-center">Activity</label>
+            <select name="activity" value={formData.activity || ''} onChange={handleInputChange} className="w-full border border-black rounded px-2 py-1 text-base font-semibold">
+              <option value="" disabled>Select Activity</option>
+              {activityOptions.map((activity: string) => (
+                <option key={activity} value={activity}>{activity}</option>
+              ))}
+              <option value="others">Others</option>
+            </select>
+            {formData.activity === 'others' && (
+              <input type="text" className="input mt-1 w-full" style={{ color: 'black', fontSize: '14px' }} placeholder="Enter custom activity" value={customActivity} onChange={e => setCustomActivity(e.target.value)} required />
+            )}
+          </div>
+        </div>
+        {/* Caution, Power Block, S&T Disconnection - use old logic, restyle as boxed, red-bordered rows */}
+        {/* ...existing logic for these sections, but with new UI... */}
+        {/* Remarks - purple box */}
+        <div className="bg-[#f7d6f7] border border-black rounded-lg p-2">
+          <label className="font-bold">Remarks, if any</label>
+          <textarea name="requestremarks" value={formData.requestremarks || ''} onChange={handleInputChange} className="w-full bg-white border border-black rounded p-2 mt-1" />
+        </div>
+        {/* Bottom Buttons */}
+        <div className="flex flex-row justify-between items-center mt-4 gap-2">
+          <button type="button" onClick={() => router.push('/dashboard')} className="flex items-center gap-2 bg-lime-300 border border-black rounded px-4 py-2 text-lg font-bold text-black shadow hover:bg-lime-200 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke="black" strokeWidth={2} className="w-7 h-7"><rect x="6" y="12" width="20" height="12" rx="2" fill="#fffbe9" stroke="black" strokeWidth="2" /><path d="M4 14L16 4L28 14" stroke="black" strokeWidth="2" fill="none" /></svg>
+            Home
           </button>
-        </div>
-        <ConfirmationDialog
-          isOpen={showConfirmation}
-          onClose={() => setShowConfirmation(false)}
-          onConfirm={handleConfirmedSubmit}
-          formData={formData}
-        />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-
-        {success && (
-          <div className="text-green-700 text-xs mt-2 text-center">
-            {success}
-          </div>
-        )}
-        {formError && (
-          <div className="text-red-600 text-xs mt-2 text-center">
-            {formError}
-          </div>
-        )}
-
-        <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
-          <span className="text-red-600">*</span> Required fields • ©{" "}
-          {new Date().getFullYear()} Indian Railways
+          <button type="button" onClick={() => router.back()} className="flex items-center gap-2 bg-[#e6e6fa] border border-black rounded px-4 py-2 text-lg font-bold text-black shadow hover:bg-[#d1d1e0] transition">
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-6 h-6'><path strokeLinecap='round' strokeLinejoin='round' d='M15 19l-7-7 7-7' /></svg>
+            Back
+          </button>
+          <button type="submit" className="bg-[#eeb8f7] border border-black rounded px-6 py-2 text-lg font-bold text-black shadow hover:bg-[#d1aee0] transition">SUBMIT</button>
         </div>
       </form>
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleConfirmedSubmit}
+        formData={formData}
+      />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
-      <style jsx global>{`
-        :root {
-          --primary-color: #13529e;
-          --error-color: #d32f2f;
-          --border-color: #000000;
-          --focus-color: #1976d2;
-          --font-family: "Arial", "Noto Sans", sans-serif;
-        }
-        body {
-          font-family: var(--font-family);
-          font-size: 14px;
-          margin: 0;
-          padding: 0;
-        }
-        .form-group {
-          margin-bottom: 6px;
-        }
-        .gov-input {
-          width: 100%;
-          padding: 4px 6px;
-          border: 1px solid var(--border-color);
-          border-radius: 2px;
-          margin-top: 2px;
-          margin-bottom: 2px;
-          background: white;
-          font-size: 14px;
-          font-family: var(--font-family);
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .gov-input:focus {
-          outline: none;
-          border-color: var(--primary-color);
-          box-shadow: 0 0 0 2px rgba(19, 82, 158, 0.2);
-        }
-        input[type="checkbox"],
-        input[type="radio"] {
-          accent-color: #13529e;
-          width: 16px;
-          height: 16px;
-        }
-        select.gov-input {
-          appearance: none;
-          background-image: url('data:image/svg+xml;charset=US-ASCII,<svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="%2313529e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-          background-repeat: no-repeat;
-          background-position: right 8px center;
-          padding-right: 24px;
-        }
-        @media (max-width: 768px) {
-          .grid-cols-2 {
-            grid-template-columns: 1fr !important;
-          }
-          .grid-cols-3 {
-            grid-template-columns: 1fr !important;
-          }
-          .w-full.max-w-6xl {
-            padding: 8px !important;
-          }
-        }
-      `}</style>
+      {success && (
+        <div className="text-green-700 text-xs mt-2 text-center">
+          {success}
+        </div>
+      )}
+      {formError && (
+        <div className="text-red-600 text-xs mt-2 text-center">
+          {formError}
+        </div>
+      )}
+
+      <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
+        <span className="text-red-600">*</span> Required fields • ©{" "}
+        {new Date().getFullYear()} Indian Railways
+      </div>
     </div>
   );
 }

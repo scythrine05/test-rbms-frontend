@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Sidebar } from "../components/ui/sidebar";
 import { UrgentModeProvider, useUrgentMode } from "../context/UrgentModeContext";
@@ -24,6 +24,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isUrgentMode, toggleUrgentMode } = useUrgentMode();
+  const pathname = usePathname();
+
+  // If user is 'USER' and on dashboard home, render only children (no nav/sidebar)
+  if ((session?.user?.role === "USER" && pathname === "/dashboard") || pathname === "/dashboard/create-block-request") {
+    return <>{children}</>;
+  }
 
   // Handle sidebar visibility based on screen size
   useEffect(() => {
@@ -59,7 +65,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar - Responsive with dynamic color scheme */}
-      <nav 
+      <nav
         className={`text-white h-12 md:h-10 flex items-center px-4 shadow-sm z-30 sticky top-0 transition-colors duration-200`}
         style={{ backgroundColor: themeColors.primary }}
       >
@@ -106,11 +112,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <div className="relative group">
             <button
               onClick={toggleUrgentMode}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center gap-1 ${
-                isUrgentMode 
-                  ? 'bg-white text-red-600 hover:bg-red-50' 
-                  : 'bg-white text-blue-600 hover:bg-blue-50'
-              }`}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center gap-1 ${isUrgentMode
+                ? 'bg-white text-red-600 hover:bg-red-50'
+                : 'bg-white text-blue-600 hover:bg-blue-50'
+                }`}
               aria-label={isUrgentMode ? "Switch to normal mode" : "Switch to urgent mode"}
             >
               {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
@@ -147,11 +152,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 bg-white relative">
         {/* Sidebar */}
         <div
-          className={`fixed inset-y-0 left-0 transform ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 transition-transform duration-200 ease-in-out z-20`}
+          className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 transition-transform duration-200 ease-in-out z-20`}
         >
-          <Sidebar 
+          <Sidebar
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
