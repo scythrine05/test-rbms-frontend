@@ -53,7 +53,7 @@ export default function DashboardPage() {
         {/* Navigation buttons */}
         <div className="w-full flex flex-col items-center gap-5 mt-6 px-2 max-w-md">
           <a href="/create-block-request" className="w-full rounded-2xl bg-[#eeb8f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">ENTER NEW BLOCK REQUEST</a>
-          <a href="/edit-cancel-requests" className="w-full rounded-2xl bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">EDIT/CANCEL PREVIOUS BLOCK REQUESTS</a>
+          <a href="/edit-request" className="w-full rounded-2xl bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">EDIT/CANCEL PREVIOUS BLOCK REQUESTS</a>
           <a href="/request-table" className="w-full rounded-2xl bg-[#c7c7f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">SUMMARY OF MY BLOCK REQUESTS</a>
           <a href="https://external-block-site.example.com" target="_blank" rel="noopener noreferrer" className="w-full rounded-2xl bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
           <a href="/generate-reports" className="w-full rounded-2xl bg-[#ffd180] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">GENERATE REPORTS</a>

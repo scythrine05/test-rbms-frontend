@@ -1228,431 +1228,88 @@ export default function RequestTablePage() {
   };
 
   return (
-    <>
-      <Toaster position="top-center" />
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-          <h1 className="text-lg font-bold text-[#13529e]">
-            {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
-          </h1>
-          <ShowAllToggle
-            showAll={showAll}
-            onToggle={() => setShowAll(!showAll)}
-            isUrgentMode={isUrgentMode}
-          />
-        </div>
-
-        {/* View toggle - only show in normal mode */}
-        {!isUrgentMode && (
-          <div className="flex justify-between items-center mb-3 border-b border-black pb-3">
-            <div className="space-x-1">
-              <button
-                onClick={() => setViewType("compact")}
-                className={`px-3 py-1 text-sm border border-black ${viewType === "compact"
-                  ? "bg-[#13529e] text-white"
-                  : "bg-white text-[#13529e]"
-                  }`}
-              >
-                Compact View
-              </button>
-              <button
-                onClick={() => setViewType("gantt")}
-                className={`px-3 py-1 text-sm border border-black ${viewType === "gantt"
-                  ? "bg-[#13529e] text-white"
-                  : "bg-white text-[#13529e]"
-                  }`}
-              >
-                Gantt View
-              </button>
-            </div>
-            <div>
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="p-1 text-sm border border-black bg-white text-black"
-              >
-                <option value={5}>5 per page</option>
-                <option value={10}>10 per page</option>
-                <option value={20}>20 per page</option>
-                <option value={50}>50 per page</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Period selector */}
-        <div className="flex justify-between items-center mb-3 text-sm border-b border-black pb-2">
-          <WeeklySwitcher
-            currentWeekStart={currentWeekStart}
-            onWeekChange={(direction) => {
-              if (direction === "prev") {
-                goToPreviousPeriod();
-              } else {
-                goToNextPeriod();
-              }
-            }}
-            isUrgentMode={isUrgentMode}
-          />
-        </div>
-
-        {viewType === "compact" ? (
-          /* Compact Table View */
-          <div className="overflow-x-auto">
-            {isWeeklyLoading ? (
-              <div className="text-center py-3 text-sm text-black">
-                Loading requests...
-              </div>
-            ) : weeklyError ? (
-              <div className="text-center py-3 text-sm text-red-600">
-                Error loading requests. Please try again.
-              </div>
-            ) : paginatedRequests.length === 0 ? (
-              <div className="text-center py-3 text-sm text-gray-600">
-                No requests found. Create a new block request to get started.
-                <div className="mt-2">
-                  <Link
-                    href="/create-block-request"
-                    className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black"
-                  >
-                    Create New Block Request
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <>
-                <table className="min-w-full border-collapse border border-black text-sm text-black">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="id" title="Request ID" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="date" title="Date" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="section" title="Major Section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="section" title="Depot" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="section" title="Block Section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="section" title="Line" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="time" title="Time" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="section" title="Corridor Type" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="work" title="Work Details" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="disconnection" title="Disconnections" showFilter={false} />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        <ColumnHeader icon="status" title="Status" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedRequests.map((request) => (
-                      <tr
-                        key={`compact-${request.id}-${request.date}`}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="border border-black p-1">
-                          {request.id.substring(0, 8)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {formatDate(request.date)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.selectedSection}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.selectedDepo}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.missionBlock}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getLineName(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {formatTimePeriod(
-                            request.demandTimeFrom,
-                            request.demandTimeTo
-                          )}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getCorridorType(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getWorkInfoChip(request)}
-                        </td>
-                        <td className="border border-black p-1 text-[8px]">
-                          {getDisconnectionBadges(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getEnhancedStatus(request)}
-                        </td>
-                        <td className="border border-black p-1 whitespace-nowrap">
-                          <RequestActions request={request} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              </>
-            )}
-          </div>
-        ) : (
-          /* Gantt View */
-          <div className="mb-3 text-black">
-            <div className="overflow-x-auto">
-              <div className="w-full">
-                {/* Week days header */}
-                <div className="flex border-b border-black text-xs">
-                  <div className="w-[20%] min-w-32 flex-shrink-0 p-1 font-medium bg-gray-100 border-r border-black">
-                    Block Section
-                  </div>
-                  {displayDates.map((dateInfo) => (
-                    <div
-                      key={`date-${dateInfo.formattedDate}`}
-                      className="flex-1 min-w-14 p-1 text-center border-r border-black bg-gray-100"
-                    >
-                      <div>{dateInfo.dayOfWeek}</div>
-                      <div>{format(dateInfo.date, "dd-MM")}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {isWeeklyLoading ? (
-                  <div className="text-center py-3 text-sm">
-                    Loading weekly data...
-                  </div>
-                ) : weeklyError ? (
-                  <div className="text-center py-3 text-sm text-red-600">
-                    Error loading weekly data. Please try again.
-                  </div>
-                ) : !filteredWeeklyRequests || filteredWeeklyRequests.length === 0 ? (
-                  <div className="text-center py-3 text-sm text-gray-600">
-                    No requests found for this week.
-                    <div className="mt-2">
-                      <Link
-                        href="/create-block-request"
-                        className="px-3 py-1 text-sm bg-[#13529e] text-white border border-black"
-                      >
-                        Create New Block Request
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  /* Group by block section for Gantt view */
-                  Object.entries(
-                    filteredWeeklyRequests.reduce((acc, request) => {
-                      const blockSections = request.missionBlock.split(",");
-                      blockSections.forEach((section) => {
-                        if (!acc[section]) acc[section] = [];
-                        acc[section].push(request);
-                      });
-                      return acc;
-                    }, {} as Record<string, RequestItem[]>) || {}
-                  ).map(([blockSection, requests]) => (
-                    <div
-                      key={`gantt-section-${blockSection}`}
-                      className="flex border-b border-black"
-                    >
-                      <div className="w-[20%] min-w-32 flex-shrink-0 p-1 font-medium text-xs border-r border-black">
-                        {blockSection}
-                      </div>
-
-                      {displayDates.map((dateInfo) => {
-                        const dateStr = format(dateInfo.date, "yyyy-MM-dd");
-                        const requestsForDay = requests.filter((request) => {
-                          // Compare dates using yyyy-MM-dd format for consistency
-                          const requestDateStr = format(parseISO(request.date), "yyyy-MM-dd");
-                          const cellDateStr = format(dateInfo.date, "yyyy-MM-dd");
-                          return requestDateStr === cellDateStr;
-                        });
-
-                        return (
-                          <div
-                            key={`gantt-cell-${blockSection}-${dateInfo.formattedDate}`}
-                            className="flex-1 min-w-14 p-0.5 border-r border-black relative min-h-8"
-                          >
-                            {requestsForDay.map((request) => (
-                              <Link
-                                key={`gantt-request-${request.id}-${dateInfo.formattedDate}`}
-                                href={`/view-request/${request.id}`}
-                                className={`block text-[8px] p-0.5 mb-0.5 border border-black overflow-hidden text-white
-                                  ${request.status === "APPROVED"
-                                    ? "bg-green-700"
-                                    : request.status === "REJECTED"
-                                      ? "bg-red-700"
-                                      : request.workType === "EMERGENCY"
-                                        ? "bg-orange-700"
-                                        : "bg-[#13529e]"
-                                  }`}
-                                title={`${request.workType}: ${request.activity
-                                  } - ${formatTime(
-                                    request.demandTimeFrom
-                                  )} to ${formatTime(request.demandTimeTo)} 
-${getCorridorType(request)} - ${request.selectedDepo}
-${request.missionBlock} - ${getLineName(request)}`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span>{formatTimePeriod(
-                                    request.demandTimeFrom,
-                                    request.demandTimeTo
-                                  )}</span>
-                                  {request.status === "APPROVED" && (
-                                    <svg className="w-2 h-2" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                  {request.status === "REJECTED" && (
-                                    <svg className="w-2 h-2" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Detailed view table for gantt view */}
-        {viewType === "gantt" &&
-          filteredWeeklyRequests &&
-          filteredWeeklyRequests.length > 0 && (
-            <div className="mt-3 border-t border-black pt-3">
-              <h2 className="text-md font-bold text-[#13529e] mb-2">
-                Detailed Weekly Requests
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse border border-black text-xs text-black">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-black p-1 text-left font-medium">
-                        ID <HeaderIcon type="id" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Date <HeaderIcon type="date" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Section <HeaderIcon type="section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Depot <HeaderIcon type="section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Block Section <HeaderIcon type="section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Line <HeaderIcon type="section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Time <HeaderIcon type="time" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Corridor <HeaderIcon type="section" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Work Details <HeaderIcon type="work" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Disconnections <HeaderIcon type="disconnection" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Status <HeaderIcon type="status" />
-                      </th>
-                      <th className="border border-black p-1 text-left font-medium">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredWeeklyRequests.map((request) => (
-                      <tr
-                        key={`detailed-${request.id}-${request.date}`}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="border border-black p-1">
-                          {request.id.substring(0, 8)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {formatDate(request.date)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.selectedSection}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.selectedDepo}
-                        </td>
-                        <td className="border border-black p-1">
-                          {request.missionBlock}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getLineName(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {formatTimePeriod(
-                            request.demandTimeFrom,
-                            request.demandTimeTo
-                          )}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getCorridorType(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getWorkInfoChip(request)}
-                        </td>
-                        <td className="border border-black p-1 text-[8px]">
-                          {getDisconnectionBadges(request)}
-                        </td>
-                        <td className="border border-black p-1">
-                          {getEnhancedStatus(request)}
-                        </td>
-                        <td className="border border-black p-1 whitespace-nowrap">
-                          <RequestActions request={request} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-        {/* Delete confirmation modal */}
-        {confirmDelete && <DeleteConfirmationModal requestId={confirmDelete} />}
-
-        <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1">
-          © {new Date().getFullYear()} Indian Railways. All Rights Reserved.
+    <div className="min-h-screen bg-[#FFFDF5]">
+      {/* Top Yellow Bar */}
+      <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
+        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+      </div>
+      {/* Main Title on Light Blue */}
+      <div className="w-full bg-[#D6F3FF] py-4 flex flex-col items-center border-b-2 border-black">
+        <span className="text-3xl font-bold text-black text-center">Summary of My Block Requests</span>
+        <span className="text-md text-black mt-1">Screen 15A</span>
+      </div>
+      {/* User Info Row */}
+      <div className="flex justify-center mt-2">
+        <div className="flex gap-2">
+          <span className="bg-[#FFB74D] border border-black px-6 py-2 font-bold text-lg text-black rounded">User:</span>
+          <span className="bg-[#FFB74D] border border-black px-6 py-2 font-bold text-lg text-black rounded">User's Designation</span>
         </div>
       </div>
-    </>
+      {/* Summary Box */}
+      <div className="flex justify-center mt-4">
+        <div className="w-[90%] rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
+          <div className="text-2xl font-bold text-black text-center py-2">SUMMARY OF NEXT 10 DAYS</div>
+          <div className="italic text-center text-gray-700 pb-2">(Click ID to see full details or to Edit)</div>
+          {/* Table */}
+          <div className="overflow-x-auto rounded-xl mx-2 mb-2">
+            <table className="min-w-full border border-black rounded-xl overflow-hidden">
+              <thead>
+                <tr className="bg-[#D6F3FF] text-black text-lg">
+                  <th className="border border-black px-2 py-1">Scroll</th>
+                  <th className="border border-black px-2 py-1">Date</th>
+                  <th className="border border-black px-2 py-1">ID</th>
+                  <th className="border border-black px-2 py-1">Block Section</th>
+                  <th className="border border-black px-2 py-1">UP/DN/SL/Rpad No.</th>
+                  <th className="border border-black px-2 py-1">Activity</th>
+                  <th className="border border-black px-2 py-1">Duration (HH:MM)</th>
+                  <th className="border border-black px-2 py-1">Sanction Status (Y/N)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Example rows, replace with map over your data */}
+                {[0, 1, 2, 3, 4].map((_, idx) => (
+                  <tr key={idx} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
+                    <td className="border border-black px-2 py-1 text-center">{idx === 0 ? <span className="inline-block bg-gray-400 border border-black rounded p-1">▲</span> : idx === 2 ? <span className="inline-block bg-gray-400 border border-black rounded p-1">▼</span> : ""}</td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                    <td className="border border-black px-2 py-1"></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {/* Customised Summary Section */}
+      <div className="flex flex-col items-center mt-8">
+        <div className="bg-[#E6E6FA] text-black text-xl font-semibold px-8 py-2 rounded">Customised Summary</div>
+        <div className="flex items-center gap-2 mt-4">
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="DD" />
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="MM" />
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="YY" />
+          <span className="text-xl font-bold">to</span>
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="DD" />
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="MM" />
+          <input className="bg-[#B2F3F5] border-2 border-red-500 text-black text-xl font-bold w-16 text-center rounded" placeholder="YY" />
+          <button className="bg-[#E6E6FA] border border-black px-4 py-2 rounded text-lg font-bold ml-2">Click</button>
+        </div>
+        <div className="mt-4 bg-[#E6E6FA] px-8 py-2 rounded text-center font-semibold">For Printing the Summary, <br /> click Download</div>
+        <button className="mt-2 bg-[#FFB74D] border border-black px-8 py-2 rounded text-xl font-bold text-black">Download</button>
+      </div>
+      {/* Footer Buttons */}
+      <div className="flex justify-center gap-4 mt-10 mb-4">
+        <button className="flex items-center gap-2 bg-lime-300 border border-black px-6 py-2 rounded text-xl font-bold">
+          <span className="text-2xl">🏠</span> Home
+        </button>
+        <button className="flex items-center gap-2 bg-[#E6E6FA] border border-black px-6 py-2 rounded text-xl font-bold">
+          <span className="text-2xl">⬅️</span> Back
+        </button>
+        <button className="bg-[#FFB74D] border border-black px-8 py-2 rounded text-xl font-bold text-black">Logout</button>
+      </div>
+    </div>
   );
 }

@@ -260,7 +260,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                     <td className="font-medium w-40">Caution Location:</td>
                     <td>
                       {formData.freshCautionLocationFrom &&
-                      formData.freshCautionLocationTo
+                        formData.freshCautionLocationTo
                         ? `From ${formData.freshCautionLocationFrom} to ${formData.freshCautionLocationTo}`
                         : "Not specified"}
                     </td>
@@ -302,7 +302,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
                     <td className="font-medium w-40">Line:</td>
                     <td>
                       {formData.sntDisconnectionLineFrom &&
-                      formData.sntDisconnectionLineTo
+                        formData.sntDisconnectionLineTo
                         ? `From ${formData.sntDisconnectionLineFrom} to ${formData.sntDisconnectionLineTo}`
                         : "Not specified"}
                     </td>
