@@ -8,8 +8,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useSession } from "next-auth/react";
+import { useRef } from "react";
 
-export default function RequestTablePage() {
+export default function ManagerRequestTablePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -17,6 +19,14 @@ export default function RequestTablePage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(50); // Increased limit to show more requests
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
+  const { data: session } = useSession();
+  const [dateRange, setDateRange] = useState({
+    startDate: format(new Date(), "dd-MM-yy"),
+    endDate: format(new Date(), "dd-MM-yy")
+  });
+  const [selectedSection, setSelectedSection] = useState("All");
+  const [selectedSSE, setSelectedSSE] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
 
   // Initialize currentWeekStart from URL parameter or default to current date
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -38,15 +48,25 @@ export default function RequestTablePage() {
     department: "ALL",
     section: "ALL",
     workType: "ALL",
-    corridorType: "ALL"
+    corridorType: "ALL",
+    blockType: "All",
+    sse: "ALL" // Added SSE to filters
   });
 
-  // Update URL when currentWeekStart changes
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
-    router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentWeekStart, router]);
+  // Dropdown open states
+  const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
+  const [sseDropdownOpen, setSseDropdownOpen] = useState(false);
+  const [blockTypeDropdownOpen, setBlockTypeDropdownOpen] = useState(false);
+
+  // Multi-select state
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [selectedSSEs, setSelectedSSEs] = useState<string[]>([]);
+
+  // Date range state
+  const [customDateRange, setCustomDateRange] = useState({
+    start: '',
+    end: ''
+  });
 
   // Calculate week range
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
@@ -77,6 +97,19 @@ export default function RequestTablePage() {
     }
   });
 
+  // Section options
+  const sectionOptions = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedSection) || []));
+  // SSE options
+  const sseOptions = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.user?.name) || []));
+  // Block type options
+  const blockTypeOptions = [
+    { label: "All", value: "All" },
+    { label: "Corridor (C)", value: "CORRIDOR" },
+    { label: "Non-corridor(NC)", value: "NON_CORRIDOR" },
+    { label: "Emergency (E)", value: "EMERGENCY" },
+    { label: "Mega Block (M)", value: "MEGA_BLOCK" },
+  ];
+
   // Format date
   const formatDate = (dateString: string) => {
     try {
@@ -102,18 +135,33 @@ export default function RequestTablePage() {
     }
   };
 
-  // Status badge class
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "APPROVED":
-        return "bg-green-100 text-green-800 border border-black";
-      case "REJECTED":
-        return "bg-red-100 text-red-800 border border-black";
-      case "PENDING":
-      default:
-        return "bg-yellow-100 text-yellow-800 border border-black";
+  // Status mapping function for table display
+  function getDisplayStatus(request: UserRequest) {
+    // You may need to adjust these conditions based on your backend fields
+    if (request.status === 'APPROVED' && request.isSanctioned) {
+      return { label: 'Sanctioned', className: 'bg-green-100 text-green-900 border-green-400' };
     }
-  };
+    if (request.status === 'PENDING' && request.adminRequestStatus === 'PENDING') {
+      return { label: 'Pending with Optg', className: 'bg-yellow-200 text-yellow-900 border-yellow-400' };
+    }
+    if (request.status === 'REJECTED' && request.adminRequestStatus === 'REJECTED') {
+      return { label: 'Returned by Optg', className: 'bg-red-500 text-white border-red-700' };
+    }
+    if (["NOT_AVAILED", "AVAILED", "CANCELLED"].includes(request.userStatus)) {
+      return { label: 'Not-availed/availed/cancelled', className: 'bg-white text-black border-gray-300' };
+    }
+    if (request.status === 'REJECTED' && request.managerAcceptance === false) {
+      return { label: 'Returned to applicant', className: 'bg-sky-200 text-sky-900 border-sky-400' };
+    }
+    if (request.status === 'PENDING' && request.managerAcceptance === false) {
+      return { label: 'Pending with me', className: 'bg-fuchsia-300 text-fuchsia-900 border-fuchsia-400' };
+    }
+    if (request.status === 'BURST') {
+      return { label: 'Burst', className: 'bg-orange-400 text-white border-orange-700 font-bold' };
+    }
+    // Default fallback
+    return { label: request.status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+  }
 
   // Handle week/day navigation
   const handleWeekChange = (direction: "prev" | "next") => {
@@ -130,20 +178,49 @@ export default function RequestTablePage() {
     setPage(1);
   };
 
+  // Handle block type filter
+  const handleBlockTypeFilter = (type: string) => {
+    setFilters(prev => ({
+      ...prev,
+      blockType: type
+    }));
+  };
+
+  // Handle section filter
+  const handleSectionFilter = (section: string) => {
+    setFilters(prev => ({
+      ...prev,
+      section: section
+    }));
+  };
+
+  // Handle SSE filter
+  const handleSSEFilter = (sse: string) => {
+    setFilters(prev => ({
+      ...prev,
+      sse: sse
+    }));
+  };
+
   // Filter requests based on all filters
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
     const statusMatch = filters.status === "ALL" || request.status === filters.status;
     const departmentMatch = filters.department === "ALL" || request.selectedDepartment === filters.department;
-    const sectionMatch = filters.section === "ALL" || request.selectedSection === filters.section;
+    // OR logic for section
+    const sectionMatch = selectedSections.length === 0 || selectedSections.includes(request.selectedSection);
     const workTypeMatch = filters.workType === "ALL" || request.workType === filters.workType;
     const corridorTypeMatch = filters.corridorType === "ALL" || request.corridorType === filters.corridorType;
-
-    // For urgent mode, also filter by date
+    const blockTypeMatch = filters.blockType === "All" ||
+      (filters.blockType === "CORRIDOR" && request.corridorType === "CORRIDOR") ||
+      (filters.blockType === "NON_CORRIDOR" && request.corridorType === "NON_CORRIDOR") ||
+      (filters.blockType === "EMERGENCY" && request.corridorType === "EMERGENCY") ||
+      (filters.blockType === "MEGA_BLOCK" && request.corridorType === "MEGA_BLOCK");
+    // OR logic for SSE
+    const sseMatch = selectedSSEs.length === 0 || selectedSSEs.includes(request.user?.name);
     const dateMatch = isUrgentMode
       ? format(parseISO(request.date), "yyyy-MM-dd") === format(currentWeekStart, "yyyy-MM-dd")
       : true;
-
-    return statusMatch && departmentMatch && sectionMatch && workTypeMatch && corridorTypeMatch && dateMatch;
+    return statusMatch && departmentMatch && sectionMatch && workTypeMatch && corridorTypeMatch && blockTypeMatch && sseMatch && dateMatch;
   }) || [];
 
   // Bulk approve mutation
@@ -195,6 +272,46 @@ export default function RequestTablePage() {
     }
   };
 
+  // Handlers for multi-select
+  const handleSectionToggle = (section: string) => {
+    setSelectedSections(prev =>
+      prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]
+    );
+  };
+  const handleSSEToggle = (sse: string) => {
+    setSelectedSSEs(prev =>
+      prev.includes(sse) ? prev.filter(s => s !== sse) : [...prev, sse]
+    );
+  };
+  // Handler for block type radio
+  const handleBlockTypeRadio = (type: string) => {
+    setFilters(prev => ({ ...prev, blockType: type }));
+    setBlockTypeDropdownOpen(false);
+  };
+  // Handler for date pickers
+  const handleDateChange = (field: 'start' | 'end', value: string) => {
+    setCustomDateRange(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Update filters when multi-select changes
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      section: selectedSections.length === 0 ? "ALL" : selectedSections.join(','),
+      sse: selectedSSEs.length === 0 ? "ALL" : selectedSSEs.join(',')
+    }));
+  }, [selectedSections, selectedSSEs]);
+  // Update filters when date changes
+  useEffect(() => {
+    if (customDateRange.start && customDateRange.end) {
+      setFilters(prev => ({
+        ...prev,
+        startDate: customDateRange.start,
+        endDate: customDateRange.end
+      }));
+    }
+  }, [customDateRange]);
+
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -214,211 +331,196 @@ export default function RequestTablePage() {
   }
 
   return (
-    <div className="bg-white p-3 border border-black mb-3">
-      <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-bold text-[#13529e]">
-          {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
-        </h1>
-        <div className="flex flex-wrap gap-2">
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-transparent"
-          >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-          <select
-            value={filters.department}
-            onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-transparent"
-          >
-            <option value="ALL">All Departments</option>
-            {Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedDepartment) || [])).map(dept => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-          <select
-            value={filters.section}
-            onChange={(e) => setFilters(prev => ({ ...prev, section: e.target.value }))}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-transparent"
-          >
-            <option value="ALL">All Sections</option>
-            {Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedSection) || [])).map(section => (
-              <option key={section} value={section}>{section}</option>
-            ))}
-          </select>
-          <select
-            value={filters.workType}
-            onChange={(e) => setFilters(prev => ({ ...prev, workType: e.target.value }))}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-transparent"
-          >
-            <option value="ALL">All Work Types</option>
-            {Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType) || [])).map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <select
-            value={filters.corridorType}
-            onChange={(e) => setFilters(prev => ({ ...prev, corridorType: e.target.value }))}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-transparent"
-          >
-            <option value="ALL">All Corridor Types</option>
-            <option value="Corridor">Corridor</option>
-            <option value="Outside Corridor">Outside Corridor</option>
-            <option value="Urgent Block">Urgent Block</option>
-          </select>
+    <div className="min-h-screen bg-[#FFFDF5]">
+      {/* Top Yellow Bar */}
+      <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
+        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+      </div>
+
+      {/* Main Title on Light Blue */}
+      <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
+        <span className="text-2xl md:text-3xl font-bold text-black text-center">Departmental Control</span>
+      </div>
+
+      {/* Department Name */}
+      <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
+        <span className="text-xl font-bold text-black">{session?.user?.department || "..."} Department</span>
+      </div>
+
+      {/* View Block Details Button */}
+      <div className="w-full flex justify-center mt-4">
+        <button className="bg-[#FFF86B] px-8 py-2 rounded-full border-4 border-[#13529e] text-lg font-bold text-[#13529e] shadow-md hover:bg-[#B57CF6] hover:text-white transition-colors">
+          View Block Details
+        </button>
+      </div>
+
+      {/* Pending Requests Section */}
+      <div className="mx-4 mt-6">
+        <div className="bg-[#FF6B6B] grid grid-cols-3 gap-0 border-2 border-black">
+          <div className="p-3 text-black font-bold border-r-2 border-black">REQUESTS PENDING WITH ME</div>
+          <div className="p-3 text-black font-bold border-r-2 border-black text-center">Nos. {data?.data?.total || 0}</div>
+          <Link href="/manage/pending-requests" className="p-3 text-black font-bold text-center hover:bg-[#FF5555]">
+            Click to View
+          </Link>
         </div>
       </div>
 
-      {/* Date Navigation */}
-      <div className="mb-4">
-        {isUrgentMode ? (
-          <div className="flex justify-center gap-2 text-black">
-            <button
-              onClick={() => handleWeekChange("prev")}
-              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black hover:bg-gray-50"
-            >
-              Previous Day
-            </button>
-            <span className="px-3 py-1 text-sm font-medium">
-              {format(currentWeekStart, "dd MMM yyyy")}
-            </span>
-            <button
-              onClick={() => handleWeekChange("next")}
-              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black hover:bg-gray-50"
-            >
-              Next Day
-            </button>
-          </div>
-        ) : (
-          <WeeklySwitcher
-            currentWeekStart={currentWeekStart}
-            onWeekChange={handleWeekChange}
-            weekStartsOn={6}
-          />
-        )}
-      </div>
-
-      {/* Bulk Actions */}
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex items-center gap-2">
+      {/* Filters Row: All filters in a single row */}
+      <div className="mx-4 mt-4 flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-black">
+        {/* Date Range */}
+        <div className="flex items-center gap-1">
+          <span className="bg-[#E6E6FA] px-2 py-1 border border-black font-bold text-black rounded-l-md text-xs">Custom view</span>
           <input
-            type="checkbox"
-            checked={selectedRequests.size > 0 && selectedRequests.size === filteredRequests.filter(r => r.status !== "REJECTED").length}
-            onChange={handleSelectAll}
-            className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
+            type="date"
+            value={customDateRange.start}
+            onChange={e => handleDateChange('start', e.target.value)}
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
           />
-          <span className="text-sm text-gray-700">Select All</span>
+          <span className="px-1 text-black text-xs">to</span>
+          <input
+            type="date"
+            value={customDateRange.end}
+            onChange={e => handleDateChange('end', e.target.value)}
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          />
         </div>
-        {selectedRequests.size > 0 && (
+        {/* Block Type Dropdown (Radio) */}
+        <div className="relative inline-block">
           <button
-            onClick={handleBulkApprove}
-            disabled={approveMutation.isPending}
-            className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setBlockTypeDropdownOpen(v => !v)}
+            className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
           >
-            {approveMutation.isPending ? "Approving..." : `Approve Selected (${selectedRequests.size})`}
+            {blockTypeOptions.find(opt => opt.value === filters.blockType)?.label || 'Block Type'}
+            <span className="ml-1">▼</span>
           </button>
-        )}
-      </div>
-
-      {/* Requests Table */}
-      <div className="overflow-x-auto">
-        {filteredRequests.length === 0 ? (
-          <div className="text-center py-5 text-gray-600">
-            No requests found for the selected filters
-          </div>
-        ) : (
-          <table className="w-full border-collapse text-black">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-black p-2 text-left text-sm font-medium text-black w-10">
+          {blockTypeDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg">
+              {blockTypeOptions.map(opt => (
+                <label key={opt.value} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
+                  <input
+                    type="radio"
+                    name="blockType"
+                    checked={filters.blockType === opt.value}
+                    onChange={() => handleBlockTypeRadio(opt.value)}
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Section Dropdown (Multi-select) */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setSectionDropdownOpen(v => !v)}
+            className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
+          >
+            Section: {selectedSections.length === 0 ? 'All' : `${selectedSections.length} selected`}
+            <span className="ml-1">▼</span>
+          </button>
+          {sectionDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+              {sectionOptions.map(section => (
+                <label key={section} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
                   <input
                     type="checkbox"
-                    checked={selectedRequests.size > 0 && selectedRequests.size === filteredRequests.filter(r => r.status !== "REJECTED").length}
-                    onChange={handleSelectAll}
-                    className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
+                    checked={selectedSections.includes(section)}
+                    onChange={() => handleSectionToggle(section)}
+                    className="mr-2 accent-[#B57CF6]"
                   />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Date</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Major Section</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Depot</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Block Section</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Line</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Time</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Work Type</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Status</th>
-                <th className="border border-black p-2 text-left text-sm font-medium text-black">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request: UserRequest) => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="border border-black p-2 text-sm">
-                    {request.status !== "REJECTED" && (
-                      <input
-                        type="checkbox"
-                        checked={selectedRequests.has(request.id)}
-                        onChange={() => handleSelectRequest(request.id)}
-                        className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
-                      />
-                    )}
-                  </td>
-                  <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
-                  <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
-                  <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
-                  <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.processedLineSections?.[0]?.lineName || "N/A"}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}
-                  </td>
-                  <td className="border border-black p-2 text-sm">{request.workType}</td>
-                  <td className="border border-black p-2 text-sm">
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.status)}`}>
-                      {request.status}
-                    </span>
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    <Link
-                      href={`/manage/view-request/${request.id}?from=request-table`}
-                      className="px-2 py-1 text-xs bg-[#13529e] text-white border border-[#0e4080] rounded hover:bg-[#0e4080]"
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
+                  {section}
+                </label>
               ))}
-            </tbody>
-          </table>
-        )}
+            </div>
+          )}
+        </div>
+        {/* SSE Dropdown (Multi-select) */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setSseDropdownOpen(v => !v)}
+            className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
+          >
+            SSE: {selectedSSEs.length === 0 ? 'All' : `${selectedSSEs.length} selected`}
+            <span className="ml-1">▼</span>
+          </button>
+          {sseDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+              {sseOptions.map(sse => (
+                <label key={sse} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedSSEs.includes(sse)}
+                    onChange={() => handleSSEToggle(sse)}
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {sse}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Pagination */}
-      {data?.data?.totalPages && data.data.totalPages > 1 && (
-        <div className="mt-4 flex justify-center gap-2">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-3 py-1 text-sm">
-            Page {page} of {data?.data?.totalPages || 1}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(data?.data?.totalPages || 1, p + 1))}
-            disabled={page === (data?.data?.totalPages || 1)}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      {/* Table Section */}
+      <div className="mx-2 mt-2 overflow-x-auto">
+        <table className="w-full border-2 border-black bg-white text-black text-sm">
+          <thead>
+            <tr className="bg-[#E8F4F8] text-black">
+              <th className="border-2 border-black p-1">Date</th>
+              <th className="border-2 border-black p-1">ID</th>
+              <th className="border-2 border-black p-1">Block Section</th>
+              <th className="border-2 border-black p-1">UP/DN/SL/RO AD NO.</th>
+              <th className="border-2 border-black p-1">Duration</th>
+              <th className="border-2 border-black p-1">Activity</th>
+              <th className="border-2 border-black p-1">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRequests.map((request: UserRequest) => (
+              <tr key={request.id} className="bg-white hover:bg-[#F3F3F3]">
+                <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
+                <td className="border border-black p-1 text-center">
+                  <Link
+                    href={`/manage/view-request/${request.id}?from=request-table`}
+                    className="text-[#13529e] hover:underline font-semibold"
+                  >
+                    {request.id}
+                  </Link>
+                </td>
+                <td className="border border-black p-1">{request.selectedSection}</td>
+                <td className="border border-black p-1 text-center">{request.processedLineSections?.[0]?.lineName || "N/A"}</td>
+                <td className="border border-black p-1 text-center">{formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}</td>
+                <td className="border border-black p-1">{request.workType}</td>
+                <td className="border border-black p-1 text-center">
+                  {(() => {
+                    const status = getDisplayStatus(request);
+                    return (
+                      <span className={`px-2 py-1 text-xs rounded-full border ${status.className}`}>{status.label}</span>
+                    );
+                  })()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Help Text */}
+      <div className="mx-4 mt-6 text-center">
+        <p className="text-lg font-bold">Click ID to see details of a Block.</p>
+        <p className="mt-2 text-lg">For printing the complete table, click to download in .csv format.</p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
+        <button className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
+          Download
+        </button>
+        <Link href="/dashboard" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold">
+          Home
+        </Link>
+      </div>
     </div>
   );
 }

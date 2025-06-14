@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { managerService, CreateUserInput } from "../api/manager";
+import { toast } from 'react-hot-toast';
 
 /**
  * Hook for creating a new user
@@ -42,4 +43,64 @@ export function useDeleteUser() {
         },
     });
 }
+
+export const useAcceptRequest = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => managerService.acceptRequest(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+            toast.success('Request accepted successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.message || 'Failed to accept request');
+        }
+    });
+};
+
+export const useRejectRequest = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, reason }: { id: string; reason: string }) => managerService.rejectRequest(id, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+            toast.success('Request rejected successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.message || 'Failed to reject request');
+        }
+    });
+};
+
+export const useBulkAcceptRequests = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (ids: string[]) => managerService.bulkAcceptRequests(ids),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+            toast.success('Requests accepted successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.message || 'Failed to accept requests');
+        }
+    });
+};
+
+export const useBulkRejectRequests = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ ids, reason }: { ids: string[]; reason: string }) => managerService.bulkRejectRequests(ids, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+            toast.success('Requests rejected successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.message || 'Failed to reject requests');
+        }
+    });
+};
 

@@ -22,60 +22,10 @@ const QuickAction = ({
 );
 
 export default function ManagerQuickLinks() {
-
-    {/* Quick actions */ }
     return (
-        <div className="mb-4">
-            <h2 className="text-sm font-bold text-[#13529e] mb-2 border-b border-gray-300 pb-1">
-                Quick Actions
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-
-
-                <QuickAction
-                    title="Manage Users"
-                    icon={
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                    }
-                    link="/manage/manage-users"
-                />
-                <QuickAction
-                    title="View Requests"
-                    icon={
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                            />
-                        </svg>
-                    }
-                    link="/manage/request-table"
-                />
-
-            </div>
+        <div className="w-full flex flex-col items-center gap-5 mt-6 px-2 max-w-md">
+            <a href="/manage/request-table" className="w-full rounded-2xl bg-[#eeb8f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">VIEW BLOCK DETAILS</a>
+            <a href="/manage/block-summary" className="w-full rounded-2xl bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">BLOCK SUMMARY REPORT</a>
         </div>
-
-    )
-
+    );
 }

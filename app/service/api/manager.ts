@@ -48,6 +48,7 @@ export interface UserRequest {
     date: string;
     selectedDepartment: string;
     selectedSection: string;
+    selectedSSE: string;
     stationID: string | null;
     missionBlock: string;
     workType: string;
@@ -64,8 +65,8 @@ export interface UserRequest {
     selectedLine: string | null;
     optimisedTimeFrom?: string;
     optimisedTimeTo?: string;
-    optimizeTimeFrom?:string;
-    optimizeTimeTo?:string,
+    optimizeTimeFrom?: string;
+    optimizeTimeTo?: string,
     sigDisconnection: boolean;
     elementarySection: string;
     elementarySectionTo: string | null;
@@ -182,7 +183,7 @@ export const managerService = {
             page: page.toString(),
             limit: limit.toString(),
         });
-        
+
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
         if (status) params.append('status', status);
@@ -204,7 +205,7 @@ export const managerService = {
             page: page.toString(),
             limit: limit.toString(),
         });
-        
+
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
         if (status) params.append('status', status);
@@ -226,7 +227,7 @@ export const managerService = {
             page: page.toString(),
             limit: limit.toString(),
         });
-        
+
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
 
@@ -247,7 +248,7 @@ export const managerService = {
             page: page.toString(),
             limit: limit.toString(),
         });
-        
+
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
 
@@ -268,7 +269,7 @@ export const managerService = {
             page: page.toString(),
             limit: limit.toString(),
         });
-        
+
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
         if (status) params.append('status', status);
@@ -282,12 +283,12 @@ export const managerService = {
     /**
      * Accept a user request
      */
-    
-// Fixed version
-acceptUserRequest: async (id: string, isAccept: boolean, remark?: string): Promise<{ status: boolean; message: string }> => {
-    const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept, remark });
-    return response.data;
-},
+
+    // Fixed version
+    acceptUserRequest: async (id: string, isAccept: boolean, remark?: string): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept, remark });
+        return response.data;
+    },
 
     /**
      * Get a single user request by ID
@@ -298,23 +299,63 @@ acceptUserRequest: async (id: string, isAccept: boolean, remark?: string): Promi
     },
 
 
-     getManagerUserRequests: async (page: number, limit: number, startDate: string,
+    getManagerUserRequests: async (page: number, limit: number, startDate: string,
         endDate: string,) => {
         try {
-          const queryParams = new URLSearchParams();
-          queryParams.append('page', page.toString());
-          queryParams.append('limit', limit.toString());
-          if (startDate && endDate) {
-            queryParams.append('startDate', startDate);
-            queryParams.append('endDate', endDate);
-          }
-          const response = await axiosInstance.get("/api/user-request/manager/manager-optimise-status", {
-            params: { page, limit, startDate, endDate },
-          });
-          return response.data;
+            const queryParams = new URLSearchParams();
+            queryParams.append('page', page.toString());
+            queryParams.append('limit', limit.toString());
+            if (startDate && endDate) {
+                queryParams.append('startDate', startDate);
+                queryParams.append('endDate', endDate);
+            }
+            const response = await axiosInstance.get("/api/user-request/manager/manager-optimise-status", {
+                params: { page, limit, startDate, endDate },
+            });
+            return response.data;
         } catch (error) {
-          console.error("Error fetching user requests:", error);
-          throw error;
+            console.error("Error fetching user requests:", error);
+            throw error;
         }
-      },
+    },
+
+    /**
+     * Get all pending requests for the manager
+     */
+    getPendingRequests: async (): Promise<UserRequestsResponse> => {
+        const response = await axiosInstance.get<UserRequestsResponse>('/api/user-request/manager/pending');
+        return response.data;
+    },
+
+    /**
+     * Accept a request
+     */
+    acceptRequest: async (id: string): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post(`/api/user-request/manager/accept/${id}`);
+        return response.data;
+    },
+
+    /**
+     * Reject a request
+     */
+    rejectRequest: async (id: string, reason: string): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post(`/api/user-request/manager/reject/${id}`, { reason });
+        return response.data;
+    },
+
+    /**
+     * Bulk accept requests
+     */
+    bulkAcceptRequests: async (ids: string[]): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post('/api/user-request/manager/bulk-accept', { ids });
+        return response.data;
+    },
+
+    /**
+     * Bulk reject requests
+     */
+    bulkRejectRequests: async (ids: string[], reason: string): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.post('/api/user-request/manager/bulk-reject', { ids, reason });
+        return response.data;
+    },
 };

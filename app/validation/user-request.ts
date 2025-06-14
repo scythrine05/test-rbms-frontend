@@ -57,7 +57,11 @@ export const userRequestSchema = z.object({
         stream: z.string().optional(),
         road: z.string().optional(),
         otherRoads: z.string().optional(),
-    }))
+    })),
+    sanctionStatus: z.enum(['YES', 'NO']).optional(),
+    road: z.string().optional(),
+    lineType: z.enum(['UP', 'DN', 'SL']).optional(),
+    cautionDays: z.number().optional(),
 });
 
 export type UserRequestInput = z.infer<typeof userRequestSchema>;

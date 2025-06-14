@@ -3,118 +3,45 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO, addDays, startOfWeek, subDays, endOfWeek } from "date-fns";
+import { format, parseISO, addDays, subDays, startOfWeek, endOfWeek } from "date-fns";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useAcceptUserRequest,
-  useApproveAllPendingRequests,
-} from "@/app/service/mutation/admin";
-import { useUrgentMode } from "@/app/context/UrgentModeContext";
-import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
-import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 
-export default function RequestTablePage() {
-  // Context hooks
+export default function AdminRequestTablePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isUrgentMode } = useUrgentMode();
-
-  // State hooks
-  const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [limit] = useState(30);
-  const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
-  const [corridorTab, setCorridorTab] = useState<'corridor' | 'non-corridor'>('corridor');
-  const [workTypeFilter, setWorkTypeFilter] = useState<string>("ALL");
-  const [activityFilter, setActivityFilter] = useState<string>("ALL");
-  const [timeSlotFilter, setTimeSlotFilter] = useState<string>("ALL");
-
-  // Initialize currentWeekStart from URL parameter or default to current date
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const dateParam = searchParams.get('date');
-    if (dateParam) {
-      const parsedDate = new Date(dateParam);
-      if (!isNaN(parsedDate.getTime())) {
-        return parsedDate;
-      }
-    }
-    const today = new Date();
-    return isUrgentMode ? today : startOfWeek(today, { weekStartsOn: 1 });
+  const [dateRange, setDateRange] = useState({
+    start: format(new Date(), "yyyy-MM-dd"),
+    end: format(new Date(), "yyyy-MM-dd"),
   });
-
-  // Mutation hooks
-  const acceptMutation = useAcceptUserRequest();
-  const approveAllMutation = useApproveAllPendingRequests();
-
-  // Calculate week range
-  const weekEnd = isUrgentMode
-    ? currentWeekStart
-    : endOfWeek(currentWeekStart, { weekStartsOn: 1 });
-  const weekStart = isUrgentMode
-    ? currentWeekStart
-    : startOfWeek(currentWeekStart, { weekStartsOn: 1 });
-
-  // Update URL when currentWeekStart changes
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
-    router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentWeekStart, router]);
+  const [sectionFilter, setSectionFilter] = useState<string>("ALL");
+  const [typeFilter, setTypeFilter] = useState<string>("ALL");
 
   // Fetch requests data
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", statusFilter, weekStart, weekEnd, isUrgentMode],
-    queryFn: () => {
-      const dateRange = isUrgentMode
-        ? {
-          startDate: format(currentWeekStart, "yyyy-MM-dd"),
-          endDate: format(currentWeekStart, "yyyy-MM-dd")
-        }
-        : {
-          startDate: format(currentWeekStart, "yyyy-MM-dd"),
-          endDate: format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), "yyyy-MM-dd")
-        };
-
-      return managerService.getUserRequestsByAdmin(
+    queryKey: ["admin-requests", dateRange, sectionFilter, typeFilter],
+    queryFn: () =>
+      managerService.getUserRequestsByAdmin(
         1,
         1000,
-        dateRange.startDate,
-        dateRange.endDate,
-        statusFilter !== "ALL" ? statusFilter : undefined
-      );
-    }
+        dateRange.start,
+        dateRange.end
+      ),
   });
 
-  // Get unique work types and activities for filters
-  const uniqueWorkTypes = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType) || []));
-  const uniqueActivities = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.activity) || []));
+  // Get unique sections and types for filters
+  const sectionOptions = Array.from(
+    new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedSection).filter(Boolean) || [])
+  );
+  const typeOptions = Array.from(
+    new Set(data?.data?.requests?.map((r: UserRequest) => r.corridorType).filter(Boolean) || [])
+  );
 
-  // Time slot helper function
-  const getTimeSlot = (timeStr: string) => {
-    if (!timeStr) return "N/A";
-    const hour = new Date(timeStr).getUTCHours();
-    if (hour >= 20 || hour < 4) return "20:00-04:00";
-    if (hour >= 4 && hour < 12) return "04:00-12:00";
-    return "12:00-20:00";
-  };
-
-  // Filter requests based on all filters
+  // Filter requests based on filters
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const urgentMatch = isUrgentMode
-      ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-      : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-
-    const statusMatch = statusFilter === "ALL" || request.adminRequestStatus === statusFilter;
-    const departmentMatch = departmentTab === 'all' ||
-      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
-        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
-    const corridorMatch = !isUrgentMode ? (corridorTab === 'corridor' ? request.corridorType === "Corridor" : request.corridorType !== "Corridor") : true;
-    const workTypeMatch = workTypeFilter === "ALL" || request.workType === workTypeFilter;
-    const activityMatch = activityFilter === "ALL" || request.activity === activityFilter;
-    const timeSlotMatch = timeSlotFilter === "ALL" || getTimeSlot(request.demandTimeFrom) === timeSlotFilter;
-
-    return urgentMatch && statusMatch && departmentMatch && corridorMatch && workTypeMatch && activityMatch && timeSlotMatch;
+    const sectionMatch = sectionFilter === "ALL" || request.selectedSection === sectionFilter;
+    const typeMatch = typeFilter === "ALL" || request.corridorType === typeFilter;
+    return sectionMatch && typeMatch;
   }) || [];
 
   // Helper functions
@@ -125,595 +52,193 @@ export default function RequestTablePage() {
       return "Invalid date";
     }
   };
-
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "N/A";
-
       const hours = date.getUTCHours().toString().padStart(2, '0');
       const minutes = date.getUTCMinutes().toString().padStart(2, '0');
       return `${hours}:${minutes}`;
-    } catch (error) {
-      console.error("Error formatting time:", error, dateString);
+    } catch {
       return "N/A";
     }
   };
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "ACCEPTED":
-        return "bg-green-100 text-green-800 border border-black";
-      case "REJECTED":
-        return "bg-red-100 text-red-800 border border-black";
-      case "PENDING":
-      default:
-        return "";
+  // Status badge mapping
+  function getStatusBadge(request: UserRequest) {
+    if (request.status === 'APPROVED' && request.isSanctioned) {
+      return { label: 'Sanctioned', className: 'bg-green-200 text-green-900 border-green-400' };
     }
-  };
-
-  const getLineOrRoad = (request: UserRequest) => {
-    if (
-      request.processedLineSections &&
-      Array.isArray(request.processedLineSections) &&
-      request.processedLineSections.length > 0
-    ) {
-      return request.processedLineSections
-        .map((section) => {
-          if (section.type === "yard") {
-            if (section.stream && section.road) {
-              return `${section.stream}/${section.road}`;
-            }
-            if (section.stream) {
-              return section.stream;
-            }
-            if (section.road) {
-              return section.road;
-            }
-          } else if (section.lineName) {
-            return section.lineName;
-          }
-          return null;
-        })
-        .filter(Boolean)
-        .join(", ") || "N/A";
+    if (request.status === 'REJECTED') {
+      return { label: 'Rejected', className: 'bg-red-500 text-white border-red-700' };
     }
-    return "N/A";
-  };
-
-  const getAdjacentLinesAffected = (request: UserRequest): string => {
-    if (request.adjacentLinesAffected) {
-      return request.adjacentLinesAffected;
+    if (request.status === 'PENDING') {
+      return { label: 'Pending', className: 'bg-yellow-200 text-yellow-900 border-yellow-400' };
     }
-
-    if (request.processedLineSections) {
-      const affectedLines = request.processedLineSections.map(section => {
-        if (section.type === 'yard') {
-          return section.otherRoads;
-        }
-        return section.otherLines;
-      }).filter(Boolean).join(", ");
-
-      return affectedLines || "N/A";
+    if (request.userStatus === 'AVAILED') {
+      return { label: 'Availed', className: 'bg-sky-200 text-sky-900 border-sky-400' };
     }
-
-    return "N/A";
-  };
-
-  // Event handlers
-  const handleApproveAllPending = async () => {
-    if (confirm("Are you sure you want to approve all pending requests shown in this view?")) {
-      try {
-        // Get the current filtered requests that are pending
-        const requestsToApprove = filteredRequests
-          .filter((request: UserRequest) => request.adminRequestStatus === "PENDING")
-          .map((request: UserRequest) => request.id);
-
-        if (requestsToApprove.length === 0) {
-          alert("No pending requests to approve in the current view.");
-          return;
-        }
-
-        // Approve each request in the filtered list
-        for (const id of requestsToApprove) {
-          await acceptMutation.mutateAsync({ id, accept: true });
-        }
-
-        alert(`Successfully approved ${requestsToApprove.length} pending requests from the current view.`);
-      } catch (error) {
-        console.error("Failed to approve requests:", error);
-        alert("Failed to approve requests. Please try again.");
-      }
+    if (request.userStatus === 'NOT_AVAILED') {
+      return { label: 'Not-availed', className: 'bg-white text-black border-gray-300' };
     }
-  };
-
-  const handleRequestAction = async (id: string, accept: boolean) => {
-    if (
-      confirm(
-        `Are you sure you want to ${accept ? "approve" : "reject"} this request?`
-      )
-    ) {
-      try {
-        await acceptMutation.mutateAsync({ id, accept });
-        alert(`Request ${accept ? "approved" : "rejected"} successfully`);
-      } catch (error) {
-        console.error("Failed to process request:", error);
-        alert("Failed to process request. Please try again.");
-      }
+    if (request.status === 'BURST') {
+      return { label: 'Burst', className: 'bg-orange-400 text-white border-orange-700 font-bold' };
     }
-  };
+    return { label: request.status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+  }
 
-  const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) => {
-      if (isUrgentMode) {
-        return direction === "prev"
-          ? subDays(prev, 1)
-          : addDays(prev, 1);
-      } else {
-        return direction === "prev"
-          ? subDays(prev, 7)
-          : addDays(prev, 7);
-      }
-    });
-    setPage(1);
-  };
-
-  const corridorRequests = filteredRequests.filter(
-    (request) => request.corridorType === "Corridor"
-  );
-
-  const nonCorridorRequests = filteredRequests.filter(
-    (request) => request.corridorType === "Outside Corridor"
-  );
-
-  const urgentRequests = filteredRequests.filter(
-    (request) => request.corridorType === "Urgent Block"
-  );
-
+  // Download CSV
   const handleDownloadCSV = () => {
-    if (!data?.data?.requests) return;
-
-    // Get the current filtered requests
-    const requestsToDownload = filteredRequests;
-
-    // Create CSV headers
+    if (!filteredRequests.length) return;
     const headers = [
-      "Date",
-      "Major Section",
-      "Depot",
-      "Block Section",
-      "Line/Road",
-      "Adjacent Lines Affected",
-      "Work Type",
-      "Corridor Type",
-      "Activity",
-      "Demanded Time From",
-      "Demanded Time To",
-      "Requested By",
-      "Department",
-      "Description"
+      "Date", "ID", "Section", "Demanded From", "Demanded To", "Slot From", "Slot To", "Type", "Status"
     ];
-
-    // Create CSV rows
-    const rows = requestsToDownload.map((request: UserRequest) => [
-      formatDate(request.date),
-      request.selectedSection || "N/A",
-      request.selectedDepo || "N/A",
-      request.missionBlock || "N/A",
-      getLineOrRoad(request),
-      request.adjacentLinesAffected || getAdjacentLinesAffected(request),
-      request.workType || "N/A",
-      request.corridorType || "N/A",
-      request.activity || "N/A",
-      formatTime(request.demandTimeFrom || ""),
-      formatTime(request.demandTimeTo || ""),
-      request.user?.name || "N/A",
-      request.selectedDepartment || "N/A",
-      request.requestremarks || "N/A"
+    const rows = filteredRequests.map((r) => [
+      formatDate(r.date),
+      r.id,
+      r.selectedSection,
+      formatTime(r.demandTimeFrom),
+      formatTime(r.demandTimeTo),
+      formatTime(r.sanctionedTimeFrom),
+      formatTime(r.sanctionedTimeTo),
+      r.corridorType,
+      getStatusBadge(r).label
     ]);
-
-    // Combine headers and rows
     const csvContent = [
       headers.join(","),
-      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(","))
     ].join("\n");
-
-    // Create and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
+    link.setAttribute("download", `block_details_${dateRange.start}_to_${dateRange.end}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5">Loading requests...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5 text-red-600">
-          Error loading requests. Please try again.
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white p-3 border border-black mb-3">
-      <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-bold text-[#13529e]">
-            {isUrgentMode ? "Urgent Block Requests" : "Block Requests"}
-          </h1>
-          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
-            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
-          </span>
-        </div>
+    <div className="min-h-screen bg-[#FFFDF5] flex flex-col items-center">
+      {/* RBMS Header */}
+      <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
+        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+      </div>
+      {/* Blue Section Title */}
+      <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
+        <span className="text-3xl font-bold text-black text-center">Block Details</span>
+      </div>
+      {/* Red Bar */}
+      <div className="w-full flex flex-col items-center mt-4">
         <div className="flex gap-2">
-          <button
-            onClick={handleDownloadCSV}
-            className="px-3 py-1 text-sm bg-green-600 text-white border border-black hover:bg-green-700"
-          >
-            Download CSV
-          </button>
-          <button
-            onClick={handleApproveAllPending}
-            className="px-3 py-1 text-sm bg-blue-600 text-white border border-black hover:bg-blue-700"
-          >
-            Save
-          </button>
+          <div className="bg-[#FF4B4B] text-white font-bold px-6 py-2 rounded">Requests Pending with Me</div>
+          <div className="bg-[#FF4B4B] text-white font-bold px-6 py-2 rounded">Urgent(..Nos.)</div>
         </div>
       </div>
-
-      {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg border border-[#13529e] mb-4 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Status</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="ACCEPTED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Work Type</label>
-            <select
-              value={workTypeFilter}
-              onChange={(e) => setWorkTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Work Types</option>
-              {uniqueWorkTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Activity</label>
-            <select
-              value={activityFilter}
-              onChange={(e) => setActivityFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Activities</option>
-              {uniqueActivities.map((activity) => (
-                <option key={activity} value={activity}>{activity}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Time Slot</label>
-            <select
-              value={timeSlotFilter}
-              onChange={(e) => setTimeSlotFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Time Slots</option>
-              <option value="20:00-04:00">Night (20:00-04:00)</option>
-              <option value="04:00-12:00">Morning (04:00-12:00)</option>
-              <option value="12:00-20:00">Afternoon (12:00-20:00)</option>
-            </select>
-          </div>
+      {/* Filters Row */}
+      <div className="w-full flex flex-wrap gap-4 items-center justify-center mt-6 mb-2">
+        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
+          <span className="font-bold text-black">Custom</span>
+          <span className="text-black">From</span>
+          <input
+            type="date"
+            value={dateRange.start}
+            onChange={e => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          />
+          <span className="text-black">to</span>
+          <input
+            type="date"
+            value={dateRange.end}
+            onChange={e => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          />
+        </div>
+        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
+          <span className="font-bold text-black">Section</span>
+          <select
+            value={sectionFilter}
+            onChange={e => setSectionFilter(e.target.value)}
+            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          >
+            <option value="ALL">All</option>
+            {sectionOptions.map((section) => (
+              <option key={section} value={section}>{section}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
+          <span className="font-bold text-black">Type</span>
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          >
+            <option value="ALL">All</option>
+            {typeOptions.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
         </div>
       </div>
-
-      <WeeklySwitcher
-        currentWeekStart={currentWeekStart}
-        onWeekChange={handleWeekChange}
-        isUrgentMode={isUrgentMode}
-        weekStartsOn={1}
-      />
-
-      {/* Mode description and date range */}
-      {isUrgentMode ? (
-        <div className="mb-4">
-          <div className="text-sm text-gray-600 mb-2">
-            <p className="font-medium">Urgent Mode Active</p>
-            <p>Showing urgent block requests and emergency work types for the selected day.</p>
-          </div>
-          <div className="text-sm text-gray-600">
-            Date: {format(currentWeekStart, "dd-MM-yyyy")}
-          </div>
-        </div>
-      ) : (
-        <div className="mb-4">
-          <div className="text-sm text-gray-600 mb-2">
-            <p className="font-medium">Normal Mode Active</p>
-            <p>Showing regular block requests for the selected week.</p>
-          </div>
-          <div className="text-sm text-gray-600">
-            Week: {format(weekStart, "dd-MM-yyyy")} to {format(weekEnd, "dd-MM-yyyy")}
-          </div>
-        </div>
-      )}
-
-      {/* Department Tabs */}
-      <div className="border-b border-gray-200 mb-4">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setDepartmentTab('all')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'all'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            All Requests
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY").length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY").length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('engg')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'engg'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Engineering
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('trd')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'trd'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            TRD
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('snt')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'snt'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            S&T
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0}
-            </span>
-          </button>
-        </nav>
-      </div>
-
-      {!isUrgentMode && (
-        <div className="space-y-4">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
-              <button
-                onClick={() => setCorridorTab('corridor')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${corridorTab === 'corridor'
-                  ? 'border-[#13529e] text-[#13529e]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-              >
-                Corridor Requests
-                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                  {corridorRequests.length}
-                </span>
-              </button>
-              <button
-                onClick={() => setCorridorTab('non-corridor')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${corridorTab === 'non-corridor'
-                  ? 'border-[#13529e] text-[#13529e]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-              >
-                Non-Corridor Requests
-                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                  {nonCorridorRequests.length}
-                </span>
-              </button>
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
-              <table className="w-full border-collapse text-black">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Date</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Major Section</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Depot</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Block Section</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Line / Road</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Time</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Work Type</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Activity</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">S&T Approval</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Status</th>
-                    <th className="border border-black p-2 text-left text-sm font-medium text-black">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(corridorTab === 'corridor' ? corridorRequests : nonCorridorRequests).map((request: UserRequest) => (
-                    <tr key={request.id} className="hover:bg-gray-50">
-                      <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
-                      <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
-                      <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
-                      <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
-                      <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
-                      <td className="border border-black p-2 text-sm">
-                        {formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">{request.workType}</td>
-                      <td className="border border-black p-2 text-sm">{request.activity}</td>
-                      <td className="border border-black p-2 text-sm">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN")}`}>
-                          {request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN"}
-                        </span>
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.adminRequestStatus)}`}>
-                          {request.adminRequestStatus}
-                        </span>
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/view-request/${request.id}?from=request-table`}
-                            className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black hover:bg-[#0e4080] flex items-center"
-                          >
-                            <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                            </svg>
-                            View
-                          </Link>
-                          {request.adminRequestStatus === "PENDING" && (
-                            <button
-                              onClick={() => handleRequestAction(request.id, false)}
-                              className="px-2 py-1 text-xs bg-red-600 text-white border border-black hover:bg-red-700"
-                            >
-                              Reject
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isUrgentMode && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-[#13529e]">
-              Urgent Block Requests
-              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                {urgentRequests.length}
-              </span>
-            </h2>
-          </div>
-          <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
-            <table className="w-full border-collapse text-black">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Date</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Major Section</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Depot</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Block Section</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Line / Road</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Time</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Work Type</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Activity</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">S&T Approval</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Status</th>
-                  <th className="border border-black p-2 text-left text-sm font-medium text-black">Actions</th>
+      {/* Block Summary Table */}
+      <div className="w-full max-w-6xl mt-4 overflow-x-auto">
+        <table className="w-full border-2 border-black bg-white text-black text-sm">
+          <thead>
+            <tr className="bg-[#E8F4F8] text-black">
+              <th className="border-2 border-black p-1">Date</th>
+              <th className="border-2 border-black p-1">ID</th>
+              <th className="border-2 border-black p-1">Section</th>
+              <th className="border-2 border-black p-1">Demanded From</th>
+              <th className="border-2 border-black p-1">Demanded To</th>
+              <th className="border-2 border-black p-1">Slot From</th>
+              <th className="border-2 border-black p-1">Slot To</th>
+              <th className="border-2 border-black p-1">Type</th>
+              <th className="border-2 border-black p-1">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRequests.map((request: UserRequest) => {
+              const status = getStatusBadge(request);
+              return (
+                <tr key={request.id} className="bg-white hover:bg-[#F3F3F3]">
+                  <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
+                  <td className="border border-black p-1 text-center">
+                    <Link
+                      href={`/dashboard/(admin)/admin/view-request/${request.id}?from=request-table`}
+                      className="text-[#13529e] hover:underline font-semibold"
+                    >
+                      {request.id}
+                    </Link>
+                  </td>
+                  <td className="border border-black p-1 text-center">{request.selectedSection}</td>
+                  <td className="border border-black p-1 text-center">{formatTime(request.demandTimeFrom)}</td>
+                  <td className="border border-black p-1 text-center">{formatTime(request.demandTimeTo)}</td>
+                  <td className="border border-black p-1 text-center">{formatTime(request.sanctionedTimeFrom)}</td>
+                  <td className="border border-black p-1 text-center">{formatTime(request.sanctionedTimeTo)}</td>
+                  <td className="border border-black p-1 text-center">{request.corridorType}</td>
+                  <td className="border border-black p-1 text-center">
+                    <span className={`px-2 py-1 text-xs rounded-full border ${status.className}`}>{status.label}</span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {urgentRequests.map((request: UserRequest) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
-                    <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
-                    <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
-                    <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
-                    <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
-                    <td className="border border-black p-2 text-sm">
-                      {formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}
-                    </td>
-                    <td className="border border-black p-2 text-sm">{request.workType}</td>
-                    <td className="border border-black p-2 text-sm">{request.activity}</td>
-                    <td className="border border-black p-2 text-sm">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN")}`}>
-                        {request.sntDisconnectionRequired ? request.DisconnAcceptance || "PENDING" : "NAN"}
-                      </span>
-                    </td>
-                    <td className="border border-black p-2 text-sm">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(request.adminRequestStatus)}`}>
-                        {request.adminRequestStatus}
-                      </span>
-                    </td>
-                    <td className="border border-black p-2 text-sm">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/admin/view-request/${request.id}?from=request-table`}
-                          className="px-2 py-1 text-xs bg-[#13529e] text-white border border-black hover:bg-[#0e4080] flex items-center"
-                        >
-                          <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                          </svg>
-                          View
-                        </Link>
-                        {request.adminRequestStatus === "PENDING" && (
-                          <button
-                            onClick={() => handleRequestAction(request.id, false)}
-                            className="px-2 py-1 text-xs bg-red-600 text-white border border-black hover:bg-red-700"
-                          >
-                            Reject
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
-        © {new Date().getFullYear()} Indian Railways
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {/* Help Text */}
+      <div className="mx-4 mt-6 text-center">
+        <p className="text-lg font-bold">Click ID to see details &amp; to decide the Block.</p>
+        <p className="mt-2 text-lg">For printing the complete table, click download here in <span className="text-blue-700 font-bold cursor-pointer underline" onClick={handleDownloadCSV}>.csv format</span>.</p>
+      </div>
+      {/* Action Buttons */}
+      <div className="flex flex-col items-center gap-4 mt-8 mb-8">
+        <button onClick={handleDownloadCSV} className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold text-2xl">Download</button>
+        <Link href="/dashboard" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold text-2xl flex items-center gap-2">
+          <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v11a1 1 0 01-1 1h-3m-4 0h4' /></svg>
+          </span>
+          Home
+        </Link>
       </div>
     </div>
   );

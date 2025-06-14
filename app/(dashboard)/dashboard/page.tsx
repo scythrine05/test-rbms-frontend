@@ -73,6 +73,100 @@ export default function DashboardPage() {
     );
   }
 
+  // Custom manager dashboard UI
+  if (session?.user?.role === "SENIOR_OFFICER" || session?.user?.role === "BRANCH_OFFICER" || session?.user?.role === "JUNIOR_OFFICER") {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
+        {/* Header */}
+        <div className="w-full border border-black bg-yellow-200 flex items-center justify-center relative p-2" style={{ minHeight: 60 }}>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke="black" strokeWidth={2} className="w-9 h-9"><rect x="6" y="12" width="20" height="12" rx="2" fill="#fffbe9" stroke="black" strokeWidth="2" /><path d="M4 14L16 4L28 14" stroke="black" strokeWidth="2" fill="none" /></svg>
+          </span>
+          <span className="text-2xl font-bold text-black">Home</span>
+        </div>
+        {/* RBMS badge */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-green-200 rounded-2xl px-8 py-2">
+            <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
+          </div>
+        </div>
+        {/* Designation bar */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:</span>
+            <span className="text-2xl font-bold text-black mt-1">{session?.user?.name || ''}</span>
+          </div>
+        </div>
+        {/* Navigation buttons */}
+        <ManagerQuickLinks />
+        {/* Logout button */}
+        <div className="w-full flex justify-center mt-10 mb-4">
+          <form action="/auth/login" method="get" onSubmit={async (e) => { e.preventDefault(); await import('next-auth/react').then(mod => mod.signOut({ redirect: true, callbackUrl: '/auth/login' })); }}>
+            <button type="submit" className="flex items-center gap-2 bg-[#dbe6fd] border border-black rounded px-6 py-2 text-lg font-bold text-black shadow hover:bg-[#c7d7f7] transition">
+              <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
+                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' /></svg>
+              </span>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Custom admin dashboard UI (match manager dashboard style)
+  if (session?.user?.role === "ADMIN") {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
+        {/* Header */}
+        <div className="w-full border border-black bg-yellow-200 flex items-center justify-center relative p-2" style={{ minHeight: 60 }}>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke="black" strokeWidth={2} className="w-9 h-9"><rect x="6" y="12" width="20" height="12" rx="2" fill="#fffbe9" stroke="black" strokeWidth="2" /><path d="M4 14L16 4L28 14" stroke="black" strokeWidth="2" fill="none" /></svg>
+          </span>
+          <span className="text-2xl font-bold text-black">Home</span>
+        </div>
+        {/* RBMS badge */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-green-200 rounded-2xl px-8 py-2">
+            <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
+          </div>
+        </div>
+        {/* Designation bar */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">ADMIN DESIGNATION:</span>
+            <span className="text-2xl font-bold text-black mt-1">{session?.user?.name || ''}</span>
+          </div>
+        </div>
+        {/* Navigation buttons */}
+        <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
+          <a href="/admin/request-table">
+            <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+              VIEW BLOCK DETAILS
+            </button>
+          </a>
+          <a href="/dashboard/(admin)/admin/sanction-table-data">
+            <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+              BLOCK SUMMARY REPORT
+            </button>
+          </a>
+        </div>
+        {/* Logout button */}
+        <div className="w-full flex justify-center mt-10 mb-4">
+          <form action="/auth/login" method="get" onSubmit={async (e) => { e.preventDefault(); await import('next-auth/react').then(mod => mod.signOut({ redirect: true, callbackUrl: '/auth/login' })); }}>
+            <button type="submit" className="flex items-center gap-2 bg-[#dbe6fd] border border-black rounded px-6 py-2 text-lg font-bold text-black shadow hover:bg-[#c7d7f7] transition">
+              <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
+                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' /></svg>
+              </span>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Default dashboard UI for other roles
   return (
     <div className="max-w-full overflow-hidden text-black">
       <div className="bg-white p-3 border border-black mb-3">
@@ -91,36 +185,30 @@ export default function DashboardPage() {
               <span className="text-gray-600 text-xs">Employee ID:</span>
               <p className="font-medium">{session?.user?.id || "N/A"}</p>
             </div>
-            {session?.user?.role === "USER" ? (
-              <div className="border border-gray-300 bg-gray-50 p-2">
-                <span className="text-gray-600 text-xs">Department :</span>
-                <p className="font-medium">
-                  {session?.user?.department || "N/A"}
-                </p>
-              </div>
-            ) : (
-              <div className="border border-gray-300 bg-gray-50 p-2">
-                <span className="text-gray-600 text-xs">Role :</span>
-                <p className="font-medium">{session?.user?.role || "N/A"}</p>
-              </div>
-            )}
+            <div className="border border-gray-300 bg-gray-50 p-2">
+              <span className="text-gray-600 text-xs">Role :</span>
+              <p className="font-medium">{session?.user?.role || "N/A"}</p>
+            </div>
           </div>
         </div>
 
         {/* Quick actions */}
         {
-          session?.user?.role === "ADMIN" ? <AdminQuickLinks /> : session?.user?.role === "SENIOR_OFFICER" ? <ManagerQuickLinks /> : session?.user?.role === "USER" ? <UserQuickLinks /> : null
+          session?.user?.role === "ADMIN" ? (
+            <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
+              <a href="/admin/request-table">
+                <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+                  VIEW BLOCK DETAILS
+                </button>
+              </a>
+              <a href="/dashboard/(admin)/admin/sanction-table-data">
+                <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+                  BLOCK SUMMARY REPORT
+                </button>
+              </a>
+            </div>
+          ) : null
         }
-
-        {/* System message */}
-        <div className="border border-gray-300 bg-gray-50 p-3 text-sm">
-          <p className="font-medium mb-1">System Message</p>
-          <p className="text-xs text-gray-600">
-            Welcome to the Southern Railways Block Request Portal. This system
-            allows you to create, manage and track block requests. For
-            assistance, please contact the IT department.
-          </p>
-        </div>
       </div>
     </div>
   );

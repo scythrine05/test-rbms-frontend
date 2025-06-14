@@ -1,6 +1,10 @@
 import axiosInstance from "@/app/utils/axiosInstance";
 import { UserRequestInput } from "@/app/validation/user-request";
 import { RequestItem } from "../query/user-request";
+import { format } from 'date-fns';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface UserRequestResponse {
   status: boolean;
@@ -157,7 +161,7 @@ export const userRequestService = {
       page: page.toString(),
       limit: limit.toString(),
     });
-    
+
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
     if (status) params.append('status', status);
@@ -166,5 +170,16 @@ export const userRequestService = {
       `/api/user-request/user?${params.toString()}`
     );
     return response.data;
+  },
+
+  downloadExcel: async (startDate: string, endDate: string) => {
+    const response = await axiosInstance.get(`/api/user-request/download`, {
+      params: {
+        startDate,
+        endDate
+      },
+      responseType: 'blob'
+    });
+    return response;
   },
 };
