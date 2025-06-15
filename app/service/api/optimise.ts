@@ -11,7 +11,7 @@ export interface OptimizeResponse {
 export const optimiseService = {
     optimizeRequests: async (requestData: FlatRecord[]): Promise<OptimizeResponse> => {
         const response = await axiosInstance.post<OptimizeResponse>(
-            "https://sr-optimization.vercel.app/backend/optimize",
+            "https://sr-new-optimize-git-latest-sridharjeyakumars-projects.vercel.app/backend/optimize",
             { requestData }
         );
         return response.data;
