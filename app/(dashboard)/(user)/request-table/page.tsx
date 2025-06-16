@@ -17,6 +17,7 @@ import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
 import { useQuery } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { managerService } from "@/app/service/api/manager";
 
 // Components
 const Pagination = ({
@@ -265,25 +266,68 @@ export default function RequestTablePage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [customDateRange, setCustomDateRange] = useState({
     startDate: new Date(),
-    endDate: new Date()
+    endDate: addDays(new Date(), 9)
   });
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Get user session for role-based features
   const { data: session } = useSession();
   const userName = session?.user?.name || "User";
+  const userRole = session?.user?.role || "USER";
 
-  // Fetch requests data with pagination
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", currentPage, statusFilter, dateRange, isUrgentMode],
-    queryFn: () => userRequestService.getUserRequests(
-      currentPage,
-      pageSize,
-      format(dateRange.startDate, 'yyyy-MM-dd'),
-      format(dateRange.endDate, 'yyyy-MM-dd'),
-      statusFilter !== "ALL" ? statusFilter : undefined
-    )
+  // Map frontend roles to backend roles
+  const getBackendRole = (role: string) => {
+    switch (role) {
+      case "MANAGER":
+        return "BRANCH_OFFICER";
+      default:
+        return role;
+    }
+  };
+
+  // Fetch requests data
+  const {
+    data,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ["requests", currentPage, statusFilter, customDateRange, userRole],
+    queryFn: async () => {
+      const backendRole = getBackendRole(userRole);
+      if (backendRole === "BRANCH_OFFICER" || backendRole === "SENIOR_OFFICER" || backendRole === "JUNIOR_OFFICER") {
+        // For managers, fetch all subordinate requests with date filtering
+        return await managerService.getUserRequestsByManager(
+          currentPage,
+          pageSize,
+          format(customDateRange.startDate, 'yyyy-MM-dd'),
+          format(customDateRange.endDate, 'yyyy-MM-dd'),
+          statusFilter !== "ALL" ? statusFilter : undefined
+        );
+      } else {
+        // For users, fetch only their own requests (no date filtering for download, but table always next 10 days)
+        return await userRequestService.getUserRequests(
+          currentPage,
+          pageSize
+        );
+      }
+    },
   });
+
+  // For managers, show all requests in the selected date range
+  // For users, show only next 10 days
+  let filteredRequests: any[] = [];
+  const backendRole = getBackendRole(userRole);
+  if (backendRole === "BRANCH_OFFICER" || backendRole === "SENIOR_OFFICER" || backendRole === "JUNIOR_OFFICER") {
+    filteredRequests = data?.data?.requests || [];
+  } else {
+    const today = new Date();
+    const tenDaysLater = new Date();
+    tenDaysLater.setDate(today.getDate() + 9);
+    filteredRequests = data?.data?.requests?.filter((request: any) => {
+      const reqDate = new Date(request.date);
+      return reqDate >= today && reqDate <= tenDaysLater;
+    }) || [];
+  }
 
   // Handle date range navigation
   const goToPreviousPeriod = () => {
@@ -418,7 +462,7 @@ export default function RequestTablePage() {
                 </tr>
               </thead>
               <tbody>
-                {data?.data?.requests?.map((request: any, idx: number) => (
+                {filteredRequests.map((request: any, idx: number) => (
                   <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{formatDate(request.date)}</td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
@@ -460,10 +504,6 @@ export default function RequestTablePage() {
                       startDate: newDate,
                       endDate: newDate > prev.endDate ? newDate : prev.endDate
                     }));
-                    setDateRange(prev => ({
-                      ...prev,
-                      startDate: newDate
-                    }));
                   }}
                   className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"
                   max={format(customDateRange.endDate, 'yyyy-MM-dd')}
@@ -480,10 +520,6 @@ export default function RequestTablePage() {
                       ...prev,
                       endDate: newDate,
                       startDate: newDate < prev.startDate ? newDate : prev.startDate
-                    }));
-                    setDateRange(prev => ({
-                      ...prev,
-                      endDate: newDate
                     }));
                   }}
                   className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"

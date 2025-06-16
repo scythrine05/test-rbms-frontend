@@ -5,31 +5,31 @@ export const parseDate = (dateStr: string) => {
 };
 
 export const isDateAfterThursdayCutoff = (dateStr: string) => {
-  const selectedDate = parseDate(dateStr);
-  if (!selectedDate) return false;
-  
-  selectedDate.setHours(0, 0, 0, 0);
-  const now = new Date();
+    const selectedDate = parseDate(dateStr);
+    if (!selectedDate) return false;
 
-  // Calculate the most recent Thursday at 16:00 (4 PM)
-  const day = now.getDay();
-  const diffToThursday = (day + 7 - 4) % 7;
-  const thursdayThisWeek = new Date(now);
-  thursdayThisWeek.setDate(now.getDate() - diffToThursday);
-  thursdayThisWeek.setHours(16, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    const now = new Date();
 
-  // Adjust to previous Thursday if it's not yet 16:00 today
-  if (now < thursdayThisWeek) {
-    thursdayThisWeek.setDate(thursdayThisWeek.getDate() - 7);
-  }
+    // Calculate the most recent Thursday at 16:00 (4 PM)
+    const day = now.getDay();
+    const diffToThursday = (day + 7 - 4) % 7;
+    const thursdayThisWeek = new Date(now);
+    thursdayThisWeek.setDate(now.getDate() - diffToThursday);
+    thursdayThisWeek.setHours(16, 0, 0, 0);
 
-  // Calculate the upcoming Sunday at 23:59:59
-  const cycleEnd = new Date(thursdayThisWeek);
-  cycleEnd.setDate(thursdayThisWeek.getDate() + (7 - thursdayThisWeek.getDay()) % 7);
-  cycleEnd.setHours(23, 59, 59, 999);
+    // Adjust to previous Thursday if it's not yet 16:00 today
+    if (now < thursdayThisWeek) {
+        thursdayThisWeek.setDate(thursdayThisWeek.getDate() - 7);
+    }
 
-  // Check if selected date is within the range
-  return selectedDate >= thursdayThisWeek && selectedDate <= cycleEnd;
+    // Calculate the upcoming Sunday at 23:59:59
+    const cycleEnd = new Date(thursdayThisWeek);
+    cycleEnd.setDate(thursdayThisWeek.getDate() + (7 - thursdayThisWeek.getDay()) % 7);
+    cycleEnd.setHours(23, 59, 59, 999);
+
+    // Check if selected date is within the range
+    return selectedDate >= thursdayThisWeek && selectedDate <= cycleEnd;
 };
 
 export function formatTimeToDatetime(date: string, time: string): string {

@@ -3,46 +3,31 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO, addDays, subDays, startOfWeek, endOfWeek } from "date-fns";
+import { format, parseISO } from "date-fns";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function AdminRequestTablePage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [dateRange, setDateRange] = useState({
-    start: format(new Date(), "yyyy-MM-dd"),
-    end: format(new Date(), "yyyy-MM-dd"),
-  });
-  const [sectionFilter, setSectionFilter] = useState<string>("ALL");
-  const [typeFilter, setTypeFilter] = useState<string>("ALL");
+  const { data: session } = useSession();
+  const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
+  const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
+  const [blockTypeDropdownOpen, setBlockTypeDropdownOpen] = useState(false);
+  const [sseDropdownOpen, setSseDropdownOpen] = useState(false);
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [selectedSSEs, setSelectedSSEs] = useState<string[]>([]);
+  const [blockType, setBlockType] = useState('All');
 
-  // Fetch requests data
+  // Fetch all requests for admin
   const { data, isLoading, error } = useQuery({
-    queryKey: ["admin-requests", dateRange, sectionFilter, typeFilter],
+    queryKey: ["admin-requests", customDateRange],
     queryFn: () =>
       managerService.getUserRequestsByAdmin(
         1,
-        1000,
-        dateRange.start,
-        dateRange.end
+        10000,
+        customDateRange.start || undefined,
+        customDateRange.end || undefined
       ),
   });
-
-  // Get unique sections and types for filters
-  const sectionOptions = Array.from(
-    new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedSection).filter(Boolean) || [])
-  );
-  const typeOptions = Array.from(
-    new Set(data?.data?.requests?.map((r: UserRequest) => r.corridorType).filter(Boolean) || [])
-  );
-
-  // Filter requests based on filters
-  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const sectionMatch = sectionFilter === "ALL" || request.selectedSection === sectionFilter;
-    const typeMatch = typeFilter === "ALL" || request.corridorType === typeFilter;
-    return sectionMatch && typeMatch;
-  }) || [];
 
   // Helper functions
   const formatDate = (dateString: string) => {
@@ -63,45 +48,69 @@ export default function AdminRequestTablePage() {
       return "N/A";
     }
   };
-  // Status badge mapping
-  function getStatusBadge(request: UserRequest) {
+
+  // Section and SSE options
+  const sectionOptions = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.selectedSection).filter(Boolean) || []));
+  const sseOptions = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.user?.name).filter(Boolean) || []));
+  const blockTypeOptions = [
+    { label: "All", value: "All" },
+    { label: "Corridor (C)", value: "CORRIDOR" },
+    { label: "Non-corridor(NC)", value: "NON_CORRIDOR" },
+    { label: "Emergency (E)", value: "EMERGENCY" },
+    { label: "Mega Block (M)", value: "MEGA_BLOCK" },
+  ];
+
+  // Status mapping for admin (lookalike to manager's, but with admin-specific labels)
+  function getStatusDisplay(request: UserRequest) {
     if (request.status === 'APPROVED' && request.isSanctioned) {
-      return { label: 'Sanctioned', className: 'bg-green-200 text-green-900 border-green-400' };
+      return { label: 'Sanctioned', style: { background: '#d6ecd2', color: '#11332b' } };
     }
-    if (request.status === 'REJECTED') {
-      return { label: 'Rejected', className: 'bg-red-500 text-white border-red-700' };
+    if (request.status === 'APPROVED' && !request.isSanctioned) {
+      return { label: 'Pending with me', style: { background: '#d47ed4', color: '#222' } };
     }
-    if (request.status === 'PENDING') {
-      return { label: 'Pending', className: 'bg-yellow-200 text-yellow-900 border-yellow-400' };
+    if (request.status === 'REJECTED' && request.adminAcceptance === false) {
+      return { label: 'Rejected by me', style: { background: '#ff4e36', color: '#fff' } };
     }
-    if (request.userStatus === 'AVAILED') {
-      return { label: 'Availed', className: 'bg-sky-200 text-sky-900 border-sky-400' };
-    }
-    if (request.userStatus === 'NOT_AVAILED') {
-      return { label: 'Not-availed', className: 'bg-white text-black border-gray-300' };
+    if (["NOT_AVAILED", "AVAILED", "CANCELLED"].includes(request.userStatus)) {
+      return { label: request.userStatus.replace('_', '-').toLowerCase(), style: { background: '#fff', color: '#222' } };
     }
     if (request.status === 'BURST') {
-      return { label: 'Burst', className: 'bg-orange-400 text-white border-orange-700 font-bold' };
+      return { label: 'Burst', style: { background: '#ff944c', color: '#fff' } };
     }
-    return { label: request.status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+    // Fallback
+    return { label: request.status, style: { background: '#fff', color: '#222' } };
   }
+
+  // Filtering logic
+  let filteredRequests = data?.data?.requests || [];
+  if (selectedSections.length > 0) {
+    filteredRequests = filteredRequests.filter(r => selectedSections.includes(r.selectedSection));
+  }
+  if (selectedSSEs.length > 0) {
+    filteredRequests = filteredRequests.filter(r => selectedSSEs.includes(r.user?.name));
+  }
+  if (blockType !== 'All') {
+    filteredRequests = filteredRequests.filter(r => r.corridorType === blockType);
+  }
+
+  // Count of pending with me
+  const pendingWithMeCount = filteredRequests.filter(
+    (r: UserRequest) => r.status === 'APPROVED' && !r.isSanctioned
+  ).length;
 
   // Download CSV
   const handleDownloadCSV = () => {
     if (!filteredRequests.length) return;
     const headers = [
-      "Date", "ID", "Section", "Demanded From", "Demanded To", "Slot From", "Slot To", "Type", "Status"
+      "Date", "ID", "Block Section", "Line", "Activity", "Status"
     ];
     const rows = filteredRequests.map((r) => [
       formatDate(r.date),
       r.id,
-      r.selectedSection,
-      formatTime(r.demandTimeFrom),
-      formatTime(r.demandTimeTo),
-      formatTime(r.sanctionedTimeFrom),
-      formatTime(r.sanctionedTimeTo),
-      r.corridorType,
-      getStatusBadge(r).label
+      r.missionBlock,
+      r.processedLineSections?.[0]?.lineName || 'N/A',
+      r.activity,
+      getStatusDisplay(r).label
     ]);
     const csvContent = [
       headers.join(","),
@@ -111,132 +120,198 @@ export default function AdminRequestTablePage() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `block_details_${dateRange.start}_to_${dateRange.end}.csv`);
+    link.setAttribute("download", `block_details_${customDateRange.start}_to_${customDateRange.end}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  if (isLoading) {
+    return (
+      <div className="bg-white p-3 border border-black mb-3">
+        <div className="text-center py-5">Loading requests...</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="bg-white p-3 border border-black mb-3">
+        <div className="text-center py-5 text-red-600">Error loading requests. Please try again.</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#FFFDF5] flex flex-col items-center">
-      {/* RBMS Header */}
+    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 pb-32">
+      {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
       </div>
-      {/* Blue Section Title */}
+      {/* Main Title on Light Blue */}
       <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-        <span className="text-3xl font-bold text-black text-center">Block Details</span>
+        <span className="text-2xl md:text-3xl font-bold text-black text-center">Summary of Block Requests</span>
       </div>
-      {/* Red Bar */}
-      <div className="w-full flex flex-col items-center mt-4">
+      {/* User Info Row */}
+      <div className="flex justify-center mt-2">
         <div className="flex gap-2">
-          <div className="bg-[#FF4B4B] text-white font-bold px-6 py-2 rounded">Requests Pending with Me</div>
-          <div className="bg-[#FF4B4B] text-white font-bold px-6 py-2 rounded">Urgent(..Nos.)</div>
+          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">Admin:</span>
+          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">{session?.user?.name || "Admin"}</span>
         </div>
       </div>
-      {/* Filters Row */}
-      <div className="w-full flex flex-wrap gap-4 items-center justify-center mt-6 mb-2">
-        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
-          <span className="font-bold text-black">Custom</span>
-          <span className="text-black">From</span>
+      {/* Summary Box */}
+      <div className="flex justify-center mt-3 mb-6">
+        <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
+          <div className="text-xl font-bold text-black text-center py-2">REQUESTS PENDING WITH ME</div>
+          <div className="italic text-center text-sm text-black pb-2">(Click to view and optimise)</div>
+          <div className="flex justify-center items-center gap-4 py-2">
+            <div className="bg-[#FF6B6B] text-black font-bold px-6 py-2 rounded border border-black">Nos. {pendingWithMeCount}</div>
+            <Link href="/admin/optimise-table" className="bg-[#B2F3F5] border border-black px-6 py-2 rounded text-lg font-bold hover:bg-[#D6F3FF]">Click to View</Link>
+          </div>
+        </div>
+      </div>
+      {/* Filters Row: All filters in a single row */}
+      <div className="mx-4 mt-4 flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-black">
+        {/* Date Range */}
+        <div className="flex items-center gap-1">
+          <span className="bg-[#E6E6FA] px-2 py-1 border border-black font-bold text-black rounded-l-md text-xs">Custom view</span>
           <input
             type="date"
-            value={dateRange.start}
-            onChange={e => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+            value={customDateRange.start}
+            onChange={e => setCustomDateRange(r => ({ ...r, start: e.target.value }))}
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
           />
-          <span className="text-black">to</span>
+          <span className="px-1 text-black text-xs">to</span>
           <input
             type="date"
-            value={dateRange.end}
-            onChange={e => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+            value={customDateRange.end}
+            onChange={e => setCustomDateRange(r => ({ ...r, end: e.target.value }))}
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
           />
         </div>
-        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
-          <span className="font-bold text-black">Section</span>
-          <select
-            value={sectionFilter}
-            onChange={e => setSectionFilter(e.target.value)}
-            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+        {/* Block Type Dropdown (Radio) */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setBlockTypeDropdownOpen(v => !v)}
+            className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
           >
-            <option value="ALL">All</option>
-            {sectionOptions.map((section) => (
-              <option key={section} value={section}>{section}</option>
-            ))}
-          </select>
+            {blockTypeOptions.find(opt => opt.value === blockType)?.label || 'Block Type'}
+            <span className="ml-1">▼</span>
+          </button>
+          {blockTypeDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg">
+              {blockTypeOptions.map(opt => (
+                <label key={opt.value} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
+                  <input
+                    type="radio"
+                    name="blockType"
+                    checked={blockType === opt.value}
+                    onChange={() => { setBlockType(opt.value); setBlockTypeDropdownOpen(false); }}
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-2 bg-[#E6E6FA] px-4 py-2 rounded border-2 border-black">
-          <span className="font-bold text-black">Type</span>
-          <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="p-1 border border-black text-black bg-white w-32 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+        {/* Section Dropdown (Multi-select) */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setSectionDropdownOpen(v => !v)}
+            className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
           >
-            <option value="ALL">All</option>
-            {typeOptions.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+            Section: {selectedSections.length === 0 ? 'All' : `${selectedSections.length} selected`}
+            <span className="ml-1">▼</span>
+          </button>
+          {sectionDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+              {sectionOptions.map(section => (
+                <label key={section} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedSections.includes(section)}
+                    onChange={() => setSelectedSections(prev => prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section])}
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {section}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* SSE Dropdown (Multi-select) */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setSseDropdownOpen(v => !v)}
+            className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
+          >
+            SSE: {selectedSSEs.length === 0 ? 'All' : `${selectedSSEs.length} selected`}
+            <span className="ml-1">▼</span>
+          </button>
+          {sseDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+              {sseOptions.map(sse => (
+                <label key={sse} className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedSSEs.includes(sse)}
+                    onChange={() => setSelectedSSEs(prev => prev.includes(sse) ? prev.filter(s => s !== sse) : [...prev, sse])}
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {sse}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      {/* Block Summary Table */}
-      <div className="w-full max-w-6xl mt-4 overflow-x-auto">
-        <table className="w-full border-2 border-black bg-white text-black text-sm">
-          <thead>
-            <tr className="bg-[#E8F4F8] text-black">
-              <th className="border-2 border-black p-1">Date</th>
-              <th className="border-2 border-black p-1">ID</th>
-              <th className="border-2 border-black p-1">Section</th>
-              <th className="border-2 border-black p-1">Demanded From</th>
-              <th className="border-2 border-black p-1">Demanded To</th>
-              <th className="border-2 border-black p-1">Slot From</th>
-              <th className="border-2 border-black p-1">Slot To</th>
-              <th className="border-2 border-black p-1">Type</th>
-              <th className="border-2 border-black p-1">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRequests.map((request: UserRequest) => {
-              const status = getStatusBadge(request);
-              return (
-                <tr key={request.id} className="bg-white hover:bg-[#F3F3F3]">
-                  <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
-                  <td className="border border-black p-1 text-center">
-                    <Link
-                      href={`/dashboard/(admin)/admin/view-request/${request.id}?from=request-table`}
-                      className="text-[#13529e] hover:underline font-semibold"
-                    >
-                      {request.id}
-                    </Link>
-                  </td>
-                  <td className="border border-black p-1 text-center">{request.selectedSection}</td>
-                  <td className="border border-black p-1 text-center">{formatTime(request.demandTimeFrom)}</td>
-                  <td className="border border-black p-1 text-center">{formatTime(request.demandTimeTo)}</td>
-                  <td className="border border-black p-1 text-center">{formatTime(request.sanctionedTimeFrom)}</td>
-                  <td className="border border-black p-1 text-center">{formatTime(request.sanctionedTimeTo)}</td>
-                  <td className="border border-black p-1 text-center">{request.corridorType}</td>
-                  <td className="border border-black p-1 text-center">
-                    <span className={`px-2 py-1 text-xs rounded-full border ${status.className}`}>{status.label}</span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Table Section in a scrollable window */}
+      <div className="mx-2 mt-2 overflow-x-auto">
+        <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
+          <table className="w-full text-black text-sm relative">
+            <thead>
+              <tr className="bg-[#E8F4F8] text-black">
+                <th className="border-2 border-black p-1">Date</th>
+                <th className="border-2 border-black p-1">ID</th>
+                <th className="border-2 border-black p-1">Block Section</th>
+                <th className="border-2 border-black p-1">UP/DN/SL/RO AD NO.</th>
+                <th className="border-2 border-black p-1">Activity</th>
+                <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#E8F4F8]">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.map((request: UserRequest, idx: number) => {
+                const status = getStatusDisplay(request);
+                return (
+                  <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
+                    <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
+                    <td className="border border-black p-1 text-center">
+                      <Link
+                        href={`/admin/optimise-table?id=${request.id}`}
+                        className="text-[#13529e] hover:underline font-semibold"
+                      >
+                        {request.id}
+                      </Link>
+                    </td>
+                    <td className="border border-black p-1">{request.missionBlock}</td>
+                    <td className="border border-black p-1 text-center">{request.processedLineSections?.[0]?.lineName || 'N/A'}</td>
+                    <td className="border border-black p-1">{request.activity}</td>
+                    <td className="border border-black p-1 sticky right-0 z-10 text-center font-bold" style={status.style}>
+                      <span className="w-full block text-base">{status.label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-      {/* Help Text */}
-      <div className="mx-4 mt-6 text-center">
-        <p className="text-lg font-bold">Click ID to see details &amp; to decide the Block.</p>
-        <p className="mt-2 text-lg">For printing the complete table, click download here in <span className="text-blue-700 font-bold cursor-pointer underline" onClick={handleDownloadCSV}>.csv format</span>.</p>
-      </div>
-      {/* Action Buttons */}
-      <div className="flex flex-col items-center gap-4 mt-8 mb-8">
-        <button onClick={handleDownloadCSV} className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold text-2xl">Download</button>
-        <Link href="/dashboard" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold text-2xl flex items-center gap-2">
-          <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
-            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v11a1 1 0 01-1 1h-3m-4 0h4' /></svg>
-          </span>
+      {/* Action Buttons below the scrollable window */}
+      <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
+        <button onClick={handleDownloadCSV} className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
+          Download
+        </button>
+        <Link href="/dashboard" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold">
           Home
         </Link>
       </div>

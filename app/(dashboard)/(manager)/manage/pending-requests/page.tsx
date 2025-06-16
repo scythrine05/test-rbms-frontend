@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
-import { managerService } from "@/app/service/api/manager";
-import { useAcceptRequest, useRejectRequest, useBulkAcceptRequests, useBulkRejectRequests } from "@/app/service/mutation/manager";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { managerService, UserRequest } from "@/app/service/api/manager";
+import { useBulkAcceptRequests, useBulkRejectRequests } from "@/app/service/mutation/manager";
 import { toast } from "react-hot-toast";
 import { notFound } from "next/navigation";
 
@@ -16,34 +16,51 @@ export default function PendingRequestsPage() {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
     const [requestToReject, setRequestToReject] = useState<string | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState<null | string>(null);
 
-    // Fetch pending requests
+    // Fetch all requests (same as request-table)
     const { data, isLoading, error } = useQuery({
         queryKey: ["pendingRequests"],
         queryFn: async () => {
             try {
-                console.log("Fetching pending requests...");
-                const result = await managerService.getPendingRequests();
-                console.log("Pending requests result:", result);
+                const result = await managerService.getUserRequestsByManager(1, 10000);
                 return result;
             } catch (err) {
-                console.error("Error fetching pending requests:", err);
+                console.error("Error fetching requests:", err);
                 throw err;
             }
         }
     });
 
-    // Defensive: log the data object
-    console.log("Pending requests page data:", data);
-
-    // Defensive: get requests array safely
-    const pendingRequests = Array.isArray(data?.data?.requests) ? data.data.requests : [];
+    // Defensive: get requests array safely and filter for 'Pending with me'
+    const pendingRequests = (Array.isArray(data?.data?.requests) ? data.data.requests : []).filter(
+        (r: UserRequest) => r.status === 'PENDING' && r.managerAcceptance === false
+    );
 
     // Mutations
-    const acceptRequest = useAcceptRequest();
-    const rejectRequest = useRejectRequest();
     const bulkAcceptRequests = useBulkAcceptRequests();
     const bulkRejectRequests = useBulkRejectRequests();
+
+    const queryClient = useQueryClient();
+
+    // Accept mutation
+    const acceptMutation = useMutation({
+        mutationFn: (id: string) => managerService.acceptUserRequest(id, true),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["pendingRequests"] });
+            queryClient.invalidateQueries({ queryKey: ["requests"] });
+            setShowSuccessModal("Request accepted successfully");
+        },
+    });
+    // Reject mutation
+    const rejectMutation = useMutation({
+        mutationFn: ({ id, reason }: { id: string; reason: string }) => managerService.acceptUserRequest(id, false, reason),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["pendingRequests"] });
+            queryClient.invalidateQueries({ queryKey: ["requests"] });
+            setShowSuccessModal("Request rejected successfully");
+        },
+    });
 
     // Handle bulk actions
     const handleSelectAll = () => {
@@ -65,10 +82,8 @@ export default function PendingRequestsPage() {
     };
 
     const handleAccept = async (id: string) => {
-        try {
-            await acceptRequest.mutateAsync(id);
-        } catch (error) {
-            console.error('Error accepting request:', error);
+        if (confirm("Are you sure you want to accept this request?")) {
+            await acceptMutation.mutateAsync(id);
         }
     };
 
@@ -96,39 +111,42 @@ export default function PendingRequestsPage() {
             toast.error('Please provide a reason for rejection');
             return;
         }
-
-        try {
-            if (requestToReject === 'bulk') {
-                await bulkRejectRequests.mutateAsync({
-                    ids: Array.from(selectedRequests),
-                    reason: rejectReason
-                });
-                setSelectedRequests(new Set());
-            } else if (requestToReject) {
-                await rejectRequest.mutateAsync({
-                    id: requestToReject,
-                    reason: rejectReason
-                });
-            }
+        if (requestToReject) {
+            await rejectMutation.mutateAsync({ id: requestToReject, reason: rejectReason });
             setShowRejectModal(false);
             setRejectReason("");
             setRequestToReject(null);
-        } catch (error) {
-            console.error('Error rejecting request(s):', error);
         }
     };
 
-    // Status mapping function for pending requests
-    function getPendingDisplayStatus(request: any) {
-        if (!request.managerAcceptance) {
-            return { label: 'Pending with me', className: 'bg-fuchsia-300 text-fuchsia-900 border-fuchsia-400' };
-        }
-        if (request.managerAcceptance && (request.adminRequestStatus === 'PENDING' || !request.isSanctioned)) {
-            return { label: 'Pending with Optg', className: 'bg-yellow-200 text-yellow-900 border-yellow-400' };
+    // Status mapping function for pending requests (same as main table)
+    function getPendingDisplayStatus(request: UserRequest) {
+        if (request.status === 'PENDING' && request.managerAcceptance === false) {
+            return { label: 'Pending with me', style: { background: '#d47ed4', color: '#222' } };
         }
         // Fallback
-        return { label: request.status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+        return { label: request.status, style: { background: '#fff', color: '#222' } };
     }
+
+    // Add formatDate and formatTime helpers (copy from request-table)
+    const formatDate = (dateString: string) => {
+        try {
+            return format(new Date(dateString), "dd-MM-yyyy");
+        } catch {
+            return "Invalid date";
+        }
+    };
+    const formatTime = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return "N/A";
+            const hours = date.getUTCHours().toString().padStart(2, '0');
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        } catch {
+            return "N/A";
+        }
+    };
 
     if (isLoading) {
         return (
@@ -196,78 +214,71 @@ export default function PendingRequestsPage() {
 
             {/* Table Section */}
             <div className="mx-4 mt-6 overflow-x-auto">
-                <table className="w-full border-2 border-black">
-                    <thead>
-                        <tr className="bg-[#E8F4F8]">
-                            <th className="border-2 border-black p-2 w-10">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedRequests.size === pendingRequests.length && pendingRequests.length > 0}
-                                    onChange={handleSelectAll}
-                                    className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
-                                />
-                            </th>
-                            <th className="border-2 border-black p-2">Date</th>
-                            <th className="border-2 border-black p-2">ID</th>
-                            <th className="border-2 border-black p-2">Block Section</th>
-                            <th className="border-2 border-black p-2">UP/DN/SL/RO AD NO.</th>
-                            <th className="border-2 border-black p-2">Duration</th>
-                            <th className="border-2 border-black p-2">Activity</th>
-                            <th className="border-2 border-black p-2">Status</th>
-                            <th className="border-2 border-black p-2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pendingRequests.map((request: any) => (
-                            <tr key={request.id} className="bg-white">
-                                <td className="border border-black p-2 text-center">
+                <div className={`rounded-xl overflow-hidden border-2 border-black bg-[#F5E7B2] min-w-[700px] ${showRejectModal || showSuccessModal ? 'invisible' : ''}`}>
+                    <table className="w-full text-black text-base border-collapse">
+                        <thead>
+                            <tr className="bg-[#D6F3FF] text-black font-bold">
+                                <th className="border-2 border-black px-2 py-2 w-10 bg-[#D6F3FF]">{/* Checkbox */}
                                     <input
                                         type="checkbox"
-                                        checked={selectedRequests.has(request.id)}
-                                        onChange={() => handleSelectRequest(request.id)}
+                                        checked={selectedRequests.size === pendingRequests.length && pendingRequests.length > 0}
+                                        onChange={handleSelectAll}
                                         className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
                                     />
-                                </td>
-                                <td className="border border-black p-2 text-center">{format(new Date(request.date), "dd-MM-yyyy")}</td>
-                                <td className="border border-black p-2 text-center">
-                                    <Link href={`/manage/view-request/${request.id}`} className="text-blue-600 hover:underline">
-                                        {request.id}
-                                    </Link>
-                                </td>
-                                <td className="border border-black p-2">{request.blockSection}</td>
-                                <td className="border border-black p-2 text-center">{request.lineDirection}</td>
-                                <td className="border border-black p-2 text-center">{request.duration}</td>
-                                <td className="border border-black p-2">{request.activity}</td>
-                                <td className="border border-black p-2 text-center">
-                                    {(() => {
-                                        const status = getPendingDisplayStatus(request);
-                                        return (
-                                            <span className={`px-2 py-1 text-xs rounded-full border ${status.className}`}>{status.label}</span>
-                                        );
-                                    })()}
-                                </td>
-                                <td className="border border-black p-2 text-center">
-                                    <div className="flex gap-2 justify-center">
-                                        <button
-                                            onClick={() => handleAccept(request.id)}
-                                            disabled={acceptRequest.isPending}
-                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-                                        >
-                                            Accept
-                                        </button>
-                                        <button
-                                            onClick={() => handleReject(request.id)}
-                                            disabled={rejectRequest.isPending}
-                                            className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                </td>
+                                </th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Date</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">ID</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Block Section</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">UP/DN/SL/RO AD NO.</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Duration</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Activity</th>
+                                <th className="border-2 border-black px-2 py-2 sticky right-0 z-10 bg-[#D6F3FF] w-32">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {pendingRequests.map((request: UserRequest) => (
+                                <tr key={request.id} className="bg-white hover:bg-[#FFF86B] text-black">
+                                    <td className="border border-black px-2 py-1 text-center align-middle">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedRequests.has(request.id)}
+                                            onChange={() => handleSelectRequest(request.id)}
+                                            className="w-4 h-4 text-[#13529e] border-gray-300 rounded focus:ring-[#13529e]"
+                                        />
+                                    </td>
+                                    <td className="border border-black px-2 py-1 text-center align-middle">{formatDate(request.date)}</td>
+                                    <td className="border border-black px-2 py-1 text-center align-middle">
+                                        <Link href={`/manage/view-request/${request.id}`} className="text-[#13529e] hover:underline font-semibold">
+                                            {request.id}
+                                        </Link>
+                                    </td>
+                                    <td className="border border-black px-2 py-1 align-middle">{request.missionBlock}</td>
+                                    <td className="border border-black px-2 py-1 text-center align-middle">{request.processedLineSections?.[0]?.lineName || 'N/A'}</td>
+                                    <td className="border border-black px-2 py-1 text-center align-middle">{formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}</td>
+                                    <td className="border border-black px-2 py-1 align-middle">{request.activity}</td>
+                                    <td className="border border-black px-2 py-1 sticky right-0 z-10 bg-[#E6E6FA] text-center align-middle w-32">
+                                        <div className="flex gap-2 justify-center flex-col md:flex-row">
+                                            <button
+                                                onClick={() => handleAccept(request.id)}
+                                                disabled={acceptMutation.isPending}
+                                                className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
+                                            >
+                                                Accept
+                                            </button>
+                                            <button
+                                                onClick={() => handleReject(request.id)}
+                                                disabled={rejectMutation.isPending}
+                                                className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Action Buttons */}
@@ -310,6 +321,20 @@ export default function PendingRequestsPage() {
                                 Reject
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-xs w-full flex flex-col items-center">
+                        <div className="text-lg font-bold mb-4 text-center">{showSuccessModal}</div>
+                        <button
+                            onClick={() => setShowSuccessModal(null)}
+                            className="px-6 py-2 text-base bg-green-600 text-white rounded hover:bg-green-700 mt-2 font-bold"
+                        >
+                            OK
+                        </button>
                     </div>
                 </div>
             )}

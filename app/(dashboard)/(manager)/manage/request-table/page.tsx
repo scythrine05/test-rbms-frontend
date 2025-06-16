@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { managerService, UserRequest } from "@/app/service/api/manager";
-import { format, parseISO, addDays, subDays, startOfWeek, endOfWeek } from "date-fns";
+import { format, parseISO, addDays, subDays, startOfWeek, endOfWeek, isAfter, isBefore, isEqual } from "date-fns";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
@@ -16,10 +16,8 @@ export default function ManagerRequestTablePage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { isUrgentMode } = useUrgentMode();
-  const [page, setPage] = useState(1);
-  const [limit] = useState(50); // Increased limit to show more requests
-  const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
+  const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [dateRange, setDateRange] = useState({
     startDate: format(new Date(), "dd-MM-yy"),
     endDate: format(new Date(), "dd-MM-yy")
@@ -72,29 +70,16 @@ export default function ManagerRequestTablePage() {
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 6 });
   const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 6 });
 
-  // Fetch requests data
+  // Fetch all requests initially (no date filter)
   const { data, isLoading, error } = useQuery({
-    queryKey: ["requests", page, filters, weekStart, weekEnd, isUrgentMode, currentWeekStart],
-    queryFn: () => {
-      if (isUrgentMode) {
-        // For urgent mode, get requests for the selected date
-        const selectedDate = format(currentWeekStart, "yyyy-MM-dd");
-        return managerService.getUserRequestsByManager(
-          1,
-          limit,
-          selectedDate,
-          selectedDate,
-          filters.status !== "ALL" ? filters.status : undefined
-        );
-      }
-      return managerService.getUserRequestsByManager(
-        page,
-        limit,
-        format(weekStart, "yyyy-MM-dd"),
-        format(weekEnd, "yyyy-MM-dd"),
-        filters.status !== "ALL" ? filters.status : undefined
-      );
-    }
+    queryKey: ["requests", filters],
+    queryFn: () => managerService.getUserRequestsByManager(
+      1,
+      10000, // Large limit to fetch all
+      undefined,
+      undefined,
+      filters.status !== "ALL" ? filters.status : undefined
+    ),
   });
 
   // Section options
@@ -137,30 +122,36 @@ export default function ManagerRequestTablePage() {
 
   // Status mapping function for table display
   function getDisplayStatus(request: UserRequest) {
-    // You may need to adjust these conditions based on your backend fields
+    // Sanctioned (light green)
     if (request.status === 'APPROVED' && request.isSanctioned) {
-      return { label: 'Sanctioned', className: 'bg-green-100 text-green-900 border-green-400' };
+      return { label: 'Sanctioned', style: { background: '#d6ecd2', color: '#11332b' } };
     }
-    if (request.status === 'PENDING' && request.adminRequestStatus === 'PENDING') {
-      return { label: 'Pending with Optg', className: 'bg-yellow-200 text-yellow-900 border-yellow-400' };
+    // Pending with OPTG (yellow)
+    if (request.status === 'APPROVED' && !request.isSanctioned) {
+      return { label: 'Pending with Optg', style: { background: '#fff86b', color: '#222' } };
     }
+    // Returned by Optg (red)
     if (request.status === 'REJECTED' && request.adminRequestStatus === 'REJECTED') {
-      return { label: 'Returned by Optg', className: 'bg-red-500 text-white border-red-700' };
+      return { label: 'Returned by Optg', style: { background: '#ff4e36', color: '#fff' } };
     }
+    // Not-availed/availed/cancelled (white)
     if (["NOT_AVAILED", "AVAILED", "CANCELLED"].includes(request.userStatus)) {
-      return { label: 'Not-availed/availed/cancelled', className: 'bg-white text-black border-gray-300' };
+      return { label: 'Not-availed/availed/cancelled', style: { background: '#fff', color: '#222' } };
     }
+    // Returned to applicant (light blue)
     if (request.status === 'REJECTED' && request.managerAcceptance === false) {
-      return { label: 'Returned to applicant', className: 'bg-sky-200 text-sky-900 border-sky-400' };
+      return { label: 'Returned to applicant', style: { background: '#8ee0ef', color: '#11332b' } };
     }
+    // Pending with me (purple)
     if (request.status === 'PENDING' && request.managerAcceptance === false) {
-      return { label: 'Pending with me', className: 'bg-fuchsia-300 text-fuchsia-900 border-fuchsia-400' };
+      return { label: 'Pending with me', style: { background: '#d47ed4', color: '#222' } };
     }
+    // Burst (orange)
     if (request.status === 'BURST') {
-      return { label: 'Burst', className: 'bg-orange-400 text-white border-orange-700 font-bold' };
+      return { label: 'Burst', style: { background: '#ff944c', color: '#fff' } };
     }
-    // Default fallback
-    return { label: request.status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+    // Default fallback (white)
+    return { label: request.status, style: { background: '#fff', color: '#222' } };
   }
 
   // Handle week/day navigation
@@ -175,7 +166,6 @@ export default function ManagerRequestTablePage() {
         return direction === "prev" ? subDays(prev, 7) : addDays(prev, 7);
       }
     });
-    setPage(1);
   };
 
   // Handle block type filter
@@ -202,11 +192,28 @@ export default function ManagerRequestTablePage() {
     }));
   };
 
-  // Filter requests based on all filters
+  // Date filter logic (frontend)
+  const applyDateFilter = (requests: UserRequest[]) => {
+    if (!customDateRange.start && !customDateRange.end) return requests;
+    return requests.filter((request) => {
+      const reqDate = parseISO(request.date);
+      const start = customDateRange.start ? parseISO(customDateRange.start) : undefined;
+      const end = customDateRange.end ? parseISO(customDateRange.end) : undefined;
+      if (start && end) {
+        return (isAfter(reqDate, start) || isEqual(reqDate, start)) && (isBefore(reqDate, end) || isEqual(reqDate, end));
+      } else if (start) {
+        return isAfter(reqDate, start) || isEqual(reqDate, start);
+      } else if (end) {
+        return isBefore(reqDate, end) || isEqual(reqDate, end);
+      }
+      return true;
+    });
+  };
+
+  // Filter requests based on all filters (except date)
   const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
     const statusMatch = filters.status === "ALL" || request.status === filters.status;
     const departmentMatch = filters.department === "ALL" || request.selectedDepartment === filters.department;
-    // OR logic for section
     const sectionMatch = selectedSections.length === 0 || selectedSections.includes(request.selectedSection);
     const workTypeMatch = filters.workType === "ALL" || request.workType === filters.workType;
     const corridorTypeMatch = filters.corridorType === "ALL" || request.corridorType === filters.corridorType;
@@ -215,13 +222,12 @@ export default function ManagerRequestTablePage() {
       (filters.blockType === "NON_CORRIDOR" && request.corridorType === "NON_CORRIDOR") ||
       (filters.blockType === "EMERGENCY" && request.corridorType === "EMERGENCY") ||
       (filters.blockType === "MEGA_BLOCK" && request.corridorType === "MEGA_BLOCK");
-    // OR logic for SSE
     const sseMatch = selectedSSEs.length === 0 || selectedSSEs.includes(request.user?.name);
-    const dateMatch = isUrgentMode
-      ? format(parseISO(request.date), "yyyy-MM-dd") === format(currentWeekStart, "yyyy-MM-dd")
-      : true;
-    return statusMatch && departmentMatch && sectionMatch && workTypeMatch && corridorTypeMatch && blockTypeMatch && sseMatch && dateMatch;
+    return statusMatch && departmentMatch && sectionMatch && workTypeMatch && corridorTypeMatch && blockTypeMatch && sseMatch;
   }) || [];
+
+  // Apply date filter last
+  const dateFilteredRequests = applyDateFilter(filteredRequests);
 
   // Bulk approve mutation
   const approveMutation = useMutation({
@@ -239,7 +245,7 @@ export default function ManagerRequestTablePage() {
 
   // Handle select all
   const handleSelectAll = () => {
-    const selectableRequests = filteredRequests.filter(request =>
+    const selectableRequests = dateFilteredRequests.filter(request =>
       request.status === "PENDING" && !request.managerAcceptance
     );
     if (selectedRequests.size === selectableRequests.length) {
@@ -251,7 +257,7 @@ export default function ManagerRequestTablePage() {
 
   // Handle individual selection
   const handleSelectRequest = (requestId: string) => {
-    const request = filteredRequests.find(r => r.id === requestId);
+    const request = dateFilteredRequests.find(r => r.id === requestId);
     if (request && request.status === "PENDING" && !request.managerAcceptance) {
       const newSelected = new Set(selectedRequests);
       if (newSelected.has(requestId)) {
@@ -312,6 +318,11 @@ export default function ManagerRequestTablePage() {
     }
   }, [customDateRange]);
 
+  // Calculate pending with me count
+  const pendingWithMeCount = (data?.data?.requests || []).filter(
+    (r: UserRequest) => r.status === 'PENDING' && r.managerAcceptance === false
+  ).length;
+
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -358,7 +369,7 @@ export default function ManagerRequestTablePage() {
       <div className="mx-4 mt-6">
         <div className="bg-[#FF6B6B] grid grid-cols-3 gap-0 border-2 border-black">
           <div className="p-3 text-black font-bold border-r-2 border-black">REQUESTS PENDING WITH ME</div>
-          <div className="p-3 text-black font-bold border-r-2 border-black text-center">Nos. {data?.data?.total || 0}</div>
+          <div className="p-3 text-black font-bold border-r-2 border-black text-center">Nos. {pendingWithMeCount}</div>
           <Link href="/manage/pending-requests" className="p-3 text-black font-bold text-center hover:bg-[#FF5555]">
             Click to View
           </Link>
@@ -462,57 +473,51 @@ export default function ManagerRequestTablePage() {
         </div>
       </div>
 
-      {/* Table Section */}
+      {/* Table Section in a scrollable window */}
       <div className="mx-2 mt-2 overflow-x-auto">
-        <table className="w-full border-2 border-black bg-white text-black text-sm">
-          <thead>
-            <tr className="bg-[#E8F4F8] text-black">
-              <th className="border-2 border-black p-1">Date</th>
-              <th className="border-2 border-black p-1">ID</th>
-              <th className="border-2 border-black p-1">Block Section</th>
-              <th className="border-2 border-black p-1">UP/DN/SL/RO AD NO.</th>
-              <th className="border-2 border-black p-1">Duration</th>
-              <th className="border-2 border-black p-1">Activity</th>
-              <th className="border-2 border-black p-1">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRequests.map((request: UserRequest) => (
-              <tr key={request.id} className="bg-white hover:bg-[#F3F3F3]">
-                <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
-                <td className="border border-black p-1 text-center">
-                  <Link
-                    href={`/manage/view-request/${request.id}?from=request-table`}
-                    className="text-[#13529e] hover:underline font-semibold"
-                  >
-                    {request.id}
-                  </Link>
-                </td>
-                <td className="border border-black p-1">{request.selectedSection}</td>
-                <td className="border border-black p-1 text-center">{request.processedLineSections?.[0]?.lineName || "N/A"}</td>
-                <td className="border border-black p-1 text-center">{formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}</td>
-                <td className="border border-black p-1">{request.workType}</td>
-                <td className="border border-black p-1 text-center">
-                  {(() => {
-                    const status = getDisplayStatus(request);
-                    return (
-                      <span className={`px-2 py-1 text-xs rounded-full border ${status.className}`}>{status.label}</span>
-                    );
-                  })()}
-                </td>
+        <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
+          <table className="w-full text-black text-sm relative">
+            <thead>
+              <tr className="bg-[#E8F4F8] text-black">
+                <th className="border-2 border-black p-1">Date</th>
+                <th className="border-2 border-black p-1">ID</th>
+                <th className="border-2 border-black p-1">Block Section</th>
+                <th className="border-2 border-black p-1">UP/DN/SL/RO AD NO.</th>
+                <th className="border-2 border-black p-1">Duration</th>
+                <th className="border-2 border-black p-1">Activity</th>
+                <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#E8F4F8]">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dateFilteredRequests.map((request: UserRequest) => {
+                const status = getDisplayStatus(request);
+                return (
+                  <tr key={request.id} className="bg-white hover:bg-[#F3F3F3]">
+                    <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
+                    <td className="border border-black p-1 text-center">
+                      <Link
+                        href={`/manage/view-request/${request.id}?from=request-table`}
+                        className="text-[#13529e] hover:underline font-semibold"
+                      >
+                        {request.id}
+                      </Link>
+                    </td>
+                    <td className="border border-black p-1">{request.selectedSection}</td>
+                    <td className="border border-black p-1 text-center">{request.processedLineSections?.[0]?.lineName || "N/A"}</td>
+                    <td className="border border-black p-1 text-center">{formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}</td>
+                    <td className="border border-black p-1">{request.workType}</td>
+                    <td className="border border-black p-1 sticky right-0 z-10 text-center font-bold" style={status.style}>
+                      <span className="w-full block text-base">{status.label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Help Text */}
-      <div className="mx-4 mt-6 text-center">
-        <p className="text-lg font-bold">Click ID to see details of a Block.</p>
-        <p className="mt-2 text-lg">For printing the complete table, click to download in .csv format.</p>
-      </div>
-
-      {/* Action Buttons */}
+      {/* Action Buttons below the scrollable window */}
       <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
         <button className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
           Download

@@ -18,7 +18,8 @@ export default function EditRequestsPage() {
         const [toHours, toMinutes] = to.split(":").map(Number);
         const fromTotal = fromHours * 60 + fromMinutes;
         const toTotal = toHours * 60 + toMinutes;
-        const diff = toTotal - fromTotal;
+        let diff = toTotal - fromTotal;
+        if (diff < 0) diff += 24 * 60;
         const hours = Math.floor(diff / 60);
         const minutes = diff % 60;
         return `${hours}h ${minutes}m`;
@@ -55,111 +56,110 @@ export default function EditRequestsPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-[#fcfaf3]">
-            <div className="w-full max-w-6xl mx-auto mt-4">
-                {/* Header */}
-                <div className="text-center bg-[#f7f7a1] rounded-t-2xl p-4 border-b-2 border-[#b6f7e6]">
-                    <span className="text-4xl font-extrabold text-[#b07be0]">RBMS</span>
-                </div>
-                <div className="bg-[#c6e6f7] rounded-b-2xl p-6">
-                    <h1 className="text-2xl font-bold text-center mb-6">Edit/Cancel Previous Block Requests</h1>
-
-                    {/* Responsive List/Table */}
-                    <div className="max-h-[60vh] w-full overflow-x-auto">
-                        {userRequests.length === 0 ? (
-                            <div className="text-center text-gray-600 py-8">No block requests found for your account.</div>
-                        ) : (
-                            <div className="w-full min-w-[600px]">
-                                <table className="min-w-full border-collapse border border-black text-sm text-black rounded-xl overflow-hidden">
-                                    <thead className="bg-[#f7d6f7] sticky top-0 z-10">
-                                        <tr>
-                                            <th className="p-2 text-left" style={{ minWidth: 90 }}>Date</th>
-                                            <th className="p-2 text-left" style={{ minWidth: 50 }}>ID</th>
-                                            <th className="p-2 text-left" style={{ minWidth: 100 }}>Block Section</th>
-                                            <th className="p-2 text-left" style={{ minWidth: 120 }}>UP/DN/SL/Road</th>
-                                            <th className="p-2 text-left" style={{ minWidth: 70 }}>Duration</th>
-                                            <th className="p-2 text-left" style={{ minWidth: 60 }}>Edit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="overflow-y-auto">
-                                        {userRequests.map((request: any) => (
-                                            <tr key={request.id} className="border-b border-black hover:bg-gray-50">
-                                                <td className="p-2 whitespace-nowrap">{dayjs(request.date).format("DD-MM-YYYY")}</td>
-                                                <td className="p-2">
+        <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative pb-32">
+            {/* Top Yellow Bar */}
+            <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
+                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+            </div>
+            {/* Main Title on Light Blue */}
+            <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
+                <span className="text-2xl md:text-3xl font-bold text-black text-center">Edit/Cancel Previous Block Requests</span>
+            </div>
+            {/* Table Box */}
+            <div className="flex justify-center mt-3 mb-6">
+                <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
+                    <div className="text-xl font-bold text-black text-center py-2">MY UPCOMING BLOCK REQUESTS</div>
+                    <div className="italic text-center text-sm text-black pb-2">(Click ID to edit or cancel)</div>
+                    {/* Table */}
+                    <div className="overflow-x-auto rounded-xl mx-2 mb-2">
+                        <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+                            <thead>
+                                <tr className="bg-[#D6F3FF] text-black">
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">Date</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">ID</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">Block Section</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">UP/DN/SL/Rpad</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Duration</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Edit/Cancel</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {userRequests.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="text-center text-gray-600 py-8">No block requests found for your account.</td>
+                                    </tr>
+                                ) : (
+                                    userRequests.map((request: any, idx: number) => (
+                                        <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
+                                            <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{dayjs(request.date).format("DD-MM-YYYY")}</td>
+                                            <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
+                                                <button
+                                                    onClick={() => router.push(`/edit-request/${request.id}`)}
+                                                    className="text-black hover:underline"
+                                                >
+                                                    {request.id.slice(-4)}
+                                                </button>
+                                            </td>
+                                            <td className="border border-black px-2 py-1 text-black">{request.missionBlock || "-"}</td>
+                                            <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                                                {request.processedLineSections?.map((section: any) => section.lineName || section.road).join(", ") || "-"}
+                                            </td>
+                                            <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                                                {getDuration(
+                                                    extractTimeFromDatetime(request.demandTimeFrom || ""),
+                                                    extractTimeFromDatetime(request.demandTimeTo || "")
+                                                )}
+                                            </td>
+                                            <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
+                                                {isEditable(request.date) ? (
                                                     <button
                                                         onClick={() => router.push(`/edit-request/${request.id}`)}
-                                                        className="text-blue-600 hover:text-blue-800 underline text-xs px-1 py-0.5 rounded"
-                                                        style={{ minWidth: 0 }}
+                                                        className="bg-[#b7b7f7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#e6e6fa] transition"
                                                     >
-                                                        {request.id.slice(0, 6)}
+                                                        Edit
                                                     </button>
-                                                </td>
-                                                <td className="p-2 truncate">{request.missionBlock || "-"}</td>
-                                                <td className="p-2 truncate">
-                                                    {request.processedLineSections?.map((section: any) =>
-                                                        section.lineName || section.road
-                                                    ).join(", ") || "-"}
-                                                </td>
-                                                <td className="p-2 whitespace-nowrap">
-                                                    {getDuration(
-                                                        extractTimeFromDatetime(request.demandTimeFrom || ""),
-                                                        extractTimeFromDatetime(request.demandTimeTo || "")
-                                                    )}
-                                                </td>
-                                                <td className="p-2">
-                                                    {isEditable(request.date) ? (
-                                                        <button
-                                                            onClick={() => router.push(`/edit-request/${request.id}`)}
-                                                            className="bg-[#b7b7f7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#e6e6fa] transition"
-                                                            style={{ minWidth: 0 }}
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleCancel(request.id)}
-                                                            className="bg-[#ffb7b7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#ffcccc] transition"
-                                                            style={{ minWidth: 0 }}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleCancel(request.id)}
+                                                        className="bg-[#ffb7b7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#ffcccc] transition"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-center gap-4 mt-8">
+                </div>
+            </div>
+            {/* Navigation Buttons */}
+            <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2 z-10">
+                <div className="max-w-[1366px] mx-auto px-2">
+                    <div className="flex justify-center gap-3 mb-2">
                         <button
-                            className="flex items-center gap-2 bg-[#e6e6fa] border-2 border-black rounded-lg px-4 py-2 text-lg font-bold text-black"
-                            onClick={() => router.back()}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="black" strokeWidth={2} className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Back
-                        </button>
-                        <button
-                            className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-lg font-bold text-black"
                             onClick={() => router.push('/dashboard')}
+                            className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke="black" strokeWidth={2} className="w-6 h-6">
-                                <rect x="6" y="12" width="20" height="12" rx="2" fill="#fffbe9" stroke="black" strokeWidth="2" />
-                                <path d="M4 14L16 4L28 14" stroke="black" strokeWidth="2" fill="none" />
-                            </svg>
-                            Home
+                            <span className="text-xl">🏠</span> Home
                         </button>
                         <button
-                            className="flex items-center gap-2 bg-[#ffb347] border-2 border-black rounded-lg px-4 py-2 text-lg font-bold text-black"
+                            onClick={() => window.history.back()}
+                            className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold"
+                        >
+                            <span className="text-xl">⬅️</span> Back
+                        </button>
+                        <button
                             onClick={() => router.push('/auth/logout')}
+                            className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
                         >
                             Logout
                         </button>
+                    </div>
+                    <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
+                        © {new Date().getFullYear()} Indian Railways
                     </div>
                 </div>
             </div>
