@@ -145,7 +145,7 @@ export default function DashboardPage() {
               VIEW BLOCK DETAILS
             </button>
           </a>
-          <a href="/dashboard/(admin)/admin/sanction-table-data">
+          <a href="/drm/generate-report">
             <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
               BLOCK SUMMARY REPORT
             </button>

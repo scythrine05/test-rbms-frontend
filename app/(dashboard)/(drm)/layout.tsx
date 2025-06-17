@@ -18,7 +18,7 @@ export default function UserLayout({
       status === "authenticated" &&
       !allowedRoles.includes(session?.user?.role || "")
     ) {
-      router.push("/404");
+      // router.push("/404");
     }
   }, [session, status, router]);
 
@@ -32,7 +32,7 @@ export default function UserLayout({
     status === "unauthenticated" ||
     !allowedRoles.includes(session?.user?.role || "")
   ) {
-    router.push("/auth/login");
+    // router.push("/auth/login");
   }
 
   return <>{children}</>;
