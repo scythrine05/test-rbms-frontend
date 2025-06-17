@@ -257,15 +257,15 @@ function ReviewBlockRequestModal({ isOpen, onClose, onConfirm, formData, blockSe
 }
 
 // Helper to determine if Type of Block should be locked to Urgent Block
-export function isUrgentBlockDate(dateString: string): boolean {
-  if (!dateString) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const targetDate = new Date(dateString);
-  targetDate.setHours(0, 0, 0, 0);
-  const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  return dayDiff === 0 || dayDiff === 1 || dayDiff === 2;
-}
+// export function isUrgentBlockDate(dateString: string): boolean {
+//   if (!dateString) return false;
+//   const today = new Date();
+//   today.setHours(0, 0, 0, 0);
+//   const targetDate = new Date(dateString);
+//   targetDate.setHours(0, 0, 0, 0);
+//   const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+//   return dayDiff === 0 || dayDiff === 1 || dayDiff === 2;
+// }
 
 // Add a new style object for better contrast in 'Other affected Lines/Roads' dropdowns
 const otherAffectedSelectStyles = {
