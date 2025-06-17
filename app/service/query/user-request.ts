@@ -17,6 +17,7 @@ export interface RequestResponse {
 }
 
 export interface RequestItem {
+    isSanctioned: boolean;
     remarkByManager: string;
     adjacentLinesAffected: string;
     id: string;
