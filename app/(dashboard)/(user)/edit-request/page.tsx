@@ -151,12 +151,21 @@ export default function EditRequestsPage() {
                         >
                             <span className="text-xl">⬅️</span> Back
                         </button>
-                        <button
+                        {/* <button
                             onClick={() => router.push('/auth/logout')}
                             className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
                         >
                             Logout
-                        </button>
+                        </button> */}
+                        <button
+    onClick={async () => {
+        const { signOut } = await import('next-auth/react');
+        await signOut({ redirect: true, callbackUrl: '/auth/login' });
+    }}
+    className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+>
+    Logout
+</button>
                     </div>
                     <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
                         © {new Date().getFullYear()} Indian Railways

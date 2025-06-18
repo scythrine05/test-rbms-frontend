@@ -381,7 +381,7 @@ export default function ViewRequestPage() {
                   <h3 className="font-medium text-[#13529e]">
                     {section.block}
                   </h3>
-                  {section.type === "regular" ? (
+                  {section.type === "line"|| section.type==="regular" ? (
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <span className="text-xs font-medium">Line:</span>
@@ -541,15 +541,25 @@ export default function ViewRequestPage() {
         </div>
       </div>
 
-      {request.requestremarks && (
+      {/* {request.requestremarks && (
         <div className="border border-black p-3 mb-4">
           <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             Remarks
           </h2>
           <p className="text-sm">{request.requestremarks}</p>
         </div>
-      )}
+      )} */}
 
+ <div className="border border-black p-3 mb-4">
+          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+            Remarks
+          </h2>
+          {/* <p className="text-sm">{request.requestremarks}</p> */}
+          <p className="text-sm">
+  {request.requestremarks?.trim() ? request.requestremarks : "Nil"}
+</p>
+
+        </div>
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
         © {new Date().getFullYear()} Indian Railways
       </div>

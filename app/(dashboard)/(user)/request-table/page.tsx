@@ -471,7 +471,7 @@ export default function RequestTablePage() {
                       </Link>
                     </td>
                     <td className="border border-black px-2 py-1 text-black">{request.missionBlock}</td>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{request.lineDirection || 'N/A'}</td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{request.processedLineSections[0].lineName || 'N/A'}</td>
                     <td className="border border-black px-2 py-1 text-black">{request.activity}</td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
                       {formatDuration(request.demandTimeFrom, request.demandTimeTo)}
@@ -546,9 +546,18 @@ export default function RequestTablePage() {
             >
               <span className="text-xl">⬅️</span> Back
             </button>
-            <Link href="/logout" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black">
+            {/* <Link href="/logout" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black">
               Logout
-            </Link>
+            </Link> */}
+                               <button
+    onClick={async () => {
+        const { signOut } = await import('next-auth/react');
+        await signOut({ redirect: true, callbackUrl: '/auth/login' });
+    }}
+    className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+>
+    Logout
+</button>
           </div>
 
           <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
