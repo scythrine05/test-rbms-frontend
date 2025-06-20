@@ -294,7 +294,7 @@ export default function GenerateReportPage() {
           <div className="flex flex-row gap-8 items-end w-full flex-wrap">
             {/* Choose Section Dropdown */}
             <div className="flex flex-col flex-1 min-w-[90px] max-w-[110px] w-full">
-              <span className="text-lg font-bold text-black mb-1">Choose Section</span>
+              <span className="text-lg font-bold text-black mb-1 whitespace-nowrap">Choose Section</span>
               <Select
                 options={majorSectionOptions}
                 isMulti={true}
@@ -319,13 +319,25 @@ export default function GenerateReportPage() {
             </div>
             {/* Select Period */}
             <div className="flex flex-col flex-1 min-w-[180px] w-full">
-              <span className="text-lg font-bold text-black mb-1">Select Period</span>
-              <div className="flex flex-row items-center gap-1 w-full">
-                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" style={{color:"black"}} {...register('startDate')} />
-                <span className="text-base font-bold" style={{color:"black"}}>to</span>
-                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" style={{color:"black"}} {...register('endDate')} />
-              </div>
-            </div>
+  <div className="flex justify-center w-full mb-1">
+    <span className="text-lg font-bold text-black">Select Period</span>
+  </div>
+  <div className="flex flex-row items-center gap-1 w-full">
+    <input 
+      type="date" 
+      className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" 
+      style={{color:"black"}} 
+      {...register('startDate')} 
+    />
+    <span className="text-base font-bold" style={{color:"black"}}>to</span>
+    <input 
+      type="date" 
+      className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" 
+      style={{color:"black"}} 
+      {...register('endDate')} 
+    />
+  </div>
+</div>
           </div>
         </div>
         {/* Block Type Filters (first line) */}
@@ -348,7 +360,7 @@ export default function GenerateReportPage() {
             <button
               key={opt.value}
               className={`rounded-full px-3 py-1 text-base font-semibold border flex items-center gap-1 transition-colors duration-150
-                ${opt.value === 'Engineering' ? (selectedDepartments.includes(opt.value) ? 'bg-[#f3c6f7] border-[#b07be0] text-black' : 'bg-[#f3e6f7] border-[#b07be0] text-black') :
+                ${opt.value === 'Engineering' ? (selectedDepartments.includes(opt.value) ? 'bg-[#e49edd] border-[#b07be0] text-black' : 'bg-[#f3e6f7] border-[#b07be0] text-black') :
                   opt.value === 'ST' ? (selectedDepartments.includes(opt.value) ? 'bg-[#fff35c] border-[#e0e0e0] text-black' : 'bg-[#fffbe9] border-[#e0e0e0] text-black') :
                     selectedDepartments.includes(opt.value) ? 'bg-[#c7f7c7] border-[#7be09b] text-black' : 'bg-[#e0fff0] border-[#7be09b] text-black'
                 }`}
@@ -373,17 +385,17 @@ export default function GenerateReportPage() {
         {/* (A) Block Summary Table */}
         <div className="w-full mt-4">
           <div className="flex w-full">
-            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">
+            <div className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1" style={{color:"black"}}>
               (A)Block Summary: {formatDisplayDate(watch('startDate')) || '........'} to {formatDisplayDate(watch('endDate')) || '........'}
             </div>
-            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">
+            <div className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1" style={{color:"black"}}>
               Department: {selectedDepartments.length > 0 ? selectedDepartments.join(', ') : '.............'} (in Hrs)
             </div>
           </div>
           <div className="overflow-x-auto w-full">
             <table className="w-full border-2 border-black">
               <thead>
-                <tr className="bg-[#ffeaea] text-black text-lg font-bold">
+                <tr className="bg-[#f7c7ac] text-black text-lg font-bold">
                   <th className="border-2 border-black px-2 py-1">Section</th>
                   <th className="border-2 border-black px-2 py-1">Demanded</th>
                   <th className="border-2 border-black px-2 py-1">Approved</th>
@@ -394,29 +406,33 @@ export default function GenerateReportPage() {
                 </tr>
               </thead>
               <tbody>
-                {pastBlockSummary.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-4" style={{color:"black"}}>No data found.</td></tr>
-                ) : pastBlockSummary.map((summary: any, idx: number) => (
-                  <tr className="bg-[#ffb347] font-bold" key={idx}>
-                    <td className="border-2 border-black px-2 py-1">{summary.Department || summary.Section || ''}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.Demanded}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.Approved}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.Granted}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.PercentGranted !== undefined ? summary.PercentGranted + '%' : ''}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.Availed}</td>
-                    <td className="border-2 border-black px-2 py-1">{summary.PercentAvailed !== undefined ? summary.PercentAvailed + '%' : ''}</td>
-                  </tr>
-                ))}
-              </tbody>
+  {pastBlockSummary.length === 0 ? (
+    <tr>
+      <td colSpan={7} className="text-center py-4" style={{color:"black"}}>No data found.</td>
+    </tr>
+  ) : pastBlockSummary.map((summary: any, idx: number) => (
+    <tr 
+      className={`font-bold ${idx % 2 === 0 ? 'bg-[#f4dcf1]' : 'bg-white'}`} 
+      key={idx}
+    >
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.Department || summary.Section || ''}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.Demanded}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.Approved}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.Granted}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.PercentGranted !== undefined ? summary.PercentGranted + '%' : ''}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.Availed}</td>
+      <td className="border-2 border-black px-2 py-1" style={{color:"black"}}>{summary.PercentAvailed !== undefined ? summary.PercentAvailed + '%' : ''}</td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
         </div>
         {/* (B) Summary of Upcoming Blocks */}
         <div className="w-full max-w-4xl mt-8">
           <div className="flex w-full items-center">
-            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">(B) Summary of Upcoming Blocks</div>
+            <div className="flex-1 bg-[#f1a983] text-xl font-bold border-2 border-black px-2 py-1">(B) Summary of Upcoming Blocks</div>
             <div className="flex items-center gap-2 ml-4">
-              <span className="text-lg font-bold text-black">Choose Section</span>
               <div className="relative inline-block" ref={sectionDropdownRefB}>
                 <button
                   onClick={() => setSectionDropdownOpenB(v => !v)}
@@ -448,9 +464,9 @@ export default function GenerateReportPage() {
             </div>
           </div>
           <div className="overflow-x-auto w-full max-w-full">
-            <table className="w-full border-2 border-black mt-1 text-sm">
+            {/* <table className="w-full border-2 border-black mt-1 text-sm">
               <thead>
-                <tr className="bg-[#E8F4F8] text-black text-lg font-bold">
+                <tr className="bg-[#e49edd] text-black text-lg font-bold">
                   <th className="border-2 border-black px-2 py-1">Section</th>
                   <th className="border-2 border-black px-2 py-1">Date</th>
                   <th className="border-2 border-black px-2 py-1">Type</th>
@@ -488,21 +504,72 @@ export default function GenerateReportPage() {
                   );
                 })}
               </tbody>
-            </table>
+            </table> */}
+
+<table className="w-full border-2 border-black mt-1 text-sm">
+  <thead>
+    <tr className="bg-[#e49edd] text-black text-lg font-bold">
+      <th className="border-2 border-black px-2 py-1">Section</th>
+      <th className="border-2 border-black px-2 py-1">Date</th>
+      <th className="border-2 border-black px-2 py-1">Type</th>
+      <th className="border-2 border-black px-2 py-1">Duration</th>
+      <th className="border-2 border-black px-2 py-1">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredUpcomingBlocks.length === 0 ? (
+      <tr className="bg-white">
+        <td colSpan={5} className="text-center py-4" style={{color:"black"}}>No data found.</td>
+      </tr>
+    ) : filteredUpcomingBlocks.slice(0, 200).map((block: DetailedData, idx: number) => {
+      // Status color logic
+      let statusLabel = '';
+      let statusStyle = { background: '#fff', color: '#222' };
+      if (block.Status === 'APPROVED') {
+        statusLabel = 'Pending with Optg';
+        statusStyle = { background: '#fff86b', color: '#222' };
+      } else if (block.Status === 'PENDING') {
+        statusLabel = 'Pending with dept control';
+        statusStyle = { background: '#d47ed4', color: '#222' };
+      } else if (block.Status === 'REJECTED') {
+        statusLabel = 'Returned by Optg';
+        statusStyle = { background: '#ff4e36', color: '#fff' };
+      } else {
+        statusLabel = block.Status;
+      }
+      
+      // Row background alternates between pink and white
+      const rowBgColor = idx % 2 === 0 ? 'bg-white' : 'bg-[#f5d0f2]';
+      
+      return (
+        <tr key={idx} className={`${rowBgColor} hover:bg-[#F3F3F3]`}>
+          <td className="border-2 border-black px-2 py-1 font-bold text-black">{block.Section}</td>
+          <td className="border-2 border-black px-2 py-1 text-black">{formatDateB(block.Date)}</td>
+          <td className="border-2 border-black px-2 py-1 text-black">{block.Type}</td>
+          <td className="border-2 border-black px-2 py-1 text-black">{block.Duration}</td>
+          <td className="border-2 border-black px-2 py-1 font-bold text-center text-black" style={statusStyle}>{statusLabel}</td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+
           </div>
         </div>
         {/* Info Bar and Navigation */}
         <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between mt-8 mb-4 px-2">
-          <div className="flex items-center gap-2 bg-[#e0e0ff] px-4 py-2 rounded-2xl border-2 border-[#00b347]">
+          <div className="flex items-center gap-2 bg-[#cfd4ff] px-4 py-2 rounded-2xl border-2 ">
+            <span className="text-lg font-bold text-black">Click</span>
             <span className="bg-[#00b347] text-white font-bold px-2 py-1 rounded">Section/Block ID</span>
             <span className="text-lg font-bold text-black">to see further details.</span>
           </div>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <button className="flex items-center gap-2 bg-[#e0e0ff] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black" onClick={() => router.back()}>
+            <button className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black" onClick={() => router.back()}>
               <span className="text-2xl">⬅️</span> Back
             </button>
             <Link href="/drm">
-              <button className="flex items-center gap-2 bg-[#b7e37b] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
+              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
                 <span className="text-2xl">🏠</span> Home
               </button>
             </Link>

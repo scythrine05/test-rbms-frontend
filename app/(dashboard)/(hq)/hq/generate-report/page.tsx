@@ -206,7 +206,6 @@ export default function GenerateReportPage() {
         <div className="flex flex-col bg-green-200">
         <h2 className="text-xl font-semibold text-black">Block Summary(Past/Upcoming)</h2>
         <div className="text-md text-black font-bold">Headquarter</div>
-        <div className="text-sm text-black mt-1 text-left pl-6">Screen 15D</div>
         </div>
       </div>
 
@@ -428,13 +427,13 @@ export default function GenerateReportPage() {
 
       {/* Past Block Summary Table */}
       <div className="mb-6">
-        <div className="bg-orange-200 p-2 font-semibold text-black">
+        <div className="bg-[#ff914d] p-2 font-semibold text-black">
           (A)Past Block Summary:....... to .......Division      Department:.............(In Hrs)
         </div>
         <div className="overflow-x-auto border border-gray-200 rounded-b">
           <table className="min-w-full bg-white">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-[#f7c7ac]">
                 <th className="border px-4 py-2 text-left text-black">Section</th>
                 <th className="border px-4 py-2 text-center text-black">Demanded</th>
                 <th className="border px-4 py-2 text-center text-black">Approved</th>
@@ -447,7 +446,7 @@ export default function GenerateReportPage() {
             <tbody className="text-black">
               {pastBlockSummary.length > 0 && (
                 pastBlockSummary.map((item, index) => (
-                  <tr key={index} className={`${index % 2 === 0 ? "bg-purple-50" : "bg-white"} hover:bg-gray-50 transition-colors text-black`}>
+                  <tr key={index} className={`${index % 2 === 0 ? "bg-[#f4dcf1]" : "bg-white"} hover:bg-gray-50 transition-colors text-black`}>
                     <td className="border px-4 py-2 cursor-pointer hover:bg-purple-100" onClick={() => handleSectionClick(item.Section)}>
                      <span className="text-blue-600 font-medium underline">{item.Department && item.Department} - {item.corridorType &&  item.corridorType}</span>
                     </td>
@@ -461,7 +460,7 @@ export default function GenerateReportPage() {
                 ))
               ) }
               
-               {pastBlockSummary.length > 0 && <tr className="bg-orange-200 font-semibold text-black">
+               {pastBlockSummary.length > 0 && <tr className="bg-[#ff914d] font-semibold text-black">
                 <td className="border px-4 py-2 text-center text-black">Total</td>
                 <td className="border px-4 py-2 text-center text-black">
                   {pastBlockSummary.length > 0 ? pastBlockSummary.reduce((sum, item) => sum + item.Demanded, 0) : "0"}
@@ -481,6 +480,7 @@ export default function GenerateReportPage() {
             </tbody>
             
           </table>
+
           {pastBlockSummary.length === 0 && <div className="bg-white hover:bg-gray-50 text-black border border-black w-full py-2 text-center">
                   No data available
           </div>}
@@ -489,13 +489,13 @@ export default function GenerateReportPage() {
 
       {/* Upcoming Blocks Table */}
       <div className="mb-6">
-        <div className="bg-yellow-200 p-2 font-semibold text-black">
+        <div className="bg-[#ffc000] p-2 font-semibold text-black">
           (B) Upcoming Blocks (Summary):...... Division ......  Department.......
         </div>
         <div className="overflow-x-auto border border-gray-200 rounded-b">
           <table className="min-w-full bg-white">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-[#f7c7ac]">
                 <th className="border px-4 py-2 text-center text-black">Date</th>
                 <th className="border px-4 py-2 text-left text-black">Section</th>
                 <th className="border px-4 py-2 text-center text-black">Duration (Hours)</th>
@@ -507,7 +507,7 @@ export default function GenerateReportPage() {
               
               {upcomingBlocks.length > 0 && (
                 upcomingBlocks.map((block, index) => (
-                  <tr key={index} className={`${index % 2 === 0 ? "bg-purple-50" : "bg-white"} hover:bg-gray-50 transition-colors text-black `}>
+                  <tr key={index} className={`${index % 2 === 0 ? "bg-[#f4dcf1]" : "bg-white"} hover:bg-gray-50 transition-colors text-black `}>
                     <td className="border px-4 py-2 text-center text-black">{block.Date}</td>
                     <td className="border px-4 py-2 cursor-pointer hover:bg-purple-100" onClick={() => handleSectionClick(block.Section)}>
                       <span className="text-blue-600 font-medium underline">{block.Section}</span>
@@ -536,9 +536,9 @@ export default function GenerateReportPage() {
 
       {/* Click SectionBlock ID Info Section */}
       <div className="mt-6 mb-4 p-4 bg-blue-100 rounded-md flex items-center justify-center">
-        <div className="bg-blue-200 px-6 py-3 rounded-md border border-blue-300 shadow-sm text-center">
+        <div className="bg-[#cfd4ff] px-6 py-3 rounded-md border border-blue-300 shadow-sm text-center">
           <span className="font-bold text-black">Click</span>
-          <span className="mx-1 px-4 py-1 bg-yellow-300 rounded-md font-bold text-black">SectionBlock ID</span>
+          <span className="mx-1 px-4 py-1 bg-[#0da84a] rounded-md font-bold text-black">SectionBlock ID</span>
           <span className="text-black">to see further details of datewise details of blocks in the division</span>
         </div>
       </div>
@@ -546,12 +546,12 @@ export default function GenerateReportPage() {
       <div className="mt-4 bg-white p-4 rounded flex justify-center items-center gap-6 border-2 border-gray-300">
         <button 
           onClick={() => router.back()}
-          className="bg-blue-300 text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400"
+          className="bg-[#cfd4ff] text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400"
         >
           Back
         </button>
         <Link href="/drm">
-          <button className="bg-green-300 text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400">
+          <button className="bg-[#a0d815] text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400">
             Home
           </button>
         </Link>
