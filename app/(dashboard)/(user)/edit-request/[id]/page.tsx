@@ -253,7 +253,7 @@ export default function CreateBlockRequestPage() {
               <tbody>
                 <tr>
                   <td className="bg-purple-200 font-semibold p-1.5 w-1/4 text-gray-900">
-                    Block Date1
+                    Block Date
                   </td>
                   <td className="bg-green-200 p-1.5 w-1/4">
                     <input
@@ -452,12 +452,26 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </td>
                 </tr>
-
-                <tr>
+                            <tr className="bg-purple-200">
+  <td className="font-semibold p-1.5 text-gray-900 whitespace-nowrap">
+    Other Lines Affected, if any
+  </td>
+  <td className="p-1.5" colSpan={3}>
+    <input
+      type="text"
+      name="otherLinesAffected"
+      value={formData.otherLinesAffected}
+      onChange={handleInputChange}
+      placeholder="Enter affected lines"
+      className="p-1 border border-gray-800 rounded bg-inherit w-44 ml-23"
+    />
+  </td>
+</tr>
+                {/* <tr>
                   <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
-                    Other Lines Affected
+                    Other Lines Affected,if any
                   </td>
-                  <td className="bg-white p-1.5" colSpan={3}>
+                  <td className="bg-white  p-1.5" colSpan={3}>
                     <input
                       type="text"
                       name="otherLinesAffected"
@@ -467,10 +481,10 @@ export default function CreateBlockRequestPage() {
                       className="w-full p-1 border border-gray-800 rounded bg-white"
                     />
                   </td>
-                </tr>
+                </tr> */}
 
                 <tr>
-                  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
+                  <td className=" font-semibold p-1.5 text-gray-900">
                     PB Required
                   </td>
                   <td className="bg-white p-1.5" colSpan={3}>
@@ -539,7 +553,7 @@ export default function CreateBlockRequestPage() {
                   <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
                     S&T Disconnection Required
                   </td>
-                  <td className="bg-white p-1.5" colSpan={3}>
+                  <td className="bg-purple-200 p-1.5" colSpan={3}>
                     <div className="flex gap-4 justify-center">
                       <label className="flex items-center gap-1">
                         <input
