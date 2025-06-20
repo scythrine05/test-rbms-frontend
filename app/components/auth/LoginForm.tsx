@@ -83,18 +83,32 @@ export default function LoginForm() {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="w-full flex flex-col items-center bg-white/60 rounded-2xl shadow-lg p-6 mb-4 border border-gray-200 backdrop-blur-md"
-      style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}
+      style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
     >
       {/* User ID */}
-      <div className="w-full flex items-center mb-4">
+      {/* <div className="w-full flex items-center mb-4">
         <input
           type="text"
           {...register("email")}
           placeholder="User ID"
           className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-white placeholder:font-bold border-none shadow-none"
-          style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
+          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
         />
-      </div>
+      </div> */}
+      <div className="w-full flex items-center mb-4">
+  <input
+    type="text"
+    {...register("email")}
+    placeholder="User ID"
+    className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+    style={{
+      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+      color: "black", // Ensure text color remains black
+      caretColor: "black" // Optional: caret (typing cursor) color
+    }}
+  />
+</div>
+
       {/* Password : OTP */}
       <div className="w-full flex items-center mb-6">
         <input
@@ -102,15 +116,22 @@ export default function LoginForm() {
           {...register("password")}
           placeholder="Password : OTP"
           className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-white placeholder:font-bold border-none shadow-none"
-          style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
+          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
         />
       </div>
       {/* Login Button */}
       <button
         type="submit"
-        className="w-56 h-14 bg-orange-300 hover:bg-orange-400 transition-all duration-200 text-black font-extrabold text-lg rounded-full shadow-md border-2 border-orange-400 mb-2"
         disabled={isLoading}
-        style={{ letterSpacing: 1 }}
+        className="flex items-center justify-center font-bold text-black text-base"
+        style={{
+          width: "180px",
+          height: "100px",
+          backgroundColor: "#f4a47c",
+          borderRadius: "50%",
+          letterSpacing: "1px",
+          border: "none",
+        }}
       >
         {isLoading ? "Logging in..." : "CLICK TO LOGIN"}
       </button>

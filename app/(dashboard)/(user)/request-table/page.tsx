@@ -8,9 +8,19 @@ import {
   RequestItem,
 } from "@/app/service/query/user-request";
 import Link from "next/link";
-import { format, parseISO, addDays, startOfWeek, endOfWeek, subDays } from "date-fns";
+import {
+  format,
+  parseISO,
+  addDays,
+  startOfWeek,
+  endOfWeek,
+  subDays,
+} from "date-fns";
 import { useSession } from "next-auth/react";
-import { useUpdateOtherRequest, useDeleteUserRequest } from "@/app/service/mutation/user-request";
+import {
+  useUpdateOtherRequest,
+  useDeleteUserRequest,
+} from "@/app/service/mutation/user-request";
 import { Toaster, toast } from "react-hot-toast";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
@@ -67,13 +77,15 @@ const formatTime = (dateString: string): string => {
 
   try {
     // Handle both full ISO strings and time-only strings
-    const timePart = dateString.includes('T')
-      ? dateString.split('T')[1]
+    const timePart = dateString.includes("T")
+      ? dateString.split("T")[1]
       : dateString;
 
     // Extract just the hours and minutes
-    const [hours, minutes] = timePart.split(':');
-    return `${hours.padStart(2, '0')}:${(minutes || '00').padStart(2, '0').substring(0, 2)}`;
+    const [hours, minutes] = timePart.split(":");
+    return `${hours.padStart(2, "0")}:${(minutes || "00")
+      .padStart(2, "0")
+      .substring(0, 2)}`;
   } catch {
     return "Invalid time";
   }
@@ -91,8 +103,8 @@ const formatTimePeriod = (fromTime: string, toTime: string): string => {
   // Calculate duration if possible
   let durationText = "";
   try {
-    const fromParts = from.split(':').map(Number);
-    const toParts = to.split(':').map(Number);
+    const fromParts = from.split(":").map(Number);
+    const toParts = to.split(":").map(Number);
 
     if (fromParts.length === 2 && toParts.length === 2) {
       let hours = toParts[0] - fromParts[0];
@@ -133,7 +145,12 @@ const getStatusDetails = (status: string) => {
 // Get disconnection status details
 const getDisconnectionStatus = (type: string, request: RequestItem) => {
   // Since the actual status fields aren't in the RequestItem type, we'll use simulated statuses
-  const statusOptions = ["Accepted by Electrical Dept.", "Pending Approval", "Rejected by S&T Dept.", "Approved by Station Master"];
+  const statusOptions = [
+    "Accepted by Electrical Dept.",
+    "Pending Approval",
+    "Rejected by S&T Dept.",
+    "Approved by Station Master",
+  ];
   const randomIndex = (request.id || "").length % statusOptions.length; // Use ID length to create consistent "random" index
 
   switch (type) {
@@ -155,51 +172,111 @@ const HeaderIcon = ({ type }: { type: string }) => {
   switch (type) {
     case "id":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M5.5 9.5A2.5 2.5 0 018 12V8.5H5.5v1zm0 0V8.5H8V12a2.5 2.5 0 01-2.5-2.5zM12 12v-1.5h-1.5V12H12zm-1.5-3V12H12V9h-1.5zm3.5.5v1h1.5V8h-5v1.5h2V12h1.5V9.5h1z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.5 9.5A2.5 2.5 0 018 12V8.5H5.5v1zm0 0V8.5H8V12a2.5 2.5 0 01-2.5-2.5zM12 12v-1.5h-1.5V12H12zm-1.5-3V12H12V9h-1.5zm3.5.5v1h1.5V8h-5v1.5h2V12h1.5V9.5h1z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "date":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "section":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
           <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
       );
     case "time":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "work":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+            clipRule="evenodd"
+          />
           <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
         </svg>
       );
     case "disconnection":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "status":
       return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        <svg
+          className="w-3.5 h-3.5 inline-block mr-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "filter":
       return (
-        <svg className="w-3 h-3 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+        <svg
+          className="w-3 h-3 inline-block ml-1"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     default:
@@ -211,14 +288,22 @@ const HeaderIcon = ({ type }: { type: string }) => {
 interface TooltipPosition {
   x: number;
   y: number;
-  placement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  placement: "top-left" | "top-right" | "bottom-left" | "bottom-right";
 }
 
 // Time chip component for better visualization
-const TimeChip = ({ time, label }: { time: string, label?: string }) => (
+const TimeChip = ({ time, label }: { time: string; label?: string }) => (
   <div className="inline-flex items-center bg-blue-50 rounded-full px-2 py-1 border border-blue-200 text-xs shadow-sm">
-    <svg className="w-3 h-3 mr-1 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+    <svg
+      className="w-3 h-3 mr-1 text-blue-600"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fillRule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+        clipRule="evenodd"
+      />
     </svg>
     <span className="font-medium">{time}</span>
     {label && <span className="ml-1 text-gray-500">{label}</span>}
@@ -226,17 +311,33 @@ const TimeChip = ({ time, label }: { time: string, label?: string }) => (
 );
 
 // Time period display with duration
-const TimePeriodDisplay = ({ fromTime, toTime }: { fromTime: string, toTime: string }) => {
+const TimePeriodDisplay = ({
+  fromTime,
+  toTime,
+}: {
+  fromTime: string;
+  toTime: string;
+}) => {
   const formattedPeriod = formatTimePeriod(fromTime, toTime);
-  const [timeRange, duration] = formattedPeriod.split(/\s+\(|\)/).filter(Boolean);
-  const [startTime, endTime] = timeRange.split('-');
+  const [timeRange, duration] = formattedPeriod
+    .split(/\s+\(|\)/)
+    .filter(Boolean);
+  const [startTime, endTime] = timeRange.split("-");
 
   return (
     <div className="flex items-center space-x-2">
       <TimeChip time={startTime} />
       <div className="flex items-center justify-center">
-        <svg className="w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+        <svg
+          className="w-4 h-4 text-gray-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
         </svg>
       </div>
       <TimeChip time={endTime} />
@@ -255,18 +356,18 @@ export default function RequestTablePage() {
   const [pageSize] = useState(10);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(),
-    endDate: addDays(new Date(), 9)
+    endDate: addDays(new Date(), 9),
   });
   const [downloadDateRange, setDownloadDateRange] = useState({
     startDate: new Date(),
-    endDate: new Date()
+    endDate: new Date(),
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { isUrgentMode } = useUrgentMode();
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [customDateRange, setCustomDateRange] = useState({
     startDate: new Date(),
-    endDate: addDays(new Date(), 9)
+    endDate: addDays(new Date(), 9),
   });
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -286,29 +387,32 @@ export default function RequestTablePage() {
   };
 
   // Fetch requests data
-  const {
-    data,
-    isLoading,
-    error
-  } = useQuery({
-    queryKey: ["requests", currentPage, statusFilter, customDateRange, userRole],
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      "requests",
+      currentPage,
+      statusFilter,
+      customDateRange,
+      userRole,
+    ],
     queryFn: async () => {
       const backendRole = getBackendRole(userRole);
-      if (backendRole === "BRANCH_OFFICER" || backendRole === "SENIOR_OFFICER" || backendRole === "JUNIOR_OFFICER") {
+      if (
+        backendRole === "BRANCH_OFFICER" ||
+        backendRole === "SENIOR_OFFICER" ||
+        backendRole === "JUNIOR_OFFICER"
+      ) {
         // For managers, fetch all subordinate requests with date filtering
         return await managerService.getUserRequestsByManager(
           currentPage,
           pageSize,
-          format(customDateRange.startDate, 'yyyy-MM-dd'),
-          format(customDateRange.endDate, 'yyyy-MM-dd'),
+          format(customDateRange.startDate, "yyyy-MM-dd"),
+          format(customDateRange.endDate, "yyyy-MM-dd"),
           statusFilter !== "ALL" ? statusFilter : undefined
         );
       } else {
         // For users, fetch only their own requests (no date filtering for download, but table always next 10 days)
-        return await userRequestService.getUserRequests(
-          currentPage,
-          pageSize
-        );
+        return await userRequestService.getUserRequests(currentPage, pageSize);
       }
     },
   });
@@ -317,30 +421,35 @@ export default function RequestTablePage() {
   // For users, show only next 10 days
   let filteredRequests: any[] = [];
   const backendRole = getBackendRole(userRole);
-  if (backendRole === "BRANCH_OFFICER" || backendRole === "SENIOR_OFFICER" || backendRole === "JUNIOR_OFFICER") {
+  if (
+    backendRole === "BRANCH_OFFICER" ||
+    backendRole === "SENIOR_OFFICER" ||
+    backendRole === "JUNIOR_OFFICER"
+  ) {
     filteredRequests = data?.data?.requests || [];
   } else {
     const today = new Date();
     const tenDaysLater = new Date();
     tenDaysLater.setDate(today.getDate() + 9);
-    filteredRequests = data?.data?.requests?.filter((request: any) => {
-      const reqDate = new Date(request.date);
-      return reqDate >= today && reqDate <= tenDaysLater;
-    }) || [];
+    filteredRequests =
+      data?.data?.requests?.filter((request: any) => {
+        const reqDate = new Date(request.date);
+        return reqDate >= today && reqDate <= tenDaysLater;
+      }) || [];
   }
 
   // Handle date range navigation
   const goToPreviousPeriod = () => {
-    setDateRange(prev => ({
+    setDateRange((prev) => ({
       startDate: subDays(prev.startDate, 10),
-      endDate: subDays(prev.endDate, 10)
+      endDate: subDays(prev.endDate, 10),
     }));
   };
 
   const goToNextPeriod = () => {
-    setDateRange(prev => ({
+    setDateRange((prev) => ({
       startDate: addDays(prev.startDate, 10),
-      endDate: addDays(prev.endDate, 10)
+      endDate: addDays(prev.endDate, 10),
     }));
   };
 
@@ -348,7 +457,7 @@ export default function RequestTablePage() {
   const handleDownload = () => {
     try {
       if (!data?.data?.requests || data.data.requests.length === 0) {
-        toast.error('No data available to download');
+        toast.error("No data available to download");
         return;
       }
 
@@ -359,38 +468,38 @@ export default function RequestTablePage() {
         "UP/DN/SL/Rpad No.",
         "Activity",
         "Duration",
-        "Status"
+        "Status",
       ];
 
       // Create CSV rows
       const rows = data.data.requests.map((request: any) => [
         formatDate(request.date),
-        request.missionBlock || 'N/A',
-        request.lineDirection || 'N/A',
-        request.activity || 'N/A',
+        request.missionBlock || "N/A",
+        request.lineDirection || "N/A",
+        request.activity || "N/A",
         formatDuration(request.demandTimeFrom, request.demandTimeTo),
-        request.adminRequestStatus === 'ACCEPTED' ? 'Y' : 'N'
+        request.adminRequestStatus === "ACCEPTED" ? "Y" : "N",
       ]);
 
       // Combine headers and rows
       const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-      ].join('\n');
+        headers.join(","),
+        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ].join("\n");
 
       // Create blob and download
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `block_requests_${format(new Date(), 'dd-MM-yyyy')}.csv`;
+      link.download = `block_requests_${format(new Date(), "dd-MM-yyyy")}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      toast.success('Download completed successfully');
+      toast.success("Download completed successfully");
     } catch (error) {
-      console.error('Download error:', error);
-      toast.error('Failed to download file. Please try again.');
+      console.error("Download error:", error);
+      toast.error("Failed to download file. Please try again.");
     }
   };
 
@@ -401,7 +510,7 @@ export default function RequestTablePage() {
     return (
       <div className="mt-4 flex justify-center gap-2">
         <button
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-[#13529e] disabled:opacity-50"
         >
@@ -411,7 +520,9 @@ export default function RequestTablePage() {
           Page {currentPage} of {data.data.totalPages}
         </span>
         <button
-          onClick={() => setCurrentPage(p => Math.min(data.data.totalPages, p + 1))}
+          onClick={() =>
+            setCurrentPage((p) => Math.min(data.data.totalPages, p + 1))
+          }
           disabled={currentPage === data.data.totalPages}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-[#13529e] disabled:opacity-50"
         >
@@ -425,59 +536,102 @@ export default function RequestTablePage() {
     <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative pb-32">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
+          RBMS
+        </span>
       </div>
 
       {/* Main Title on Light Blue */}
       <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-        <span className="text-2xl md:text-3xl font-bold text-black text-center">Summary of My Block Requests</span>
+        <span className="text-2xl md:text-3xl font-bold text-black text-center">
+          Summary of My Block Requests
+        </span>
       </div>
 
       {/* User Info Row */}
       <div className="flex justify-center mt-2">
         <div className="flex gap-2">
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">User:</span>
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">{userName}</span>
+          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
+            User:
+          </span>
+          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
+            {userName}
+          </span>
         </div>
       </div>
 
       {/* Summary Box */}
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
-          <div className="text-xl font-bold text-black text-center py-2">SUMMARY OF NEXT 10 DAYS</div>
-          <div className="italic text-center text-sm text-black pb-2">(Click ID to see full details or to Edit)</div>
+          <div className="text-xl font-bold text-black text-center py-2">
+            SUMMARY OF NEXT 10 DAYS
+          </div>
+          <div className="italic text-center text-sm text-black pb-2">
+            (Click ID to see full details or to Edit)
+          </div>
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl mx-2 mb-2">
             <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
               <thead>
                 <tr className="bg-[#D6F3FF] text-black">
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">Date</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">ID</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">Block Section</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">UP/DN/SL/Rpad</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[20%]">Activity</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Duration</th>
-                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Status</th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">
+                    Date
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">
+                    ID
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">
+                    Block Section
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">
+                    UP/DN/SL/Rpad
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[20%]">
+                    Activity
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Duration
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRequests.map((request: any, idx: number) => (
-                  <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{formatDate(request.date)}</td>
+                  <tr
+                    key={request.id}
+                    className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}
+                  >
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {formatDate(request.date)}
+                    </td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
-                      <Link href={`/view-request/${request.id}?from=request-table`} className="text-black hover:underline">
+                      <Link
+                        href={`/view-request/${request.id}?from=request-table`}
+                        className="text-black hover:underline"
+                      >
                         {request.id.slice(-4)}
                       </Link>
                     </td>
-                    <td className="border border-black px-2 py-1 text-black">{request.missionBlock}</td>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{request.processedLineSections[0].lineName || 'N/A'}</td>
-                    <td className="border border-black px-2 py-1 text-black">{request.activity}</td>
+                    <td className="border border-black px-2 py-1 text-black">
+                      {request.missionBlock}
+                    </td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {formatDuration(request.demandTimeFrom, request.demandTimeTo)}
+                      {request.processedLineSections[0].lineName || "N/A"}
+                    </td>
+                    <td className="border border-black px-2 py-1 text-black">
+                      {request.activity}
+                    </td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {formatDuration(
+                        request.demandTimeFrom,
+                        request.demandTimeTo
+                      )}
                     </td>
                     <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
-                      {request.adminRequestStatus === 'ACCEPTED' ? 'Y' : 'N'}
+                      {request.adminRequestStatus === "ACCEPTED" ? "Y" : "N"}
                     </td>
                   </tr>
                 ))}
@@ -486,49 +640,66 @@ export default function RequestTablePage() {
           </div>
         </div>
       </div>
-
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
+        <div className=" text-center">
+          <h3 style={{ background: "#E6E6FA" }}>Customised Summary</h3>
+        </div>
+
         <div className="max-w-[1366px] mx-auto px-2">
-          <div className="flex justify-center items-center gap-4 mb-4 bg-[#E6E6FA] py-3 w-full rounded-lg">
+          <div className="flex justify-center items-center gap-4 mb-4  py-3 w-full rounded-lg">
             <div className="flex items-center gap-4 flex-wrap justify-center">
               <div className="flex flex-col">
-                <label className="text-xs font-medium mb-1 text-black">From Date</label>
+                <label className="text-xs font-medium mb-1 text-black">
+                  From Date
+                </label>
                 <input
                   type="date"
-                  value={format(customDateRange.startDate, 'yyyy-MM-dd')}
+                  value={format(customDateRange.startDate, "yyyy-MM-dd")}
                   onChange={(e) => {
                     const newDate = new Date(e.target.value);
-                    setCustomDateRange(prev => ({
+                    setCustomDateRange((prev) => ({
                       ...prev,
                       startDate: newDate,
-                      endDate: newDate > prev.endDate ? newDate : prev.endDate
+                      endDate: newDate > prev.endDate ? newDate : prev.endDate,
                     }));
                   }}
                   className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"
-                  max={format(customDateRange.endDate, 'yyyy-MM-dd')}
+                  max={format(customDateRange.endDate, "yyyy-MM-dd")}
                 />
               </div>
               <div className="flex flex-col">
-                <label className="text-xs font-medium mb-1 text-black">To Date</label>
+                <label className="text-xs font-medium mb-1 text-black">
+                  To Date
+                </label>
                 <input
                   type="date"
-                  value={format(customDateRange.endDate, 'yyyy-MM-dd')}
+                  value={format(customDateRange.endDate, "yyyy-MM-dd")}
                   onChange={(e) => {
                     const newDate = new Date(e.target.value);
-                    setCustomDateRange(prev => ({
+                    setCustomDateRange((prev) => ({
                       ...prev,
                       endDate: newDate,
-                      startDate: newDate < prev.startDate ? newDate : prev.startDate
+                      startDate:
+                        newDate < prev.startDate ? newDate : prev.startDate,
                     }));
                   }}
                   className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"
-                  min={format(customDateRange.startDate, 'yyyy-MM-dd')}
+                  min={format(customDateRange.startDate, "yyyy-MM-dd")}
                 />
               </div>
+
+              <div className="w-60 text-center mt-2">
+                <h3 className="bg-[#E6E6FA] text-black text-sm font-medium px-3 py-1 rounded">
+                  For printing the summary,
+                  <br />
+                  click Download
+                </h3>
+              </div>
+
               <button
                 onClick={handleDownload}
-                className="mt-4 bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-base font-bold text-black hover:bg-[#FFA726]"
+                className="mt-1 bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-base font-bold text-black hover:bg-[#FFA726]"
               >
                 Download CSV
               </button>
@@ -537,7 +708,10 @@ export default function RequestTablePage() {
 
           {/* Footer Buttons */}
           <div className="flex justify-center gap-3 mb-2">
-            <Link href="/dashboard" className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
+            >
               <span className="text-xl">🏠</span> Home
             </Link>
             <button
@@ -549,15 +723,15 @@ export default function RequestTablePage() {
             {/* <Link href="/logout" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black">
               Logout
             </Link> */}
-                               <button
-    onClick={async () => {
-        const { signOut } = await import('next-auth/react');
-        await signOut({ redirect: true, callbackUrl: '/auth/login' });
-    }}
-    className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
->
-    Logout
-</button>
+            <button
+              onClick={async () => {
+                const { signOut } = await import("next-auth/react");
+                await signOut({ redirect: true, callbackUrl: "/auth/login" });
+              }}
+              className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+            >
+              Logout
+            </button>
           </div>
 
           <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
@@ -574,11 +748,15 @@ function formatDuration(from: string, to: string) {
   try {
     const fromDate = new Date(from);
     const toDate = new Date(to);
-    const diffInMinutes = Math.round((toDate.getTime() - fromDate.getTime()) / (1000 * 60));
+    const diffInMinutes = Math.round(
+      (toDate.getTime() - fromDate.getTime()) / (1000 * 60)
+    );
     const hours = Math.floor(diffInMinutes / 60);
     const minutes = diffInMinutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
   } catch {
-    return 'N/A';
+    return "N/A";
   }
 }

@@ -1461,7 +1461,7 @@ export default function CreateBlockRequestPage() {
           <div className="text-center bg-[#f7f7a1] rounded-t-2xl p-4 border-b-2 border-[#b6f7e6]">
             <span className="text-4xl font-extrabold text-[#b07be0]">RBMS</span>
           </div>
-          <div className="bg-[#b6e6c6] rounded-b-2xl p-4 sm:p-6 w-full max-w-2xl overflow-auto">
+          <div className="bg-[#fffaf0] rounded-b-2xl p-4 sm:p-6 w-full max-w-2xl overflow-auto">
             <div className="bg-[#c6e6f7] rounded-xl p-4 mb-6 w-full overflow-auto">
               <h2 className="text-2xl font-extrabold mb-4 text-[#222]">
                 Your Block Request has been Registered
@@ -1591,7 +1591,7 @@ export default function CreateBlockRequestPage() {
       {/* Main Title on Green */}
       <div className="w-full bg-[#d6f7a1] py-4 flex flex-col items-center border-b-2 border-black">
         <span
-          className="text-4xl font-extrabold text-black text-center"
+          className="text-2xl font-extrabold text-black text-center"
           style={{ letterSpacing: "0.02em" }}
         >
           {reviewMode
@@ -1664,9 +1664,9 @@ export default function CreateBlockRequestPage() {
             {renderError("selectedSection")}
           </div>
           {/* Block Section/Yard and Line/Road dropdowns (compact layout) */}
-          <div className="flex flex-col gap-1 w-full mt-2">
+          <div className="flex flex-row gap-1 w-full mt-2">
             {/* Block Section/Yard Multi-select (no extra label) */}
-            <div className="flex flex-row items-center gap-2 w-full">
+            <div className="w-full flex items-center gap-2 ">
               <Select
                 isMulti
                 name="blockSection"
@@ -1772,9 +1772,9 @@ export default function CreateBlockRequestPage() {
                   key={block}
                   className="flex flex-row items-center gap-2 w-full mt-1"
                 >
-                  <span className="font-bold text-black text-[13px] min-w-[90px] truncate">
+                  {/* <span className="font-bold text-black text-[13px] min-w-[90px] truncate">
                     {block}
-                  </span>
+                  </span> */}
                   <Select
                     isMulti
                     name={`lineOrRoad-${block}`}
@@ -2563,10 +2563,17 @@ export default function CreateBlockRequestPage() {
               {reviewMode ? (
                 <button
                   type="submit"
-                  className={`bg-[#eeb8f7] border-2 border-black rounded px-6 py-2 text-lg font-extrabold text-white hover:bg-[#e6aee0] ${
+                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-sm font-extrabold text-white hover:bg-[#e6aee0] ${
                     formSubmitting ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={formSubmitting}
+                  style={{
+          width: "150px",
+          height: "70px",
+          borderRadius: "50%",
+          letterSpacing: "1px",
+          border: "none",
+        }}
                 >
                   {formSubmitting ? "SUBMITTING..." : "CLICK TO CONFIRM"}
                 </button>
