@@ -497,10 +497,10 @@ export default function AdminRequestTablePage() {
         </div>
       </div>
       <div className="text-center mt-1">
-        <h3 className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full">
+        <h3 className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full" style={{color:"black"}}>
           Click ID to see details of a Block.
         </h3>
-        <h3 className="bg-[#cfd4ff]  mt-1 rounded-full py-2">
+        <h3 className="bg-[#cfd4ff]  mt-1 rounded-full py-2" style={{color:"black"}}>
           For printing the complete table, click to download in{" "}
           <span className="font-bold" style={{ color: "#5ec4e2" }}>
             .csv format

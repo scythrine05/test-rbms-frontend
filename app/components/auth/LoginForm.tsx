@@ -85,7 +85,7 @@ export default function LoginForm() {
       className="w-full flex flex-col items-center bg-white/60 rounded-2xl shadow-lg p-6 mb-4 border border-gray-200 backdrop-blur-md"
       style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
     >
-      <div className="w-full flex items-center mb-4">
+      {/* <div className="w-full flex items-center mb-4">
         <input
           type="text"
           {...register("email")}
@@ -99,10 +99,10 @@ export default function LoginForm() {
             caretColor: "black",
           }}
         />
-      </div>
+      </div> */}
 
       {/* Password : OTP */}
-      <div className="w-full flex items-center mb-6">
+      {/* <div className="w-full flex items-center mb-6">
         <input
           type="password"
           {...register("password")}
@@ -116,7 +116,39 @@ export default function LoginForm() {
             caretColor: "black",
           }}
         />
-      </div>
+      </div> */}
+
+
+      <div className="w-full flex items-center mb-4">
+  <input
+    type="text"
+    {...register("email")}
+    placeholder="User ID"
+    className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+    style={{
+      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+      WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
+      WebkitTextFillColor: "white",
+      caretColor: "white",
+    }}
+  />
+</div>
+
+{/* Password : OTP */}
+<div className="w-full flex items-center mb-6">
+  <input
+    type="password"
+    {...register("password")}
+    placeholder="Password : OTP"
+    className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+    style={{
+      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+      WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
+      WebkitTextFillColor: "white",
+      caretColor: "white",
+    }}
+  />
+</div>
       {/* Login Button */}
       <button
         type="submit"

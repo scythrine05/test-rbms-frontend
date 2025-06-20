@@ -643,7 +643,7 @@ export default function RequestTablePage() {
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
         <div className=" text-center">
-          <h3 style={{ background: "#E6E6FA" }}>Customised Summary</h3>
+          <h3 style={{ background: "#E6E6FA" ,color:"black" }}>Customised Summary</h3>
         </div>
 
         <div className="max-w-[1366px] mx-auto px-2">
