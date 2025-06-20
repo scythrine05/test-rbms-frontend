@@ -321,9 +321,9 @@ export default function GenerateReportPage() {
             <div className="flex flex-col flex-1 min-w-[180px] w-full">
               <span className="text-lg font-bold text-black mb-1">Select Period</span>
               <div className="flex flex-row items-center gap-1 w-full">
-                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" {...register('startDate')} />
-                <span className="text-base font-bold">to</span>
-                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" {...register('endDate')} />
+                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" style={{color:"black"}} {...register('startDate')} />
+                <span className="text-base font-bold" style={{color:"black"}}>to</span>
+                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" style={{color:"black"}} {...register('endDate')} />
               </div>
             </div>
           </div>
@@ -395,7 +395,7 @@ export default function GenerateReportPage() {
               </thead>
               <tbody>
                 {pastBlockSummary.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-4">No data found.</td></tr>
+                  <tr><td colSpan={7} className="text-center py-4" style={{color:"black"}}>No data found.</td></tr>
                 ) : pastBlockSummary.map((summary: any, idx: number) => (
                   <tr className="bg-[#ffb347] font-bold" key={idx}>
                     <td className="border-2 border-black px-2 py-1">{summary.Department || summary.Section || ''}</td>
@@ -460,7 +460,7 @@ export default function GenerateReportPage() {
               </thead>
               <tbody>
                 {filteredUpcomingBlocks.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-4">No data found.</td></tr>
+                  <tr><td colSpan={5} className="text-center py-4" style={{color:"black"}}>No data found.</td></tr>
                 ) : filteredUpcomingBlocks.slice(0, 200).map((block: DetailedData, idx: number) => {
                   // Status color logic
                   let statusLabel = '';

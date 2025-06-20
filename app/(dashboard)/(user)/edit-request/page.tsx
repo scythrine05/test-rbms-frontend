@@ -141,13 +141,13 @@ export default function EditRequestsPage() {
                     <div className="flex justify-center gap-3 mb-2">
                         <button
                             onClick={() => router.push('/dashboard')}
-                            className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
+                            className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
                         >
                             <span className="text-xl">🏠</span> Home
                         </button>
                         <button
                             onClick={() => window.history.back()}
-                            className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold"
+                            className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
                         >
                             <span className="text-xl">⬅️</span> Back
                         </button>

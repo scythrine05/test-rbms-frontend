@@ -242,7 +242,6 @@ export default function CreateBlockRequestPage() {
           <span className="text-4xl font-extrabold text-purple-600 tracking-wide">
             RBMS
           </span>
-          <div className="text-sm font-bold mt-1">Screen 15A-2</div>
         </div>
 
         <div className="bg-blue-100 rounded-b-xl p-3">
@@ -279,7 +278,7 @@ export default function CreateBlockRequestPage() {
             <table className="w-full border-collapse font-sans text-sm table-fixed">
               <tbody>
                 <tr>
-                  <td className="bg-purple-200 font-semibold p-1.5 w-1/4 text-gray-900">
+                  <td className="bg-purple-200 font-semibold p-1.5 w-1/4 text-gray-900" >
                     Block Date
                   </td>
                   <td className="bg-green-200 p-1.5 w-1/4">
@@ -292,7 +291,7 @@ export default function CreateBlockRequestPage() {
                           : ""
                       }
                       onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white"
+                      className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
                     />
                   </td>
                   <td className="bg-purple-200 font-semibold p-1.5 w-1/4 text-gray-900">
@@ -302,7 +301,7 @@ export default function CreateBlockRequestPage() {
                     <input
                       type="text"
                       value={new Date().toLocaleDateString("en-GB")}
-                      className="w-full p-1 border border-gray-800 rounded bg-gray-200"
+                      className="w-full p-1 border border-gray-800 rounded bg-gray-200" style={{color:"black"}}
                       readOnly
                     />
                   </td>
@@ -350,7 +349,7 @@ export default function CreateBlockRequestPage() {
         name="demandTimeFrom"
         value={formData.demandTimeFrom}
         onChange={handleInputChange}
-        className="w-full p-1 border border-gray-800 rounded bg-white"
+        className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
       />
       <span className="text-gray-900">to</span>
       <input
@@ -358,7 +357,7 @@ export default function CreateBlockRequestPage() {
         name="demandTimeTo"
         value={formData.demandTimeTo}
         onChange={handleInputChange}
-        className="w-full p-1 border border-gray-800 rounded bg-white"
+        className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
       />
     </div>
   </td>
@@ -372,7 +371,7 @@ export default function CreateBlockRequestPage() {
                       name="selectedSection"
                       value={formData.selectedSection}
                       onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white appearance-none"
+                      className="w-full p-1 border border-gray-800 rounded bg-white appearance-none" style={{color:"black"}}
                     >
                       <option value="">Select Section</option>
                       {MajorSection[
@@ -392,7 +391,7 @@ export default function CreateBlockRequestPage() {
                       name="lineType"
                       value={formData.lineType || ""}
                       onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white"
+                      className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
                     >
                       <option value="">Select</option>
                       <option value="UP">UP</option>
@@ -414,7 +413,7 @@ export default function CreateBlockRequestPage() {
                         value={formData.workLocationFrom}
                         onChange={handleInputChange}
                         placeholder="From"
-                        className="w-32 p-1 border border-gray-800 rounded bg-white"
+                        className="w-32 p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
                       />
                       <input
                         type="text"
@@ -422,7 +421,7 @@ export default function CreateBlockRequestPage() {
                         value={formData.workLocationTo}
                         onChange={handleInputChange}
                         placeholder="To"
-                        className="w-32 p-1 border border-gray-800 rounded bg-white"
+                        className="w-32 p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
                       />
                     </div>
                   </td>
@@ -522,7 +521,7 @@ export default function CreateBlockRequestPage() {
         value={formData.freshCautionLocationFrom}
         onChange={handleInputChange}
         placeholder="From"
-        className="w-14 p-1 border border-gray-800 rounded bg-white shrink-0"
+        className="w-14 p-1 border border-gray-800 rounded bg-white shrink-0" style={{color:"black"}}
       />
       <input
         type="text"
@@ -530,7 +529,7 @@ export default function CreateBlockRequestPage() {
         value={formData.freshCautionLocationTo}
         onChange={handleInputChange}
         placeholder="To"
-        className="w-14 p-1 border border-gray-800 rounded bg-white shrink-0"
+        className="w-14 p-1 border border-gray-800 rounded bg-white shrink-0" style={{color:"black"}}
       />
       <input
         type="number"
@@ -538,7 +537,7 @@ export default function CreateBlockRequestPage() {
         value={formData.freshCautionSpeed}
         onChange={handleNumberInputChange}
         placeholder="SB"
-        className="w-10 p-1 border border-gray-800 rounded bg-white shrink-0"
+        className="w-10 p-1 border border-gray-800 rounded bg-white shrink-0" style={{color:"black"}}
       /></>
       )}
      
@@ -556,7 +555,7 @@ export default function CreateBlockRequestPage() {
                       value={formData.otherLinesAffected}
                       onChange={handleInputChange}
                       placeholder="Enter affected lines"
-                      className="p-1 border border-gray-800 rounded bg-inherit w-44 ml-23"
+                      className="p-1 border border-gray-800 rounded bg-inherit w-44 ml-23" style={{color:"black"}}
                     />
                   </td>
                 </tr>
@@ -648,7 +647,7 @@ export default function CreateBlockRequestPage() {
                             name="elementarySection"
                             value={formData.elementarySection || ""}
                             onChange={handleInputChange}
-                            className="p-1 border border-gray-800 rounded bg-white"
+                            className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
                           />
                         </div>
                       </div>
@@ -731,7 +730,7 @@ export default function CreateBlockRequestPage() {
                               name="sntDisconnectionLineFrom"
                               value={formData.sntDisconnectionLineFrom || ""}
                               onChange={handleInputChange}
-                              className="w-full p-1.5 border border-gray-800 rounded bg-white"
+                              className="w-full p-1.5 border border-gray-800 rounded bg-white" style={{color:"black"}}
                               placeholder="Enter starting point"
                             />
                           </div>
@@ -744,7 +743,7 @@ export default function CreateBlockRequestPage() {
                               name="sntDisconnectionLineTo"
                               value={formData.sntDisconnectionLineTo || ""}
                               onChange={handleInputChange}
-                              className="w-full p-1.5 border border-gray-800 rounded bg-white"
+                              className="w-full p-1.5 border border-gray-800 rounded bg-white" style={{color:"black"}}
                               placeholder="Enter ending point"
                             />
                           </div>
@@ -770,19 +769,19 @@ export default function CreateBlockRequestPage() {
 
           <div className="flex justify-between gap-2 mt-4">
             <button
-              className="flex items-center gap-1 bg-lavender border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"
+              className="flex items-center gap-1 bg-lavender border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"style={{color:"black"}}
               onClick={() => window.history.back()}
             >
               Back
             </button>
             <button
-              className="flex items-center gap-1 bg-lime-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"
+              className="flex items-center gap-1 bg-lime-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900" style={{color:"black"}}
               onClick={() => (window.location.href = "/dashboard")}
             >
               Home
             </button>
             <button
-              className="flex items-center gap-1 bg-orange-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"
+              className="flex items-center gap-1 bg-orange-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900" style={{color:"black"}}
               onClick={() => (window.location.href = "/auth/logout")}
             >
               Logout
