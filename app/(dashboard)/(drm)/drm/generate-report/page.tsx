@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Select, { MultiValue } from "react-select";
 import { toast } from "react-hot-toast";
@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { useGenerateReport } from "@/app/service/query/hq";
 import { MajorSection } from "@/app/lib/store";
 import { useSession } from "next-auth/react";
+import { managerService, UserRequest } from "@/app/service/api/manager";
+import { useQuery } from "@tanstack/react-query";
 
 interface OptionType {
   value: string;
@@ -35,9 +37,9 @@ interface PastBlockSummary {
   Percentage?: number;
   PercentGranted?: number;
   PercentAvailed?: number;
-  Department? : String;
-  corridorType? : String;
-  MissionBlock? : String
+  Department?: String;
+  corridorType?: String;
+  MissionBlock?: String
 }
 
 interface DetailedData {
@@ -73,7 +75,6 @@ const departmentOptions: OptionType[] = [
 
 export default function GenerateReportPage() {
   const [pastBlockSummary, setPastBlockSummary] = useState<PastBlockSummary[]>([]);
-  const [upcomingBlocks, setUpcomingBlocks] = useState<DetailedData[]>([]);
   const [loading, setLoading] = useState(false);
   const [reportGenerated, setReportGenerated] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<string[]>(["All"]);
@@ -82,7 +83,7 @@ export default function GenerateReportPage() {
   const [selectedMajorSections, setSelectedMajorSections] = useState<string[]>([]);
   const [majorSectionOptions, setMajorSectionOptions] = useState<OptionType[]>([]);
   const router = useRouter();
-  const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormData>();
   const { data: session } = useSession();
 
   // Parameters for the query
@@ -99,7 +100,7 @@ export default function GenerateReportPage() {
     if (session?.user?.location) {
       const userLocation = session.user.location;
       setSelectedLocations([userLocation]);
-      
+
       // Set up major section options based on user's location
       if (MajorSection[userLocation as keyof typeof MajorSection]) {
         const sections = MajorSection[userLocation as keyof typeof MajorSection];
@@ -119,22 +120,21 @@ export default function GenerateReportPage() {
   useEffect(() => {
     setLoading(isLoading);
     console.log("Full reportData:", reportData);
-    
+
     if (reportData && reportData.data) {
       // Safe access of nested properties with detailed logging
       console.log("pastBlockSummary raw data:", reportData.data.pastBlockSummary);
       console.log("detailedData raw data:", reportData.data.detailedData);
-      
+
       // Handle data even if the property names don't exactly match
       const pastData = reportData.data.pastBlockSummary || [];
       setPastBlockSummary(pastData);
       console.log("Set pastBlockSummary to:", pastData);
-      
+
       // Set the detailed data directly
       const detailedData = reportData.data.detailedData || [];
-      setUpcomingBlocks(detailedData);
       console.log("Set upcomingBlocks to:", detailedData);
-      
+
       setReportGenerated(true);
       toast.success(reportData.message || 'Report generated successfully');
     }
@@ -148,7 +148,7 @@ export default function GenerateReportPage() {
       setLoading(false);
     }
   }, [error]);
-  
+
   // Function to handle row click for section details
   const handleSectionClick = (section: string) => {
     toast.success(`Viewing details for section: ${section}`);
@@ -160,7 +160,18 @@ export default function GenerateReportPage() {
   const handleMajorSectionChange = (options: MultiValue<OptionType>) => {
     if (Array.isArray(options) && options.length > 0) {
       const selectedValues = options.map(option => option.value);
-      setSelectedMajorSections(selectedValues);
+
+      // Check if 'All' is included in the selected options
+      if (selectedValues.includes('All')) {
+        // If 'All' is selected, include all major sections except 'All' itself
+        const allSpecificSections = majorSectionOptions
+          .map(option => option.value)
+          .filter(value => value !== 'All');
+        setSelectedMajorSections(allSpecificSections);
+      } else {
+        // Otherwise just set the selected values
+        setSelectedMajorSections(selectedValues);
+      }
     } else {
       setSelectedMajorSections([]);
     }
@@ -194,15 +205,15 @@ export default function GenerateReportPage() {
       toast.error('Please enter both start and end dates');
       return;
     }
-    
+
     try {
       // Format dates to DD/MM/YY format for API
       const startDate = new Date(data.startDate);
       const endDate = new Date(data.endDate);
-      
+
       const formattedStartDate = format(startDate, 'dd/MM/yy');
       const formattedEndDate = format(endDate, 'dd/MM/yy');
-      
+
       // Update query parameters
       setQueryParams({
         startDate: formattedStartDate,
@@ -211,7 +222,7 @@ export default function GenerateReportPage() {
         department: selectedDepartments,
         blockType: selectedBlockTypes
       });
-      
+
       // Trigger the query - react-query will handle the loading state
       await refetch();
     } catch (error) {
@@ -228,362 +239,275 @@ export default function GenerateReportPage() {
     return `${day}/${month}/${year}`;
   };
 
+  // Format the selected dates for display
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-GB'); // DD/MM/YYYY
+  };
+
+  // (B) Summary of Upcoming Blocks
+  const [upcomingSectionFilter, setUpcomingSectionFilter] = useState<string>("All");
+  const sectionOptionsB: string[] = Array.from(new Set(reportData?.data?.detailedData?.map((b: DetailedData) => b.Section) || []));
+  const filteredUpcomingBlocks: DetailedData[] = upcomingSectionFilter === "All"
+    ? reportData?.data?.detailedData || []
+    : reportData?.data?.detailedData?.filter((b: DetailedData) => b.Section === upcomingSectionFilter) || [];
+  function formatDateB(dateString: string) {
+    if (!dateString) return '';
+    // Accepts both MM/DD/YYYY and DD/MM/YYYY
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      // Try MM/DD/YYYY first
+      const d1 = new Date(dateString);
+      if (!isNaN(d1.getTime())) return d1.toLocaleDateString('en-GB');
+      // Try DD/MM/YYYY
+      const d2 = new Date(parts[2] + '-' + parts[1] + '-' + parts[0]);
+      if (!isNaN(d2.getTime())) return d2.toLocaleDateString('en-GB');
+    }
+    return dateString;
+  }
+
+  const upcomingBlocks: DetailedData[] = reportData?.data?.detailedData || [];
+
+  const [sectionDropdownOpenB, setSectionDropdownOpenB] = useState(false);
+  const sectionDropdownRefB = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="max-w-7xl mx-auto bg-white">
-      <div className="bg-yellow-100 text-center pt-3 rounded-t-md">
-        <h1 className="text-3xl font-bold text-purple-600">RBMS</h1>
-        <div className="flex flex-col bg-green-200">
-        <h2 className="text-xl font-semibold text-black">Block Summary(Past/Upcoming)</h2>
-        <div className="text-md text-black font-bold">DRM</div>
-        <div className="text-sm text-black mt-1 text-left pl-6">Screen 15D</div>
+    <div className="min-h-screen w-full bg-[#fffbe9] flex flex-col items-center">
+      {/* RBMS Header */}
+      <div className="w-full bg-[#fff35c] flex flex-col items-center py-2 rounded-t-2xl">
+        <span className="text-5xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
+      </div>
+      {/* Block Summary Report Title */}
+      <div className="w-full bg-[#b7e3ee] flex flex-col items-center pt-2 pb-1">
+        <span className="text-4xl font-extrabold text-black">Block Summary Report</span>
+        <span className="text-lg font-bold text-black">DRM/ADRM/SrDOM</span>
+        <div className="mt-2 bg-[#7be09b] px-6 py-1 rounded-2xl">
+          <span className="text-xl font-bold text-white">Blocks Granted/Availed/Pending</span>
         </div>
       </div>
-
-      <div className="bg-white p-4 rounded-b-md mb-4 border-2 border-gray-300 rounded-md">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-4">
-            <div className="text-center font-semibold mb-4 text-black">Select Period</div>
-            <div className="flex justify-center items-center gap-4 mb-4">
-              <div>
-                <label className="block text-black font-medium mb-1">Start Date:</label>
-                <input
-                  {...register("startDate", {
-                    required: "Start date is required"
-                    // Removed onChange handler to prevent API calls when date changes
-                  })}
-                  type="date"
-                  className="px-4 py-2 w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-                  disabled={loading}
-                />
-                {errors.startDate && <p className="text-red-500 mt-1 text-sm">{errors.startDate.message}</p>}
-              </div>
-              <div>
-                <label className="block text-black font-medium mb-1">End Date:</label>
-                <input
-                  {...register("endDate", {
-                    required: "End date is required"
-                    // Removed onChange handler to prevent API calls when date changes
-                  })}
-                  type="date"
-                  className="px-4 py-2 w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-                  disabled={loading}
-                />
-                {errors.endDate && <p className="text-red-500 mt-1 text-sm">{errors.endDate.message}</p>}
-              </div>
+      {/* Wrap the main content in a max-w-screen-lg mx-auto w-full container */}
+      <div className="max-w-screen-lg mx-auto w-full">
+        {/* Filters Section */}
+        <div className="w-full bg-[#fffbe9] px-2 py-2">
+          <div className="flex flex-row gap-8 items-end w-full flex-wrap">
+            {/* Choose Section Dropdown */}
+            <div className="flex flex-col flex-1 min-w-[90px] max-w-[110px] w-full">
+              <span className="text-lg font-bold text-black mb-1">Choose Section</span>
+              <Select
+                options={majorSectionOptions}
+                isMulti={true}
+                value={majorSectionOptions.filter(opt => selectedMajorSections.includes(opt.value))}
+                onChange={opts => handleMajorSectionChange(opts)}
+                classNamePrefix="section-select"
+                styles={{
+                  container: (base) => ({ ...base, width: '100%', maxWidth: '110px', minWidth: '90px' }),
+                  control: (base) => ({ ...base, borderColor: '#00bfff', borderWidth: 2, borderRadius: 0, minHeight: 32, fontSize: 14, width: '100%', maxWidth: '110px', minWidth: '90px' }),
+                  option: (base, state) => ({ ...base, backgroundColor: state.isSelected ? '#b7e3ee' : '#fff', color: '#000', fontWeight: 'bold', fontSize: 14 }),
+                  menu: (base) => ({ ...base, zIndex: 50 }),
+                  multiValue: (base) => ({ ...base, backgroundColor: '#e0e0ff', color: '#000' }),
+                  multiValueLabel: (base) => ({ ...base, color: '#000', fontWeight: 'bold' }),
+                  multiValueRemove: (base) => ({ ...base, color: '#b07be0', ':hover': { backgroundColor: '#b07be0', color: 'white' } }),
+                }}
+                placeholder="Section"
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
+                menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
+                menuPosition="fixed"
+              />
             </div>
-
-            {/* User's location and major section dropdown */}
-            <div className="flex flex-col items-center mb-4">
-              <div className="w-full mb-2">
-                <label className="block text-black font-medium text-center mb-1">Your Location: {session?.user?.location || 'Loading...'}</label>
+            {/* Select Period */}
+            <div className="flex flex-col flex-1 min-w-[180px] w-full">
+              <span className="text-lg font-bold text-black mb-1">Select Period</span>
+              <div className="flex flex-row items-center gap-1 w-full">
+                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" {...register('startDate')} />
+                <span className="text-base font-bold">to</span>
+                <input type="date" className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center" {...register('endDate')} />
               </div>
-              
-              <div className="w-full max-w-md">
-                <label className="block text-black font-medium text-center mb-1">Select Major Sections</label>
-                <Controller
-                  name="majorSection"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={majorSectionOptions}
-                      isMulti={true}
-                      className="basic-multi-select"
-                      classNamePrefix="select"
-                      placeholder="Select major sections"
-                      value={majorSectionOptions.filter(option => selectedMajorSections.includes(option.value))}
-                      onChange={(options) => handleMajorSectionChange(options)}
-                      isDisabled={loading || majorSectionOptions.length === 0}
-                      styles={{
-                        control: (baseStyles) => ({
-                          ...baseStyles,
-                          borderColor: '#d1d5db',
-                          boxShadow: 'none',
-                          '&:hover': {
-                            borderColor: '#9ca3af'
-                          }
-                        }),
-                        multiValue: (baseStyles) => ({
-                          ...baseStyles,
-                          backgroundColor: '#dbeafe', // Light blue background
-                          borderRadius: '16px',
-                          padding: '0 4px'
-                        }),
-                        multiValueLabel: (baseStyles) => ({
-                          ...baseStyles,
-                          color: '#1e40af', // Dark blue text
-                          fontWeight: 500
-                        }),
-                        multiValueRemove: (baseStyles) => ({
-                          ...baseStyles,
-                          color: '#4b5563',
-                          borderRadius: '50%',
-                          '&:hover': {
-                            backgroundColor: '#bfdbfe',
-                            color: '#1e3a8a'
-                          }
-                        }),
-                        menu: (baseStyles) => ({
-                          ...baseStyles,
-                          backgroundColor: 'white',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                        }),
-                        option: (baseStyles, { isFocused, isSelected }) => ({
-                          ...baseStyles,
-                          backgroundColor: isSelected 
-                            ? '#3b82f6' // Selected blue
-                            : isFocused 
-                              ? '#dbeafe' // Light blue on focus
-                              : undefined,
-                          color: isSelected ? 'white' : '#111827',
-                          '&:active': {
-                            backgroundColor: '#bfdbfe'
-                          }
-                        })
-                      }}
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Block Type buttons */}
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              {/* <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("All") ? "bg-blue-300" : "bg-blue-100"} border border-blue-400`}
-                onClick={() => toggleBlockType("All")}
-              >
-                {selectedBlockTypes.includes("All") && (
-                  <span className="mr-1">✓</span>
-                )}
-                All
-              </button> */}
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Corridor") ? "bg-indigo-300" : "bg-indigo-100"} border border-indigo-400`}
-                onClick={() => toggleBlockType("Corridor")}
-              >
-                {selectedBlockTypes.includes("Corridor") && (
-                  <span className="mr-1">✓</span>
-                )}
-                Corridor
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Non-corridor") ? "bg-cyan-300" : "bg-cyan-100"} border border-cyan-400`}
-                onClick={() => toggleBlockType("Non-corridor")}
-              >
-                {selectedBlockTypes.includes("Non-corridor") && (
-                  <span className="mr-1">✓</span>
-                )}
-                Outside corridor
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Emergency") ? "bg-red-300" : "bg-red-100"} border border-red-400`}
-                onClick={() => toggleBlockType("Emergency")}
-              >
-                {selectedBlockTypes.includes("Emergency") && (
-                  <span className="mr-1">✓</span>
-                )}
-                Emergency
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Mega") ? "bg-amber-300" : "bg-amber-100"} border border-amber-400`}
-                onClick={() => toggleBlockType("Mega")}
-              >
-                {selectedBlockTypes.includes("Mega") && (
-                  <span className="mr-1">✓</span>
-                )}
-                Mega Block
-              </button>
-            </div>
-
-            {/* Department buttons */}
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedDepartments.includes("Engineering") ? "bg-green-300" : "bg-green-100"} border border-green-400`}
-                onClick={() => toggleDepartment("Engineering")}
-              >
-                {selectedDepartments.includes("Engineering") && (
-                  <span className="mr-1">✓</span>
-                )}
-                Engineering
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedDepartments.includes("ST") ? "bg-blue-300" : "bg-blue-100"} border border-blue-400`}
-                onClick={() => toggleDepartment("ST")}
-              >
-                {selectedDepartments.includes("ST") && (
-                  <span className="mr-1">✓</span>
-                )}
-                S & T
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedDepartments.includes("TRD") ? "bg-yellow-300" : "bg-yellow-100"} border border-yellow-400`}
-                onClick={() => toggleDepartment("TRD")}
-              >
-                {selectedDepartments.includes("TRD") && (
-                  <span className="mr-1">✓</span>
-                )}
-                TRD
-              </button>
-            </div>
-
-            <div className="flex justify-center">
-              <button 
-                type="submit"
-                className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 shadow-md transition-all font-semibold"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating...
-                  </span>
-                ) : "Generate Report"}
-              </button>
             </div>
           </div>
-        </form>
-      </div>
-
-      {/* Past Block Summary Table */}
-      <div className="mb-6">
-        <div className="bg-orange-200 p-2 font-semibold text-black">
-          (A)Past Block Summary:....... to .......Division      Department:.............(In Hrs)
         </div>
-        <div className="overflow-x-auto border border-gray-200 rounded-b">
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-20 py-2 text-left text-black">Section</th>
-                <th className="border px-4 py-2 text-center text-black">Demanded</th>
-                <th className="border px-4 py-2 text-center text-black">Approved</th>
-                <th className="border px-4 py-2 text-center text-black">Granted</th>
-                <th className="border px-4 py-2 text-center text-black">% Granted</th>
-                <th className="border px-4 py-2 text-center text-black">Availed</th>
-                <th className="border px-4 py-2 text-center text-black">% Availed</th>
-              </tr>
-            </thead>
-            <tbody className="text-black">
-              {pastBlockSummary.length > 0 && (
-                pastBlockSummary.map((item, index) => (
-                  <tr key={index} className={`${index % 2 === 0 ? "bg-purple-50" : "bg-white"} hover:bg-gray-50 transition-colors text-black`}>
-                    <td className="border px-4 py-2 cursor-pointer hover:bg-purple-100" onClick={() => handleSectionClick(item.Section)}>
-                     <span className="text-blue-600 font-medium underline">{item.Department && item.Department}</span>
-                    </td>
-                    <td className="border px-4 py-2 text-center text-black">{item.Demanded}</td>
-                    <td className="border px-4 py-2 text-center text-black">{item.Approved}</td>
-                    <td className="border px-4 py-2 text-center text-black">{item.Granted}</td>
-                    <td className="border px-4 py-2 text-center text-black">{item.PercentGranted}%</td>
-                    <td className="border px-4 py-2 text-center text-black">{item.Availed}</td>
-                    <td className="border px-4 py-2 text-center text-black">{item.PercentAvailed}%</td>
-                  </tr>
-                ))
-              ) }
-              
-               {pastBlockSummary.length > 0 && <tr className="bg-orange-200 font-semibold text-black">
-                <td className="border px-4 py-2 text-center text-black">Total</td>
-                <td className="border px-4 py-2 text-center text-black">
-                  {pastBlockSummary.length > 0 ? pastBlockSummary.reduce((sum, item) => sum + item.Demanded, 0) : "0"}
-                </td>
-                <td className="border px-4 py-2 text-center text-black">
-                  {pastBlockSummary.length > 0 ? pastBlockSummary.reduce((sum, item) => sum + item.Approved, 0) : "0"}
-                </td>
-                <td className="border px-4 py-2 text-center text-black">
-                  {pastBlockSummary.length > 0 ? pastBlockSummary.reduce((sum, item) => sum + item.Granted, 0) : "0"}
-                </td>
-                <td className="border px-4 py-2 text-center text-black"></td>
-                <td className="border px-4 py-2 text-center text-black">
-                  {pastBlockSummary.length > 0 ? pastBlockSummary.reduce((sum, item) => sum + item.Availed, 0) : "0"}
-                </td>
-                <td className="border px-4 py-2 text-center text-black"></td>
-              </tr>}
-            </tbody>
-            
-          </table>
-          {pastBlockSummary.length === 0 && <div className="bg-white hover:bg-gray-50 text-black border border-black w-full py-2 text-center">
-                  No data available
-          </div>}
+        {/* Block Type Filters (first line) */}
+        <div className="w-full flex flex-wrap justify-center gap-2 mt-2 mb-1">
+          {blockTypeOptions.map(opt => (
+            <button
+              key={opt.value}
+              className={`rounded-full px-3 py-1 text-base font-semibold border border-[#b7e3ee] flex items-center gap-1 transition-colors duration-150 ${selectedBlockTypes.includes(opt.value) ? 'bg-[#b7e3ee] text-black' : 'bg-[#e0e0ff] text-black'}`}
+              onClick={() => toggleBlockType(opt.value)}
+              type="button"
+            >
+              {selectedBlockTypes.includes(opt.value) && <span className="text-green-600 font-bold">✔</span>}
+              {opt.label}
+            </button>
+          ))}
         </div>
-      </div>
-
-      {/* Upcoming Blocks Table */}
-      <div className="mb-6">
-        <div className="bg-yellow-200 p-2 font-semibold text-black">
-          (B) Upcoming Blocks (Summary):...... Division ......  Department.......
+        {/* Department Filters (second line) */}
+        <div className="w-full flex flex-wrap justify-center gap-2 mb-2">
+          {departmentOptions.map(opt => (
+            <button
+              key={opt.value}
+              className={`rounded-full px-3 py-1 text-base font-semibold border flex items-center gap-1 transition-colors duration-150
+                ${opt.value === 'Engineering' ? (selectedDepartments.includes(opt.value) ? 'bg-[#f3c6f7] border-[#b07be0] text-black' : 'bg-[#f3e6f7] border-[#b07be0] text-black') :
+                  opt.value === 'ST' ? (selectedDepartments.includes(opt.value) ? 'bg-[#fff35c] border-[#e0e0e0] text-black' : 'bg-[#fffbe9] border-[#e0e0e0] text-black') :
+                    selectedDepartments.includes(opt.value) ? 'bg-[#c7f7c7] border-[#7be09b] text-black' : 'bg-[#e0fff0] border-[#7be09b] text-black'
+                }`}
+              onClick={() => toggleDepartment(opt.value)}
+              type="button"
+            >
+              {selectedDepartments.includes(opt.value) && <span className="text-green-600 font-bold">✔</span>}
+              {opt.label}
+            </button>
+          ))}
         </div>
-        <div className="overflow-x-auto border border-gray-200 rounded-b">
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-4 py-2 text-center text-black">Date</th>
-                <th className="border px-4 py-2 text-left text-black">Section</th>
-                <th className="border px-4 py-2 text-center text-black">Duration (Hours)</th>
-                <th className="border px-4 py-2 text-center text-black">Type</th>
-                <th className="border px-4 py-2 text-center text-black">Status</th>
-              </tr>
-            </thead>
-            <tbody className="overflow-y-auto">
-              
-              {upcomingBlocks.length > 0 && (
-                upcomingBlocks.map((block, index) => (
-                  <tr key={index} className={`${index % 2 === 0 ? "bg-purple-50" : "bg-white"} hover:bg-gray-50 transition-colors text-black `}>
-                    <td className="border px-4 py-2 text-center text-black">{block.Date}</td>
-                    <td className="border px-4 py-2 cursor-pointer hover:bg-purple-100" onClick={() => handleSectionClick(block.Section)}>
-                      <span className="text-blue-600 font-medium underline">{block.Section}</span>
-                    </td>
-                    <td className="border px-4 py-2 text-center text-black">{block.Duration}</td>
-                    <td className="border px-4 py-2 text-center text-black">{block.Type}</td>
-                    <td className={`border px-4 py-2 text-center ${block.Status === 'Pending' ? 'bg-yellow-100 text-black' : 
-                                  block.Status === 'Sanctioned' ? 'bg-green-100 text-black' : 
-                                  block.Status === 'Rejected' ? 'bg-red-100 text-black' : ''}`}>
-                      <span 
-                        className={`px-3 py-1 rounded-full text-sm font-medium `}
-                      >
-                        {block.Status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          {upcomingBlocks.length === 0 && <div className="bg-white hover:bg-gray-50 text-black border border-black w-full py-2 text-center">
-                  No data available
-          </div> }
-        </div>
-      </div>
-
-      {/* Click SectionBlock ID Info Section */}
-      <div className="mt-6 mb-4 p-4 bg-blue-100 rounded-md flex items-center justify-center">
-        <div className="bg-blue-200 px-6 py-3 rounded-md border border-blue-300 shadow-sm text-center">
-          <span className="font-bold text-black">Click</span>
-          <span className="mx-1 px-4 py-1 bg-yellow-300 rounded-md font-bold text-black">SectionBlock ID</span>
-          <span className="text-black">to see further details of datewise details of blocks in the division</span>
-        </div>
-      </div>
-
-      <div className="mt-4 bg-white p-4 rounded flex justify-center items-center gap-6 border-2 border-gray-300">
-        <button 
-          onClick={() => router.back()}
-          className="bg-blue-300 text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400"
-        >
-          Back
-        </button>
-        <Link href="/drm">
-          <button className="bg-green-300 text-black px-8 py-2 rounded-md hover:bg-gray-300 shadow-md transition-all border border-gray-400">
-            Home
+        {/* Submit Button */}
+        <div className="w-full flex justify-center mb-2">
+          <button
+            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-lg shadow border border-[#00b347] text-lg"
+            onClick={handleSubmit(onSubmit)}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Submit'}
           </button>
-        </Link>
+        </div>
+        {/* (A) Block Summary Table */}
+        <div className="w-full mt-4">
+          <div className="flex w-full">
+            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">
+              (A)Block Summary: {formatDisplayDate(watch('startDate')) || '........'} to {formatDisplayDate(watch('endDate')) || '........'}
+            </div>
+            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">
+              Department: {selectedDepartments.length > 0 ? selectedDepartments.join(', ') : '.............'} (in Hrs)
+            </div>
+          </div>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-2 border-black">
+              <thead>
+                <tr className="bg-[#ffeaea] text-black text-lg font-bold">
+                  <th className="border-2 border-black px-2 py-1">Section</th>
+                  <th className="border-2 border-black px-2 py-1">Demanded</th>
+                  <th className="border-2 border-black px-2 py-1">Approved</th>
+                  <th className="border-2 border-black px-2 py-1">Granted</th>
+                  <th className="border-2 border-black px-2 py-1">% Granted</th>
+                  <th className="border-2 border-black px-2 py-1">Availed</th>
+                  <th className="border-2 border-black px-2 py-1">% Availed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pastBlockSummary.length === 0 ? (
+                  <tr><td colSpan={7} className="text-center py-4">No data found.</td></tr>
+                ) : pastBlockSummary.map((summary: any, idx: number) => (
+                  <tr className="bg-[#ffb347] font-bold" key={idx}>
+                    <td className="border-2 border-black px-2 py-1">{summary.Department || summary.Section || ''}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.Demanded}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.Approved}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.Granted}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.PercentGranted !== undefined ? summary.PercentGranted + '%' : ''}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.Availed}</td>
+                    <td className="border-2 border-black px-2 py-1">{summary.PercentAvailed !== undefined ? summary.PercentAvailed + '%' : ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {/* (B) Summary of Upcoming Blocks */}
+        <div className="w-full max-w-4xl mt-8">
+          <div className="flex w-full items-center">
+            <div className="flex-1 bg-[#ffb347] text-xl font-bold border-2 border-black px-2 py-1">(B) Summary of Upcoming Blocks</div>
+            <div className="flex items-center gap-2 ml-4">
+              <span className="text-lg font-bold text-black">Choose Section</span>
+              <div className="relative inline-block" ref={sectionDropdownRefB}>
+                <button
+                  onClick={() => setSectionDropdownOpenB(v => !v)}
+                  className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-base min-w-[100px]"
+                >
+                  {upcomingSectionFilter === 'All' ? 'All' : upcomingSectionFilter}
+                  <span className="ml-1">▼</span>
+                </button>
+                {sectionDropdownOpenB && (
+                  <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+                    <div
+                      className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-base"
+                      onClick={() => { setUpcomingSectionFilter('All'); setSectionDropdownOpenB(false); }}
+                    >
+                      All
+                    </div>
+                    {sectionOptionsB.map((section: string) => (
+                      <div
+                        key={section}
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-base"
+                        onClick={() => { setUpcomingSectionFilter(section); setSectionDropdownOpenB(false); }}
+                      >
+                        {section}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto w-full max-w-full">
+            <table className="w-full border-2 border-black mt-1 text-sm">
+              <thead>
+                <tr className="bg-[#E8F4F8] text-black text-lg font-bold">
+                  <th className="border-2 border-black px-2 py-1">Section</th>
+                  <th className="border-2 border-black px-2 py-1">Date</th>
+                  <th className="border-2 border-black px-2 py-1">Type</th>
+                  <th className="border-2 border-black px-2 py-1">Duration</th>
+                  <th className="border-2 border-black px-2 py-1">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUpcomingBlocks.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-4">No data found.</td></tr>
+                ) : filteredUpcomingBlocks.slice(0, 200).map((block: DetailedData, idx: number) => {
+                  // Status color logic
+                  let statusLabel = '';
+                  let statusStyle = { background: '#fff', color: '#222' };
+                  if (block.Status === 'APPROVED') {
+                    statusLabel = 'Pending with Optg';
+                    statusStyle = { background: '#fff86b', color: '#222' };
+                  } else if (block.Status === 'PENDING') {
+                    statusLabel = 'Pending with dept control';
+                    statusStyle = { background: '#d47ed4', color: '#222' };
+                  } else if (block.Status === 'REJECTED') {
+                    statusLabel = 'Returned by Optg';
+                    statusStyle = { background: '#ff4e36', color: '#fff' };
+                  } else {
+                    statusLabel = block.Status;
+                  }
+                  return (
+                    <tr key={idx} className="bg-white hover:bg-[#F3F3F3]">
+                      <td className="border-2 border-black px-2 py-1 font-bold text-black">{block.Section}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{formatDateB(block.Date)}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{block.Type}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{block.Duration}</td>
+                      <td className="border-2 border-black px-2 py-1 font-bold text-center text-black" style={statusStyle}>{statusLabel}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {/* Info Bar and Navigation */}
+        <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between mt-8 mb-4 px-2">
+          <div className="flex items-center gap-2 bg-[#e0e0ff] px-4 py-2 rounded-2xl border-2 border-[#00b347]">
+            <span className="bg-[#00b347] text-white font-bold px-2 py-1 rounded">Section/Block ID</span>
+            <span className="text-lg font-bold text-black">to see further details.</span>
+          </div>
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <button className="flex items-center gap-2 bg-[#e0e0ff] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black" onClick={() => router.back()}>
+              <span className="text-2xl">⬅️</span> Back
+            </button>
+            <Link href="/drm">
+              <button className="flex items-center gap-2 bg-[#b7e37b] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
+                <span className="text-2xl">🏠</span> Home
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
