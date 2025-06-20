@@ -85,29 +85,21 @@ export default function LoginForm() {
       className="w-full flex flex-col items-center bg-white/60 rounded-2xl shadow-lg p-6 mb-4 border border-gray-200 backdrop-blur-md"
       style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
     >
-      {/* User ID */}
-      {/* <div className="w-full flex items-center mb-4">
+      <div className="w-full flex items-center mb-4">
         <input
           type="text"
           {...register("email")}
           placeholder="User ID"
-          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-white placeholder:font-bold border-none shadow-none"
-          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
+          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          style={{
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+            color: "white",
+            WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
+            WebkitTextFillColor: "black",
+            caretColor: "black",
+          }}
         />
-      </div> */}
-      <div className="w-full flex items-center mb-4">
-  <input
-    type="text"
-    {...register("email")}
-    placeholder="User ID"
-    className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
-    style={{
-      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-      color: "black", // Ensure text color remains black
-      caretColor: "black" // Optional: caret (typing cursor) color
-    }}
-  />
-</div>
+      </div>
 
       {/* Password : OTP */}
       <div className="w-full flex items-center mb-6">
@@ -115,8 +107,14 @@ export default function LoginForm() {
           type="password"
           {...register("password")}
           placeholder="Password : OTP"
-          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-white placeholder:font-bold border-none shadow-none"
-          style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)" }}
+          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          style={{
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+            color: "white !important",
+            WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
+            WebkitTextFillColor: "black",
+            caretColor: "black",
+          }}
         />
       </div>
       {/* Login Button */}
