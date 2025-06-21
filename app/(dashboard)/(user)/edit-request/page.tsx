@@ -97,7 +97,7 @@ export default function EditRequestsPage() {
                                                     onClick={() => router.push(`/edit-request/${request.id}`)}
                                                     className="text-black hover:underline"
                                                 >
-                                                    {request.id.slice(-4)}
+                                                    {request.divisionId||request.id.slice(-4)}
                                                 </button>
                                             </td>
                                             <td className="border border-black px-2 py-1 text-black">{request.missionBlock || "-"}</td>

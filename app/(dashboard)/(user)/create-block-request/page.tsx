@@ -921,7 +921,7 @@ export default function CreateBlockRequestPage() {
         toast.success("Block request submitted successfully!");
         setSubmittedSummary({
           date: submitData.date,
-          id: response.data?.id || "-",
+          id: response.data?.divisionId || response.data?.id ,
           blockSection: submitData.missionBlock || "-",
           lineOrRoad:
             submitData.processedLineSections &&
