@@ -215,7 +215,7 @@ export default function GenerateReportPage() {
             <div className="text-center font-semibold mb-4 text-black">Select Period</div>
             <div className="flex justify-center items-center gap-4 mb-4">
               <div>
-                <label className="block text-black font-medium mb-1">Start Date:</label>
+                <label className="block text-black font-medium mb-1">From</label>
                 <input
                   {...register("startDate", {
                     required: "Start date is required"
@@ -228,7 +228,7 @@ export default function GenerateReportPage() {
                 {errors.startDate && <p className="text-red-500 mt-1 text-sm">{errors.startDate.message}</p>}
               </div>
               <div>
-                <label className="block text-black font-medium mb-1">End Date:</label>
+                <label className="block text-black font-medium mb-1 ml-1">To</label>
                 <input
                   {...register("endDate", {
                     required: "End date is required"
@@ -320,7 +320,7 @@ export default function GenerateReportPage() {
             <div className="flex flex-wrap justify-center gap-2 mb-4">
               <button
                 type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("All") ? "bg-blue-300" : "bg-blue-100"} border border-blue-400`}
+                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("All") ? "bg-blue-300" : "bg-[#cfd4ff]"}`}
                 onClick={() => toggleBlockType("All")}
               >
                 {selectedBlockTypes.includes("All") && (
@@ -330,7 +330,7 @@ export default function GenerateReportPage() {
               </button>
               <button
                 type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Corridor") ? "bg-indigo-300" : "bg-indigo-100"} border border-indigo-400`}
+                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Corridor") ? "bg-indigo-300" : "bg-[#cfd4ff]"}`}
                 onClick={() => toggleBlockType("Corridor")}
               >
                 {selectedBlockTypes.includes("Corridor") && (
@@ -340,7 +340,7 @@ export default function GenerateReportPage() {
               </button>
               <button
                 type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Non-corridor") ? "bg-cyan-300" : "bg-cyan-100"} border border-cyan-400`}
+                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Non-corridor") ? "bg-cyan-300" : "bg-[#cfd4ff]"}`}
                 onClick={() => toggleBlockType("Non-corridor")}
               >
                 {selectedBlockTypes.includes("Non-corridor") && (
@@ -350,7 +350,7 @@ export default function GenerateReportPage() {
               </button>
               <button
                 type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Emergency") ? "bg-red-300" : "bg-red-100"} border border-red-400`}
+                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Emergency") ? "bg-red-300" : "bg-[#cfd4ff]"}`}
                 onClick={() => toggleBlockType("Emergency")}
               >
                 {selectedBlockTypes.includes("Emergency") && (
@@ -360,7 +360,7 @@ export default function GenerateReportPage() {
               </button>
               <button
                 type="button"
-                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Mega") ? "bg-amber-300" : "bg-amber-100"} border border-amber-400`}
+                className={`px-3 py-1.5 text-sm rounded-full text-black ${selectedBlockTypes.includes("Mega") ? "bg-amber-300" : "bg-[#cfd4ff]"} `}
                 onClick={() => toggleBlockType("Mega")}
               >
                 {selectedBlockTypes.includes("Mega") && (
