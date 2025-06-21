@@ -449,24 +449,6 @@ export default function GenerateReportPage() {
             </button>
           ))}
         </div>
-        {/* Department Filters (second line) */}
-        {/* <div className="w-full flex flex-wrap justify-center gap-2 mb-2">
-          {departmentOptions.map(opt => (
-            <button
-              key={opt.value}
-              className={`rounded-full px-3 py-1 text-base font-semibold border flex items-center gap-1 transition-colors duration-150
-                ${opt.value === 'Engineering' ? (selectedDepartments.includes(opt.value) ? 'bg-[#e49edd] border-[#b07be0] text-black' : 'bg-[#f3e6f7] border-[#b07be0] text-black') :
-                  opt.value === 'ST' ? (selectedDepartments.includes(opt.value) ? 'bg-[#fff35c] border-[#e0e0e0] text-black' : 'bg-[#fffbe9] border-[#e0e0e0] text-black') :
-                    selectedDepartments.includes(opt.value) ? 'bg-[#c7f7c7] border-[#7be09b] text-black' : 'bg-[#e0fff0] border-[#7be09b] text-black'
-                }`}
-              onClick={() => toggleDepartment(opt.value)}
-              type="button"
-            >
-              {selectedDepartments.includes(opt.value) && <span className="text-green-600 font-bold">✔</span>}
-              {opt.label}
-            </button>
-          ))}
-        </div> */}
         {/* Submit Button */}
         <div className="w-full flex justify-center mb-2">
           <button
@@ -572,6 +554,71 @@ export default function GenerateReportPage() {
                       </td>
                     </tr>
                   ))
+                )}
+                            {pastBlockSummary.length > 0 && (
+                  <>
+                    <tr className="bg-[#ff914d] text-white font-bold">
+                      <td className="border-2 border-black px-2 py-1">Total</td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Demanded || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Approved || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Granted || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        80%
+                        {/* {pastBlockSummary.length > 0 
+              ? Math.round((pastBlockSummary.reduce((sum, item) => sum + (item.Granted || 0), 0) / 
+                           pastBlockSummary.reduce((sum, item) => sum + (item.Approved || 1), 0)) * 100) + '%' 
+              : '0%'} */}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Availed || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1"
+                        style={{ color: "black" }}
+                      >
+                        70%
+                        {/* {pastBlockSummary.length > 0 
+    ? Math.round((
+        pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Availed) || 0), 0) / 
+        Math.max(1, pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Granted) || 0), 0))
+      ) * 100) + '%' 
+    : '0%'} */}
+                      </td>
+                    </tr>
+                  </>
                 )}
               </tbody>
             </table>
