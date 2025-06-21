@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
       </div>
       {/* Navigation buttons */}
       <div className="w-full flex flex-col items-center gap-8 mt-10 px-2 max-w-md">
-        <Link href="/drm/generate-report" className="w-full">
+        <Link href="/bo/generate-report" className="w-full">
           <button className="w-full rounded-2xl bg-[#c7c7f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
             BLOCK SUMMARY REPORT
           </button>
