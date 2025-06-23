@@ -246,7 +246,7 @@ export default function CreateBlockRequestPage() {
 
         <div className="bg-blue-100 rounded-b-xl p-3">
           <div className="bg-green-500 text-gray-800 font-bold text-xl rounded-xl p-2 text-center mb-4 border-2 border-green-700 tracking-wide">
-            Edit/Cancel the Block ID {formData.id}
+            Edit/Cancel the Block ID {userDataById?.data.divisionId||formData.id}
           </div>
 
           <div className="flex gap-3 justify-center mb-4">

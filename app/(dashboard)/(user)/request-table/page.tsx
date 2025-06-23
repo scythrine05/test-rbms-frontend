@@ -612,7 +612,7 @@ export default function RequestTablePage() {
                         href={`/view-request/${request.id}?from=request-table`}
                         className="text-black hover:underline"
                       >
-                        {request.id.slice(-4)}
+                        {request.divisionId||request.id.slice(-4)}
                       </Link>
                     </td>
                     <td className="border border-black px-2 py-1 text-black">
