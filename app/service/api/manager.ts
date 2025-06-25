@@ -289,6 +289,7 @@ export const managerService = {
         const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept, remark,mobileView });
         return response.data;
     },
+   
 
     /**
      * Get a single user request by ID

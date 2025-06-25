@@ -24,7 +24,7 @@ import {
 import { Toaster, toast } from "react-hot-toast";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { ShowAllToggle } from "@/app/components/ui/ShowAllToggle";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { managerService } from "@/app/service/api/manager";
@@ -416,7 +416,45 @@ export default function RequestTablePage() {
       }
     },
   });
+     const queryClient = useQueryClient();
 
+  // Accept Mutation
+  const acceptMutation = useMutation({
+    mutationFn: (id: string) => userRequestService.acceptUserRequestRemark(id),
+    onSuccess: () => {
+      toast.success("Request accepted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
+    },
+    onError: (error) => {
+      toast.error("Failed to accept request.");
+      console.error(error);
+    },
+  });
+
+  // Reject Mutation
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => userRequestService.rejectUserRequestRemark(id),
+    onSuccess: () => {
+      toast.success("Request rejected successfully!");
+      queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
+    },
+    onError: (error) => {
+      toast.error("Failed to reject request.");
+      console.error(error);
+    },
+  });
+
+  const handleAccept = async (id: string) => {
+    if (confirm("Are you sure you want to accept this request?")) {
+      await acceptMutation.mutateAsync(id);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (confirm("Are you sure you want to reject this request?")) {
+      await rejectMutation.mutateAsync(id);
+    }
+  };
   // For managers, show all requests in the selected date range
   // For users, show only next 10 days
   let filteredRequests: any[] = [];
@@ -596,6 +634,9 @@ export default function RequestTablePage() {
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Status
                   </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Accept Sanctioned Timing?
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -612,7 +653,7 @@ export default function RequestTablePage() {
                         href={`/view-request/${request.id}?from=request-table`}
                         className="text-black hover:underline"
                       >
-                        {request.divisionId||request.id.slice(-4)}
+                        {request.divisionId || request.id.slice(-4)}
                       </Link>
                     </td>
                     <td className="border border-black px-2 py-1 text-black">
@@ -633,6 +674,27 @@ export default function RequestTablePage() {
                     <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
                       {request.adminRequestStatus === "ACCEPTED" ? "Y" : "N"}
                     </td>
+                  <td className="border border-black px-2 py-1 sticky right-0 z-10 bg-[#E6E6FA] text-center align-middle w-32">
+  <div className="flex gap-2 justify-center flex-col md:flex-row">
+    {/* Accept Button */}
+    <button
+      onClick={() => handleAccept(request.id)}
+      disabled={acceptMutation.isPending || rejectMutation.isPending}
+      className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
+    >
+      {acceptMutation.isPending ? "Processing..." : "Accept"}
+    </button>
+
+    {/* Reject Button */}
+    <button
+      onClick={() => handleReject(request.id)}
+      disabled={acceptMutation.isPending || rejectMutation.isPending}
+      className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
+    >
+      {rejectMutation.isPending ? "Processing..." : "Reject"}
+    </button>
+  </div>
+</td>
                   </tr>
                 ))}
               </tbody>
@@ -643,7 +705,9 @@ export default function RequestTablePage() {
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
         <div className=" text-center">
-          <h3 style={{ background: "#E6E6FA" ,color:"black" }}>Customised Summary</h3>
+          <h3 style={{ background: "#E6E6FA", color: "black" }}>
+            Customised Summary
+          </h3>
         </div>
 
         <div className="max-w-[1366px] mx-auto px-2">
@@ -710,13 +774,15 @@ export default function RequestTablePage() {
           <div className="flex justify-center gap-3 mb-2">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
+              className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
+              style={{ color: "black" }}
             >
               <span className="text-xl">🏠</span> Home
             </Link>
             <button
               onClick={() => window.history.back()}
-              className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
+              className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold"
+              style={{ color: "black" }}
             >
               <span className="text-xl">⬅️</span> Back
             </button>
@@ -728,7 +794,8 @@ export default function RequestTablePage() {
                 const { signOut } = await import("next-auth/react");
                 await signOut({ redirect: true, callbackUrl: "/auth/login" });
               }}
-              className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black" style={{color:"black"}}
+              className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+              style={{ color: "black" }}
             >
               Logout
             </button>

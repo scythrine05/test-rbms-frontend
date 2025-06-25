@@ -182,4 +182,15 @@ export const userRequestService = {
     });
     return response;
   },
+
+
+  acceptUserRequestRemark: async (id: string) => {
+    const response = await axiosInstance.put(`/api/user-request/accept/${id}`);
+    return response.data;
+  },
+
+  rejectUserRequestRemark: async (id: string) => {
+    const response = await axiosInstance.put(`/api/user-request/reject/${id}`);
+    return response.data;
+  },
 };
