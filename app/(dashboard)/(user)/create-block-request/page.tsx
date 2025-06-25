@@ -461,6 +461,8 @@ function getDurationFromTimes(from: string, to: string) {
 type FormDataValue = string | number | boolean | null | string[];
 
 interface FormData {
+  powerBlockDisconnectionAssignTo: string;
+  sntDisconnectionAssignTo: string;
   date: string;
   demandTimeFrom: string;
   demandTimeTo: string;
@@ -593,6 +595,8 @@ export default function CreateBlockRequestPage() {
     sntDisconnectionPointNo: "",
     sntDisconnectionSignalNo: "",
     trdWorkLocation: "",
+    sntDisconnectionAssignTo:"",
+    powerBlockDisconnectionAssignTo:"",
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -1664,208 +1668,223 @@ export default function CreateBlockRequestPage() {
             {renderError("selectedSection")}
           </div>
           {/* Block Section/Yard and Line/Road dropdowns (compact layout) */}
-     <div className="flex flex-col gap-1 w-full mt-2">
-  {/* Block Section/Yard Multi-select */}
-  <div className="w-full flex items-center gap-2">
-    <Select
-      isMulti
-      name="blockSection"
-      options={blockSectionOptions.map((block: string) => ({
-        value: block,
-        label: block,
-      }))}
-      value={blockSectionValue.map((val: string) => ({
-        value: val,
-        label: val,
-      }))}
-      onChange={(selected) => {
-        const values = selected ? selected.map((opt: any) => opt.value) : [];
-        setBlockSectionValue(values);
-        setFormData((prev) => ({
-          ...prev,
-          processedLineSections: (prev.processedLineSections || []).filter(
-            (s: any) => values.includes(s.block)
-          ),
-        }));
-      }}
-      classNamePrefix="react-select"
-      styles={{
-        control: (base) => ({
-          ...base,
-          backgroundColor: "#FFB74D",
-          borderColor: "black",
-          borderWidth: 2,
-          borderRadius: 6,
-          minHeight: "32px",
-          fontWeight: "bold",
-          fontSize: "14px",
-          boxShadow: "none",
-          padding: "0 2px",
-        }),
-        menu: (base) => ({ ...base, zIndex: 9999 }),
-        multiValue: (base) => ({
-          ...base,
-          backgroundColor: "#fff3",
-          color: "black",
-          fontSize: "13px",
-        }),
-        option: (base, state) => ({
-          ...base,
-          backgroundColor: state.isSelected
-            ? "#ffe082"
-            : state.isFocused
-            ? "#ffe08299"
-            : "#FFB74D",
-          color: "black",
-          fontWeight: "bold",
-          fontSize: "14px",
-          padding: "4px 8px",
-        }),
-        placeholder: (base) => ({
-          ...base,
-          color: "black",
-          fontWeight: "bold",
-          fontSize: "14px",
-        }),
-        dropdownIndicator: (base) => ({
-          ...base,
-          color: "black",
-          fontSize: "20px",
-          padding: 0,
-        }),
-      }}
-      placeholder="Block Section/Yard"
-      closeMenuOnSelect={false}
-    />
-    {renderError("missionBlock")}
-  </div>
+          <div className="flex flex-col gap-1 w-full mt-2">
+            {/* Block Section/Yard Multi-select */}
+            <div className="w-full flex items-center gap-2">
+              <Select
+                isMulti
+                name="blockSection"
+                options={blockSectionOptions.map((block: string) => ({
+                  value: block,
+                  label: block,
+                }))}
+                value={blockSectionValue.map((val: string) => ({
+                  value: val,
+                  label: val,
+                }))}
+                onChange={(selected) => {
+                  const values = selected
+                    ? selected.map((opt: any) => opt.value)
+                    : [];
+                  setBlockSectionValue(values);
+                  setFormData((prev) => ({
+                    ...prev,
+                    processedLineSections: (
+                      prev.processedLineSections || []
+                    ).filter((s: any) => values.includes(s.block)),
+                  }));
+                }}
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: "#FFB74D",
+                    borderColor: "black",
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    minHeight: "32px",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    boxShadow: "none",
+                    padding: "0 2px",
+                  }),
+                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: "#fff3",
+                    color: "black",
+                    fontSize: "13px",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#ffe082"
+                      : state.isFocused
+                      ? "#ffe08299"
+                      : "#FFB74D",
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    padding: "4px 8px",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                  }),
+                  dropdownIndicator: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontSize: "20px",
+                    padding: 0,
+                  }),
+                }}
+                placeholder="Block Section/Yard"
+                closeMenuOnSelect={false}
+              />
+              {renderError("missionBlock")}
+            </div>
 
-  {/* Always Scrollable Line/Road List */}
-  <div
-    className="w-full flex flex-col gap-1 mt-1 pr-1"
-    style={{
-      maxHeight: "110px",
-      overflowY: "auto",
-      borderRadius: "6px",
-    }}
-  >
-    {blockSectionValue.map((block: string) => {
-      const isYard = block.includes("-YD");
-      const lineOrRoadOptions = isYard
-        ? getAllRoadsForYard(block).map((road: string) => ({
-            value: road,
-            label: road,
-          }))
-        : (lineData[block as keyof typeof lineData] || []).map((line: string) => ({
-            value: line,
-            label: line,
-          }));
+            {/* Always Scrollable Line/Road List */}
+            <div
+              className="w-full flex flex-col gap-1 mt-1 pr-1"
+              style={{
+                maxHeight: "110px",
+                overflowY: "auto",
+                borderRadius: "6px",
+              }}
+            >
+              {blockSectionValue.map((block: string) => {
+                const isYard = block.includes("-YD");
+                const lineOrRoadOptions = isYard
+                  ? getAllRoadsForYard(block).map((road: string) => ({
+                      value: road,
+                      label: road,
+                    }))
+                  : (lineData[block as keyof typeof lineData] || []).map(
+                      (line: string) => ({
+                        value: line,
+                        label: line,
+                      })
+                    );
 
-      const sectionEntry =
-        (formData.processedLineSections || []).find((s: any) => s.block === block) || {};
+                const sectionEntry =
+                  (formData.processedLineSections || []).find(
+                    (s: any) => s.block === block
+                  ) || {};
 
-      return (
-        <div
-          key={block}
-          className="flex flex-row items-center gap-2 w-full"
-        >
-          <Select
-            isMulti
-            name={`lineOrRoad-${block}`}
-            options={lineOrRoadOptions}
-            value={(() => {
-              const section = formData.processedLineSections?.find((s) => s.block === block);
-              const selectedValues: { value: string; label: string }[] = [];
+                return (
+                  <div
+                    key={block}
+                    className="flex flex-row items-center gap-2 w-full"
+                  >
+                    <Select
+                      isMulti
+                      name={`lineOrRoad-${block}`}
+                      options={lineOrRoadOptions}
+                      value={(() => {
+                        const section = formData.processedLineSections?.find(
+                          (s) => s.block === block
+                        );
+                        const selectedValues: {
+                          value: string;
+                          label: string;
+                        }[] = [];
 
-              if (section?.lineName) {
-                selectedValues.push({
-                  value: section.lineName,
-                  label: section.lineName,
-                });
-              }
+                        if (section?.lineName) {
+                          selectedValues.push({
+                            value: section.lineName,
+                            label: section.lineName,
+                          });
+                        }
 
-              if (section?.otherLines) {
-                const otherLineList = section.otherLines
-                  .split(",")
-                  .map((line) => line.trim())
-                  .filter(Boolean);
-                selectedValues.push(
-                  ...otherLineList.map((line) => ({
-                    value: line,
-                    label: line,
-                  }))
+                        if (section?.otherLines) {
+                          const otherLineList = section.otherLines
+                            .split(",")
+                            .map((line) => line.trim())
+                            .filter(Boolean);
+                          selectedValues.push(
+                            ...otherLineList.map((line) => ({
+                              value: line,
+                              label: line,
+                            }))
+                          );
+                        }
+
+                        return selectedValues;
+                      })()}
+                      onChange={(selected) => {
+                        const values = selected
+                          ? selected.map((opt: any) => opt.value)
+                          : [];
+                        if (isYard) {
+                          handleRoadSelection(block, values.join(","));
+                        } else {
+                          handleLineNameSelection(block, values);
+                        }
+                      }}
+                      classNamePrefix="react-select"
+                      menuPortalTarget={
+                        typeof window !== "undefined" ? document.body : null
+                      }
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#FFB74D",
+                          borderColor: "black",
+                          borderWidth: 2,
+                          borderRadius: 6,
+                          minHeight: "32px",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          boxShadow: "none",
+                          padding: "0 2px",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        menuPortal: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? "#ffe082"
+                            : state.isFocused
+                            ? "#ffe08299"
+                            : "#FFB74D",
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          padding: "4px 8px",
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }),
+                        dropdownIndicator: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontSize: "20px",
+                          padding: 0,
+                        }),
+                      }}
+                      placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
+                      closeMenuOnSelect={false}
+                    />
+                    {renderError(`${block}.lineName`)}
+                    {renderError(`${block}.road`)}
+                    {renderError(`${block}.stream`)}
+                  </div>
                 );
-              }
-
-              return selectedValues;
-            })()}
-            onChange={(selected) => {
-              const values = selected ? selected.map((opt: any) => opt.value) : [];
-              if (isYard) {
-                handleRoadSelection(block, values.join(","));
-              } else {
-                handleLineNameSelection(block, values);
-              }
-            }}
-            classNamePrefix="react-select"
-            menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#FFB74D",
-                borderColor: "black",
-                borderWidth: 2,
-                borderRadius: 6,
-                minHeight: "32px",
-                fontWeight: "bold",
-                fontSize: "14px",
-                boxShadow: "none",
-                padding: "0 2px",
-              }),
-              menu: (base) => ({
-                ...base,
-                zIndex: 9999,
-              }),
-              menuPortal: (base) => ({
-                ...base,
-                zIndex: 9999,
-              }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isSelected
-                  ? "#ffe082"
-                  : state.isFocused
-                  ? "#ffe08299"
-                  : "#FFB74D",
-                color: "black",
-                fontWeight: "bold",
-                fontSize: "14px",
-                padding: "4px 8px",
-              }),
-              placeholder: (base) => ({
-                ...base,
-                color: "black",
-                fontWeight: "bold",
-                fontSize: "14px",
-              }),
-              dropdownIndicator: (base) => ({
-                ...base,
-                color: "black",
-                fontSize: "20px",
-                padding: 0,
-              }),
-            }}
-            placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
-            closeMenuOnSelect={false}
-          />
-          {renderError(`${block}.lineName`)}
-          {renderError(`${block}.road`)}
-          {renderError(`${block}.stream`)}
-        </div>
-      );
-    })}
-  </div>
-</div>
+              })}
+            </div>
+          </div>
 
           {/* Corridor and Preferred Slot section (horizontal, compact, responsive) */}
           <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-2 overflow-x-hidden">
@@ -2360,6 +2379,7 @@ export default function CreateBlockRequestPage() {
               </div>
             )}
           </div>
+
           {/* Power Block Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
@@ -2391,6 +2411,7 @@ export default function CreateBlockRequestPage() {
               </select>
               {renderError("powerBlockRequired")}
             </div>
+
             {formData.powerBlockRequired && (
               <div
                 className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
@@ -2419,6 +2440,55 @@ export default function CreateBlockRequestPage() {
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
                 />
               </div>
+            )}
+            {formData.powerBlockRequired && (
+              <>
+                {" "}
+                <div className="col-span-1">
+                  <label className="block text-xs font-medium text-black mb-1">
+                    Assign Disconnection To{" "}
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    name="powerBlockDisconnectionAssignTo"
+                    value={formData.powerBlockDisconnectionAssignTo || ""}
+                    onChange={handleInputChange}
+                    className="input gov-input"
+                    style={{
+                      color: "black",
+                      borderColor: errors.powerBlockDisconnectionAssignTo
+                        ? "#dc2626"
+                        : "#45526c",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select Depo
+                    </option>
+                    {selectedMajorSection &&
+                    session?.user.department &&
+                    depot[selectedMajorSection] &&
+                    depot[selectedMajorSection]["TRD"] ? (
+                      depot[selectedMajorSection]["TRD"].map(
+                        (depotOption: string, index) => (
+                          <option key={index} value={depotOption}>
+                            {depotOption}
+                          </option>
+                        )
+                      )
+                    ) : (
+                      <option value="" disabled>
+                        Select Major Section first
+                      </option>
+                    )}
+                  </select>
+                  {errors.powerBlockDisconnectionAssignTo && (
+                    <span className="text-xs text-red-700 font-medium mt-1 block">
+                      {errors.powerBlockDisconnectionAssignTo}
+                    </span>
+                  )}
+                </div>
+              </>
             )}
           </div>
           {/* S&T Disconnection Section */}
@@ -2489,6 +2559,51 @@ export default function CreateBlockRequestPage() {
               </div>
             )}
           </div>
+          {formData.sntDisconnectionRequired && (
+            <div className="col-span-1">
+              <label className="block text-xs font-medium text-black mb-1">
+                Assign Disconnection To <span className="text-red-600">*</span>
+              </label>
+              <select
+                name="sntDisconnectionAssignTo"
+                value={formData.sntDisconnectionAssignTo || ""}
+                onChange={handleInputChange}
+                className="input gov-input"
+                style={{
+                  color: "black",
+                  borderColor: errors.sntDisconnectionAssignTo
+                    ? "#dc2626"
+                    : "#45526c",
+                  fontSize: "14px",
+                }}
+              >
+                <option value="" disabled>
+                  Select Depo
+                </option>
+                {selectedMajorSection &&
+                session?.user.department &&
+                depot[selectedMajorSection] &&
+                depot[selectedMajorSection]["S&T"] ? (
+                  depot[selectedMajorSection]["S&T"].map(
+                    (depotOption: string, index) => (
+                      <option key={index} value={depotOption}>
+                        {depotOption}
+                      </option>
+                    )
+                  )
+                ) : (
+                  <option value="" disabled>
+                    Select Major Section first
+                  </option>
+                )}
+              </select>
+              {errors.sntDisconnectionAssignTo && (
+                <span className="text-xs text-red-700 font-medium mt-1 block">
+                  {errors.sntDisconnectionAssignTo}
+                </span>
+              )}
+            </div>
+          )}
           {/* Remarks and Action Buttons */}
           <div className="w-full mt-2 flex flex-col gap-2">
             <textarea

@@ -6,6 +6,7 @@ import {
   useGetWeeklyUserRequests,
   DateRangeFilter,
   RequestItem,
+  useGetOtherRequests,
 } from "@/app/service/query/user-request";
 import Link from "next/link";
 import {
@@ -363,6 +364,9 @@ export default function RequestTablePage() {
     endDate: new Date(),
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState("");
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+
   const { isUrgentMode } = useUrgentMode();
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [customDateRange, setCustomDateRange] = useState({
@@ -370,12 +374,30 @@ export default function RequestTablePage() {
     endDate: addDays(new Date(), 9),
   });
   const [isDownloading, setIsDownloading] = useState(false);
+const today = new Date(); // Current date
+const endDate = addDays(today, 10); // Today + 10 days
+
+const formattedStartDate = format(today, "yyyy-MM-dd");       // "2025-06-10"
+const formattedEndDate = format(endDate, "yyyy-MM-dd");
+  const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
 
   // Get user session for role-based features
   const { data: session } = useSession();
   const userName = session?.user?.name || "User";
   const userRole = session?.user?.role || "USER";
+  const selectedDepo = session?.user?.depot || "";
 
+  
+ const {
+    data: otherRequestsData,
+    refetch
+  } = useGetOtherRequests(
+    selectedDepo,
+    currentPage,
+    pageSize,
+    formattedStartDate, 
+  formattedEndDate  
+  );
   // Map frontend roles to backend roles
   const getBackendRole = (role: string) => {
     switch (role) {
@@ -386,6 +408,27 @@ export default function RequestTablePage() {
     }
   };
 
+
+   const handleStatusUpdate = (id: string, accept: boolean) => {
+    if (accept) {
+      updateOtherRequest(
+        {
+          id,
+          accept,
+        },
+        {
+          onSuccess: () => {
+            // Refetch the data after the mutation succeeds
+            refetch();
+          },
+        }
+      );
+    } else {
+      // If rejecting, show the dialog to enter remarks
+ setSelectedRequestId(id);
+      setShowRejectDialog(true);
+    }
+  };
   // Fetch requests data
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -416,7 +459,7 @@ export default function RequestTablePage() {
       }
     },
   });
-     const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // Accept Mutation
   const acceptMutation = useMutation({
@@ -424,6 +467,7 @@ export default function RequestTablePage() {
     onSuccess: () => {
       toast.success("Request accepted successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
+      refetch()
     },
     onError: (error) => {
       toast.error("Failed to accept request.");
@@ -437,6 +481,7 @@ export default function RequestTablePage() {
     onSuccess: () => {
       toast.success("Request rejected successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
+      refetch()
     },
     onError: (error) => {
       toast.error("Failed to reject request.");
@@ -674,27 +719,177 @@ export default function RequestTablePage() {
                     <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
                       {request.adminRequestStatus === "ACCEPTED" ? "Y" : "N"}
                     </td>
-                  <td className="border border-black px-2 py-1 sticky right-0 z-10 bg-[#E6E6FA] text-center align-middle w-32">
-  <div className="flex gap-2 justify-center flex-col md:flex-row">
-    {/* Accept Button */}
-    <button
-      onClick={() => handleAccept(request.id)}
-      disabled={acceptMutation.isPending || rejectMutation.isPending}
-      className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
-    >
-      {acceptMutation.isPending ? "Processing..." : "Accept"}
-    </button>
+                    <td className="border border-black px-2 py-1 sticky right-0 z-10 bg-[#E6E6FA] text-center align-middle w-32">
+                      <div className="flex gap-2 justify-center flex-col md:flex-row">
+                        {/* Accept Button */}
+                        <button
+                          onClick={() => handleAccept(request.id)}
+                          disabled={
+                            acceptMutation.isPending || rejectMutation.isPending
+                          }
+                          className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
+                        >
+                          {acceptMutation.isPending
+                            ? "Processing..."
+                            : "Accept"}
+                        </button>
 
-    {/* Reject Button */}
-    <button
-      onClick={() => handleReject(request.id)}
-      disabled={acceptMutation.isPending || rejectMutation.isPending}
-      className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
-    >
-      {rejectMutation.isPending ? "Processing..." : "Reject"}
-    </button>
-  </div>
-</td>
+                        {/* Reject Button */}
+                        <button
+                          onClick={() => handleReject(request.id)}
+                          disabled={
+                            acceptMutation.isPending || rejectMutation.isPending
+                          }
+                          className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
+                        >
+                          {rejectMutation.isPending
+                            ? "Processing..."
+                            : "Reject"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-3 mb-6">
+        <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
+          <div className="text-xl font-bold text-black text-center py-2">
+            SUMMARY OF OTHER REQUEST FOR NEXT 10 DAYS
+          </div>
+          <div className="italic text-center text-sm text-black pb-2">
+            (Click ID to see full details or to Edit)
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto rounded-xl mx-2 mb-2">
+            <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+              <thead>
+                <tr className="bg-[#D6F3FF] text-black">
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">
+                    Date
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">
+                    ID
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">
+                    Block Section
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">
+                    UP/DN/SL/Rpad
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[20%]">
+                    Activity
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Duration
+                  </th>
+                  
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {otherRequestsData?.data.requests.map((request: any, idx: number) => (
+                  <tr
+                    key={request.id}
+                    className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}
+                  >
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {formatDate(request.date)}
+                    </td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
+                      <Link
+                        href={`/view-request/${request.id}?from=request-table`}
+                        className="text-black hover:underline"
+                      >
+                        {request.divisionId || request.id.slice(-4)}
+                      </Link>
+                    </td>
+                    <td className="border border-black px-2 py-1 text-black">
+                      {request.missionBlock}
+                    </td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {request.processedLineSections[0].lineName || "N/A"}
+                    </td>
+                    <td className="border border-black px-2 py-1 text-black">
+                      {request.activity}
+                    </td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {formatDuration(
+                        request.demandTimeFrom,
+                        request.demandTimeTo
+                      )}
+                    </td>
+                          <td className="border border-black px-2 py-1 text-center whitespace-nowrap">
+        {request.DisconnAcceptance === "ACCEPTED" ? (
+          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            Accepted
+          </span>
+        ) : request.DisconnAcceptance === "REJECTED" ? (
+          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            Rejected
+          </span>
+        ) : (
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => handleStatusUpdate(request.id, true)}
+              disabled={isMutating}
+              className="px-3 py-1 bg-green-50 hover:bg-green-100 text-green-700 text-xs rounded-md border border-green-200 flex items-center transition-colors"
+            >
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Accept
+            </button>
+            <button
+              onClick={() => handleStatusUpdate(request.id, false)}
+              disabled={isMutating}
+              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs rounded-md border border-red-200 flex items-center transition-colors"
+            >
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              Reject
+            </button>
+          </div>
+        )}
+      </td>
+                   {/* {request.DisconnAcceptance === "PENDING" && (
+                        <div className="flex gap-1 mt-1">
+                          <button
+                            onClick={() => handleStatusUpdate(request.id, true)}
+                            disabled={isMutating}
+                            className="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded border border-green-700 flex items-center"
+                          >
+                            <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(request.id, false)}
+                            disabled={isMutating}
+                            className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded border border-red-700 flex items-center"
+                          >
+                            <svg className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            Reject
+                          </button>
+                        </div>
+                      )} */}
                   </tr>
                 ))}
               </tbody>
@@ -800,7 +995,6 @@ export default function RequestTablePage() {
               Logout
             </button>
           </div>
-
           <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
             © {new Date().getFullYear()} Indian Railways
           </div>
