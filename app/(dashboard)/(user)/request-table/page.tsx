@@ -374,12 +374,13 @@ export default function RequestTablePage() {
     endDate: addDays(new Date(), 9),
   });
   const [isDownloading, setIsDownloading] = useState(false);
-const today = new Date(); // Current date
-const endDate = addDays(today, 10); // Today + 10 days
+  const today = new Date(); // Current date
+  const endDate = addDays(today, 10); // Today + 10 days
 
-const formattedStartDate = format(today, "yyyy-MM-dd");       // "2025-06-10"
-const formattedEndDate = format(endDate, "yyyy-MM-dd");
-  const { mutate: updateOtherRequest, isPending: isMutating } = useUpdateOtherRequest();
+  const formattedStartDate = format(today, "yyyy-MM-dd"); // "2025-06-10"
+  const formattedEndDate = format(endDate, "yyyy-MM-dd");
+  const { mutate: updateOtherRequest, isPending: isMutating } =
+    useUpdateOtherRequest();
 
   // Get user session for role-based features
   const { data: session } = useSession();
@@ -387,16 +388,12 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
   const userRole = session?.user?.role || "USER";
   const selectedDepo = session?.user?.depot || "";
 
-  
- const {
-    data: otherRequestsData,
-    refetch
-  } = useGetOtherRequests(
+  const { data: otherRequestsData, refetch } = useGetOtherRequests(
     selectedDepo,
     currentPage,
     pageSize,
-    formattedStartDate, 
-  formattedEndDate  
+    formattedStartDate,
+    formattedEndDate
   );
   // Map frontend roles to backend roles
   const getBackendRole = (role: string) => {
@@ -408,8 +405,7 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
     }
   };
 
-
-   const handleStatusUpdate = (id: string, accept: boolean) => {
+  const handleStatusUpdate = (id: string, accept: boolean) => {
     if (accept) {
       updateOtherRequest(
         {
@@ -425,7 +421,7 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
       );
     } else {
       // If rejecting, show the dialog to enter remarks
- setSelectedRequestId(id);
+      setSelectedRequestId(id);
       setShowRejectDialog(true);
     }
   };
@@ -467,7 +463,7 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
     onSuccess: () => {
       toast.success("Request accepted successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
-      refetch()
+      refetch();
     },
     onError: (error) => {
       toast.error("Failed to accept request.");
@@ -481,7 +477,7 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
     onSuccess: () => {
       toast.success("Request rejected successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
-      refetch()
+      refetch();
     },
     onError: (error) => {
       toast.error("Failed to reject request.");
@@ -788,85 +784,124 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Duration
                   </th>
-                  
+
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Status
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {otherRequestsData?.data.requests.map((request: any, idx: number) => (
-                  <tr
-                    key={request.id}
-                    className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}
-                  >
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {formatDate(request.date)}
-                    </td>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
-                      <Link
-                        href={`/view-request/${request.id}?from=request-table`}
-                        className="text-black hover:underline"
-                      >
-                        {request.divisionId || request.id.slice(-4)}
-                      </Link>
-                    </td>
-                    <td className="border border-black px-2 py-1 text-black">
-                      {request.missionBlock}
-                    </td>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {request.processedLineSections[0].lineName || "N/A"}
-                    </td>
-                    <td className="border border-black px-2 py-1 text-black">
-                      {request.activity}
-                    </td>
-                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {formatDuration(
-                        request.demandTimeFrom,
-                        request.demandTimeTo
-                      )}
-                    </td>
-                          <td className="border border-black px-2 py-1 text-center whitespace-nowrap">
-        {request.DisconnAcceptance === "ACCEPTED" ? (
-          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Accepted
-          </span>
-        ) : request.DisconnAcceptance === "REJECTED" ? (
-          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-            Rejected
-          </span>
-        ) : (
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => handleStatusUpdate(request.id, true)}
-              disabled={isMutating}
-              className="px-3 py-1 bg-green-50 hover:bg-green-100 text-green-700 text-xs rounded-md border border-green-200 flex items-center transition-colors"
-            >
-              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Accept
-            </button>
-            <button
-              onClick={() => handleStatusUpdate(request.id, false)}
-              disabled={isMutating}
-              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs rounded-md border border-red-200 flex items-center transition-colors"
-            >
-              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              Reject
-            </button>
-          </div>
-        )}
-      </td>
-                   {/* {request.DisconnAcceptance === "PENDING" && (
+                {otherRequestsData?.data.requests.map(
+                  (request: any, idx: number) => (
+                    <tr
+                      key={request.id}
+                      className={
+                        idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"
+                      }
+                    >
+                      <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                        {formatDate(request.date)}
+                      </td>
+                      <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
+                        <Link
+                          href={`/view-request/${request.id}?from=request-table`}
+                          className="text-black hover:underline"
+                        >
+                          {request.divisionId || request.id.slice(-4)}
+                        </Link>
+                      </td>
+                      <td className="border border-black px-2 py-1 text-black">
+                        {request.missionBlock}
+                      </td>
+                      <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                        {request.processedLineSections[0].lineName || "N/A"}
+                      </td>
+                      <td className="border border-black px-2 py-1 text-black">
+                        {request.activity}
+                      </td>
+                      <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                        {formatDuration(
+                          request.demandTimeFrom,
+                          request.demandTimeTo
+                        )}
+                      </td>
+                      <td className="border border-black px-2 py-1 text-center whitespace-nowrap">
+                        {request.DisconnAcceptance === "ACCEPTED" ? (
+                          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Accepted
+                          </span>
+                        ) : request.DisconnAcceptance === "REJECTED" ? (
+                          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Rejected
+                          </span>
+                        ) : (
+                          <div className="flex gap-2 justify-center">
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(request.id, true)
+                              }
+                              disabled={isMutating}
+                              className="px-3 py-1 bg-green-50 hover:bg-green-100 text-green-700 text-xs rounded-md border border-green-200 flex items-center transition-colors"
+                            >
+                              <svg
+                                className="w-3 h-3 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              Accept
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleStatusUpdate(request.id, false)
+                              }
+                              disabled={isMutating}
+                              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs rounded-md border border-red-200 flex items-center transition-colors"
+                            >
+                              <svg
+                                className="w-3 h-3 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                      {/* {request.DisconnAcceptance === "PENDING" && (
                         <div className="flex gap-1 mt-1">
                           <button
                             onClick={() => handleStatusUpdate(request.id, true)}
@@ -890,8 +925,9 @@ const formattedEndDate = format(endDate, "yyyy-MM-dd");
                           </button>
                         </div>
                       )} */}
-                  </tr>
-                ))}
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>

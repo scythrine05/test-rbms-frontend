@@ -628,7 +628,7 @@ export default function CreateBlockRequestPage() {
       window.location.href = "/auth/login";
     },
   });
-
+const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
   const majorSectionOptions =
@@ -919,6 +919,7 @@ export default function CreateBlockRequestPage() {
         ),
         processedLineSections: processedSectionsWithDefaults,
         adminAcceptance: false,
+        selectedDepo
       };
       const response = await mutation.mutateAsync(submitData);
       if (response) {
