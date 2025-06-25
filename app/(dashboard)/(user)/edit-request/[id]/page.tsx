@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useUpdateUserRequest } from "@/app/service/mutation/user-request";
 import { useSession } from "next-auth/react";
-import { MajorSection } from "@/app/lib/store";
+import { MajorSection, blockSection } from "@/app/lib/store";
 import { useParams } from "next/navigation";
 import { useGetUserRequestById } from "@/app/service/query/user-request";
 import { Loader } from "@/app/components/ui/Loader";
 import { format, parse, parseISO } from "date-fns";
+import { useDeleteUserRequest } from "@/app/service/mutation/user-request";
+import Select from "react-select";
 
 interface FormData {
   isSanctioned: boolean;
@@ -32,6 +34,7 @@ interface FormData {
   sntDisconnectionRequired: boolean;
   elementarySectionTo: string;
   lineType?: string;
+  missionBlock: string;
   [key: string]: any;
 }
 
@@ -63,10 +66,16 @@ export default function CreateBlockRequestPage() {
     isSanctioned: false,
     powerBlockRequirements: [],
     elementarySection: "",
+    missionBlock: "",
   });
 
   const { data: session } = useSession({ required: true });
   const mutation = useUpdateUserRequest(params.id as string);
+  const deleteMutation = useDeleteUserRequest();
+  const [cancelModal, setCancelModal] = useState(false);
+  const [cancelRemark, setCancelRemark] = useState("");
+  const [cancelError, setCancelError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (userDataById?.data) {
@@ -75,8 +84,8 @@ export default function CreateBlockRequestPage() {
       const getTimeFromISO = (isoString: string) => {
         if (!isoString) return "";
         const date = new Date(isoString);
-        return `${String(date.getHours()).padStart(2, "0")}:${String(
-          date.getMinutes()
+        return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
+          date.getUTCMinutes()
         ).padStart(2, "0")}`;
       };
 
@@ -103,6 +112,7 @@ export default function CreateBlockRequestPage() {
         sntDisconnectionRequirements: data.sntDisconnectionRequirements || [],
         sntDisconnectionLineFrom: data.sntDisconnectionLineFrom || "",
         sntDisconnectionLineTo: data.sntDisconnectionLineTo || "",
+        missionBlock: data.missionBlock || "",
       });
     }
   }, [userDataById]);
@@ -216,7 +226,13 @@ export default function CreateBlockRequestPage() {
       };
 
       await mutation.mutateAsync(formattedData as any);
-      alert("Request updated successfully!");
+      // Show toast and redirect
+      if (typeof window !== 'undefined') {
+        window.alert('Request updated successfully!');
+        setTimeout(() => {
+          window.location.href = '/edit-request';
+        }, 1000);
+      }
     } catch (error) {
       console.error("Update failed:", error);
       alert("Failed to update request");
@@ -231,6 +247,35 @@ export default function CreateBlockRequestPage() {
       console.error("Cancel failed:", error);
       alert("Failed to cancel request");
     }
+  };
+
+  // Helper to get roads for the selected mission block, excluding the selected road
+  const getOtherRoads = () => {
+    const roads = blockSection[
+      formData.selectedSection as keyof typeof blockSection
+    ] || [];
+    // Exclude the selected mission block and the selected road
+    return roads.filter(
+      (road) =>
+        road !== formData.missionBlock &&
+        road !== formData.lineType &&
+        ["UP", "DN", "SL", "No", "SINGLE"].indexOf(road) === -1 // Exclude generic values
+    );
+  };
+
+  const handleOtherRoadsChange = (road: string, checked: boolean) => {
+    let affected = formData.otherLinesAffected
+      ? formData.otherLinesAffected.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [];
+    if (checked) {
+      if (!affected.includes(road)) affected.push(road);
+    } else {
+      affected = affected.filter((r: string) => r !== road);
+    }
+    setFormData((prev) => ({
+      ...prev,
+      otherLinesAffected: affected.join(","),
+    }));
   };
 
   if (isLoading) return <Loader name="Loading request..." />;
@@ -262,13 +307,62 @@ export default function CreateBlockRequestPage() {
             </button>
             <button
               className="flex-1 max-w-[160px] rounded-xl bg-red-600 text-white font-bold text-xl py-3 border-2 border-gray-800 shadow-sm"
-              onClick={() =>
-                window.confirm("Cancel this request?") && handleCancelRequest()
-              }
+              onClick={() => setCancelModal(true)}
+              type="button"
             >
               CANCEL
             </button>
           </div>
+
+          {/* Cancel Modal */}
+          {cancelModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                <h2 className="text-lg font-bold mb-2 text-black">Cancel Request</h2>
+                <p className="mb-2 text-black">Please enter a remark for cancellation:</p>
+                <textarea
+                  className="w-full border border-gray-400 rounded p-2 mb-2 text-black"
+                  rows={3}
+                  value={cancelRemark}
+                  onChange={e => setCancelRemark(e.target.value)}
+                  placeholder="Enter cancellation remark..."
+                />
+                {cancelError && <div className="text-red-600 text-xs mb-2">{cancelError}</div>}
+                <div className="flex justify-end gap-2 mt-2">
+                  <button
+                    onClick={() => setCancelModal(false)}
+                    className="px-4 py-1 bg-gray-200 text-black rounded border border-gray-400 hover:bg-gray-300"
+                    disabled={deleting}
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!cancelRemark.trim()) {
+                        setCancelError("Remark is required.");
+                        return;
+                      }
+                      setCancelError("");
+                      setDeleting(true);
+                      try {
+                        await deleteMutation.mutateAsync(params.id as string);
+                        setCancelModal(false);
+                        setDeleting(false);
+                        window.location.href = "/edit-request";
+                      } catch (err) {
+                        setCancelError("Failed to cancel request. Please try again.");
+                        setDeleting(false);
+                      }
+                    }}
+                    className="px-4 py-1 bg-red-600 text-white rounded border border-red-700 hover:bg-red-700 disabled:opacity-50"
+                    disabled={deleting}
+                  >
+                    {deleting ? "Cancelling..." : "Confirm Cancel"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form
             id="edit-block-form"
@@ -338,47 +432,105 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </td>
                 </tr>
-<tr>
-  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900 ">
-    Preferred Slot
-  </td>
-  <td className="bg-green-200 p-1.5" colSpan={3}>
-    <div className="flex items-center gap-2">
-      <input
-        type="time"
-        name="demandTimeFrom"
-        value={formData.demandTimeFrom}
-        onChange={handleInputChange}
-        className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
-      />
-      <span className="text-gray-900">to</span>
-      <input
-        type="time"
-        name="demandTimeTo"
-        value={formData.demandTimeTo}
-        onChange={handleInputChange}
-        className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
-      />
-    </div>
-  </td>
-</tr>
+                <tr>
+                  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900 ">
+                    Preferred Slot
+                  </td>
+                  <td className="bg-green-200 p-1.5" colSpan={3}>
+                    <div className="flex items-center gap-2">
+                      <select
+                        name="demandTimeFromHour"
+                        value={formData.demandTimeFrom.split(":")[0] || "00"}
+                        onChange={e => {
+                          const hour = e.target.value;
+                          const minute = formData.demandTimeFrom.split(":")[1] || "00";
+                          setFormData(prev => ({
+                            ...prev,
+                            demandTimeFrom: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`
+                          }));
+                        }}
+                        className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
+                      >
+                        {[...Array(24).keys()].map(h => (
+                          <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
+                        ))}
+                      </select>
+                      <span className="text-gray-900">:</span>
+                      <select
+                        name="demandTimeFromMinute"
+                        value={formData.demandTimeFrom.split(":")[1] || "00"}
+                        onChange={e => {
+                          const minute = e.target.value;
+                          const hour = formData.demandTimeFrom.split(":")[0] || "00";
+                          setFormData(prev => ({
+                            ...prev,
+                            demandTimeFrom: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`
+                          }));
+                        }}
+                        className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
+                      >
+                        {[...Array(60).keys()].map(m => (
+                          <option key={m} value={m.toString().padStart(2, "0")}>{m.toString().padStart(2, "0")}</option>
+                        ))}
+                      </select>
+                      <span className="text-gray-900">to</span>
+                      <select
+                        name="demandTimeToHour"
+                        value={formData.demandTimeTo.split(":")[0] || "00"}
+                        onChange={e => {
+                          const hour = e.target.value;
+                          const minute = formData.demandTimeTo.split(":")[1] || "00";
+                          setFormData(prev => ({
+                            ...prev,
+                            demandTimeTo: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`
+                          }));
+                        }}
+                        className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
+                      >
+                        {[...Array(24).keys()].map(h => (
+                          <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
+                        ))}
+                      </select>
+                      <span className="text-gray-900">:</span>
+                      <select
+                        name="demandTimeToMinute"
+                        value={formData.demandTimeTo.split(":")[1] || "00"}
+                        onChange={e => {
+                          const minute = e.target.value;
+                          const hour = formData.demandTimeTo.split(":")[0] || "00";
+                          setFormData(prev => ({
+                            ...prev,
+                            demandTimeTo: `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`
+                          }));
+                        }}
+                        className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
+                      >
+                        {[...Array(60).keys()].map(m => (
+                          <option key={m} value={m.toString().padStart(2, "0")}>{m.toString().padStart(2, "0")}</option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-gray-600 ml-2">(24-hour format)</span>
+                    </div>
+                  </td>
+                </tr>
                 <tr>
                   <td className="font-semibold p-1.5 text-gray-900 w-1/4">
                     Block Section/Yard
                   </td>
                   <td className="p-1.5 w-1/2">
                     <select
-                      name="selectedSection"
-                      value={formData.selectedSection}
+                      name="missionBlock"
+                      value={formData.missionBlock || ""}
                       onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white appearance-none" style={{color:"black"}}
+                      className="w-full p-1 border border-gray-800 rounded bg-white appearance-none"
+                      style={{ color: "black" }}
                     >
-                      <option value="">Select Section</option>
-                      {MajorSection[
-                        session?.user?.location as keyof typeof MajorSection
-                      ]?.map((section) => (
-                        <option key={section} value={section}>
-                          {section}
+                      <option value="">Select Block Section/Yard</option>
+                      {blockSection[
+                        formData.selectedSection as keyof typeof blockSection
+                      ]?.map((block) => (
+                        <option key={block} value={block}>
+                          {block}
                         </option>
                       ))}
                     </select>
@@ -391,7 +543,8 @@ export default function CreateBlockRequestPage() {
                       name="lineType"
                       value={formData.lineType || ""}
                       onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
+                      className="w-full p-1 border border-gray-800 rounded bg-white"
+                      style={{ color: "black" }}
                     >
                       <option value="">Select</option>
                       <option value="UP">UP</option>
@@ -546,35 +699,81 @@ export default function CreateBlockRequestPage() {
 </tr>
                 <tr className="bg-purple-200">
                   <td className="font-semibold p-1.5 text-gray-900 whitespace-nowrap">
-                    Other Lines Affected, if any
+                    Other Lines Affected
                   </td>
                   <td className="p-1.5" colSpan={3}>
-                    <input
-                      type="text"
-                      name="otherLinesAffected"
-                      value={formData.otherLinesAffected}
-                      onChange={handleInputChange}
-                      placeholder="Enter affected lines"
-                      className="p-1 border border-gray-800 rounded bg-inherit w-44 ml-23" style={{color:"black"}}
-                    />
+                    {/* Only show if caution is required */}
+                    {formData.freshCautionRequired ? (
+                      formData.missionBlock && formData.selectedSection ? (
+                        <Select
+                          isMulti
+                          options={getOtherRoads().map((road) => ({ value: road, label: road }))}
+                          value={formData.otherLinesAffected
+                            ? formData.otherLinesAffected.split(",").filter(Boolean).map((road) => ({ value: road, label: road }))
+                            : []}
+                          onChange={(opts) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              otherLinesAffected: opts.map((opt) => opt.value).join(","),
+                            }));
+                          }}
+                          classNamePrefix="select"
+                          placeholder="Select other affected lines/roads"
+                          styles={{
+                            option: (base, state) => ({
+                              ...base,
+                              color: "black",
+                              backgroundColor: state.isSelected
+                                ? "#e0e7ef"
+                                : state.isFocused
+                                ? "#e5e7eb"
+                                : "white",
+                              fontSize: "13px",
+                              padding: "6px 10px",
+                              fontWeight: state.isSelected ? "bold" : "normal",
+                              "&:hover": {
+                                backgroundColor: "#e5e7eb",
+                                color: "black",
+                              },
+                              "&:active": {
+                                backgroundColor: "#e0e7ef",
+                                color: "black",
+                              },
+                            }),
+                            multiValue: (base) => ({
+                              ...base,
+                              backgroundColor: "#f3f4f6",
+                              color: "black",
+                              border: "1px solid #bdbdbd",
+                              borderRadius: "4px",
+                            }),
+                            multiValueLabel: (base) => ({
+                              ...base,
+                              color: "black",
+                              fontSize: "12px",
+                              padding: "2px 6px",
+                              fontWeight: "bold",
+                            }),
+                            multiValueRemove: (base) => ({
+                              ...base,
+                              color: "#ef4444",
+                              paddingLeft: "4px",
+                              paddingRight: "4px",
+                              ":hover": {
+                                backgroundColor: "#fee2e2",
+                                color: "#b91c1c",
+                              },
+                            }),
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-500 text-sm">Select Block Section/Yard to see affected lines</span>
+                      )
+                    ) : (
+                      <span className="text-gray-500 text-sm">Enable Caution Required to select affected lines</span>
+                    )}
                   </td>
                 </tr>
-                {/* <tr>
-                  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
-                    Other Lines Affected,if any
-                  </td>
-                  <td className="bg-white  p-1.5" colSpan={3}>
-                    <input
-                      type="text"
-                      name="otherLinesAffected"
-                      value={formData.otherLinesAffected}
-                      onChange={handleInputChange}
-                      placeholder="Enter affected lines"
-                      className="w-full p-1 border border-gray-800 rounded bg-white"
-                    />
-                  </td>
-                </tr> */}
-
                 <tr>
                   <td className=" font-semibold p-1.5 text-gray-900">
                     PB Required
