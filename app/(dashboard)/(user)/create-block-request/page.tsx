@@ -252,6 +252,11 @@ function ReviewBlockRequestModal({
                   : formData.activity || customActivity}
               </div>
             </div>
+            {formData.nonCorridorReason && (
+              <div className="mb-2">
+                <b>Reason for Non-Corridor/Urgent Block:</b> {formData.nonCorridorReason}
+              </div>
+            )}
             {formData.remarks && (
               <div className="mb-2">
                 <b>Remarks:</b> {formData.remarks}
@@ -532,6 +537,7 @@ interface FormData {
   powerBlockRoad: string;
   sntDisconnectionPointNo: string;
   sntDisconnectionSignalNo: string;
+  nonCorridorReason: string;
 }
 
 export default function CreateBlockRequestPage() {
@@ -597,6 +603,7 @@ export default function CreateBlockRequestPage() {
     trdWorkLocation: "",
     sntDisconnectionAssignTo:"",
     powerBlockDisconnectionAssignTo:"",
+    nonCorridorReason: "",
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -782,9 +789,9 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
 
   const getMinDateString = () => {
     const today = new Date();
-    return `${today.getUTCFullYear()}-${String(
-      today.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+    return `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
   const getMaxUrgentDateString = () => {
@@ -1006,7 +1013,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
     if (formData.corridorTypeSelection === "Outside Corridor") {
       if (!formData.routeFrom) errors.routeFrom = "Route from is required";
       if (!formData.routeTo) errors.routeTo = "Route to is required";
-      if (!formData.remarks) errors.remarks = "Remarks are required";
+      if (!formData.nonCorridorReason) errors.nonCorridorReason = "Reason is required";
     }
 
     // Urgent Block validations
@@ -1093,31 +1100,44 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
     );
   }, [formData.powerBlockRequired]);
 
+  // Handle date change and corridor type selection logic
   useEffect(() => {
     if (!formData.date) {
       setIsDisabled(true);
-      setFormData({ ...formData, corridorTypeSelection: null });
+      setFormData({
+        ...formData,
+        corridorTypeSelection: null,
+      });
     } else {
-      const { urgentOnly, urgentAllowed, message } =
-        getCorridorTypeRestrictions(formData.date);
-
-      if (urgentOnly) {
+      // Calculate if the date is today, tomorrow, or day after tomorrow
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const targetDate = new Date(formData.date);
+      targetDate.setHours(0, 0, 0, 0);
+      const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
         setIsDisabled(true);
         setFormData({
           ...formData,
           corridorTypeSelection: "Urgent Block",
         });
       } else {
-        setIsDisabled(false);
-
-        if (
-          formData.corridorTypeSelection === "Urgent Block" &&
-          !urgentAllowed
-        ) {
+        // Existing restrictions (keep as before)
+        const { urgentOnly, urgentAllowed } = getCorridorTypeRestrictions(formData.date);
+        if (urgentOnly) {
+          setIsDisabled(true);
           setFormData({
             ...formData,
-            corridorTypeSelection: null,
+            corridorTypeSelection: "Urgent Block",
           });
+        } else {
+          setIsDisabled(false);
+          if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
+            setFormData({
+              ...formData,
+              corridorTypeSelection: null,
+            });
+          }
         }
       }
     }
@@ -1520,7 +1540,16 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
             <div className="flex flex-col gap-6 items-center mt-8 w-full">
               <button
                 className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
-                onClick={() => router.push("/create-block-request")}
+                onClick={() => {
+                  setFormData(initialFormData);
+                  setBlockSectionValue([]);
+                  setProcessedLineSections([]);
+                  setSelectedActivities([]);
+                  setCustomActivity("");
+                  setErrors({});
+                  setShowSuccessPage(false);
+                  setReviewMode(false);
+                }}
               >
                 ENTER MORE BLOCK REQUESTS
               </button>
@@ -1634,6 +1663,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               placeholder="dd:mm:yyyy"
               value={formData.date || ""}
               onChange={handleInputChange}
+              min={getMinDateString()} // Prevent selection of past dates
               className="bg-[#f7d6f7] border-2 border-black rounded px-6 py-2 text-xl font-bold text-black text-center shadow-md focus:outline-none focus:ring-2 focus:ring-purple-300"
               style={{ minWidth: "180px", maxWidth: "220px" }}
               required
@@ -1888,7 +1918,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
           </div>
 
           {/* Corridor and Preferred Slot section (horizontal, compact, responsive) */}
-          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-2 overflow-x-hidden">
+          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-2 overflow-x-hidden h-15">
             <div
               className="flex flex-row items-center"
               style={{
@@ -1952,7 +1982,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
             </div>
           </div>
           {/* Preferred Slot row (styled to match corridor row, boxy, bold, high-contrast) */}
-          <div className="flex flex-row flex-wrap items-center gap-0 w-full mt-1 overflow-x-hidden">
+          <div className="flex flex-row flex-wrap items-center gap-0 w-full mt-1" style={{ height: '36px' }}>
             <div
               className="flex flex-row items-center justify-center"
               style={{
@@ -1960,9 +1990,10 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 border: "3px solid black",
                 borderRight: 0,
                 borderRadius: "8px 0 0 8px",
-                minWidth: 140,
-                maxWidth: 180,
-                height: 38,
+                minWidth: 120,
+                maxWidth: 140,
+                height: '32px',
+                padding: '0 4px',
               }}
             >
               <span className="text-black font-bold px-3 py-1 text-[15px]">
@@ -1977,9 +2008,10 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 borderBottom: "3px solid black",
                 borderRight: 0,
                 borderLeft: "3px solid black",
-                minWidth: 70,
-                maxWidth: 90,
-                height: 38,
+                minWidth: 50,
+                maxWidth: 70,
+                height: '32px',
+                padding: '0 2px',
               }}
             >
               <select
@@ -2004,7 +2036,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               >
                 <option value="">--</option>
                 {[...Array(24).keys()].map((h) => (
-                  <option key={h} value={h.toString().padStart(2, "0")}>
+                  <option key={h} value={h.toString().padStart(2, "0")}> 
                     {h.toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2032,7 +2064,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               >
                 <option value="">--</option>
                 {[...Array(12).keys()].map((m) => (
-                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}> 
                     {(m * 5).toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2046,9 +2078,10 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 borderBottom: "3px solid black",
                 borderRight: 0,
                 borderLeft: "3px solid black",
-                minWidth: 40,
-                maxWidth: 50,
-                height: 38,
+                minWidth: 30,
+                maxWidth: 40,
+                height: '32px',
+                padding: '0 2px',
               }}
             >
               <span className="text-black font-extrabold px-2 py-1 text-[15px]">
@@ -2062,9 +2095,10 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 border: "3px solid black",
                 borderLeft: 0,
                 borderRadius: "0 8px 8px 0",
-                minWidth: 70,
-                maxWidth: 90,
-                height: 38,
+                minWidth: 50,
+                maxWidth: 70,
+                height: '32px',
+                padding: '0 4px',
               }}
             >
               <select
@@ -2089,7 +2123,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               >
                 <option value="">--</option>
                 {[...Array(24).keys()].map((h) => (
-                  <option key={h} value={h.toString().padStart(2, "0")}>
+                  <option key={h} value={h.toString().padStart(2, "0")}> 
                     {h.toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2117,12 +2151,36 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               >
                 <option value="">--</option>
                 {[...Array(12).keys()].map((m) => (
-                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}> 
                     {(m * 5).toString().padStart(2, "0")}
                   </option>
                 ))}
               </select>
             </div>
+          </div>
+          {/* Site Location From/To fields */}
+          <div className="flex flex-row items-center gap-2 w-full mt-2 mb-2" style={{ background: '#f3e6ff', padding: '8px 0', borderRadius: '8px', marginTop: '8px', marginBottom: '8px' }}>
+            <label className="font-bold text-black mr-2" style={{ minWidth: 100, fontSize: '15px', paddingLeft: '12px' }}>
+              Site<br />Location
+            </label>
+            <input
+              type="text"
+              name="workLocationFrom"
+              value={formData.workLocationFrom || ""}
+              onChange={handleInputChange}
+              placeholder="From"
+              className="border-2 rounded px-2 py-1 text-[15px] text-black font-normal"
+              style={{ minWidth: 80, maxWidth: 120 }}
+            />
+            <input
+              type="text"
+              name="workLocationTo"
+              value={formData.workLocationTo || ""}
+              onChange={handleInputChange}
+              placeholder="To"
+              className="border-2 rounded px-2 py-1 text-[15px] text-black font-normal"
+              style={{ minWidth: 80, maxWidth: 120 }}
+            />
           </div>
           {/* Duration and Type of Block row, full width, equal size, compact */}
           <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-1 overflow-x-hidden">
@@ -2178,8 +2236,44 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 <option value="">Select</option>
                 <option value="Corridor Block">Corridor Block</option>
                 <option value="Non-Corridor Block">Non-Corridor Block</option>
-                <option value="Urgent Block">Urgent Block</option>
-                <option value="Mega Block">Mega Block</option>
+                {(!!formData.date && (() => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const targetDate = new Date(formData.date);
+                  targetDate.setHours(0, 0, 0, 0);
+                  const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  // Check if date is today, tomorrow, or day after tomorrow
+                  if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
+                    return true;
+                  }
+                  // Check if date is in next week and after Thursday 22:00
+                  const isDateInNextWeek = (dateString: string): boolean => {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0);
+                    const targetDate = new Date(dateString + "T00:00:00Z");
+                    targetDate.setUTCHours(0, 0, 0, 0);
+                    const currentWeekSunday = new Date(today);
+                    const daysUntilSunday = today.getUTCDay() === 0 ? 0 : 7 - today.getUTCDay();
+                    currentWeekSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
+                    const nextWeekMonday = new Date(currentWeekSunday);
+                    nextWeekMonday.setUTCDate(currentWeekSunday.getUTCDate() + 1);
+                    const nextWeekSunday = new Date(nextWeekMonday);
+                    nextWeekSunday.setUTCDate(nextWeekMonday.getUTCDate() + 6);
+                    return targetDate >= nextWeekMonday && targetDate <= nextWeekSunday;
+                  };
+                  const isPastThursdayCutoff = (): boolean => {
+                    const now = new Date();
+                    const dayOfWeek = now.getUTCDay();
+                    const hour = now.getUTCHours();
+                    return (dayOfWeek === 4 && hour >= 22) || dayOfWeek > 4;
+                  };
+                  if (isDateInNextWeek(formData.date) && isPastThursdayCutoff()) {
+                    return true;
+                  }
+                  return false;
+                })()) && (
+                  <option value="Urgent Block">Urgent Block</option>
+                )}
               </select>
               {renderError("corridorTypeSelection")}
             </div>
@@ -2191,8 +2285,8 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
             ) && (
               <div className="w-full mt-1">
                 <textarea
-                  name="remarks"
-                  value={formData.remarks || ""}
+                  name="nonCorridorReason"
+                  value={formData.nonCorridorReason || ""}
                   onChange={handleInputChange}
                   placeholder="Reasons for asking Block outside Corridor or Emergency Block"
                   className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[13px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
@@ -2204,7 +2298,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                   }}
                   required
                 />
-                {renderError("remarks")}
+                {renderError("nonCorridorReason")}
               </div>
             )}
           {/* Type of Work and Activity dropdowns, compact style with heading as placeholder */}
