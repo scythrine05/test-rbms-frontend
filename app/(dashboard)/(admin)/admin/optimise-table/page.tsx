@@ -251,12 +251,13 @@ export default function OptimiseTablePage() {
     }) || [];
 
   // Separate corridor and non-corridor requests
-  const corridorRequests = filteredRequests.filter(
-    (request: UserRequest) => request.corridorType === "Corridor"
-  );
-
+ const corridorRequests = filteredRequests.filter(
+  (request: UserRequest) => 
+    request.corridorType === "Corridor" || 
+    request.corridorType === "Corridor Block"
+);
   const nonCorridorRequests = filteredRequests.filter(
-    (request: UserRequest) => request.corridorType === "Outside Corridor"
+    (request: UserRequest) => request.corridorType === "Outside Corridor"||request.corridorType === "Non-Corridor Block"
   );
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
@@ -700,6 +701,9 @@ export default function OptimiseTablePage() {
                       <ColumnHeader icon="work" title="Work Type" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="User Remarks" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="work" title="Activity" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
@@ -776,9 +780,13 @@ export default function OptimiseTablePage() {
                       <td className="border border-black p-2 text-sm">
                         {request.workType}
                       </td>
+                       <td className="border border-black p-2 text-sm">
+                        {request.userResponse||"N/A"}
+                      </td>
                       <td className="border border-black p-2 text-sm">
                         {request.activity}
                       </td>
+                     
                       <td className="border border-black p-2 text-sm">
                         {editingId === request.id ? (
                           <div className="flex gap-2">
@@ -866,8 +874,12 @@ export default function OptimiseTablePage() {
                       <ColumnHeader icon="work" title="Work Type" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="work" title="User Remarks" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="work" title="Activity" />
                     </th>
+                    
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="action" title="Actions" />
                     </th>
@@ -943,8 +955,12 @@ export default function OptimiseTablePage() {
                         {request.workType}
                       </td>
                       <td className="border border-black p-2 text-sm">
+                        {request.userResponse||"N/A"}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
                         {request.activity}
                       </td>
+                     
                       <td className="border border-black p-2 text-sm">
                         {editingId === request.id ? (
                           <div className="flex gap-2">

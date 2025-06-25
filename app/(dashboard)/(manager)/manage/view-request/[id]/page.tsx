@@ -69,8 +69,8 @@ export default function ViewRequestPage() {
   //   },
   // });
   const acceptMutation = useMutation({
-    mutationFn: ({ isAccept, remark }: { isAccept: boolean; remark?: string }) =>
-      managerService.acceptUserRequest(id, isAccept, remark),
+    mutationFn: ({ isAccept, remark,mobileView }: { isAccept: boolean; remark?: string;mobileView:boolean }) =>
+      managerService.acceptUserRequest(id, isAccept, remark,mobileView),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["request", id] });
       queryClient.invalidateQueries({ queryKey: ["requests"] });
@@ -136,7 +136,7 @@ export default function ViewRequestPage() {
     if (confirm("Are you sure you want to accept this request?")) {
       setIsAccepting(true);
       try {
-        await acceptMutation.mutateAsync({ isAccept: true });
+        await acceptMutation.mutateAsync({ isAccept: true,mobileView:true });
       } finally {
         setIsAccepting(false);
       }
@@ -158,7 +158,8 @@ export default function ViewRequestPage() {
     try {
       await acceptMutation.mutateAsync({
         isAccept: false,
-        remark: rejectionReason
+        remark: rejectionReason,
+        mobileView:false
       });
     } finally {
       setIsRejecting(false);

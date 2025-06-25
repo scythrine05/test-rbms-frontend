@@ -285,8 +285,8 @@ export const managerService = {
      */
 
     // Fixed version
-    acceptUserRequest: async (id: string, isAccept: boolean, remark?: string): Promise<{ status: boolean; message: string }> => {
-        const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept, remark });
+    acceptUserRequest: async (id: string, isAccept: boolean, remark?: string,mobileView?:Boolean): Promise<{ status: boolean; message: string }> => {
+        const response = await axiosInstance.put(`/api/user-request/manager/accept/${id}`, { isAccept, remark,mobileView });
         return response.data;
     },
 
