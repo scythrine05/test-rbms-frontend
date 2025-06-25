@@ -45,6 +45,14 @@ export const adminService = {
     return response.data;
   },
 
+  saveOptimizedRequestsCombined: async (data: any) => {
+    const response = await axiosInstance.post(
+      '/api/user-request/admin/save-optimized-requests-combined',
+      data
+    );
+    return response.data;
+  },
+  
   saveOptimizedRequestsStatus: async (requestIds: string[]) => {
     const response = await axiosInstance.put(
       '/api/user-request/admin/save-optimized-requests-status',
