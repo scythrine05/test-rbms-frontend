@@ -1,81 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { authService } from "@/app/service/api/auth";
-import { LoginInput, loginSchema } from "@/app/validation/auth";
+import { PhoneLoginInput, phoneLoginSchema } from "@/app/validation/auth";
+import { usePhoneAuth } from "@/app/service/query/auth";
 
 /**
- * Login Form Component
- * Handles user authentication with email and password
+ * Phone Login Form Component
+ * Handles user authentication with phone number and OTP
  */
-export default function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
+export default function PhoneLoginForm() {
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [otpId, setOtpId] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
+  const { 
+    requestOtp, 
+    verifyOtp, 
+    isRequestingOtp, 
+    isVerifyingOtp, 
+    requestOtpError, 
+    verifyOtpError,
+    otpRequestData 
+  } = usePhoneAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+    watch,
+    setValue,
+  } = useForm<PhoneLoginInput>({
+    resolver: zodResolver(phoneLoginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      phone: "",
+      otp: "",
     },
   });
 
+  const phone = watch("phone");
+  const isLoading = isRequestingOtp || isVerifyingOtp;
+
+  // Update error state when API errors change
+  useEffect(() => {
+    if (requestOtpError) {
+      setAuthError((requestOtpError as any)?.message || "Failed to send OTP");
+    } else if (verifyOtpError) {
+      setAuthError((verifyOtpError as any)?.message || "Failed to verify OTP");
+    } else {
+      setAuthError(null);
+    }
+  }, [requestOtpError, verifyOtpError]);
+
+  // Update otpId when received from API
+  useEffect(() => {
+    if (otpRequestData?.data?.otpId) {
+      setOtpId(otpRequestData.data.otpId);
+      setStep("otp");
+    }
+  }, [otpRequestData]);
+
   /**
-   * Handle form submission
-   * @param data The login form data
+   * Handle form submission based on current step
    */
-  const onSubmit = async (data: LoginInput) => {
-    setIsLoading(true);
+  const onSubmit = async (data: PhoneLoginInput) => {
     setAuthError(null);
 
-    try {
-      const responseData = await authService.login(data);
-
-      const { access_token, refresh_token, user } = responseData.data;
-
-      const result = await signIn("credentials", {
-        redirect: false,
-        accessToken: access_token,
-        refreshToken: refresh_token,
-        user: JSON.stringify(user),
-      });
-
-      if (result?.error) {
-        console.error("SignIn error:", result.error);
-        setAuthError(result.error);
-      } else {
-        router.push("/dashboard");
+    if (step === "phone") {
+      // Request OTP
+      try {
+        requestOtp(data.phone);
+      } catch (error: any) {
+        console.error("Request OTP error:", error);
+        setAuthError(error.message || "Failed to send OTP. Please try again.");
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-
-      // Handle different types of errors
-      if (error.status === false && error.message) {
-        // API returned an error response with a message
-        setAuthError(error.message);
-      } else if (error.errors && Object.keys(error.errors).length > 0) {
-        // API returned validation errors
-        const firstErrorField = Object.keys(error.errors)[0];
-        const firstErrorMessage = error.errors[firstErrorField][0];
-        setAuthError(`${firstErrorField}: ${firstErrorMessage}`);
-      } else {
-        // Generic error handling
-        setAuthError(
-          error.message || "Authentication failed. Please try again."
-        );
+    } else if (step === "otp" && otpId) {
+      // Verify OTP
+      try {
+        verifyOtp({
+          phone: data.phone,
+          otp: data.otp || "",
+          otpId: otpId
+        });
+      } catch (error: any) {
+        console.error("Verify OTP error:", error);
+        setAuthError(error.message || "Failed to verify OTP. Please try again.");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -85,71 +98,50 @@ export default function LoginForm() {
       className="w-full flex flex-col items-center bg-white/60 rounded-2xl shadow-lg p-6 mb-4 border border-gray-200 backdrop-blur-md"
       style={{ boxShadow: "0 4px 24px 0 rgba(0,0,0,0.10)" }}
     >
-      {/* <div className="w-full flex items-center mb-4">
+      {/* Phone Number Input */}
+      <div className="w-full flex items-center mb-4">
+        <input
+          type="tel"
+          {...register("phone")}
+          placeholder="Phone Number"
+          disabled={step === "otp"}
+          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          style={{
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
+            WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
+            WebkitTextFillColor: "white",
+            caretColor: "white",
+            opacity: step === "otp" ? 0.7 : 1
+          }}
+        />
+      </div>
+
+      {/* OTP Input */}
+      <div className="w-full flex items-center mb-6">
         <input
           type="text"
-          {...register("email")}
-          placeholder="User ID"
-          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          {...register("otp")}
+          placeholder="Enter OTP"
+          disabled={step === "phone"}
+          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
           style={{
             boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-            color: "white",
             WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
-            WebkitTextFillColor: "black",
-            caretColor: "black",
+            WebkitTextFillColor: "white",
+            caretColor: "white",
+            opacity: step === "phone" ? 0.7 : 1
           }}
         />
-      </div> */}
+      </div>
 
-      {/* Password : OTP */}
-      {/* <div className="w-full flex items-center mb-6">
-        <input
-          type="password"
-          {...register("password")}
-          placeholder="Password : OTP"
-          className="flex-1 bg-[#eeb8f7] text-black font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
-          style={{
-            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-            color: "white !important",
-            WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
-            WebkitTextFillColor: "black",
-            caretColor: "black",
-          }}
-        />
-      </div> */}
+      {/* Error message */}
+      {authError && (
+        <div className="w-full text-red-500 text-sm mb-4 text-center">
+          {authError}
+        </div>
+      )}
 
-
-      <div className="w-full flex items-center mb-4">
-  <input
-    type="text"
-    {...register("email")}
-    placeholder="User ID"
-    className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
-    style={{
-      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-      WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
-      WebkitTextFillColor: "white",
-      caretColor: "white",
-    }}
-  />
-</div>
-
-{/* Password : OTP */}
-<div className="w-full flex items-center mb-6">
-  <input
-    type="password"
-    {...register("password")}
-    placeholder="Password : OTP"
-    className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
-    style={{
-      boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-      WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
-      WebkitTextFillColor: "white",
-      caretColor: "white",
-    }}
-  />
-</div>
-      {/* Login Button */}
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={isLoading}
@@ -163,7 +155,9 @@ export default function LoginForm() {
           border: "none",
         }}
       >
-        {isLoading ? "Logging in..." : "CLICK TO LOGIN"}
+        {isLoading 
+          ? (step === "phone" ? "Sending OTP..." : "Verifying...") 
+          : (step === "phone" ? "GET OTP" : "Click to Login")}
       </button>
     </form>
   );

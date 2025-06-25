@@ -34,6 +34,32 @@ export interface ApiError {
     errors?: Record<string, string[]>;
 }
 
+export interface RequestOtpResponse {
+    status: boolean;
+    message: string;
+    data: {
+        otpId: string;
+    };
+}
+
+export interface VerifyOtpResponse {
+    status: boolean;
+    message: string;
+    data: {
+        access_token: string;
+        refresh_token: string;
+        user: {
+            id: string;
+            name: string;
+            email: string;
+            role: string;
+            department: string;
+            phone: string;
+        };
+    };
+}
+
+
 export const authService = {
     login: async (data: LoginInput): Promise<LoginResponse> => {
         try {
@@ -68,6 +94,35 @@ export const authService = {
         } finally {
             // Clear local storage regardless of API success
             localStorage.removeItem('token');
+        }
+    },
+    requestOtp: async (phone: string): Promise<RequestOtpResponse> => {
+        try {
+            const response = await axiosPublicInstance.post<RequestOtpResponse>('/api/auth/phone-login', { phone });
+            return response.data;
+        } catch (error: any) {
+            console.error('Request OTP error:', error.response?.data || error.message);
+            if (error.response?.data) {
+                throw error.response.data;
+            }
+            throw new Error(error.message || 'Failed to request OTP. Please try again.');
+        }
+    },
+
+    verifyOtp: async (phone: string, otpCode: string, otpId: string): Promise<VerifyOtpResponse> => {
+        try {
+            const response = await axiosPublicInstance.post<VerifyOtpResponse>('/api/auth/verify-phone-otp', {
+                phone,
+                otpCode,
+                otpId
+            });
+            return response.data;
+        } catch (error: any) {
+            console.error('Verify OTP error:', error.response?.data || error.message);
+            if (error.response?.data) {
+                throw error.response.data;
+            }
+            throw new Error(error.message || 'OTP verification failed. Please try again.');
         }
     },
 };
