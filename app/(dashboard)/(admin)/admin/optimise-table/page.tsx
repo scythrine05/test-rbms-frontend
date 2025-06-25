@@ -10,6 +10,7 @@ import {
   subDays,
   startOfWeek,
   endOfWeek,
+  isSameDay,
 } from "date-fns";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,6 +19,7 @@ import { useOptimizeRequests } from "@/app/service/query/optimise";
 import { flattenRecords } from "@/app/lib/optimse";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
+import { DaySwitcher } from "@/app/components/ui/DaySwitcher";
 
 // Header icons for tables
 const HeaderIcon = ({ type }: { type: string }) => {
@@ -243,12 +245,53 @@ export default function OptimiseTablePage() {
   // Filter requests based on urgent mode
   const filteredRequests =
     data?.data?.requests?.filter((request: UserRequest) => {
-      return isUrgentMode
+      return isUrgentMode //false
         ? request.corridorType === "Urgent Block" ||
         request.workType === "EMERGENCY"
         : request.corridorType !== "Urgent Block" &&
         request.workType !== "EMERGENCY";
     }) || [];
+
+
+    const UrgentRequests =
+    data?.data?.requests?.filter((request: UserRequest) => {
+      return  request.corridorType === "Urgent Block"  }) || [];
+
+
+const { minDate, maxDate } = UrgentRequests.reduce(
+  (acc: { minDate: Date ; maxDate: Date }, request: any) => {
+    const requestDate =
+      typeof request.date === "string"
+        ? parseISO(request.date)
+        : request.date;
+
+    if (!acc.minDate || requestDate < acc.minDate) {
+      acc.minDate = requestDate;
+    }
+    if (!acc.maxDate || requestDate > acc.maxDate) {
+      acc.maxDate = requestDate;
+    }
+
+    return acc;
+  },
+  { minDate: null, maxDate: null }
+);
+
+
+console.log(minDate, maxDate)
+const [selectedDate, setSelectedDate] = useState<Date>(minDate);
+
+// Set selectedDate only when minDate is ready
+useEffect(() => {
+  if (minDate && !selectedDate) {
+    setSelectedDate(minDate);
+  }
+}, [minDate, selectedDate]);
+
+const urgentRequestDate = UrgentRequests.filter((req: any) => {
+  const requestDate = typeof req.date === "string" ? parseISO(req.date) : req.date;
+  return isSameDay(requestDate, selectedDate);
+});
 
   // Separate corridor and non-corridor requests
  const corridorRequests = filteredRequests.filter(
@@ -355,6 +398,7 @@ export default function OptimiseTablePage() {
     }
   };
 
+
   const handleSendOptimizedRequests = async () => {
     try {
       const requestIds =
@@ -376,6 +420,80 @@ export default function OptimiseTablePage() {
       alert("Error updating optimization status. Please try again.");
     }
   };
+
+const handleSendUrgentRequests = async () => {
+  try {
+    const UrgentRequestsData =
+      data?.data?.requests
+        ?.filter(
+          (request: UserRequest) =>
+            request.corridorType === "Urgent Block" &&
+            request.optimizeTimeFrom != null &&
+            request.optimizeTimeTo != null
+        )
+        .map((request: UserRequest) => ({
+          id: request.id,
+          optimizeTimeFrom: request.optimizeTimeFrom,
+          optimizeTimeTo: request.optimizeTimeTo,
+        })) || [];
+
+    if (UrgentRequestsData.length === 0) {
+      alert("No requests to update");
+      return;
+    }
+
+    console.dir(UrgentRequestsData)
+    const response = await adminService.updateSanctionStatus(UrgentRequestsData);
+    if (response.success) {
+      alert("Optimization status updated successfully!");
+    } else {
+      alert("Failed to update optimization status");
+    }
+  } catch (err) {
+    console.error("Failed to update optimization status", err);
+    alert("Error updating optimization status. Please try again.");
+  }
+};
+
+const handleSendNonUrgentRequests = async () => {
+  try {
+    // Only send the required fields for each non-urgent request
+    const nonUrgentRequestsData =
+      data?.data?.requests
+        ?.filter(
+          (request: UserRequest) =>
+            request.corridorType !== "Urgent Block" &&
+            request.optimizeTimeFrom != null &&
+            request.optimizeTimeTo != null
+        )
+        .map((request: UserRequest) => ({
+          id: request.id,
+          optimizeTimeFrom: request.optimizeTimeFrom,
+          optimizeTimeTo: request.optimizeTimeTo,
+        })) || [];
+
+    if (nonUrgentRequestsData.length === 0) {
+      alert("No requests to update");
+      return;
+    }
+    
+    console.dir("nonUrgentRequestsData")
+    console.dir(nonUrgentRequestsData)
+
+    console.dir(data)
+    const response = await adminService.updateSanctionStatus(nonUrgentRequestsData);
+    if (response.success) {
+      alert("Optimization status updated successfully!");
+    } else {
+      alert("Failed to update optimization status");
+    }
+  } catch (err) {
+    console.error("Failed to update optimization status", err);
+    alert("Error updating optimization status. Please try again.");
+  }
+};
+
+  
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -438,8 +556,25 @@ export default function OptimiseTablePage() {
           optimisedTimeFrom: request.optimisedTimeFrom === "Wrong Request" ? "00:00" : request.optimisedTimeFrom,
           optimisedTimeTo: request.optimisedTimeTo === "Wrong Request" ? "00:00" : request.optimisedTimeTo
         })) as UserRequest[];
-
-        await adminService.saveOptimizedRequests(processedOptimizedData);
+        
+        // Save Functionality
+        const requestIds =
+        data?.data?.requests?.map((request: UserRequest) => request.id) || [];
+        if (requestIds.length === 0) {
+          alert("No requests to optimize");
+          return;
+        }
+        // console.log("inputdata")
+        // console.dir({
+        //     "processedOptimizedData":processedOptimizedData,
+        //     "requestIds":requestIds
+        //   })
+        await adminService.saveOptimizedRequestsCombined(
+          {
+            "processedOptimizedData":processedOptimizedData,
+            "requestIds":requestIds
+          }
+        );
         setOptimizedData(processedOptimizedData);
         setIsOptimizeDialogOpen(false);
       } else {
@@ -584,7 +719,8 @@ export default function OptimiseTablePage() {
           Optimise
         </button>
         <button
-          onClick={handleSendOptimizedRequests}
+          // onClick={handleSendOptimizedRequests}
+          onClick={handleSendNonUrgentRequests}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
         >
           <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -1016,45 +1152,68 @@ export default function OptimiseTablePage() {
         </>
       )}
 
-      {isUrgentMode && (
-        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-          <table className="w-full border-collapse text-black bg-white">
-            <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-              <tr className="bg-gray-50">
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="date" title="Date" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Major Section" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Depot" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Block Section" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="line" title="Line / Road" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="time" title="Time" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="time" title="Optimized Time" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="work" title="Work Type" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="work" title="Activity" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="action" title="Actions" />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request: UserRequest) => (
+      <div>
+      <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+        Urgent Mode
+      </h2>
+      <button
+          // onClick={handleSendOptimizedRequests}
+          onClick={handleSendUrgentRequests}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+        >
+          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Send
+      </button>
+      <DaySwitcher
+        currentDate={selectedDate}
+        onDateChange={(newDate) => setSelectedDate(newDate)}
+        minDate={minDate}
+        maxDate={maxDate}
+      />
+      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
+        <table className="w-full border-collapse text-black bg-white">
+          <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+            <tr className="bg-gray-50">
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="date" title="Date" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="section" title="Major Section" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="section" title="Depot" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="section" title="Block Section" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="line" title="Line / Road" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="time" title="Time" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="time" title="Optimized Time" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="work" title="Work Type" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="work" title="Activity" />
+              </th>
+              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                <ColumnHeader icon="action" title="Actions" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {urgentRequestDate.map((request: UserRequest) => (
                 <tr
                   key={`request-${request.id}-${request.date}`}
                   className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
@@ -1176,11 +1335,19 @@ export default function OptimiseTablePage() {
             </tbody>
           </table>
         </div>
-      )}
+      </div>
 
+      
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
         © {new Date().getFullYear()} Indian Railways
       </div>
     </div>
   );
 }
+function min(allDates: Date[]): Date | null {
+  if (!allDates || allDates.length === 0) return null;
+  return allDates.reduce((minDate, currDate) =>
+    currDate < minDate ? currDate : minDate
+  );
+}
+
