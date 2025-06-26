@@ -388,6 +388,10 @@ export default function RequestTablePage() {
   const userRole = session?.user?.role || "USER";
   const selectedDepo = session?.user?.depot || "";
 
+  const [rejectRemarkPopup, setRejectRemarkPopup] = useState(false);
+  const [rejectRemarks, setRejectRemarks] = useState("");
+  const [rejectReqId, setRejectReqId] = useState("");
+
   const { data: otherRequestsData, refetch } = useGetOtherRequests(
     selectedDepo,
     currentPage,
@@ -473,7 +477,7 @@ export default function RequestTablePage() {
 
   // Reject Mutation
   const rejectMutation = useMutation({
-    mutationFn: (id: string) => userRequestService.rejectUserRequestRemark(id),
+    mutationFn:({ id, reason }: { id: string; reason: string })  => userRequestService.rejectUserRequestRemark(id, reason),
     onSuccess: () => {
       toast.success("Request rejected successfully!");
       queryClient.invalidateQueries({ queryKey: ["user-requests"] }); // Refresh data
@@ -484,18 +488,30 @@ export default function RequestTablePage() {
       console.error(error);
     },
   });
-
-  const handleAccept = async (id: string) => {
-    if (confirm("Are you sure you want to accept this request?")) {
-      await acceptMutation.mutateAsync(id);
-    }
-  };
-
-  const handleReject = async (id: string) => {
+    const handleReject = async (id: string, reason: string) => {
     if (confirm("Are you sure you want to reject this request?")) {
-      await rejectMutation.mutateAsync(id);
+      await rejectMutation.mutateAsync({id,reason});
+
+      // This will refetch the correct query and update UI
+      await queryClient.invalidateQueries({ queryKey: ["requests"] });
     }
   };
+
+ const handleAccept = async (id: string) => {
+  if (confirm("Are you sure you want to accept this request?")) {
+    try {
+      await acceptMutation.mutateAsync(id);
+      // This will refetch the correct query and update UI
+      await queryClient.invalidateQueries({ queryKey: ["requests"] });
+      toast.success("Request accepted successfully!");
+    } catch (error) {
+      toast.error("Failed to accept request.");
+      console.error(error);
+    }
+  }
+};
+
+
   // For managers, show all requests in the selected date range
   // For users, show only next 10 days
   let filteredRequests: any[] = [];
@@ -531,6 +547,31 @@ export default function RequestTablePage() {
       endDate: addDays(prev.endDate, 10),
     }));
   };
+  // AcceptOrRejectButton is declared but not used
+  const AcceptOrRejectButton = (request: any) => (
+    <div className="flex gap-2 justify-center flex-col md:flex-row">
+      {/* Accept Button */}
+      <button
+        onClick={() => handleAccept(request.id)}
+        disabled={acceptMutation.isPending || rejectMutation.isPending}
+        className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
+      >
+        {acceptMutation.isPending ? "Processing..." : "Accept"}
+      </button>
+
+      {/* Reject Button */}
+      <button
+        onClick={() => {
+          setRejectRemarkPopup(true);
+          setRejectReqId(request.id);
+        }}
+        disabled={acceptMutation.isPending || rejectMutation.isPending}
+        className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
+      >
+        {rejectMutation.isPending ? "Processing..." : "Reject"}
+      </button>
+    </div>
+  );
 
   // Handle Excel download
   const handleDownload = () => {
@@ -613,6 +654,47 @@ export default function RequestTablePage() {
 
   return (
     <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative pb-32">
+
+      {rejectRemarkPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md border border-gray-300">
+            <h2 className="text-lg font-bold mb-2 text-black">Reject Request</h2>
+            <p className="mb-2 text-black">Please provide remarks for rejection:</p>
+            <textarea
+              className="w-full border border-gray-400 rounded p-2 mb-4 text-black"
+              rows={3}
+              value={rejectRemarks}
+              onChange={(e) => setRejectRemarks(e.target.value)}
+              placeholder="Enter remarks..."
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-1 rounded bg-gray-200 text-black font-semibold"
+                onClick={() => {
+                  setRejectRemarkPopup(false);
+                  setRejectRemarks("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-1 rounded bg-red-600 text-white font-semibold"
+                disabled={!rejectRemarks.trim() || rejectMutation.isPending}
+                onClick={async () => {
+                  await handleReject(rejectReqId, rejectRemarks);
+                  setRejectRemarkPopup(false);
+                  setRejectRemarks("");
+                  setRejectReqId("");
+                }}
+              >
+                {rejectMutation.isPending ? "Rejecting..." : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
@@ -670,7 +752,10 @@ export default function RequestTablePage() {
                     Activity
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
-                    Duration
+                    Demand Duration
+                  </th>
+                  <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
+                    Sanctioned Duration
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Status
@@ -707,42 +792,56 @@ export default function RequestTablePage() {
                       {request.activity}
                     </td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {formatDuration(
-                        request.demandTimeFrom,
-                        request.demandTimeTo
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {request.isSanctioned === true ? (
+                        <>
+                          {request.sanctionedTimeFrom === null || request.sanctionedTimeTo === null ? (
+                            <span className="text-gray-500">00:00 - 00:00</span>
+                          ) : (
+                            <>
+                              {formatTime(request.sanctionedTimeFrom)} -{" "}
+                              {formatTime(request.sanctionedTimeTo)}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-gray-500">N/A</span>
                       )}
                     </td>
                     <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
-                      {request.adminRequestStatus === "ACCEPTED" ? "Y" : "N"}
+                      {request.isSanctioned === true ? "Y" : "N"}
                     </td>
-                    <td className="border border-black px-2 py-1 sticky right-0 z-10 bg-[#E6E6FA] text-center align-middle w-32">
-                      <div className="flex gap-2 justify-center flex-col md:flex-row">
-                        {/* Accept Button */}
-                        <button
-                          onClick={() => handleAccept(request.id)}
-                          disabled={
-                            acceptMutation.isPending || rejectMutation.isPending
-                          }
-                          className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
-                        >
-                          {acceptMutation.isPending
-                            ? "Processing..."
-                            : "Accept"}
-                        </button>
-
-                        {/* Reject Button */}
-                        <button
-                          onClick={() => handleReject(request.id)}
-                          disabled={
-                            acceptMutation.isPending || rejectMutation.isPending
-                          }
-                          className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
-                        >
-                          {rejectMutation.isPending
-                            ? "Processing..."
-                            : "Reject"}
-                        </button>
-                      </div>
+                    <td className="border border-black px-2 py-1 bg-[#E6E6FA] text-center align-middle w-32">
+                      {request.isSanctioned === true ? (
+                        <>
+                        {
+                          request.availedRemarks === "ACCEPTED" ? (
+                          <div className="px-2 py-1 bg-green-100 text-green-800 mx-auto">
+                            Sanctioned and Accepted
+                          </div>
+                        ) : (
+                          AcceptOrRejectButton(request)
+                        )}
+                        </>
+                      ) : (
+                        <>
+                        {
+                          request.availedRemarks !== null ? 
+                          (
+                          <div className="px-2 py-1 bg-yellow-100 text-yellow-800 mx-auto">
+                            {request.availedRemarks}
+                          </div>
+                          )
+                          :
+                          (
+                            <span className="text-gray-500">Pending with OPTG</span>
+                          )
+                        }
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}

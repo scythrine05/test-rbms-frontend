@@ -635,7 +635,7 @@ export default function CreateBlockRequestPage() {
       window.location.href = "/auth/login";
     },
   });
-const selectedDepo = "AJJE";   //temprory fix we need to change it
+// const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
   const majorSectionOptions =
@@ -926,7 +926,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
         ),
         processedLineSections: processedSectionsWithDefaults,
         adminAcceptance: false,
-        selectedDepo
+        selectedDepo: formData.selectedDepo
       };
       const response = await mutation.mutateAsync(submitData);
       if (response) {
@@ -1982,14 +1982,11 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
             </div>
           </div>
           {/* Preferred Slot row (styled to match corridor row, boxy, bold, high-contrast) */}
-          <div className="flex flex-row flex-wrap items-center gap-0 w-full mt-1" style={{ height: '36px' }}>
+          <div className="flex flex-row flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black" style={{ height: '36px' }}>
             <div
               className="flex flex-row items-center justify-center"
               style={{
                 background: "#F4A460",
-                border: "3px solid black",
-                borderRight: 0,
-                borderRadius: "8px 0 0 8px",
                 minWidth: 120,
                 maxWidth: 140,
                 height: '32px',
@@ -2004,10 +2001,6 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               className="flex flex-row items-center justify-center"
               style={{
                 background: "#F4A460",
-                borderTop: "3px solid black",
-                borderBottom: "3px solid black",
-                borderRight: 0,
-                borderLeft: "3px solid black",
                 minWidth: 50,
                 maxWidth: 70,
                 height: '32px',
@@ -2074,10 +2067,6 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               className="flex flex-row items-center justify-center"
               style={{
                 background: "#F4A460",
-                borderTop: "3px solid black",
-                borderBottom: "3px solid black",
-                borderRight: 0,
-                borderLeft: "3px solid black",
                 minWidth: 30,
                 maxWidth: 40,
                 height: '32px',
@@ -2092,9 +2081,6 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
               className="flex flex-row items-center justify-center"
               style={{
                 background: "#F4A460",
-                border: "3px solid black",
-                borderLeft: 0,
-                borderRadius: "0 8px 8px 0",
                 minWidth: 50,
                 maxWidth: 70,
                 height: '32px',
@@ -2183,7 +2169,7 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
             />
           </div>
           {/* Duration and Type of Block row, full width, equal size, compact */}
-          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-1 overflow-x-hidden">
+          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-1 ">
             <div
               className="flex flex-row items-center justify-center flex-1"
               style={{
@@ -2191,7 +2177,6 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 border: "2px solid black",
                 borderRadius: "6px",
                 minWidth: 100,
-                height: 28,
               }}
             >
               <span className="text-black font-bold text-[12px] text-center w-full bg-green-300 rounded-md px-2 py-1 shadow-sm">
@@ -2211,7 +2196,6 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 border: "2px solid black",
                 borderRadius: "6px",
                 minWidth: 100,
-                height: 28,
               }}
             >
               <span className="text-black font-bold px-1 py-0.5 text-[12px] text-center w-full">
@@ -2660,8 +2644,8 @@ const selectedDepo = "AJJE";   //temprory fix we need to change it
                 Assign Disconnection To <span className="text-red-600">*</span>
               </label>
               <select
-                name="sntDisconnectionAssignTo"
-                value={formData.sntDisconnectionAssignTo || ""}
+                name="selectedDepo"
+                value={formData.selectedDepo}
                 onChange={handleInputChange}
                 className="input gov-input"
                 style={{

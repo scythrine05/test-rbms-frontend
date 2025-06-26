@@ -304,6 +304,7 @@ const urgentRequestDate = UrgentRequests.filter((req: any) => {
   );
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
+  const [isUrgentRequests, setIsUrgentRequests] = useState<boolean>(false);
   const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(null);
   const optimizeMutation = useOptimizeRequests();
 
@@ -539,10 +540,13 @@ const handleSendNonUrgentRequests = async () => {
       // Preprocess the requests
       //const preprocessedRequests = await flattenRecords(data.data.requests);
       const requestsToOptimize = data.data.requests.filter((request: UserRequest) => {
-        return isUrgentMode
-          ? request.corridorType === "Urgent Block" || request.workType === "EMERGENCY"
-          : request.corridorType !== "Urgent Block" && request.workType !== "EMERGENCY";
-      });
+      const requestDate = format(parseISO(request.date), "yyyy-MM-dd");
+      const selected = format(selectedDate, "yyyy-MM-dd");
+
+      return isUrgentRequests
+        ? request.corridorType === "Urgent Block" && requestDate === selected
+        : request.corridorType !== "Urgent Block";
+    });
 
       // Then preprocess the filtered requests
       const preprocessedRequests = await flattenRecords(requestsToOptimize);
@@ -706,7 +710,10 @@ const handleSendNonUrgentRequests = async () => {
 
       <div className="flex justify-end py-2 gap-2">
         <button
-          onClick={() => setIsOptimizeDialogOpen(true)}
+          onClick={() => {
+            setIsOptimizeDialogOpen(true);
+            setIsUrgentRequests(false);
+          }}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
         >
           <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -773,13 +780,13 @@ const handleSendNonUrgentRequests = async () => {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setIsOptimizeDialogOpen(false)}
+                  onClick={() => setIsOptimizeDialogOpen(false) }
                   className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleOptimize}
+                  onClick={() => handleOptimize()}
                   disabled={optimizeMutation.isPending}
                   className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
                 >
@@ -1156,6 +1163,23 @@ const handleSendNonUrgentRequests = async () => {
       <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
         Urgent Mode
       </h2>
+      <button
+          onClick={() => {
+            setIsOptimizeDialogOpen(true);
+            setIsUrgentRequests(true);
+          }}
+          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+        >
+          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Optimise
+        </button>
+
       <button
           // onClick={handleSendOptimizedRequests}
           onClick={handleSendUrgentRequests}

@@ -189,8 +189,8 @@ export const userRequestService = {
     return response.data;
   },
 
-  rejectUserRequestRemark: async (id: string) => {
-    const response = await axiosInstance.put(`/api/user-request/reject/${id}`);
+  rejectUserRequestRemark: async (id: string, remarks: string) => {
+    const response = await axiosInstance.put(`/api/user-request/reject/${id}`, { remarks });
     return response.data;
   },
 };

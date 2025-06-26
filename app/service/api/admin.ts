@@ -186,6 +186,7 @@ export const adminService = {
         optimizeTimeFrom: data.optimizeTimeFrom,
         optimizeTimeTo: data.optimizeTimeTo,
         date: data.newDate, // <-- send 'date' field here
+        mobileView: true // Assuming you want to include this field
       });
       return response.data;
     } catch (error: any) {
