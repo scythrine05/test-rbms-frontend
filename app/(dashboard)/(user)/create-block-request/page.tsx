@@ -229,8 +229,8 @@ function ReviewBlockRequestModal({
                   : "Planned"}
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 mb-2">
-              <div className="flex-1 min-w-[180px]">
+            <div className="flex flex-wrap gap-4 mb-2 text-[13px]">
+              <div className="flex-1 min-w-[180px] ">
                 <b>Preferred Slot:</b> {formData.demandTimeFrom} to{" "}
                 {formData.demandTimeTo}
               </div>
@@ -1639,7 +1639,7 @@ export default function CreateBlockRequestPage() {
         className="w-full flex justify-center mt-0"
       >
         <div
-          className="rounded-t-3xl rounded-b-2xl bg-[#c6e6f7] border-2 border-black p-6 pt-4 w-full max-w-2xl flex flex-col items-start overflow-auto"
+          className="rounded-t-3xl rounded-b-2xl bg-[#c6e6f7] border-2 border-black p-5 pt-4 w-full max-w-2xl flex flex-col items-start overflow-auto"
           style={{
             boxShadow: "0 4px 12px #0002",
             borderTopLeftRadius: "32px",
@@ -1677,7 +1677,7 @@ export default function CreateBlockRequestPage() {
               onChange={handleInputChange}
               className="bg-[#e6f7c6] border-2 border-black rounded px-3 py-2 text-lg font-bold text-black appearance-none shadow-inner focus:outline-none focus:ring-2 focus:ring-green-300"
               style={{
-                backgroundImage: `url(\"data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "right 0.5rem center",
                 backgroundSize: "2rem",
@@ -1918,7 +1918,7 @@ export default function CreateBlockRequestPage() {
           </div>
 
           {/* Corridor and Preferred Slot section (horizontal, compact, responsive) */}
-          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-2 overflow-x-hidden h-15">
+          <div className="flex flex-row flex-wrap items-center w-full ">
             <div
               className="flex flex-row items-center"
               style={{
@@ -1982,18 +1982,14 @@ export default function CreateBlockRequestPage() {
             </div>
           </div>
           {/* Preferred Slot row (styled to match corridor row, boxy, bold, high-contrast) */}
-          <div className="flex flex-row flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black" style={{ height: '36px' }}>
+          <div className="flex flex-row w-full bg-[#F4A460] flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black " style={{ height: '36px' }}>
             <div
               className="flex flex-row items-center justify-center"
               style={{
-                background: "#F4A460",
-                minWidth: 120,
-                maxWidth: 140,
-                height: '32px',
                 padding: '0 4px',
               }}
             >
-              <span className="text-black font-bold px-3 py-1 text-[15px]">
+              <span className="text-black font-bold px-3 py-1 text-[13px]">
                 Preferred Slot
               </span>
             </div>
@@ -2145,8 +2141,8 @@ export default function CreateBlockRequestPage() {
             </div>
           </div>
           {/* Site Location From/To fields */}
-          <div className="flex flex-row items-center gap-2 w-full mt-2 mb-2" style={{ background: '#f3e6ff', padding: '8px 0', borderRadius: '8px', marginTop: '8px', marginBottom: '8px' }}>
-            <label className="font-bold text-black mr-2" style={{ minWidth: 100, fontSize: '15px', paddingLeft: '12px' }}>
+          <div className="flex flex-row items-center gap-2 w-full mt-2 mb-2" style={{ background: '#f3e6ff', padding: '3px 0', borderRadius: '8px', marginTop: '8px', marginBottom: '8px' }}>
+            <label className="font-bold text-black mr-2" style={{ minWidth: 100, fontSize: '13px', paddingLeft: '12px' }}>
               Site<br />Location
             </label>
             <input
@@ -2155,7 +2151,7 @@ export default function CreateBlockRequestPage() {
               value={formData.workLocationFrom || ""}
               onChange={handleInputChange}
               placeholder="From"
-              className="border-2 rounded px-2 py-1 text-[15px] text-black font-normal"
+              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
               style={{ minWidth: 80, maxWidth: 120 }}
             />
             <input
@@ -2164,7 +2160,7 @@ export default function CreateBlockRequestPage() {
               value={formData.workLocationTo || ""}
               onChange={handleInputChange}
               placeholder="To"
-              className="border-2 rounded px-2 py-1 text-[15px] text-black font-normal"
+              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
               style={{ minWidth: 80, maxWidth: 120 }}
             />
           </div>
@@ -2210,12 +2206,13 @@ export default function CreateBlockRequestPage() {
                   minWidth: 50,
                   height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+
                   backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
+                  backgroundPosition: "right",
                   backgroundSize: "1.2rem",
                 }}
-                required
+
               >
                 <option value="">Select</option>
                 <option value="Corridor Block">Corridor Block</option>
@@ -2305,20 +2302,20 @@ export default function CreateBlockRequestPage() {
                 className="flex-1"
                 style={{
                   background: "#b6f7c6",
-                  border: "2px solid black",
+                  // border: " solid black",
                   borderLeft: 0,
                   height: 28,
+                  borderRadius: 20
                 }}
               >
                 <select
                   name="workType"
                   value={formData.workType || ""}
                   onChange={handleInputChange}
-                  className="w-full bg-[#b6f7c6] border-0 text-black font-bold text-[13px] px-1 py-0.5 focus:outline-none"
+                  className="w-full h-full  text-black font-bold text-[13px] border-2 px-2 py-0.5 focus:outline-none"
                   style={{
-                    height: 24,
                     appearance: "none",
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right 0.5rem center",
                     backgroundSize: "1.2rem",
@@ -2355,7 +2352,7 @@ export default function CreateBlockRequestPage() {
                 className="flex-1"
                 style={{
                   background: "#b6f7c6",
-                  border: "2px solid black",
+                  // border: " solid black",
                   borderLeft: 0,
                   height: 28,
                 }}
@@ -2364,11 +2361,10 @@ export default function CreateBlockRequestPage() {
                   name="activity"
                   value={formData.activity || ""}
                   onChange={handleInputChange}
-                  className="w-full bg-[#b6f7c6] border-0 text-black font-bold text-[13px] px-1 py-0.5 focus:outline-none"
+                  className="w-full h-full  text-black font-bold text-[13px] border-2 px-2 py-0.5 focus:outline-none"
                   style={{
-                    height: 24,
                     appearance: "none",
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right 0.5rem center",
                     backgroundSize: "1.2rem",
@@ -2391,7 +2387,7 @@ export default function CreateBlockRequestPage() {
           {/* Fresh Caution Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[15px]">
+              <span className="text-black font-bold text-[13px]">
                 Whether Fresh Caution will be imposed after block
               </span>
               <select
@@ -2405,10 +2401,10 @@ export default function CreateBlockRequestPage() {
                 }
                 className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 40,
+                  width: 50,
                   height: 24,
                   appearance: "none",
-                  backgroundImage: `url(\"data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -2462,7 +2458,7 @@ export default function CreateBlockRequestPage() {
           {/* Power Block Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[15px]">
+              <span className="text-black font-bold text-[13px]">
                 Whether Power Block also needed:
               </span>
               <select
@@ -2476,10 +2472,10 @@ export default function CreateBlockRequestPage() {
                 }
                 className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 40,
+                  width: 50,
                   height: 24,
                   appearance: "none",
-                  backgroundImage: `url(\"data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -2573,7 +2569,7 @@ export default function CreateBlockRequestPage() {
           {/* S&T Disconnection Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[15px]">
+              <span className="text-black font-bold text-[13px]">
                 Whether S&T Disconnection also required:
               </span>
               <select
@@ -2587,10 +2583,10 @@ export default function CreateBlockRequestPage() {
                 }
                 className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 40,
+                  width: 50,
                   height: 24,
                   appearance: "none",
-                  backgroundImage: `url(\"data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12L16 20L24 12' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",

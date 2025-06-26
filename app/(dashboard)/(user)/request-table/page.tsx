@@ -818,7 +818,7 @@ export default function RequestTablePage() {
                       {request.isSanctioned === true ? (
                         <>
                         {
-                          request.availedRemarks === "ACCEPTED" ? (
+                          request.acceptRejectRemark === "ACCEPTED" ? (
                           <div className="px-2 py-1 bg-green-100 text-green-800 mx-auto">
                             Sanctioned and Accepted
                           </div>
@@ -829,10 +829,10 @@ export default function RequestTablePage() {
                       ) : (
                         <>
                         {
-                          request.availedRemarks !== null ? 
+                          request.acceptRejectRemark !== null ? 
                           (
                           <div className="px-2 py-1 bg-yellow-100 text-yellow-800 mx-auto">
-                            {request.availedRemarks}
+                            {request.acceptRejectRemark}
                           </div>
                           )
                           :
