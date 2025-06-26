@@ -54,9 +54,10 @@ export default function DashboardPage() {
           <a href="/create-block-request" className="w-full rounded-2xl bg-[#eeb8f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">ENTER NEW BLOCK REQUEST</a>
           <a href="/edit-request" className="w-full rounded-2xl bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">EDIT/CANCEL PREVIOUS BLOCK REQUESTS</a>
           <a href="/request-table" className="w-full rounded-2xl bg-[#c7c7f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">SUMMARY OF MY BLOCK REQUESTS</a>
-          <a href="https://external-block-site.example.com" target="_blank" rel="noopener noreferrer" className="w-full rounded-2xl bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
+          <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}`}  className="w-full rounded-2xl bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
           <a href="/generate-reports" className="w-full rounded-2xl bg-[#ffd180] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">GENERATE REPORTS</a>
         </div>
+
         {/* Logout button */}
         <div className="w-full flex justify-center mt-10 mb-4">
           <form action="/auth/login" method="get" onSubmit={async (e) => { e.preventDefault(); await import('next-auth/react').then(mod => mod.signOut({ redirect: true, callbackUrl: '/auth/login' })); }}>
@@ -162,7 +163,50 @@ export default function DashboardPage() {
       </div>
     );
   }
-
+ if (session?.user?.role === "JE") {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
+        {/* Header */}
+        <div className="w-full border border-black bg-yellow-200 flex items-center justify-center relative p-2" style={{ minHeight: 60 }}>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32" stroke="black" strokeWidth={2} className="w-9 h-9"><rect x="6" y="12" width="20" height="12" rx="2" fill="#fffbe9" stroke="black" strokeWidth="2" /><path d="M4 14L16 4L28 14" stroke="black" strokeWidth="2" fill="none" /></svg>
+          </span>
+          <span className="text-2xl font-bold text-black">Home</span>
+        </div>
+        {/* RBMS badge */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-green-200 rounded-2xl px-8 py-2">
+            <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
+          </div>
+        </div>
+        {/* Designation bar */}
+        <div className="w-full flex justify-center mt-4">
+          <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+          </div>
+        </div>
+        {/* Navigation buttons */}
+        <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
+          <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}`}>
+            <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+              VIEW BLOCK DETAILS
+            </button>
+          </a>
+        </div>
+        {/* Logout button */}
+        <div className="w-full flex justify-center mt-10 mb-4">
+          <form action="/auth/login" method="get" onSubmit={async (e) => { e.preventDefault(); await import('next-auth/react').then(mod => mod.signOut({ redirect: true, callbackUrl: '/auth/login' })); }}>
+            <button type="submit" className="flex items-center gap-2 bg-[#dbe6fd] border border-black rounded px-6 py-2 text-lg font-bold text-black shadow hover:bg-[#c7d7f7] transition">
+              <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
+                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' /></svg>
+              </span>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
   // Default dashboard UI for other roles
   return (
     <div className="max-w-full overflow-hidden text-black">
@@ -206,6 +250,21 @@ export default function DashboardPage() {
             </div>
           ) : null
         }
+
+
+  {
+          session?.user?.role === "JE" ? (
+            <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
+              <a href="/admin/request-table">
+                <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+                  VIEW BLOCK DETAILS
+                </button>
+              </a>
+           
+            </div>
+          ) : null
+        }
+
       </div>
     </div>
   );
