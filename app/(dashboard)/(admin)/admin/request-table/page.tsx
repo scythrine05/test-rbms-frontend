@@ -15,11 +15,25 @@ export default function AdminRequestTablePage() {
   });
   const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
   const [blockTypeDropdownOpen, setBlockTypeDropdownOpen] = useState(false);
-  const [sseDropdownOpen, setSseDropdownOpen] = useState(false);
+  // const [sseDropdownOpen, setSseDropdownOpen] = useState(false);
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [selectedSSEs, setSelectedSSEs] = useState<string[]>([]);
-  const [blockType, setBlockType] = useState("All");
+  const [blockType, setBlockType] = useState<string[]>([]);
+  const[type,setType]=useState<string[]>([]);
+  const[section,setSection]=useState<string[]>([]);
+  const[sse,setSse]=useState<string[]>([]);
 
+  useEffect(()=>{
+setType(blockType)
+},[blockType])
+
+ useEffect(()=>{
+setSection(selectedSections)
+},[selectedSections])
+
+//  useEffect(()=>{
+// setSse(selectedSSEs)
+// },[selectedSSEs])
   // Fetch all requests for admin
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-requests", customDateRange],
@@ -68,10 +82,9 @@ export default function AdminRequestTablePage() {
     )
   );
   const blockTypeOptions = [
-    { label: "All", value: "All" },
-    { label: "Corridor (C)", value: "CORRIDOR" },
-    { label: "Non-corridor(NC)", value: "NON_CORRIDOR" },
-    { label: "Emergency (E)", value: "EMERGENCY" },
+    { label: "Corridor (C)", value: "Corridor" },
+    { label: "Non-corridor(NC)", value: "Outside Corridor" },
+    { label: "Emergency (E)", value: "Urgent Block" },
     { label: "Mega Block (M)", value: "MEGA_BLOCK" },
   ];
 
@@ -126,9 +139,14 @@ export default function AdminRequestTablePage() {
       selectedSSEs.includes(r.user?.name)
     );
   }
-  if (blockType !== "All") {
-    filteredRequests = filteredRequests.filter(
-      (r) => r.corridorType === blockType
+  // if (blockType !== "All") {
+  //   filteredRequests = filteredRequests.filter(
+  //     (r) => r.corridorType === blockType
+  //   );
+  // }
+  if (blockType.length > 0) {
+    filteredRequests = filteredRequests.filter((r) =>
+      blockType.includes(r.corridorType)
     );
   }
 
@@ -137,41 +155,85 @@ export default function AdminRequestTablePage() {
     (r: UserRequest) => r.status === "APPROVED" && !r.isSanctioned
   ).length;
 
-  // Download CSV
-  const handleDownloadCSV = () => {
-    if (!filteredRequests.length) return;
+const handleDownloadCSV = () => {
+  try {
+    if (!filteredRequests || filteredRequests.length === 0) {
+      alert("No data available to download!");
+      return;
+    }
+
+    // Define CSV headers (add more if needed)
     const headers = [
       "Date",
-      "ID",
-      "Block Section",
-      "Line",
+      "Request ID",
+      "Block Section", 
+      "Line/Road",
       "Activity",
       "Status",
+      "Start Time (HH:MM)",
+      "End Time (HH:MM)",
+      "Corridor Type",
+      "SSE Name",
+      "Work Location",
+      "Remarks"
     ];
-    const rows = filteredRequests.map((r) => [
-      formatDate(r.date),
-      r.id,
-      r.missionBlock,
-      r.processedLineSections?.[0]?.lineName || "N/A",
-      r.activity,
-      getStatusDisplay(r).label,
-    ]);
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
-    ].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+    // Map data to CSV rows with exact time formatting
+    const rows = filteredRequests.map((request) => {
+      const startTime = request.demandTimeFrom 
+        ? new Date(request.demandTimeFrom).toISOString().substr(11, 5) 
+        : "N/A";
+      
+      const endTime = request.demandTimeTo
+        ? new Date(request.demandTimeTo).toISOString().substr(11, 5)
+        : "N/A";
+
+      return [
+        formatDate(request.date), // DD-MM-YYYY
+        request.id,
+        request.missionBlock,
+        request.processedLineSections?.[0]?.road || "N/A",
+        request.activity,
+        getStatusDisplay(request).label,
+        startTime,  // Exact time in HH:MM format
+        endTime,    // Exact time in HH:MM format
+        request.corridorType,
+        request.user?.name || "N/A",
+        request.workLocationFrom,
+        request.requestremarks
+      ];
+    });
+
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    
+    rows.forEach(row => {
+      csvContent += row.map(field => {
+        // Handle null/undefined and escape quotes
+        const str = field !== null && field !== undefined 
+          ? field.toString().replace(/"/g, '""') 
+          : "";
+        return `"${str}"`;
+      }).join(",") + "\n";
+    });
+
+    // Trigger download
+    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `block_details_${customDateRange.start}_to_${customDateRange.end}.csv`
-    );
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `block_requests_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+
+  } catch (error) {
+    console.error("Download failed:", error);
+    alert("Failed to generate CSV. Please check console for details.");
+  }
+};
+
+// Ensure these match your table's date/time formatting
 
   if (isLoading) {
     return (
@@ -267,13 +329,14 @@ export default function AdminRequestTablePage() {
           />
         </div>
         {/* Block Type Dropdown (Radio) */}
+
         <div className="relative inline-block">
           <button
             onClick={() => setBlockTypeDropdownOpen((v) => !v)}
             className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
           >
-            {blockTypeOptions.find((opt) => opt.value === blockType)?.label ||
-              "Block Type"}
+            Block Type:{" "}
+            {blockType.length === 0 ? "All" : `${blockType.length} selected`}
             <span className="ml-1">▼</span>
           </button>
           {blockTypeDropdownOpen && (
@@ -284,13 +347,15 @@ export default function AdminRequestTablePage() {
                   className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
                 >
                   <input
-                    type="radio"
-                    name="blockType"
-                    checked={blockType === opt.value}
-                    onChange={() => {
-                      setBlockType(opt.value);
-                      setBlockTypeDropdownOpen(false);
-                    }}
+                    type="checkbox"
+                    checked={blockType.includes(opt.value)}
+                    onChange={() =>
+                      setBlockType((prev) =>
+                        prev.includes(opt.value)
+                          ? prev.filter((s) => s !== opt.value)
+                          : [...prev, opt.value]
+                      )
+                    }
                     className="mr-2 accent-[#B57CF6]"
                   />
                   {opt.label}
@@ -299,6 +364,7 @@ export default function AdminRequestTablePage() {
             </div>
           )}
         </div>
+
         {/* Section Dropdown (Multi-select) */}
         <div className="relative inline-block">
           <button
@@ -312,7 +378,7 @@ export default function AdminRequestTablePage() {
             <span className="ml-1">▼</span>
           </button>
           {sectionDropdownOpen && (
-            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-50 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
               {sectionOptions.map((section) => (
                 <label
                   key={section}
@@ -337,7 +403,7 @@ export default function AdminRequestTablePage() {
           )}
         </div>
         {/* SSE Dropdown (Multi-select) */}
-        <div className="relative inline-block">
+        {/* <div className="relative inline-block">
           <button
             onClick={() => setSseDropdownOpen((v) => !v)}
             className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
@@ -349,7 +415,7 @@ export default function AdminRequestTablePage() {
             <span className="ml-1">▼</span>
           </button>
           {sseDropdownOpen && (
-            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-50 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
               {sseOptions.map((sse) => (
                 <label
                   key={sse}
@@ -372,52 +438,9 @@ export default function AdminRequestTablePage() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
-      {/* Table Section in a scrollable window */}
-      {/* <div className="mx-2 mt-2 overflow-x-auto">
-        <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
-          <table className="w-full text-black text-sm relative">
-            <thead>
-              <tr className="bg-[#E8F4F8] text-black">
-                <th className="border-2 border-black p-1">Date</th>
-                <th className="border-2 border-black p-1">ID</th>
-                <th className="border-2 border-black p-1">Block Section</th>
-                <th className="border-2 border-black p-1">UP/DN/SL/RO AD NO.</th>
-                <th className="border-2 border-black p-1">Activity</th>
-                <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#E8F4F8]">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request: UserRequest, idx: number) => {
-                const status = getStatusDisplay(request);
-                return (
-                  <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
-                    <td className="border border-black p-1 text-center">{formatDate(request.date)}</td>
-                    <td className="border border-black p-1 text-center">
-                      <Link
-                        href={`/admin/optimise-table?id=${request.id}`}
-                        className="text-[#13529e] hover:underline font-semibold"
-                      >
-                        {request.id}
-                      </Link>
-                    </td>
-                    <td className="border border-black p-1">{request.missionBlock}</td>
-                    <td className="border border-black p-1 text-center">{request.processedLineSections?.[0]?.lineName || 'N/A'}</td>
-                    <td className="border border-black p-1">{request.activity}</td>
-                    <td className="border border-black p-1 sticky right-0 z-10 text-center font-bold" style={status.style}>
-                      <span className="w-full block text-base">{status.label}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div> */}
-
-
-  <div className="text-center">
+      {/* <div className="text-center">
         <h1
           style={{
             background: "#cfd4ff",
@@ -425,16 +448,212 @@ export default function AdminRequestTablePage() {
             width: "98%",
             margin: "0 auto",
             padding: "0 10px",
-             borderRadius: "1px",
-             height: "50px",
-             display: "flex",
-             justifyContent: "center",
-             alignItems: "center"
+            borderRadius: "1px",
+            height: "50px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
           Block Summary
         </h1>
-      </div>
+        <div>
+                    <input
+            type="date"
+            value={customDateRange.start}
+            onChange={(e) =>
+              setCustomDateRange((r) => ({ ...r, start: e.target.value }))
+            }
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          />
+          <span className="px-1 text-black text-xs">to</span>
+          <input
+            type="date"
+            value={customDateRange.end}
+            onChange={(e) =>
+              setCustomDateRange((r) => ({ ...r, end: e.target.value }))
+            }
+            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+          />
+          <span>Type</span>
+        <span>{type.join(", ")}</span>
+          <span>Section</span>
+        <span>{section.join(", ")}</span>
+          <span>SSE</span>
+        <span>{sse.join(", ")}</span>
+
+        </div>
+      </div> */}
+      <div className="text-center">
+  <h1
+    style={{
+      background: "#cfd4ff",
+      color: "black",
+      width: "98%",
+      margin: "0 auto",
+      padding: "0 10px",
+      borderRadius: "1px",
+      height: "50px",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    Block Summary
+  </h1>
+{/* <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "baseline",
+    gap: "15px",
+    fontSize: "12px",
+    lineHeight: "1.2",
+    width: "98%",
+    margin: "0 auto 1px auto",
+    padding: "5px 10px",
+    backgroundColor: "#c1f0c8", // Only background color applied here
+  }}
+>
+  <div style={{ display: "flex", alignItems: "center" }}>
+    <input
+      type="date"
+      value={customDateRange.start}
+      onChange={(e) =>
+        setCustomDateRange((r) => ({ ...r, start: e.target.value }))
+      }
+      style={{
+        padding: "2px",
+        border: "1px solid black",
+        color: "black",
+        backgroundColor: "white",
+        width: "100px",
+        outline: "none",
+        fontSize: "12px",
+        height: "22px",
+      }}
+    />
+    <span style={{ padding: "0 3px" }}>to</span>
+    <input
+      type="date"
+      value={customDateRange.end}
+      onChange={(e) =>
+        setCustomDateRange((r) => ({ ...r, end: e.target.value }))
+      }
+      style={{
+        padding: "2px",
+        border: "1px solid black",
+        color: "black",
+        backgroundColor: "white",
+        width: "100px",
+        outline: "none",
+        fontSize: "12px",
+        height: "22px",
+      }}
+    />
+  </div>
+
+  <div style={{ display: "flex", alignItems: "center", color: "black"}}>
+    <span style={{ fontWeight: "bold", marginRight: "2px" }}>Type:</span>
+    <span>{type.join(", ")}</span>
+  </div>
+
+  <div style={{ display: "flex", alignItems: "center",color: "black" }}>
+    <span style={{ fontWeight: "bold", marginRight: "2px" }}>Section:</span>
+    <span>{section.join(", ")}</span>
+  </div>
+
+  <div style={{ display: "flex", alignItems: "center",color: "black" }}>
+    <span style={{ fontWeight: "bold", marginRight: "2px" }}>SSE:</span>
+    <span>{sse.join(", ")}</span>
+  </div>
+</div> */}
+<div style={{
+  display: "flex",
+  width: "98%",
+  margin: "0 auto 1px auto",
+  backgroundColor: "#c1f0c8",
+  padding: "8px 10px",
+  position: "relative",
+  overflow: "hidden"
+}}>
+  {/* Fixed Date Range - doesn't scroll */}
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+    marginRight: "15px",
+    position: "relative",
+    zIndex: 2,
+  }}>
+    <input
+      type="date"
+      value={customDateRange.start}
+      onChange={(e) => setCustomDateRange((r) => ({ ...r, start: e.target.value }))}
+      style={{
+        padding: "2px",
+        border: "1px solid black",
+        width: "90px",
+        fontSize: "12px",
+        height: "22px",
+        backgroundColor: "white",
+        color:"black"
+      }}
+    />
+    <span style={{ padding: "0 3px" ,color:"black"}}>to</span>
+    <input
+      type="date"
+      value={customDateRange.end}
+      onChange={(e) => setCustomDateRange((r) => ({ ...r, end: e.target.value }))}
+      style={{
+        padding: "2px",
+        border: "1px solid black",
+        width: "90px",
+        fontSize: "12px",
+        height: "22px",
+        backgroundColor: "white",
+        color:"black"
+
+      }}
+    />
+  </div>
+
+  {/* Scrollable Filter Fields */}
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    fontSize: "12px",
+    overflowX: "auto",
+    flexGrow: 1,
+    paddingLeft: "10px",
+    scrollbarWidth: "none", /* Firefox */
+    msOverflowStyle: "none" /* IE/Edge */
+  }}>
+    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+      <span style={{ fontWeight: "bold", marginRight: "2px",color:"black" }}>Type:</span>
+      <span style={{color:"black"}}>{type.join(", ")}</span>
+    </div>
+
+    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+      <span style={{ fontWeight: "bold", marginRight: "2px",color:"black" }}>Section:</span>
+      <span style={{color:"black"}}>{section.join(", ")}</span>
+    </div>
+
+    {/* <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+      <span style={{ fontWeight: "bold", marginRight: "2px" }}>SSE:</span>
+      <span>{sse.join(", ")}</span>
+    </div> */}
+  </div>
+
+  {/* Hide scrollbar (for Chrome/Safari) */}
+  <style>{`
+    div::-webkit-scrollbar {
+      display: none;
+    }
+  `}</style>
+</div>
+</div>
 
       <div className="mx-2  overflow-x-auto">
         <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
@@ -469,7 +688,7 @@ export default function AdminRequestTablePage() {
                         href={`/admin/optimise-table?id=${request.id}`}
                         className="text-[#13529e] hover:underline font-semibold"
                       >
-                        {request.id}
+                        {request.divisionId||request.id}
                       </Link>
                     </td>
                     <td className="border border-black p-1">
@@ -497,10 +716,16 @@ export default function AdminRequestTablePage() {
         </div>
       </div>
       <div className="text-center mt-1">
-        <h3 className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full" style={{color:"black"}}>
+        <h3
+          className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full"
+          style={{ color: "black" }}
+        >
           Click ID to see details of a Block.
         </h3>
-        <h3 className="bg-[#cfd4ff]  mt-1 rounded-full py-2" style={{color:"black"}}>
+        <h3
+          className="bg-[#cfd4ff]  mt-1 rounded-full py-2"
+          style={{ color: "black" }}
+        >
           For printing the complete table, click to download in{" "}
           <span className="font-bold" style={{ color: "#5ec4e2" }}>
             .csv format

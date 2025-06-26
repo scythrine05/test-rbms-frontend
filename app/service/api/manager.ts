@@ -33,6 +33,7 @@ export interface UsersResponse {
 }
 
 export interface UserRequest {
+    divisionId: string;
     sanctionedTimeTo: any;
     sanctionedTimeFrom: any;
     optimizeData: any;
