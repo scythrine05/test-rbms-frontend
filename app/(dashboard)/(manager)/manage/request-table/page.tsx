@@ -926,92 +926,166 @@ export default function ManagerRequestTablePage() {
     (r: UserRequest) => r.status === "PENDING" && r.managerAcceptance === false
   ).length;
 
-  const handleDownloadCSV = () => {
-    try {
-      if (!filteredRequests || filteredRequests.length === 0) {
-        alert("No data available to download!");
-        return;
-      }
+  // const handleDownloadCSV = () => {
+  //   try {
+  //     if (!filteredRequests || filteredRequests.length === 0) {
+  //       alert("No data available to download!");
+  //       return;
+  //     }
 
-      // Define CSV headers
-      const headers = [
-        "Date",
-        "Request ID",
-        "Block Section",
-        "Line/Road",
-        "Activity",
-        "Status",
-        "Start Time (HH:MM)",
-        "End Time (HH:MM)",
-        "Corridor Type",
-        "SSE Name",
-        "Work Location",
-        "Remarks",
-      ];
+  //     // Define CSV headers
+  //     const headers = [
+  //       "Date",
+  //       "Request ID",
+  //       "Block Section",
+  //       "Line/Road",
+  //       "Activity",
+  //       "Status",
+  //       "Start Time (HH:MM)",
+  //       "End Time (HH:MM)",
+  //       "Corridor Type",
+  //       "SSE Name",
+  //       "Work Location",
+  //       "Remarks",
+  //     ];
 
-      // Map data to CSV rows
-      const rows = filteredRequests.map((request) => {
-        // Function to get exact time as stored in DB
-        const getExactTime = (dateString: string | null) => {
-          if (!dateString) return "N/A";
+  //     // Map data to CSV rows
+  //     const rows = filteredRequests.map((request) => {
+  //       // Function to get exact time as stored in DB
+  //       const getExactTime = (dateString: string | null) => {
+  //         if (!dateString) return "N/A";
 
-          try {
-            // Extract exactly what's after 'T' and before '.'
-            const isoString = new Date(dateString).toISOString();
-            const timePart = isoString.split("T")[1].split(".")[0];
-            return timePart.substring(0, 5); // Get HH:MM
-          } catch {
-            return "N/A";
-          }
-        };
+  //         try {
+  //           // Extract exactly what's after 'T' and before '.'
+  //           const isoString = new Date(dateString).toISOString();
+  //           const timePart = isoString.split("T")[1].split(".")[0];
+  //           return timePart.substring(0, 5); // Get HH:MM
+  //         } catch {
+  //           return "N/A";
+  //         }
+  //       };
 
-        return [
-          formatDate(request.date),
-          request.divisionId || request.id,
-          request.missionBlock,
-          request.processedLineSections?.[0]?.road || "N/A",
-          request.activity,
-          getExactTime(request.demandTimeFrom),
-          getExactTime(request.demandTimeTo),
-          request.corridorType,
-          request.user?.name || "N/A",
-          request.workLocationFrom,
-          request.requestremarks,
-        ];
-      });
+  //       return [
+  //         formatDate(request.date),
+  //         request.divisionId || request.id,
+  //         request.missionBlock,
+  //         request.processedLineSections?.[0]?.road || "N/A",
+  //         request.activity,
+  //         getExactTime(request.demandTimeFrom),
+  //         getExactTime(request.demandTimeTo),
+  //         request.corridorType,
+  //         request.user?.name || "N/A",
+  //         request.workLocationFrom,
+  //         request.requestremarks,
+  //       ];
+  //     });
 
-      // Create CSV content
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += headers.join(",") + "\n";
+  //     // Create CSV content
+  //     let csvContent = "data:text/csv;charset=utf-8,";
+  //     csvContent += headers.join(",") + "\n";
 
-      rows.forEach((row) => {
-        csvContent +=
-          row
-            .map(
-              (field) =>
-                `"${
-                  field !== null ? field.toString().replace(/"/g, '""') : ""
-                }"`
-            )
-            .join(",") + "\n";
-      });
+  //     rows.forEach((row) => {
+  //       csvContent +=
+  //         row
+  //           .map(
+  //             (field) =>
+  //               `"${
+  //                 field !== null ? field.toString().replace(/"/g, '""') : ""
+  //               }"`
+  //           )
+  //           .join(",") + "\n";
+  //     });
 
-      // Trigger download
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute(
-        "download",
-        `block_requests_${new Date().toISOString().slice(0, 10)}.csv`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Failed to generate CSV. Please check console for details.");
+  //     // Trigger download
+  //     const encodedUri = encodeURI(csvContent);
+  //     const link = document.createElement("a");
+  //     link.setAttribute("href", encodedUri);
+  //     link.setAttribute(
+  //       "download",
+  //       `block_requests_${new Date().toISOString().slice(0, 10)}.csv`
+  //     );
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //     alert("Failed to generate CSV. Please check console for details.");
+  //   }
+  // };
+  const handleDownloadExcel = async () => {
+  try {
+    if (!filteredRequests || filteredRequests.length === 0) {
+      alert("No data available to download!");
+      return;
     }
-  };
+
+    // Import xlsx library dynamically to reduce bundle size
+    const XLSX = await import('xlsx');
+
+    // Define Excel headers
+    const headers = [
+      "Date",
+      "Request ID",
+      "Block Section",
+      "Line/Road",
+      "Activity",
+      "Status",
+      "Start Time (HH:MM)",
+      "End Time (HH:MM)",
+      "Corridor Type",
+      "SSE Name",
+      "Work Location",
+      "Remarks",
+    ];
+
+    // Map data to Excel rows
+    const rows = filteredRequests.map((request) => {
+      // Function to get exact time as stored in DB
+      const getExactTime = (dateString: string | null) => {
+        if (!dateString) return "N/A";
+
+        try {
+          // Extract exactly what's after 'T' and before '.'
+          const isoString = new Date(dateString).toISOString();
+          const timePart = isoString.split("T")[1].split(".")[0];
+          return timePart.substring(0, 5); // Get HH:MM
+        } catch {
+          return "N/A";
+        }
+      };
+
+      return [
+        formatDate(request.date),
+        request.divisionId || request.id,
+        request.missionBlock,
+        request.processedLineSections?.[0]?.road || request.processedLineSections?.[0]?.lineName,
+        request.activity,
+        request.status || "N/A", // Added status which was in headers but missing in rows
+        getExactTime(request.demandTimeFrom),
+        getExactTime(request.demandTimeTo),
+        request.corridorType,
+        request.user?.name || "N/A",
+        request.workLocationFrom,
+        request.requestremarks,
+      ];
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
+
+    // Generate Excel file and trigger download
+    const dateString = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `block_requests_${dateString}.xlsx`);
+    
+  } catch (error) {
+    console.error("Download failed:", error);
+    alert("Failed to generate Excel file. Please check console for details.");
+  }
+};
   if (isLoading) {
     return (
       <div className="bg-white p-3 border border-black mb-3">
@@ -1425,7 +1499,7 @@ export default function ManagerRequestTablePage() {
         >
           For printing the complete table, click to download in{" "}
           <span className="font-bold" style={{ color: "#5ec4e2" }}>
-            .csv format
+            .xlsx format
           </span>
         </h3>
       </div>
@@ -1433,7 +1507,7 @@ export default function ManagerRequestTablePage() {
       {/* Action Buttons below the scrollable window */}
       <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
         <button
-          onClick={handleDownloadCSV}
+          onClick={handleDownloadExcel}
           className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold"
         >
           Download
