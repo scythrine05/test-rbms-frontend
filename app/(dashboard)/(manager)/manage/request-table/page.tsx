@@ -1269,6 +1269,7 @@ export default function ManagerRequestTablePage() {
               backgroundColor: "white",
               color: "black",
             }}
+            disabled
           />
           <span style={{ padding: "0 3px", color: "black" }}>to</span>
           <input
@@ -1286,6 +1287,7 @@ export default function ManagerRequestTablePage() {
               backgroundColor: "white",
               color: "black",
             }}
+            disabled
           />
         </div>
 
@@ -1381,11 +1383,11 @@ export default function ManagerRequestTablePage() {
                         {request.divisionId || request.id}
                       </Link>
                     </td>
-                    <td className="border border-black p-1">
-                      {request.selectedSection}
+                    <td className="border border-black p-1 text-center">
+                      {request.missionBlock}
                     </td>
                     <td className="border border-black p-1 text-center">
-                      {request.processedLineSections?.[0]?.lineName || "N/A"}
+                      {request.processedLineSections?.[0]?.lineName ||request.processedLineSections?.[0]?.road|| "N/A"}
                     </td>
                     <td className="border border-black p-1 text-center">
                       {formatTime(request.demandTimeFrom)} -{" "}

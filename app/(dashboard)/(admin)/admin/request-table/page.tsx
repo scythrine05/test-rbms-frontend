@@ -19,21 +19,21 @@ export default function AdminRequestTablePage() {
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [selectedSSEs, setSelectedSSEs] = useState<string[]>([]);
   const [blockType, setBlockType] = useState<string[]>([]);
-  const[type,setType]=useState<string[]>([]);
-  const[section,setSection]=useState<string[]>([]);
-  const[sse,setSse]=useState<string[]>([]);
+  const [type, setType] = useState<string[]>([]);
+  const [section, setSection] = useState<string[]>([]);
+  const [sse, setSse] = useState<string[]>([]);
 
-  useEffect(()=>{
-setType(blockType)
-},[blockType])
+  useEffect(() => {
+    setType(blockType);
+  }, [blockType]);
 
- useEffect(()=>{
-setSection(selectedSections)
-},[selectedSections])
+  useEffect(() => {
+    setSection(selectedSections);
+  }, [selectedSections]);
 
-//  useEffect(()=>{
-// setSse(selectedSSEs)
-// },[selectedSSEs])
+  //  useEffect(()=>{
+  // setSse(selectedSSEs)
+  // },[selectedSSEs])
   // Fetch all requests for admin
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-requests", customDateRange],
@@ -151,85 +151,91 @@ setSection(selectedSections)
     (r: UserRequest) => r.status === "APPROVED" && !r.isSanctioned
   ).length;
 
-const handleDownloadCSV = () => {
-  try {
-    if (!filteredRequests || filteredRequests.length === 0) {
-      alert("No data available to download!");
-      return;
-    }
+  const handleDownloadCSV = () => {
+    try {
+      if (!filteredRequests || filteredRequests.length === 0) {
+        alert("No data available to download!");
+        return;
+      }
 
-    // Define CSV headers (add more if needed)
-    const headers = [
-      "Date",
-      "Request ID",
-      "Block Section", 
-      "Line/Road",
-      "Activity",
-      "Status",
-      "Start Time (HH:MM)",
-      "End Time (HH:MM)",
-      "Corridor Type",
-      "SSE Name",
-      "Work Location",
-      "Remarks"
-    ];
-
-    // Map data to CSV rows with exact time formatting
-    const rows = filteredRequests.map((request) => {
-      const startTime = request.demandTimeFrom 
-        ? new Date(request.demandTimeFrom).toISOString().slice(11, 5) 
-        : "N/A";
-      
-      const endTime = request.demandTimeTo
-        ? new Date(request.demandTimeTo).toISOString().slice(11, 5)
-        : "N/A";
-
-      return [
-        formatDate(request.date), // DD-MM-YYYY
-        request.id,
-        request.missionBlock,
-        request.processedLineSections?.[0]?.road || "N/A",
-        request.activity,
-        getStatusDisplay(request).label,
-        startTime,  // Exact time in HH:MM format
-        endTime,    // Exact time in HH:MM format
-        request.corridorType,
-        request.user?.name || "N/A",
-        request.workLocationFrom,
-        request.requestremarks
+      // Define CSV headers (add more if needed)
+      const headers = [
+        "Date",
+        "Request ID",
+        "Block Section",
+        "Line/Road",
+        "Activity",
+        "Status",
+        "Start Time (HH:MM)",
+        "End Time (HH:MM)",
+        "Corridor Type",
+        "SSE Name",
+        "Work Location",
+        "Remarks",
       ];
-    });
 
-    // Create CSV content
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += headers.join(",") + "\n";
-    
-    rows.forEach(row => {
-      csvContent += row.map(field => {
-        // Handle null/undefined and escape quotes
-        const str = field !== null && field !== undefined 
-          ? field.toString().replace(/"/g, '""') 
-          : "";
-        return `"${str}"`;
-      }).join(",") + "\n";
-    });
+      // Map data to CSV rows with exact time formatting
+      const rows = filteredRequests.map((request) => {
+        const startTime = request.demandTimeFrom
+          ? new Date(request.demandTimeFrom).toISOString().slice(11, 5)
+          : "N/A";
 
-    // Trigger download
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `block_requests_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        const endTime = request.demandTimeTo
+          ? new Date(request.demandTimeTo).toISOString().slice(11, 5)
+          : "N/A";
 
-  } catch (error) {
-    console.error("Download failed:", error);
-    alert("Failed to generate CSV. Please check console for details.");
-  }
-};
+        return [
+          formatDate(request.date), // DD-MM-YYYY
+          request.id,
+          request.missionBlock,
+          request.processedLineSections?.[0]?.road || "N/A",
+          request.activity,
+          getStatusDisplay(request).label,
+          startTime, // Exact time in HH:MM format
+          endTime, // Exact time in HH:MM format
+          request.corridorType,
+          request.user?.name || "N/A",
+          request.workLocationFrom,
+          request.requestremarks,
+        ];
+      });
 
-// Ensure these match your table's date/time formatting
+      // Create CSV content
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += headers.join(",") + "\n";
+
+      rows.forEach((row) => {
+        csvContent +=
+          row
+            .map((field) => {
+              // Handle null/undefined and escape quotes
+              const str =
+                field !== null && field !== undefined
+                  ? field.toString().replace(/"/g, '""')
+                  : "";
+              return `"${str}"`;
+            })
+            .join(",") + "\n";
+      });
+
+      // Trigger download
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute(
+        "download",
+        `block_requests_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to generate CSV. Please check console for details.");
+    }
+  };
+
+  // Ensure these match your table's date/time formatting
 
   if (isLoading) {
     return (
@@ -270,7 +276,7 @@ const handleDownloadCSV = () => {
           </h1>
         </div>
       </div>
- 
+
       {/* Summary Box */}
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
@@ -394,108 +400,139 @@ const handleDownloadCSV = () => {
         </div>
       </div>
       <div className="text-center">
-  <h1
-    style={{
-      background: "#cfd4ff",
-      color: "black",
-      width: "98%",
-      margin: "0 auto",
-      padding: "0 10px",
-      borderRadius: "1px",
-      height: "50px",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-  >
-    Block Summary
-  </h1>
-<div style={{
-  display: "flex",
-  width: "98%",
-  margin: "0 auto 1px auto",
-  backgroundColor: "#c1f0c8",
-  padding: "8px 10px",
-  position: "relative",
-  overflow: "hidden"
-}}>
-  {/* Fixed Date Range - doesn't scroll */}
-  <div style={{
-    display: "flex",
-    alignItems: "center",
-    flexShrink: 0,
-    marginRight: "15px",
-    position: "relative",
-    zIndex: 2,
-  }}>
-    <input
-      type="date"
-      value={customDateRange.start}
-      onChange={(e) => setCustomDateRange((r) => ({ ...r, start: e.target.value }))}
-      style={{
-        padding: "2px",
-        border: "1px solid black",
-        width: "90px",
-        fontSize: "12px",
-        height: "22px",
-        backgroundColor: "white",
-        color:"black"
-      }}
-    />
-    <span style={{ padding: "0 3px" ,color:"black"}}>to</span>
-    <input
-      type="date"
-      value={customDateRange.end}
-      onChange={(e) => setCustomDateRange((r) => ({ ...r, end: e.target.value }))}
-      style={{
-        padding: "2px",
-        border: "1px solid black",
-        width: "90px",
-        fontSize: "12px",
-        height: "22px",
-        backgroundColor: "white",
-        color:"black"
+        <h1
+          style={{
+            background: "#cfd4ff",
+            color: "black",
+            width: "98%",
+            margin: "0 auto",
+            padding: "0 10px",
+            borderRadius: "1px",
+            height: "50px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          Block Summary
+        </h1>
+        <div
+          style={{
+            display: "flex",
+            width: "98%",
+            margin: "0 auto 1px auto",
+            backgroundColor: "#c1f0c8",
+            padding: "8px 10px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Fixed Date Range - doesn't scroll */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
+              marginRight: "15px",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            <input
+              type="date"
+              value={customDateRange.start}
+              onChange={(e) =>
+                setCustomDateRange((r) => ({ ...r, start: e.target.value }))
+              }
+              style={{
+                padding: "2px",
+                border: "1px solid black",
+                width: "90px",
+                fontSize: "12px",
+                height: "22px",
+                backgroundColor: "white",
+                color: "black",
+              }}
+              disabled
+            />
+            <span style={{ padding: "0 3px", color: "black" }}>to</span>
+            <input
+              type="date"
+              value={customDateRange.end}
+              onChange={(e) =>
+                setCustomDateRange((r) => ({ ...r, end: e.target.value }))
+              }
+              style={{
+                padding: "2px",
+                border: "1px solid black",
+                width: "90px",
+                fontSize: "12px",
+                height: "22px",
+                backgroundColor: "white",
+                color: "black",
+              }}
+              disabled
+            />
+          </div>
 
-      }}
-    />
-  </div>
+          {/* Scrollable Filter Fields */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "15px",
+              fontSize: "12px",
+              overflowX: "auto",
+              flexGrow: 1,
+              paddingLeft: "10px",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <div
+              style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              <span
+                style={{
+                  fontWeight: "bold",
+                  marginRight: "2px",
+                  color: "black",
+                }}
+              >
+                Type:
+              </span>
+              <span style={{ color: "black" }}>{type.join(", ")}</span>
+            </div>
 
-  {/* Scrollable Filter Fields */}
-  <div style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    fontSize: "12px",
-    overflowX: "auto",
-    flexGrow: 1,
-    paddingLeft: "10px",
-    scrollbarWidth: "none", 
-    msOverflowStyle: "none" 
-  }}>
-    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-      <span style={{ fontWeight: "bold", marginRight: "2px",color:"black" }}>Type:</span>
-      <span style={{color:"black"}}>{type.join(", ")}</span>
-    </div>
+            <div
+              style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              <span
+                style={{
+                  fontWeight: "bold",
+                  marginRight: "2px",
+                  color: "black",
+                }}
+              >
+                Section:
+              </span>
+              <span style={{ color: "black" }}>{section.join(", ")}</span>
+            </div>
 
-    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-      <span style={{ fontWeight: "bold", marginRight: "2px",color:"black" }}>Section:</span>
-      <span style={{color:"black"}}>{section.join(", ")}</span>
-    </div>
-
-    {/* <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+            {/* <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
       <span style={{ fontWeight: "bold", marginRight: "2px" }}>SSE:</span>
       <span>{sse.join(", ")}</span>
     </div> */}
-  </div>
+          </div>
 
-  {/* Hide scrollbar (for Chrome/Safari) */}
-  <style>{`
+          {/* Hide scrollbar (for Chrome/Safari) */}
+          <style>{`
     div::-webkit-scrollbar {
       display: none;
     }
   `}</style>
-</div>
-</div>
+        </div>
+      </div>
 
       <div className="mx-2  overflow-x-auto">
         <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
@@ -505,6 +542,9 @@ const handleDownloadCSV = () => {
                 <th className="border-2 border-black p-1">Date</th>
                 <th className="border-2 border-black p-1">ID</th>
                 <th className="border-2 border-black p-1">Block Section</th>
+                <th className="border-2 border-black p-1">Demanded Time</th>
+                <th className="border-2 border-black p-1">Sanctioned Time</th>
+                <th className="border-2 border-black p-1">Block Type</th>
                 <th className="border-2 border-black p-1">
                   UP/DN/SL/RO AD NO.
                 </th>
@@ -530,14 +570,30 @@ const handleDownloadCSV = () => {
                         href={`/admin/optimise-table?id=${request.id}`}
                         className="text-[#13529e] hover:underline font-semibold"
                       >
-                        {request.divisionId||request.id}
+                        {request.divisionId || request.id}
                       </Link>
                     </td>
                     <td className="border border-black p-1">
                       {request.missionBlock}
                     </td>
+                    <td className="border border-black p-1">
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black p-1">
+                      {`${formatTime(
+                        request.sanctionedTimeFrom || request.optimizeTimeFrom
+                      )} - ${formatTime(
+                        request.sanctionedTimeTo || request.optimizeTimeTo
+                      )}`}
+                    </td>
+                    <td className="border border-black p-1">
+                      {request.corridorType}
+                    </td>
                     <td className="border border-black p-1 text-center">
-                      {request.processedLineSections?.[0]?.lineName || "N/A"}
+                      {request.processedLineSections?.[0]?.lineName ||
+                        request.processedLineSections?.[0]?.road ||
+                        "N/A"}
                     </td>
                     <td className="border border-black p-1">
                       {request.activity}
