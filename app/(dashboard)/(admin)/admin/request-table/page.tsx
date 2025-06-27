@@ -139,11 +139,7 @@ setSection(selectedSections)
       selectedSSEs.includes(r.user?.name)
     );
   }
-  // if (blockType !== "All") {
-  //   filteredRequests = filteredRequests.filter(
-  //     (r) => r.corridorType === blockType
-  //   );
-  // }
+
   if (blockType.length > 0) {
     filteredRequests = filteredRequests.filter((r) =>
       blockType.includes(r.corridorType)
@@ -181,11 +177,11 @@ const handleDownloadCSV = () => {
     // Map data to CSV rows with exact time formatting
     const rows = filteredRequests.map((request) => {
       const startTime = request.demandTimeFrom 
-        ? new Date(request.demandTimeFrom).toISOString().substr(11, 5) 
+        ? new Date(request.demandTimeFrom).toISOString().slice(11, 5) 
         : "N/A";
       
       const endTime = request.demandTimeTo
-        ? new Date(request.demandTimeTo).toISOString().substr(11, 5)
+        ? new Date(request.demandTimeTo).toISOString().slice(11, 5)
         : "N/A";
 
       return [
@@ -274,13 +270,7 @@ const handleDownloadCSV = () => {
           </h1>
         </div>
       </div>
-      {/* User Info Row */}
-      {/* <div className="flex justify-center mt-2">
-        <div className="flex gap-2">
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">Admin:</span>
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">{session?.user?.name || "Admin"}</span>
-        </div>
-      </div> */}
+ 
       {/* Summary Box */}
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
@@ -402,88 +392,7 @@ const handleDownloadCSV = () => {
             </div>
           )}
         </div>
-        {/* SSE Dropdown (Multi-select) */}
-        {/* <div className="relative inline-block">
-          <button
-            onClick={() => setSseDropdownOpen((v) => !v)}
-            className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
-          >
-            SSE:{" "}
-            {selectedSSEs.length === 0
-              ? "All"
-              : `${selectedSSEs.length} selected`}
-            <span className="ml-1">▼</span>
-          </button>
-          {sseDropdownOpen && (
-            <div className="absolute z-50 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
-              {sseOptions.map((sse) => (
-                <label
-                  key={sse}
-                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedSSEs.includes(sse)}
-                    onChange={() =>
-                      setSelectedSSEs((prev) =>
-                        prev.includes(sse)
-                          ? prev.filter((s) => s !== sse)
-                          : [...prev, sse]
-                      )
-                    }
-                    className="mr-2 accent-[#B57CF6]"
-                  />
-                  {sse}
-                </label>
-              ))}
-            </div>
-          )}
-        </div> */}
       </div>
-      {/* <div className="text-center">
-        <h1
-          style={{
-            background: "#cfd4ff",
-            color: "black",
-            width: "98%",
-            margin: "0 auto",
-            padding: "0 10px",
-            borderRadius: "1px",
-            height: "50px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          Block Summary
-        </h1>
-        <div>
-                    <input
-            type="date"
-            value={customDateRange.start}
-            onChange={(e) =>
-              setCustomDateRange((r) => ({ ...r, start: e.target.value }))
-            }
-            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
-          />
-          <span className="px-1 text-black text-xs">to</span>
-          <input
-            type="date"
-            value={customDateRange.end}
-            onChange={(e) =>
-              setCustomDateRange((r) => ({ ...r, end: e.target.value }))
-            }
-            className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
-          />
-          <span>Type</span>
-        <span>{type.join(", ")}</span>
-          <span>Section</span>
-        <span>{section.join(", ")}</span>
-          <span>SSE</span>
-        <span>{sse.join(", ")}</span>
-
-        </div>
-      </div> */}
       <div className="text-center">
   <h1
     style={{
@@ -501,73 +410,6 @@ const handleDownloadCSV = () => {
   >
     Block Summary
   </h1>
-{/* <div
-  style={{
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "baseline",
-    gap: "15px",
-    fontSize: "12px",
-    lineHeight: "1.2",
-    width: "98%",
-    margin: "0 auto 1px auto",
-    padding: "5px 10px",
-    backgroundColor: "#c1f0c8", // Only background color applied here
-  }}
->
-  <div style={{ display: "flex", alignItems: "center" }}>
-    <input
-      type="date"
-      value={customDateRange.start}
-      onChange={(e) =>
-        setCustomDateRange((r) => ({ ...r, start: e.target.value }))
-      }
-      style={{
-        padding: "2px",
-        border: "1px solid black",
-        color: "black",
-        backgroundColor: "white",
-        width: "100px",
-        outline: "none",
-        fontSize: "12px",
-        height: "22px",
-      }}
-    />
-    <span style={{ padding: "0 3px" }}>to</span>
-    <input
-      type="date"
-      value={customDateRange.end}
-      onChange={(e) =>
-        setCustomDateRange((r) => ({ ...r, end: e.target.value }))
-      }
-      style={{
-        padding: "2px",
-        border: "1px solid black",
-        color: "black",
-        backgroundColor: "white",
-        width: "100px",
-        outline: "none",
-        fontSize: "12px",
-        height: "22px",
-      }}
-    />
-  </div>
-
-  <div style={{ display: "flex", alignItems: "center", color: "black"}}>
-    <span style={{ fontWeight: "bold", marginRight: "2px" }}>Type:</span>
-    <span>{type.join(", ")}</span>
-  </div>
-
-  <div style={{ display: "flex", alignItems: "center",color: "black" }}>
-    <span style={{ fontWeight: "bold", marginRight: "2px" }}>Section:</span>
-    <span>{section.join(", ")}</span>
-  </div>
-
-  <div style={{ display: "flex", alignItems: "center",color: "black" }}>
-    <span style={{ fontWeight: "bold", marginRight: "2px" }}>SSE:</span>
-    <span>{sse.join(", ")}</span>
-  </div>
-</div> */}
 <div style={{
   display: "flex",
   width: "98%",
@@ -627,8 +469,8 @@ const handleDownloadCSV = () => {
     overflowX: "auto",
     flexGrow: 1,
     paddingLeft: "10px",
-    scrollbarWidth: "none", /* Firefox */
-    msOverflowStyle: "none" /* IE/Edge */
+    scrollbarWidth: "none", 
+    msOverflowStyle: "none" 
   }}>
     <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
       <span style={{ fontWeight: "bold", marginRight: "2px",color:"black" }}>Type:</span>

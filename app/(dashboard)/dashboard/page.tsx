@@ -127,7 +127,7 @@ export default function DashboardPage() {
         </div>
         {/* RBMS badge */}
         <div className="w-full flex justify-center mt-4">
-          <div className="bg-green-200 rounded-2xl px-8 py-2">
+          <div className="bg-[#8ed975] rounded-2xl px-8 py-2">
             <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
           </div>
         </div>
@@ -140,12 +140,12 @@ export default function DashboardPage() {
         {/* Navigation buttons */}
         <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
           <a href="/admin/request-table">
-            <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+            <button className="w-72 bg-[#efb8f7] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
               VIEW BLOCK DETAILS
             </button>
           </a>
           <a href="/drm/generate-report">
-            <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+            <button className="w-72 bg-[#aee6f7] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
               BLOCK SUMMARY REPORT
             </button>
           </a>
