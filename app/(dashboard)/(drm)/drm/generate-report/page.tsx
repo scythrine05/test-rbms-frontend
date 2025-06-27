@@ -541,31 +541,31 @@ export default function GenerateReportPage() {
                       key={idx}
                     >
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.Department || summary.Section || ""}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.Demanded}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.Approved}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.Granted}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.PercentGranted !== undefined
@@ -573,13 +573,13 @@ export default function GenerateReportPage() {
                           : ""}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.Availed}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {summary.PercentAvailed !== undefined
@@ -593,9 +593,9 @@ export default function GenerateReportPage() {
                 {pastBlockSummary.length > 0 && (
                   <>
                     <tr className="bg-[#ff914d] text-white font-bold">
-                      <td className="border-2 border-black px-2 py-1">Total</td>
+                      <td className="border-2 border-black px-2 py-1 text-center">Total</td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {pastBlockSummary.reduce(
@@ -604,7 +604,7 @@ export default function GenerateReportPage() {
                         )}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {pastBlockSummary.reduce(
@@ -613,7 +613,7 @@ export default function GenerateReportPage() {
                         )}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {pastBlockSummary.reduce(
@@ -622,17 +622,16 @@ export default function GenerateReportPage() {
                         )}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
-                        80%
-                        {/* {pastBlockSummary.length > 0 
-              ? Math.round((pastBlockSummary.reduce((sum, item) => sum + (item.Granted || 0), 0) / 
-                           pastBlockSummary.reduce((sum, item) => sum + (item.Approved || 1), 0)) * 100) + '%' 
-              : '0%'} */}
+               {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.PercentGranted || 0),
+                          0
+                        )}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
                         {pastBlockSummary.reduce(
@@ -641,16 +640,13 @@ export default function GenerateReportPage() {
                         )}
                       </td>
                       <td
-                        className="border-2 border-black px-2 py-1"
+                        className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
-                        70%
-                        {/* {pastBlockSummary.length > 0 
-    ? Math.round((
-        pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Availed) || 0), 0) / 
-        Math.max(1, pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Granted) || 0), 0))
-      ) * 100) + '%' 
-    : '0%'} */}
+                   {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.PercentAvailed || 0),
+                          0
+                        )}
                       </td>
                     </tr>
                   </>
