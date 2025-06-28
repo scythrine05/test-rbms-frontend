@@ -21,13 +21,14 @@ interface OptionType {
 interface FormData {
   startDate: string;
   endDate: string;
-  department: OptionType[];
   blockType: OptionType[];
   majorSection: OptionType[];
 }
 
 // Interfaces aligned with the API service
 interface PastBlockSummary {
+  percentAvailed?: any;
+  percentGranted?: any;
   SectionId?: string;
   Section: string;
   Demanded: number;
@@ -67,11 +68,7 @@ const blockTypeOptions: OptionType[] = [
   { value: "Mega", label: "Mega Block" },
 ];
 
-const departmentOptions: OptionType[] = [
-  { value: "Engineering", label: "Engineering" },
-  { value: "ST", label: "S & T" },
-  { value: "TRD", label: "TRD" },
-];
+
 
 export default function GenerateReportPage() {
   const [pastBlockSummary, setPastBlockSummary] = useState<PastBlockSummary[]>(
@@ -83,9 +80,7 @@ export default function GenerateReportPage() {
   const [selectedBlockTypes, setSelectedBlockTypes] = useState<string[]>([
     "All",
   ]);
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([
-    "Engineering",
-  ]);
+
   const [selectedMajorSections, setSelectedMajorSections] = useState<string[]>(
     []
   );
@@ -107,9 +102,21 @@ export default function GenerateReportPage() {
     startDate: "",
     endDate: "",
     majorSections: [] as string[],
-    department: ["Engineering"],
+    department: session?.user?.department ? [session.user.department] : [""],
     blockType: ["All"],
   });
+
+
+
+
+useEffect(() => {
+  if (session?.user?.department) {
+    setQueryParams(prev => ({
+      ...prev,
+      department: [session.user.department] 
+    }));
+  }
+}, [session]);
 
   // Get user's location and set up major section options
   useEffect(() => {
@@ -214,17 +221,7 @@ export default function GenerateReportPage() {
     }
   };
 
-  const toggleDepartment = (department: string) => {
-    if (selectedDepartments.includes(department)) {
-      if (selectedDepartments.length > 1) {
-        setSelectedDepartments(
-          selectedDepartments.filter((dept) => dept !== department)
-        );
-      }
-    } else {
-      setSelectedDepartments([...selectedDepartments, department]);
-    }
-  };
+ 
 
   const onSubmit = async (data: FormData) => {
     // Validate dates
@@ -246,7 +243,7 @@ export default function GenerateReportPage() {
         startDate: formattedStartDate,
         endDate: formattedEndDate,
         majorSections: selectedMajorSections,
-        department: selectedDepartments,
+        department: session?.user?.department ? [session.user.department] : [""],
         blockType: selectedBlockTypes,
       });
 
@@ -555,7 +552,7 @@ export default function GenerateReportPage() {
                     </tr>
                   ))
                 )}
-                            {pastBlockSummary.length > 0 && (
+                {pastBlockSummary.length > 0 && (
                   <>
                     <tr className="bg-[#ff914d] text-white font-bold">
                       <td className="border-2 border-black px-2 py-1">Total</td>
@@ -590,11 +587,10 @@ export default function GenerateReportPage() {
                         className="border-2 border-black px-2 py-1"
                         style={{ color: "black" }}
                       >
-                        80%
-                        {/* {pastBlockSummary.length > 0 
-              ? Math.round((pastBlockSummary.reduce((sum, item) => sum + (item.Granted || 0), 0) / 
-                           pastBlockSummary.reduce((sum, item) => sum + (item.Approved || 1), 0)) * 100) + '%' 
-              : '0%'} */}
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.percentGranted || 0),
+                          0
+                        )}
                       </td>
                       <td
                         className="border-2 border-black px-2 py-1"
@@ -609,13 +605,10 @@ export default function GenerateReportPage() {
                         className="border-2 border-black px-2 py-1"
                         style={{ color: "black" }}
                       >
-                        70%
-                        {/* {pastBlockSummary.length > 0 
-    ? Math.round((
-        pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Availed) || 0), 0) / 
-        Math.max(1, pastBlockSummary.reduce((sum: number, item) => sum + (Number(item.Granted) || 0), 0))
-      ) * 100) + '%' 
-    : '0%'} */}
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.percentAvailed || 0),
+                          0
+                        )}
                       </td>
                     </tr>
                   </>
