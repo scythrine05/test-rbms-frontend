@@ -9,6 +9,8 @@ import {
   useGetOtherRequests,
 } from "@/app/service/query/user-request";
 import Link from "next/link";
+import * as XLSX from 'xlsx';
+
 import {
   format,
   parseISO,
@@ -574,55 +576,102 @@ export default function RequestTablePage() {
   );
 
   // Handle Excel download
-  const handleDownload = () => {
-    try {
-      if (!data?.data?.requests || data.data.requests.length === 0) {
-        toast.error("No data available to download");
-        return;
-      }
+  // const handleDownload = () => {
+  //   try {
+  //     if (!data?.data?.requests || data.data.requests.length === 0) {
+  //       toast.error("No data available to download");
+  //       return;
+  //     }
 
-      // Create CSV headers
-      const headers = [
-        "Date",
-        "Block Section",
-        "UP/DN/SL/Rpad No.",
-        "Activity",
-        "Duration",
-        "Status",
-      ];
+  //     // Create CSV headers
+  //     const headers = [
+  //       "Date",
+  //       "Block Section",
+  //       "UP/DN/SL/Rpad No.",
+  //       "Activity",
+  //       "Duration",
+  //       "Status",
+  //     ];
 
-      // Create CSV rows
-      const rows = data.data.requests.map((request: any) => [
-        formatDate(request.date),
-        request.missionBlock || "N/A",
-        request.lineDirection || "N/A",
-        request.activity || "N/A",
-        formatDuration(request.demandTimeFrom, request.demandTimeTo),
-        request.adminRequestStatus === "ACCEPTED" ? "Y" : "N",
-      ]);
+  //     // Create CSV rows
+  //     const rows = data.data.requests.map((request: any) => [
+  //       formatDate(request.date),
+  //       request.missionBlock || "N/A",
+  //       request.lineDirection || "N/A",
+  //       request.activity || "N/A",
+  //       formatDuration(request.demandTimeFrom, request.demandTimeTo),
+  //       request.adminRequestStatus === "ACCEPTED" ? "Y" : "N",
+  //     ]);
 
-      // Combine headers and rows
-      const csvContent = [
-        headers.join(","),
-        ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
-      ].join("\n");
+  //     // Combine headers and rows
+  //     const csvContent = [
+  //       headers.join(","),
+  //       ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  //     ].join("\n");
 
-      // Create blob and download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `block_requests_${format(new Date(), "dd-MM-yyyy")}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  //     // Create blob and download
+  //     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //     const link = document.createElement("a");
+  //     link.href = URL.createObjectURL(blob);
+  //     link.download = `block_requests_${format(new Date(), "dd-MM-yyyy")}.csv`;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
 
-      toast.success("Download completed successfully");
-    } catch (error) {
-      console.error("Download error:", error);
-      toast.error("Failed to download file. Please try again.");
+  //     toast.success("Download completed successfully");
+  //   } catch (error) {
+  //     console.error("Download error:", error);
+  //     toast.error("Failed to download file. Please try again.");
+  //   }
+  // };
+
+// ... (other imports remain the same)
+
+const handleDownload = () => {
+  try {
+    if (!data?.data?.requests || data.data.requests.length === 0) {
+      toast.error("No data available to download");
+      return;
     }
-  };
 
+    // Prepare data for Excel
+    const excelData = data.data.requests.map((request: any) => ({
+      "Date": formatDate(request.date),
+      "Block Section": request.missionBlock || "N/A",
+      "UP/DN/SL/Rpad No.": request.lineDirection || "N/A",
+      "Activity": request.activity || "N/A",
+      "Duration": formatDuration(request.demandTimeFrom, request.demandTimeTo),
+      "Status": request.adminRequestStatus === "ACCEPTED" ? "Y" : "N",
+      "Sanctioned From": request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A",
+      "Sanctioned To": request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A",
+      "Accept/Reject Status": request.acceptRejectRemark || "Pending"
+    }));
+
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
+
+    // Generate Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    
+    // Create blob and download
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `block_requests_${format(new Date(), "dd-MM-yyyy")}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Excel file downloaded successfully");
+  } catch (error) {
+    console.error("Download error:", error);
+    toast.error("Failed to download Excel file. Please try again.");
+  }
+};
   // Pagination component
   const Pagination = () => {
     if (!data?.data?.totalPages || data.data.totalPages <= 1) return null;
@@ -1095,7 +1144,7 @@ export default function RequestTablePage() {
                 onClick={handleDownload}
                 className="mt-1 bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-base font-bold text-black hover:bg-[#FFA726]"
               >
-                Download CSV
+                Download XLSX
               </button>
             </div>
           </div>
