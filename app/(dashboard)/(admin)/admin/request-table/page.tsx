@@ -96,15 +96,15 @@ export default function AdminRequestTablePage() {
         style: { background: "#d6ecd2", color: "#11332b" },
       };
     }
-    if (request.status === "APPROVED" && !request.isSanctioned) {
+    if (request.status === "APPROVED" && !request.isSanctioned && request.adminRequestStatus!=="REJECTED") {
       return {
         label: "Pending with me",
         style: { background: "#d47ed4", color: "#222" },
       };
     }
-    if (request.status === "REJECTED" && request.adminAcceptance === false) {
+    if (request.status === "REJECTED" ||request.adminRequestStatus==="REJECTED") {
       return {
-        label: "Rejected by me",
+        label: "Return to Applicant",
         style: { background: "#ff4e36", color: "#fff" },
       };
     }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService } from "@/app/service/api/admin";
+import { useAcceptUserRequest } from "@/app/service/mutation/admin";
 import {
   format,
   parseISO,
@@ -192,6 +193,8 @@ const getAdjacentLinesAffected = (request: UserRequest): string => {
 
 export default function OptimiseTablePage() {
   const router = useRouter();
+  
+const acceptMutation = useAcceptUserRequest();
   const searchParams = useSearchParams();
   const { isUrgentMode } = useUrgentMode();
   const queryClient = useQueryClient();
@@ -242,6 +245,18 @@ export default function OptimiseTablePage() {
       ),
   });
 
+
+  const handleRequestAction = async (requestId: string, accept: boolean) => {
+  if (confirm("Are you sure you want to  reject this request?")) {
+    try {
+      await acceptMutation.mutateAsync({ id: requestId, accept });
+      alert("Request  rejected successfully");
+    } catch (error) {
+      console.error("Failed to process request:", error);
+      alert("Failed to process request. Please try again.");
+    }
+  }
+};
   // Filter requests based on urgent mode
   const filteredRequests =
     data?.data?.requests?.filter((request: UserRequest) => {
@@ -681,7 +696,7 @@ const handleSendNonUrgentRequests = async () => {
 
       <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">Approved Requests</h1>
-        {isUrgentMode ? (
+        {/* {isUrgentMode ? (
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleWeekChange("prev")}
@@ -699,13 +714,13 @@ const handleSendNonUrgentRequests = async () => {
               Next Day
             </button>
           </div>
-        ) : (
+        ) : ( */}
           <WeeklySwitcher
             currentWeekStart={currentWeekStart}
             onWeekChange={handleWeekChange}
             weekStartsOn={1}
           />
-        )}
+        
       </div>
 
       <div className="flex justify-end py-2 gap-2">
@@ -808,7 +823,7 @@ const handleSendNonUrgentRequests = async () => {
         </div>
       )}
 
-      {!isUrgentMode && (
+      
         <>
           {/* Corridor Requests Table */}
           <div className="mb-8">
@@ -973,6 +988,14 @@ const handleSendNonUrgentRequests = async () => {
                             >
                               Edit
                             </button>
+                         
+                         <button
+                              onClick={() => handleRequestAction(request.id,false)}
+                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                            >
+                              Reject
+                            </button>
+                       
                           </div>
                         )}
                       </td>
@@ -1147,6 +1170,14 @@ const handleSendNonUrgentRequests = async () => {
                             >
                               Edit
                             </button>
+                           
+                         <button
+                             onClick={() => handleRequestAction(request.id,false)}
+                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                            >
+                              Reject
+                            </button>
+                   
                           </div>
                         )}
                       </td>
@@ -1157,7 +1188,7 @@ const handleSendNonUrgentRequests = async () => {
             </div>
           </div>
         </>
-      )}
+      
 
       <div>
       <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
@@ -1351,6 +1382,15 @@ const handleSendNonUrgentRequests = async () => {
                         >
                           Edit
                         </button>
+                      
+                         <button
+                              onClick={() => handleRequestAction(request.id,false)}
+                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                            >
+                              Reject
+                            </button>
+                      
+                         
                       </div>
                     )}
                   </td>
@@ -1368,10 +1408,12 @@ const handleSendNonUrgentRequests = async () => {
     </div>
   );
 }
-function min(allDates: Date[]): Date | null {
-  if (!allDates || allDates.length === 0) return null;
-  return allDates.reduce((minDate, currDate) =>
-    currDate < minDate ? currDate : minDate
-  );
-}
+// function min(allDates: Date[]): Date | null {
+//   if (!allDates || allDates.length === 0) return null;
+//   return allDates.reduce((minDate, currDate) =>
+//     currDate < minDate ? currDate : minDate
+//   );
+// }
+
+
 
