@@ -48,7 +48,7 @@ export default function DashboardPage() {
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">USER DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">USER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
           </div>
         </div>
         {/* Navigation buttons */}
@@ -56,7 +56,7 @@ export default function DashboardPage() {
           <a href="/create-block-request" className="w-full rounded-2xl bg-[#eeb8f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">ENTER NEW BLOCK REQUEST</a>
           <a href="/edit-request" className="w-full rounded-2xl bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">EDIT/CANCEL PREVIOUS BLOCK REQUESTS</a>
           <a href="/request-table" className="w-full rounded-2xl bg-[#c7c7f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">SUMMARY OF MY BLOCK REQUESTS</a>
-                   <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=MAS-GDR`} className="w-full rounded-2xl bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
+          <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=MAS-GDR`} className="w-full rounded-2xl bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
 
           <a href="/generate-reports" className="w-full rounded-2xl bg-[#ffd180] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">GENERATE REPORTS</a>
         </div>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
   }
 
   // Custom manager dashboard UI
-  if (session?.user?.role === "SENIOR_OFFICER"  || session?.user?.role === "JUNIOR_OFFICER") {
+  if (session?.user?.role === "SENIOR_OFFICER" || session?.user?.role === "JUNIOR_OFFICER") {
     return (
       <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
         {/* Header */}
@@ -96,7 +96,7 @@ export default function DashboardPage() {
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
           </div>
         </div>
         {/* Navigation buttons */}
@@ -117,7 +117,7 @@ export default function DashboardPage() {
   }
 
 
-if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email==="b@mail.com" ) {
+  if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email === "b@mail.com") {
     return (
       <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
         {/* Header */}
@@ -136,7 +136,7 @@ if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email==="b@mail.co
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
           </div>
         </div>
         {/* Navigation buttons */}
@@ -169,44 +169,48 @@ if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email==="b@mail.co
         </div>
         {/* RBMS badge */}
         <div className="w-full flex justify-center mt-4">
-          <div className="bg-[#8ed975] rounded-2xl px-8 py-2">
+          <div className="bg-green-200 rounded-2xl px-8 py-2">
             <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
           </div>
         </div>
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-lg font-bold text-black tracking-wide">ADMIN DESIGNATION</span>
           </div>
         </div>
         {/* Navigation buttons */}
-        <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
-          <a href="/admin/request-table">
-            <button className="w-72 bg-[#efb8f7] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+        <div className="w-full flex flex-col items-center gap-8 mt-10 px-2 max-w-md mb-2">
+          <Link href="/admin/request-table" className="w-full">
+            <button className="w-full rounded-2xl bg-[#eeb8f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
               VIEW BLOCK DETAILS
             </button>
-          </a>
-          <a href="/drm/generate-report">
-            <button className="w-72 bg-[#aee6f7] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
+          </Link>
+          <Link href="/admin/revise-block" className="w-full">
+            <button className="w-full rounded-2xl bg-[#ffd180] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
+              REVISE THE BLOCK FOR THE DAY
+            </button>
+          </Link>
+          <Link href="/admin/sanction-table-data" className="w-full">
+            <button className="w-full rounded-2xl bg-[#c7c7f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
               BLOCK SUMMARY REPORT
             </button>
-          </a>
+          </Link>
         </div>
         {/* Logout button */}
-        <div className="w-full flex justify-center mt-10 mb-4">
-          <form action="/auth/login" method="get" onSubmit={async (e) => { e.preventDefault(); await import('next-auth/react').then(mod => mod.signOut({ redirect: true, callbackUrl: '/auth/login' })); }}>
-            <button type="submit" className="flex items-center gap-2 bg-[#dbe6fd] border border-black rounded px-6 py-2 text-lg font-bold text-black shadow hover:bg-[#c7d7f7] transition">
-              <span className="inline-block w-7 h-7 bg-white rounded-full border border-black flex items-center justify-center">
-                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black' strokeWidth={2} className='w-5 h-5'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' /></svg>
-              </span>
-              Logout
-            </button>
-          </form>
-        </div>
+        <button
+          onClick={async () => {
+            const { signOut } = await import("next-auth/react");
+            await signOut({ redirect: true, callbackUrl: "/auth/login" });
+          }}
+          className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+        >
+          Logout
+        </button>
       </div>
     );
   }
- if (session?.user?.role === "JE") {
+  if (session?.user?.role === "JE") {
     return (
       <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
         {/* Header */}
@@ -225,12 +229,12 @@ if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email==="b@mail.co
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">DESIGNATION:<span  className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
           </div>
         </div>
         {/* Navigation buttons */}
         <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
-                    <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=MAS-GDR`}>
+          <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=MAS-GDR`}>
 
             <button className="w-72 bg-[#E6E6FA] py-6 rounded-2xl border-4 border-black text-2xl font-bold text-[#13529e] shadow-lg hover:bg-[#B57CF6] hover:text-white transition-colors">
               VIEW BLOCK DETAILS
@@ -254,9 +258,9 @@ if (session?.user?.role === "BRANCH_OFFICER" && session?.user.email==="b@mail.co
 
 
 
-if (session?.user?.role === "DRM") {
+  if (session?.user?.role === "DRM") {
     return (
-   <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
+      <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
         {/* Header */}
         <div
           className="w-full border border-black bg-yellow-200 flex items-center justify-center relative p-2"
@@ -294,7 +298,7 @@ if (session?.user?.role === "DRM") {
             </button>
           </Link>
         </div>
-  
+
         <button
           onClick={async () => {
             const { signOut } = await import("next-auth/react");
@@ -308,9 +312,9 @@ if (session?.user?.role === "DRM") {
     );
   }
 
-if (session?.user?.role === "BRANCH_OFFICER") {
+  if (session?.user?.role === "BRANCH_OFFICER") {
     return (
-   <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
+      <div className="min-h-screen w-full flex flex-col items-center bg-[#fffbe9]">
         {/* Header */}
         <div
           className="w-full border border-black bg-yellow-200 flex items-center justify-center relative p-2"
@@ -348,7 +352,7 @@ if (session?.user?.role === "BRANCH_OFFICER") {
             </button>
           </Link>
         </div>
-  
+
         <button
           onClick={async () => {
             const { signOut } = await import("next-auth/react");
@@ -407,7 +411,7 @@ if (session?.user?.role === "BRANCH_OFFICER") {
         }
 
 
-  {
+        {
           session?.user?.role === "JE" ? (
             <div className="flex flex-col gap-8 mt-8 w-full max-w-md items-center">
               <a href="/admin/request-table">
@@ -415,7 +419,7 @@ if (session?.user?.role === "BRANCH_OFFICER") {
                   VIEW BLOCK DETAILS
                 </button>
               </a>
-           
+
             </div>
           ) : null
         }
