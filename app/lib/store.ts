@@ -3335,12 +3335,14 @@ export let Activity = {
 
   'Lt': ['AOH', 'POH', 'IOH', 'RE POH', 'RD WORK', 'TURN OUT CHECKING', 'CROSS OVER CHECKING', 'CROSS TRACK FEEDERS CHECKING', 'GANTRY MAINTENANCE', 'CONTACT WIRE RENEWAL WORK', 'CATENARY WIRE RENEWAL WORK', 'CANTILEVER ERECTION/REPLACEMENT(2x25KV WORK)', 'MAST ERECTION(2x25KV WORK)', 'FEEDERS ERECTION(2x25KV WORK)', 'OHE PROFILING', 'OHE/CN WORK', 'OTHER SPECIAL WORKS'],
 
-  'Machine': ['BCM ', 'DTE ', 'CSM ', 'DUOMAT', 'UNIMAT', 'MFI', 'MPT',
-    'MDU', 'BRM',
-    'FRM ', 'TRT ',
+  'Machine': ['BCM ', 'DTE ', 'CSM ',
+     'DUOMAT', 'UNIMAT', 'MPT',
+    'BRM',
+    'TRT ',
     'UTV', 'DTS',
     'T28', 'SQRS',
-    'RGM working'],
+    'RGM working','SBCM'
+  ],
   'Non-Machine': ['Rail renewal',
     'Welding work',
     'Destressing work',
@@ -4436,19 +4438,16 @@ export const depotOnLocation = {
 
 export let machine = [
   "BCM",
-  "UNIMAT 4S",
-  "MFI",
-  "MPI",
+  "UNIMAT",
+  "MPT",
   "MDU",
   "DUOMAT",
   "CSM",
-  "DGS 353",
   "SBCM",
-  "BRM R32",
   "UTV",
-  "T 28",
+  "T28",
   "TRT",
-  "3X DTE",
+  "DTE",
 ];
 
 export let work = [
@@ -5176,7 +5175,7 @@ export let sectionData = {
       "ABU-AVD",
       "AVD-PAB",
       "PAB-PTMS",
-      "PTMS-TI",
+      //"PTMS-TI",
       "PAB-TI",
       "TI-TRL",
       "TRL-KBT",
