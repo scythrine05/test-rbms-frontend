@@ -35,6 +35,14 @@ interface FormData {
   elementarySectionTo: string;
   lineType?: string;
   missionBlock: string;
+  processedLineSections: {
+  block: string;
+  road?: string;
+  type: "line" | "road" | "yard";
+  lineName?: string;
+  otherLines?: string;
+  otherRoads?: string;
+}[];
   [key: string]: any;
 }
 
@@ -67,6 +75,8 @@ export default function CreateBlockRequestPage() {
     powerBlockRequirements: [],
     elementarySection: "",
     missionBlock: "",
+    processedLineSections: [],
+
   });
 
   const { data: session } = useSession({ required: true });
@@ -113,6 +123,13 @@ export default function CreateBlockRequestPage() {
         sntDisconnectionLineFrom: data.sntDisconnectionLineFrom || "",
         sntDisconnectionLineTo: data.sntDisconnectionLineTo || "",
         missionBlock: data.missionBlock || "",
+        processedLineSections: (data.processedLineSections || []).map(
+          (section: any) => ({
+            ...section,
+            type: section.type === "line" ? "line" : "road",
+          })
+        ),
+
       });
     }
   }, [userDataById]);
@@ -217,12 +234,12 @@ export default function CreateBlockRequestPage() {
                 `${formData.date.split("T")[0]}T${formData.demandTimeTo}:00`
               ).toISOString()
             : "",
-        processedLineSections: [
-          {
-            ...(userDataById?.data.processedLineSections?.[0] || {}),
-            otherLines: formData.otherLinesAffected,
-          },
-        ],
+        // processedLineSections: [
+        //   {
+        //     ...(userDataById?.data.processedLineSections?.[0] || {}),
+        //     otherLines: formData.otherLinesAffected,
+        //   },
+        // ],
       };
 
       await mutation.mutateAsync(formattedData as any);
@@ -277,6 +294,21 @@ export default function CreateBlockRequestPage() {
       otherLinesAffected: affected.join(","),
     }));
   };
+
+const handleDeleteSection = (indexToRemove: number) => {
+  setFormData((prev) => {
+    if (prev.processedLineSections.length <= 1) {
+      alert("At least one block section is required.");
+      return prev;
+    }
+
+    return {
+      ...prev,
+      processedLineSections: prev.processedLineSections.filter((_, i) => i !== indexToRemove),
+    };
+  });
+};
+
 
   if (isLoading) return <Loader name="Loading request..." />;
 
@@ -513,47 +545,44 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </td>
                 </tr>
-                <tr>
-                  <td className="font-semibold p-1.5 text-gray-900 w-1/4">
-                    Block Section/Yard
-                  </td>
-                  <td className="p-1.5 w-1/2">
-                    <select
-                      name="missionBlock"
-                      value={formData.missionBlock || ""}
-                      onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white appearance-none"
-                      style={{ color: "black" }}
-                    >
-                      <option value="">Select Block Section/Yard</option>
-                      {blockSection[
-                        formData.selectedSection as keyof typeof blockSection
-                      ]?.map((block) => (
-                        <option key={block} value={block}>
-                          {block}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="font-semibold p-1 pr-0 text-gray-900 w-[15%] whitespace-nowrap">
-                    Road
-                  </td>
-                  <td className="p-1 pl-0 w-[15%]">
-                    <select
-                      name="lineType"
-                      value={formData.lineType || ""}
-                      onChange={handleInputChange}
-                      className="w-full p-1 border border-gray-800 rounded bg-white"
-                      style={{ color: "black" }}
-                    >
-                      <option value="">Select</option>
-                      <option value="UP">UP</option>
-                      <option value="DN">DN</option>
-                      <option value="SL">SL</option>
-                      <option value="No">No</option>
-                    </select>
-                  </td>
-                </tr>
+{formData.processedLineSections.map((section, index) => (
+  <tr key={index} className="border-b border-gray-200 align-top">
+    {/* Label: Block Section/Yard */}
+    <td className="font-semibold text-sm text-gray-800 p-2 whitespace-normal break-words w-1/4">
+      Block Section/ Yard
+    </td>
+
+    {/* Value: Block */}
+    <td className="text-sm text-gray-900 p-2 whitespace-normal break-words w-1/4">
+      {section.block || "-"}
+    </td>
+
+    {/* Label: Line(s) or Road(s) */}
+    <td className="font-semibold text-sm text-gray-800 p-2 whitespace-normal break-words w-1/6">
+      {section.type === "line" ? "Line(s)" : "Road(s)"}
+    </td>
+
+    {/* Value + X icon, X stays right */}
+    <td className="text-sm text-gray-900 p-2 w-full align-top">
+      <div className="flex justify-between items-start gap-2 flex-wrap">
+        <span className="whitespace-normal break-words flex-1">
+          {section.type === "line"
+            ? [section.lineName, section.otherLines].filter(Boolean).join(", ")
+            : [section.road, section.otherRoads].filter(Boolean).join(", ")}
+        </span>
+        <span
+          className="text-red-600 font-bold cursor-pointer hover:text-red-700"
+          onClick={() => handleDeleteSection(index)}
+          title="Remove"
+        >
+          ✕
+        </span>
+      </div>
+    </td>
+  </tr>
+))}
+
+
                 <tr className="bg-purple-200">
                   <td className="font-semibold p-1.5 text-gray-900">
                     Site Location
@@ -969,7 +998,7 @@ export default function CreateBlockRequestPage() {
           <div className="flex justify-between gap-2 mt-4">
             <button
               className="flex items-center gap-1 bg-lavender border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"style={{color:"black"}}
-              onClick={() => window.history.back()}
+              onClick={() => (window.location.href = "/dashboard")}
             >
               Back
             </button>

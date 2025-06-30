@@ -630,12 +630,26 @@ export default function RequestTablePage() {
 const handleDownload = () => {
   try {
     if (!data?.data?.requests || data.data.requests.length === 0) {
-      toast.error("No data available to download");
+      console.log("No data available to download");
       return;
     }
 
-    // Prepare data for Excel
-    const excelData = data.data.requests.map((request: any) => ({
+    // Apply date filter
+    const filteredRequests = data.data.requests.filter((request: any) => {
+      const requestDate = new Date(request.date);
+      const startDate = new Date(customDateRange.startDate);
+      const endDate = new Date(customDateRange.endDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      return requestDate >= startDate && requestDate <= endDate;
+    });
+
+    if (filteredRequests.length === 0) {
+      toast.error("No data found for selected date range.");
+      return;
+    }
+
+    const excelData = filteredRequests.map((request: any) => ({
       "Date": formatDate(request.date),
       "Block Section": request.missionBlock || "N/A",
       "UP/DN/SL/Rpad No.": request.lineDirection || "N/A",
@@ -647,17 +661,13 @@ const handleDownload = () => {
       "Accept/Reject Status": request.acceptRejectRemark || "Pending"
     }));
 
-    // Create a new workbook
+    console.log(excelData);
+
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(excelData);
-    
-    // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
 
-    // Generate Excel file
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    
-    // Create blob and download
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -900,6 +910,7 @@ const handleDownload = () => {
         </div>
       </div>
 
+      { session?.user?.department !== "ENGG" && (
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
           <div className="text-xl font-bold text-black text-center py-2">
@@ -961,9 +972,22 @@ const handleDownload = () => {
                       <td className="border border-black px-2 py-1 text-black">
                         {request.missionBlock}
                       </td>
-                      <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                        {request.processedLineSections[0].lineName || "N/A"}
-                      </td>
+                   <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
+                      {session?.user.department === "S&T"
+                        ? request.processedLineSections
+                            .map((section: any) =>
+                              section.type === "line"
+                                ? [section.lineName, section.otherLines]
+                                : [section.road, section.otherRoads]
+                            )
+                            .flat()
+                            .filter(Boolean)
+                            .join(", ")
+                        : request.processedLineSections
+                            .map((section: any) => section.lineName)
+                            .filter(Boolean)
+                            .join(", ") || "N/A"}
+                    </td>
                       <td className="border border-black px-2 py-1 text-black">
                         {request.activity}
                       </td>
@@ -1081,6 +1105,8 @@ const handleDownload = () => {
           </div>
         </div>
       </div>
+      )
+      }
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
         <div className=" text-center">

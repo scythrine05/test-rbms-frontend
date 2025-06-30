@@ -154,10 +154,16 @@ export default function EditRequestsPage() {
                                                 <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{dayjs(request.date).format("DD-MM-YYYY")}</td>
                                                 <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
                                                     <button
-                                                        onClick={() => router.push(`/edit-request/${request.id}`)}
+                                                        onClick={() => {
+                                                            if (isEditable(request.date)) {
+                                                                router.push(`/edit-request/${request.id}`);
+                                                            } else {
+                                                                handleCancel(request.id);
+                                                            }
+                                                        }}
                                                         className="text-black hover:underline"
                                                     >
-                                                        {request.divisionId||request.id.slice(-4)}
+                                                        {request.divisionId || request.id.slice(-4)}
                                                     </button>
                                                 </td>
                                                 <td className="border border-black px-2 py-1 text-black">{request.missionBlock || "-"}</td>

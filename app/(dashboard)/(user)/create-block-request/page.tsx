@@ -862,6 +862,50 @@ export default function CreateBlockRequestPage() {
     }
   };
 
+
+    const shouldForceUrgentBlock = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(formData.date);
+    targetDate.setHours(0, 0, 0, 0);
+    const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
+      return true;
+    }
+    const isDateInNextWeek = (dateString: string): boolean => {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const targetDate = new Date(dateString + "T00:00:00Z");
+      targetDate.setUTCHours(0, 0, 0, 0);
+      const currentWeekSunday = new Date(today);
+      const daysUntilSunday = today.getUTCDay() === 0 ? 0 : 7 - today.getUTCDay();
+      currentWeekSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
+      const nextWeekMonday = new Date(currentWeekSunday);
+      nextWeekMonday.setUTCDate(currentWeekSunday.getUTCDate() + 1);
+      const nextWeekSunday = new Date(nextWeekMonday);
+      nextWeekSunday.setUTCDate(nextWeekMonday.getUTCDate() + 6);
+      return targetDate >= nextWeekMonday && targetDate <= nextWeekSunday;
+    };
+    const isPastThursdayCutoff = (): boolean => {
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay();
+      const hour = now.getUTCHours();
+      return (dayOfWeek === 4 && hour >= 22) || dayOfWeek > 4;
+    };
+    return isDateInNextWeek(formData.date) && isPastThursdayCutoff();
+  })();
+
+
+  useEffect(() => {
+    if (shouldForceUrgentBlock && formData.corridorTypeSelection !== "Urgent Block") {
+      setFormData((prev) => ({ ...prev, corridorTypeSelection: "Urgent Block" }));
+    }
+  }, [shouldForceUrgentBlock, formData.date]);
+
+
+
+
+
   // Add reviewMode state
   const [reviewMode, setReviewMode] = useState(false);
 
@@ -2009,6 +2053,7 @@ const roads = sectionEntry.road
                   value: val,
                   label: val,
                 }))}
+                required
                 onChange={(selected) => {
                   const values = selected
                     ? selected.map((opt: any) => opt.value)
@@ -2075,9 +2120,9 @@ const roads = sectionEntry.road
 
             {/* Always Scrollable Line/Road List */}
             <div
-              className="w-full flex flex-col gap-1 mt-1 pr-1"
+              className="w-full flex flex-col gap-1 mt-1 pr-1 mb-1"
               style={{
-                maxHeight: "110px",
+                // maxHeight: "110px",
                 overflowY: "auto",
                 borderRadius: "6px",
               }}
@@ -2106,18 +2151,19 @@ const roads = sectionEntry.road
                     key={block}
                     className="flex flex-row items-center gap-2 w-full"
                   >
-             <Select
-  isMulti
-  name={`lineOrRoad-${block}`}
-  options={lineOrRoadOptions}
-  value={(() => {
-    const section = formData.processedLineSections?.find(
-      (s) => s.block === block
-    );
-    const selectedValues: {
-      value: string;
-      label: string;
-    }[] = [];
+                    <Select
+                      isMulti
+                      name={`lineOrRoad-${block}`}
+                      options={lineOrRoadOptions}
+                      required
+                      value={(() => {
+                        const section = formData.processedLineSections?.find(
+                          (s) => s.block === block
+                        );
+                        const selectedValues: {
+                          value: string;
+                          label: string;
+                        }[] = [];
 
     if (isYard) {
       // For yards, use road and otherRoads
@@ -2472,6 +2518,7 @@ const roads = sectionEntry.road
               placeholder="From"
               className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
               style={{ minWidth: 80, maxWidth: 120 }}
+              required
             />
             <input
               type="text"
@@ -2481,6 +2528,7 @@ const roads = sectionEntry.road
               placeholder="To"
               className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
               style={{ minWidth: 80, maxWidth: 120 }}
+              required
             />
           </div>
           {/* Duration and Type of Block row, full width, equal size, compact */}
@@ -2516,65 +2564,34 @@ const roads = sectionEntry.road
               <span className="text-black font-bold px-1 py-0.5 text-[12px] text-center w-full">
                 Type of Block
               </span>
-              <select
-                name="corridorTypeSelection"
-                value={formData.corridorTypeSelection || ""}
-                onChange={handleInputChange}
-                className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
-                style={{
-                  minWidth: 50,
-                  height: 24,
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right",
-                  backgroundSize: "1.2rem",
-                }}
-
-              >
-                <option value="">Select</option>
-                <option value="Corridor Block">Corridor Block</option>
-                <option value="Non-Corridor Block">Non-Corridor Block</option>
-                {(!!formData.date && (() => {
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  const targetDate = new Date(formData.date);
-                  targetDate.setHours(0, 0, 0, 0);
-                  const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  // Check if date is today, tomorrow, or day after tomorrow
-                  if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
-                    return true;
-                  }
-                  // Check if date is in next week and after Thursday 22:00
-                  const isDateInNextWeek = (dateString: string): boolean => {
-                    const today = new Date();
-                    today.setUTCHours(0, 0, 0, 0);
-                    const targetDate = new Date(dateString + "T00:00:00Z");
-                    targetDate.setUTCHours(0, 0, 0, 0);
-                    const currentWeekSunday = new Date(today);
-                    const daysUntilSunday = today.getUTCDay() === 0 ? 0 : 7 - today.getUTCDay();
-                    currentWeekSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
-                    const nextWeekMonday = new Date(currentWeekSunday);
-                    nextWeekMonday.setUTCDate(currentWeekSunday.getUTCDate() + 1);
-                    const nextWeekSunday = new Date(nextWeekMonday);
-                    nextWeekSunday.setUTCDate(nextWeekMonday.getUTCDate() + 6);
-                    return targetDate >= nextWeekMonday && targetDate <= nextWeekSunday;
-                  };
-                  const isPastThursdayCutoff = (): boolean => {
-                    const now = new Date();
-                    const dayOfWeek = now.getUTCDay();
-                    const hour = now.getUTCHours();
-                    return (dayOfWeek === 4 && hour >= 22) || dayOfWeek > 4;
-                  };
-                  if (isDateInNextWeek(formData.date) && isPastThursdayCutoff()) {
-                    return true;
-                  }
-                  return false;
-                })()) && (
-                  <option value="Urgent Block">Urgent Block</option>
-                )}
-              </select>
+        <select
+              name="corridorTypeSelection"
+              value={formData.corridorTypeSelection || ""}
+              onChange={handleInputChange}
+              className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
+              style={{
+                minWidth: 50,
+                height: 24,
+                appearance: "none",
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "1.2rem",
+              }}
+              required
+              disabled={shouldForceUrgentBlock} // Optional: disable dropdown entirely
+            >
+              <option value="" disabled={!shouldForceUrgentBlock}>Select</option>
+              <option value="Corridor Block" disabled={shouldForceUrgentBlock}>
+                Corridor Block
+              </option>
+              <option value="Non-Corridor Block" disabled={shouldForceUrgentBlock}>
+                Non-Corridor Block
+              </option>
+              {shouldForceUrgentBlock && (
+                <option value="Urgent Block">Urgent Block</option>
+              )}
+            </select>
               {renderError("corridorTypeSelection")}
             </div>
           </div>
@@ -2744,6 +2761,7 @@ const roads = sectionEntry.road
                   value={formData.freshCautionLocationFrom || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <span className="px-1">to</span>
@@ -2752,6 +2770,7 @@ const roads = sectionEntry.road
                   value={formData.freshCautionLocationTo || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <input
@@ -2759,6 +2778,7 @@ const roads = sectionEntry.road
                   value={formData.adjacentLinesAffected || ""}
                   onChange={handleInputChange}
                   placeholder="UP/DN/SL/Road No."
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
                 />
                 <input
@@ -2767,6 +2787,7 @@ const roads = sectionEntry.road
                   value={formData.freshCautionSpeed || ""}
                   onChange={handleInputChange}
                   placeholder="Speed"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 {renderError("freshCautionSpeed")}
@@ -2816,6 +2837,7 @@ const roads = sectionEntry.road
                   value={formData.powerBlockKmFrom || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <span className="px-1">to</span>
@@ -2824,6 +2846,7 @@ const roads = sectionEntry.road
                   value={formData.powerBlockKmTo || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <input
@@ -2831,6 +2854,7 @@ const roads = sectionEntry.road
                   value={formData.powerBlockRoad || ""}
                   onChange={handleInputChange}
                   placeholder="UP/DN/Road No."
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
                 />
               </div>
@@ -2848,6 +2872,7 @@ const roads = sectionEntry.road
                     value={formData.powerBlockDisconnectionAssignTo || ""}
                     onChange={handleInputChange}
                     className="input gov-input"
+                    required
                     style={{
                       color: "black",
                       borderColor: errors.powerBlockDisconnectionAssignTo
@@ -2926,6 +2951,7 @@ const roads = sectionEntry.road
                   value={formData.sntDisconnectionLineFrom || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <span className="px-1">to</span>
@@ -2934,6 +2960,7 @@ const roads = sectionEntry.road
                   value={formData.sntDisconnectionLineTo || ""}
                   onChange={handleInputChange}
                   placeholder="KM"
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
                 />
                 <input
@@ -2941,6 +2968,7 @@ const roads = sectionEntry.road
                   value={formData.sntDisconnectionPointNo || ""}
                   onChange={handleInputChange}
                   placeholder="Point No."
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-16 text-[13px]"
                 />
                 <input
@@ -2948,6 +2976,7 @@ const roads = sectionEntry.road
                   value={formData.sntDisconnectionSignalNo || ""}
                   onChange={handleInputChange}
                   placeholder="Signal No."
+                  required
                   className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-16 text-[13px]"
                 />
               </div>
@@ -2963,6 +2992,7 @@ const roads = sectionEntry.road
                 value={formData.selectedDepo}
                 onChange={handleInputChange}
                 className="input gov-input"
+                required
                 style={{
                   color: "black",
                   borderColor: errors.sntDisconnectionAssignTo
