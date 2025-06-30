@@ -349,16 +349,13 @@ const { minDate, maxDate } = UrgentRequests.reduce(
 );
   console.log(minDate, maxDate);
   // const [selectedDate, setSelectedDate] = useState<Date>(minDate);
-const [selectedDate, setSelectedDate] = useState<Date>(() => {
-  const today = new Date();
-  return minDate && isValidDate(minDate) ? minDate : today;
-})
+const [selectedDate, setSelectedDate] = useState<Date>(startOfWeek(currentWeekStart, { weekStartsOn: 1 }));
   // Set selectedDate only when minDate is ready
   useEffect(() => {
     if (minDate && !selectedDate) {
-      setSelectedDate(minDate);
+      setSelectedDate(startOfWeek(currentWeekStart, { weekStartsOn: 1 }));
     }
-  }, [minDate, selectedDate]);
+  }, []);
 
   const urgentRequestDate = UrgentRequests.filter((req: any) => {
     const requestDate =
@@ -601,11 +598,14 @@ const [selectedDate, setSelectedDate] = useState<Date>(() => {
   // Function to navigate to previous or next period (day for urgent, week for non-urgent)
   const handleWeekChange = (direction: "prev" | "next") => {
     setCurrentWeekStart((prev) => {
+      let newDate;
       if (isUrgentMode) {
-        return direction === "prev" ? subDays(prev, 1) : addDays(prev, 1);
+        newDate = direction === "prev" ? subDays(prev, 1) : addDays(prev, 1);
       } else {
-        return direction === "prev" ? subDays(prev, 7) : addDays(prev, 7);
+        newDate = direction === "prev" ? subDays(prev, 7) : addDays(prev, 7);
       }
+      setSelectedDate(startOfWeek(newDate, { weekStartsOn: 1 }));
+      return newDate;
     });
   };
 
@@ -1307,8 +1307,8 @@ const [selectedDate, setSelectedDate] = useState<Date>(() => {
         <DaySwitcher
           currentDate={selectedDate}
           onDateChange={(newDate) => setSelectedDate(newDate)}
-          minDate={minDate}
-          maxDate={maxDate}
+          minDate={startOfWeek(currentWeekStart, { weekStartsOn: 1 })}
+          maxDate={addDays(weekStart, 7)}
         />
         <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
           <table className="w-full border-collapse text-black bg-white">
