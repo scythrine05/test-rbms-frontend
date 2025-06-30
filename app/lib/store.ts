@@ -3264,7 +3264,7 @@ export let blockSection = {
     "ABU-AVD",
     "AVD-PAB",
     "PAB-PTMS",
-    "PTMS-TI",
+    //"PTMS-TI",
     "PAB-TI",
     "TI-TRL",
     "TRL-KBT",
