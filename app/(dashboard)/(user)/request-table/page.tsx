@@ -477,6 +477,9 @@ export default function RequestTablePage() {
     },
   });
 
+  console.log("userRequestService  ----- > ")
+  console.dir(data)
+
   // Reject Mutation
   const rejectMutation = useMutation({
     mutationFn:({ id, reason }: { id: string; reason: string })  => userRequestService.rejectUserRequestRemark(id, reason),
@@ -658,7 +661,7 @@ const handleDownload = () => {
       "Status": request.adminRequestStatus === "ACCEPTED" ? "Y" : "N",
       "Sanctioned From": request.sanctionedTimeFrom ? formatTime(request.sanctionedTimeFrom) : "N/A",
       "Sanctioned To": request.sanctionedTimeTo ? formatTime(request.sanctionedTimeTo) : "N/A",
-      "Accept/Reject Status": request.acceptRejectRemark || "Pending"
+      "Accept/Reject Status": request.userResponse || "Pending"
     }));
 
     console.log(excelData);
@@ -877,7 +880,7 @@ const handleDownload = () => {
                       {request.isSanctioned === true ? (
                         <>
                         {
-                          request.acceptRejectRemark === "ACCEPTED" ? (
+                          request.userResponse === "ACCEPTED" ? (
                           <div className="px-2 py-1 bg-green-100 text-green-800 mx-auto">
                             Sanctioned and Accepted
                           </div>
@@ -888,10 +891,10 @@ const handleDownload = () => {
                       ) : (
                         <>
                         {
-                          request.acceptRejectRemark !== null ? 
+                          request.userResponse !== null ? 
                           (
                           <div className="px-2 py-1 bg-yellow-100 text-yellow-800 mx-auto">
-                            {request.acceptRejectRemark}
+                            {request.userResponse}
                           </div>
                           )
                           :

@@ -2870,7 +2870,12 @@ const roads = sectionEntry.road
                   <select
                     name="powerBlockDisconnectionAssignTo"
                     value={formData.powerBlockDisconnectionAssignTo || ""}
-                    onChange={handleInputChange}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        powerBlockDisconnectionAssignTo: e.target.value,
+                      }))
+                    }
                     className="input gov-input"
                     required
                     style={{
