@@ -228,22 +228,21 @@ export default function OptimiseTablePage() {
 
   if (isLoading) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5">Loading requests...</div>
+      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5">Loading approved requests...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
+      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
         <div className="text-center py-5 text-red-600">
-          Error loading requests. Please try again.
+          Error loading approved requests. Please try again.
         </div>
       </div>
     );
   }
-
   // Filter optimized requests that are sanctioned
   const sanctionedOptimizedRequests = data?.data.requests?.filter(
     (request: any) => {

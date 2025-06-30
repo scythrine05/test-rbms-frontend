@@ -94,18 +94,17 @@ export default function ViewRequestPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
-        <div className="text-center py-5">Loading request details...</div>
+      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5">Loading approved requests...</div>
       </div>
     );
   }
 
-  // Show error state
   if (error) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
+      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
         <div className="text-center py-5 text-red-600">
-          Error loading request details. Please try again.
+          Error loading approved requests. Please try again.
         </div>
       </div>
     );

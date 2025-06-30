@@ -517,13 +517,13 @@ export default function PendingRequestsPage() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center">
-                <div className="text-2xl font-bold">Loading...</div>
-            </div>
-        );
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5">Loading approved requests...</div>
+      </div>
+    );
+  }
 
     if (error) {
         notFound();

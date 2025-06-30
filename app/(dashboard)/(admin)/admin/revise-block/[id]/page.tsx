@@ -73,23 +73,23 @@ export default function ReviseBlockDetailsPage() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="bg-white p-3 border border-black mb-3">
-                <div className="text-center py-5">Loading block details...</div>
-            </div>
-        );
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5">Loading approved requests...</div>
+      </div>
+    );
+  }
 
-    if (error) {
-        return (
-            <div className="bg-white p-3 border border-black mb-3">
-                <div className="text-center py-5 text-red-600">
-                    Error loading block details. Please try again.
-                </div>
-            </div>
-        );
-    }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5 text-red-600">
+          Error loading approved requests. Please try again.
+        </div>
+      </div>
+    );
+  }
 
     const request = data?.data;
 

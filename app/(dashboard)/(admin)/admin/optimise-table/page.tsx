@@ -743,7 +743,7 @@ const [selectedDate, setSelectedDate] = useState<Date>(startOfWeek(currentWeekSt
 
   if (isLoading) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
+      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
         <div className="text-center py-5">Loading approved requests...</div>
       </div>
     );
@@ -751,7 +751,7 @@ const [selectedDate, setSelectedDate] = useState<Date>(startOfWeek(currentWeekSt
 
   if (error) {
     return (
-      <div className="bg-white p-3 border border-black mb-3">
+      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
         <div className="text-center py-5 text-red-600">
           Error loading approved requests. Please try again.
         </div>
@@ -760,7 +760,7 @@ const [selectedDate, setSelectedDate] = useState<Date>(startOfWeek(currentWeekSt
   }
 
   return (
-    <div className="bg-white p-3 border border-black">
+    <div className="min-h-screen bg-white p-3 border border-black">
       {showSuccess && (
         <div className="fixed top-20 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
           Operation successful!
@@ -1269,41 +1269,46 @@ const [selectedDate, setSelectedDate] = useState<Date>(startOfWeek(currentWeekSt
         </div>
       </>
 
-      <div>
-        <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+      <div className="mt-4">
+        <h2 className="border-t-2 pt-2 border-[#13529e] text-lg font-semibold  text-[#13529e]">
           Urgent Mode
         </h2>
-        <button
-          onClick={() => {
-            setIsOptimizeDialogOpen(true);
-            setIsUrgentRequests(true);
-          }}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
-        >
-          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Optimise
-        </button>
+        <div className="flex mr-0 mb-2 flex-row-reverse">
+          
 
-        <button
-          // onClick={handleSendOptimizedRequests}
-          onClick={handleSendUrgentRequests}
-          className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
-        >
-          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Send
-        </button>
+          <button
+            // onClick={handleSendOptimizedRequests}
+            onClick={handleSendUrgentRequests}
+            className="px-3 py-1 ml-2  text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Send
+          </button>
+
+          <button
+            onClick={() => {
+              setIsOptimizeDialogOpen(true);
+              setIsUrgentRequests(true);
+            }}
+            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Optimise
+          </button>
+
+        </div>
         <DaySwitcher
           currentDate={selectedDate}
           onDateChange={(newDate) => setSelectedDate(newDate)}

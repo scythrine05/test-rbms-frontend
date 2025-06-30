@@ -301,11 +301,13 @@ export default function OtherRequestsPage() {
   if (isLoading) {
     return <Loader name="other requests" />;
   }
-
+  
   if (error) {
     return (
-      <div className="text-center py-3 text-sm text-red-600">
-        Error loading requests. Please try again.
+      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
+        <div className="text-center py-5 text-red-600">
+          Error loading approved requests. Please try again.
+        </div>
       </div>
     );
   }
