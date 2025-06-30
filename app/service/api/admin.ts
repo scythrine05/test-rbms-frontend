@@ -1,10 +1,10 @@
 import axiosInstance from '@/app/utils/axiosInstance';
 
 export const adminService = {
-  acceptUserRequest: async (id: string, accept: boolean) => {
+  acceptUserRequest: async (id: string, accept: boolean,remark?:string) => {
     const response = await axiosInstance.put(
       `/api/user-request/admin/accept/${id}?accept=${accept}`,
-      { adminRequestStatus: accept ? "ACCEPTED" : "REJECTED" }
+      { adminRequestStatus: accept ? "ACCEPTED" : "REJECTED",remark,isMobileView:"mobileView" }
     );
     return response.data;
   },

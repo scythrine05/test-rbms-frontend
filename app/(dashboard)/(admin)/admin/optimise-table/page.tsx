@@ -264,7 +264,7 @@ export default function OptimiseTablePage() {
   ) => {
     if (accept || confirm("Are you sure you want to reject this request?")) {
       try {
-        await acceptMutation.mutateAsync({ id: requestId, accept, remark });
+        await acceptMutation.mutateAsync({ id: requestId, accept:false, remark });
         alert(`Request ${accept ? "accepted" : "rejected"} successfully`);
         setShowRejectionModal(false);
         setRejectionReason("");
