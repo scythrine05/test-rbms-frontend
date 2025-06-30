@@ -33,7 +33,8 @@ export function DaySwitcher({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center justify-center">
+    <div className=" space-x-4 border border-gray-300 dark:border-gray-600 rounded w-fit p-1">
       <button
         onClick={() => handleDateChange("prev")}
         disabled={!canGoPrev}
@@ -51,6 +52,7 @@ export function DaySwitcher({
       >
         Next Day
       </button>
+    </div>
     </div>
   );
 }
