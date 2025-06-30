@@ -148,25 +148,27 @@ const getLineOrRoad = (request: UserRequest) => {
     Array.isArray(request.processedLineSections) &&
     request.processedLineSections.length > 0
   ) {
-    return request.processedLineSections
-      .map((section) => {
-        if (section.type === "yard") {
-          if (section.stream && section.road) {
-            return `${section.stream}/${section.road}`;
+    return (
+      request.processedLineSections
+        .map((section) => {
+          if (section.type === "yard") {
+            if (section.stream && section.road) {
+              return `${section.stream}/${section.road}`;
+            }
+            if (section.stream) {
+              return section.stream;
+            }
+            if (section.road) {
+              return section.road;
+            }
+          } else if (section.lineName) {
+            return section.lineName;
           }
-          if (section.stream) {
-            return section.stream;
-          }
-          if (section.road) {
-            return section.road;
-          }
-        } else if (section.lineName) {
-          return section.lineName;
-        }
-        return null;
-      })
-      .filter(Boolean)
-      .join(", ") || "N/A";
+          return null;
+        })
+        .filter(Boolean)
+        .join(", ") || "N/A"
+    );
   }
   return "N/A";
 };
@@ -178,12 +180,15 @@ const getAdjacentLinesAffected = (request: UserRequest): string => {
   }
 
   if (request.processedLineSections) {
-    const affectedLines = request.processedLineSections.map(section => {
-      if (section.type === 'yard') {
-        return section.otherRoads;
-      }
-      return section.otherLines;
-    }).filter(Boolean).join(", ");
+    const affectedLines = request.processedLineSections
+      .map((section) => {
+        if (section.type === "yard") {
+          return section.otherRoads;
+        }
+        return section.otherLines;
+      })
+      .filter(Boolean)
+      .join(", ");
 
     return affectedLines || "N/A";
   }
@@ -193,15 +198,15 @@ const getAdjacentLinesAffected = (request: UserRequest): string => {
 
 export default function OptimiseTablePage() {
   const router = useRouter();
-  
-const acceptMutation = useAcceptUserRequest();
+
+  const acceptMutation = useAcceptUserRequest();
   const searchParams = useSearchParams();
   const { isUrgentMode } = useUrgentMode();
   const queryClient = useQueryClient();
 
   // Initialize currentWeekStart from URL parameter or default to current date
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const dateParam = searchParams.get('date');
+    const dateParam = searchParams.get("date");
     if (dateParam) {
       const parsedDate = new Date(dateParam);
       if (!isNaN(parsedDate.getTime())) {
@@ -216,7 +221,7 @@ const acceptMutation = useAcceptUserRequest();
   // Update URL when currentWeekStart changes
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
+    params.set("date", format(currentWeekStart, "yyyy-MM-dd"));
     router.push(`?${params.toString()}`, { scroll: false });
   }, [currentWeekStart, router]);
 
@@ -226,6 +231,9 @@ const acceptMutation = useAcceptUserRequest();
   const [timeFrom, setTimeFrom] = useState("");
   const [timeTo, setTimeTo] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
 
   // For urgent mode, use the same day for start and end
   // For non-urgent mode, use Monday to Sunday
@@ -245,82 +253,136 @@ const acceptMutation = useAcceptUserRequest();
       ),
   });
 
-
-  const handleRequestAction = async (requestId: string, accept: boolean) => {
-  if (confirm("Are you sure you want to  reject this request?")) {
-    try {
-      await acceptMutation.mutateAsync({ id: requestId, accept });
-      alert("Request  rejected successfully");
-    } catch (error) {
-      console.error("Failed to process request:", error);
-      alert("Failed to process request. Please try again.");
+  const handleRejectClick = (requestId: string) => {
+    setCurrentRequestId(requestId);
+    setShowRejectionModal(true);
+  };
+  const handleRequestAction = async (
+    requestId: string,
+    accept: boolean,
+    remark?: string
+  ) => {
+    if (accept || confirm("Are you sure you want to reject this request?")) {
+      try {
+        await acceptMutation.mutateAsync({ id: requestId, accept, remark });
+        alert(`Request ${accept ? "accepted" : "rejected"} successfully`);
+        setShowRejectionModal(false);
+        setRejectionReason("");
+      } catch (error) {
+        console.error("Failed to process request:", error);
+        alert("Failed to process request. Please try again.");
+      }
     }
-  }
-};
+  };
+  //   const handleRequestAction = async (requestId: string, accept: boolean) => {
+  //   if (confirm("Are you sure you want to  reject this request?")) {
+  //     try {
+  //       await acceptMutation.mutateAsync({ id: requestId, accept });
+  //       alert("Request  rejected successfully");
+  //     } catch (error) {
+  //       console.error("Failed to process request:", error);
+  //       alert("Failed to process request. Please try again.");
+  //     }
+  //   }
+  // };
   // Filter requests based on urgent mode
   const filteredRequests =
     data?.data?.requests?.filter((request: UserRequest) => {
       return isUrgentMode //false
         ? request.corridorType === "Urgent Block" ||
-        request.workType === "EMERGENCY"
+            request.workType === "EMERGENCY"
         : request.corridorType !== "Urgent Block" &&
-        request.workType !== "EMERGENCY";
+            request.workType !== "EMERGENCY";
     }) || [];
 
-
-    const UrgentRequests =
+  const UrgentRequests =
     data?.data?.requests?.filter((request: UserRequest) => {
-      return  request.corridorType === "Urgent Block"  }) || [];
+      return request.corridorType === "Urgent Block";
+    }) || [];
+
+  // const { minDate, maxDate } = UrgentRequests.reduce(
+  //   (acc: { minDate: Date; maxDate: Date }, request: any) => {
+  //     const requestDate =
+  //       typeof request.date === "string"
+  //         ? parseISO(request.date)
+  //         : request.date;
+
+  //     if (!acc.minDate || requestDate < acc.minDate) {
+  //       acc.minDate = requestDate;
+  //     }
+  //     if (!acc.maxDate || requestDate > acc.maxDate) {
+  //       acc.maxDate = requestDate;
+  //     }
+
+  //     return acc;
+  //   },
+  //   { minDate: null, maxDate: null }
+  // );
 
 
+  const isValidDate = (date: unknown): date is Date => {
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+// In your component
 const { minDate, maxDate } = UrgentRequests.reduce(
-  (acc: { minDate: Date ; maxDate: Date }, request: any) => {
-    const requestDate =
-      typeof request.date === "string"
-        ? parseISO(request.date)
-        : request.date;
+  (acc: { minDate: Date | null; maxDate: Date | null }, request: UserRequest) => {
+    try {
+      const requestDate = typeof request.date === 'string' 
+        ? parseISO(request.date) 
+        : new Date(request.date);
+      
+      if (!isValidDate(requestDate)) return acc;
 
-    if (!acc.minDate || requestDate < acc.minDate) {
-      acc.minDate = requestDate;
+      if (!acc.minDate || requestDate < acc.minDate) {
+        acc.minDate = requestDate;
+      }
+      if (!acc.maxDate || requestDate > acc.maxDate) {
+        acc.maxDate = requestDate;
+      }
+    } catch (error) {
+      console.error("Error processing request date:", error);
     }
-    if (!acc.maxDate || requestDate > acc.maxDate) {
-      acc.maxDate = requestDate;
-    }
-
     return acc;
   },
   { minDate: null, maxDate: null }
 );
+  console.log(minDate, maxDate);
+  // const [selectedDate, setSelectedDate] = useState<Date>(minDate);
+const [selectedDate, setSelectedDate] = useState<Date>(() => {
+  const today = new Date();
+  return minDate && isValidDate(minDate) ? minDate : today;
+})
+  // Set selectedDate only when minDate is ready
+  useEffect(() => {
+    if (minDate && !selectedDate) {
+      setSelectedDate(minDate);
+    }
+  }, [minDate, selectedDate]);
 
-
-console.log(minDate, maxDate)
-const [selectedDate, setSelectedDate] = useState<Date>(minDate);
-
-// Set selectedDate only when minDate is ready
-useEffect(() => {
-  if (minDate && !selectedDate) {
-    setSelectedDate(minDate);
-  }
-}, [minDate, selectedDate]);
-
-const urgentRequestDate = UrgentRequests.filter((req: any) => {
-  const requestDate = typeof req.date === "string" ? parseISO(req.date) : req.date;
-  return isSameDay(requestDate, selectedDate);
-});
+  const urgentRequestDate = UrgentRequests.filter((req: any) => {
+    const requestDate =
+      typeof req.date === "string" ? parseISO(req.date) : req.date;
+    return isSameDay(requestDate, selectedDate);
+  });
 
   // Separate corridor and non-corridor requests
- const corridorRequests = filteredRequests.filter(
-  (request: UserRequest) => 
-    request.corridorType === "Corridor" || 
-    request.corridorType === "Corridor Block"
-);
+  const corridorRequests = filteredRequests.filter(
+    (request: UserRequest) =>
+      request.corridorType === "Corridor" ||
+      request.corridorType === "Corridor Block"
+  );
   const nonCorridorRequests = filteredRequests.filter(
-    (request: UserRequest) => request.corridorType === "Outside Corridor"||request.corridorType === "Non-Corridor Block"
+    (request: UserRequest) =>
+      request.corridorType === "Outside Corridor" ||
+      request.corridorType === "Non-Corridor Block"
   );
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
   const [isUrgentRequests, setIsUrgentRequests] = useState<boolean>(false);
-  const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(null);
+  const [optimizedData, setOptimizedData] = useState<UserRequest[] | null>(
+    null
+  );
   const optimizeMutation = useOptimizeRequests();
 
   // Edit functionality
@@ -328,15 +390,9 @@ const urgentRequestDate = UrgentRequests.filter((req: any) => {
     setEditingId(request.id);
     setEditDate(request.date.split("T")[0]);
     setTimeFrom(
-      request.optimizeTimeFrom
-        ? formatTime(request.optimizeTimeFrom)
-        : ""
+      request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : ""
     );
-    setTimeTo(
-      request.optimizeTimeTo
-        ? formatTime(request.optimizeTimeTo)
-        : ""
-    );
+    setTimeTo(request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : "");
   };
 
   const handleCancelEdit = () => {
@@ -370,16 +426,20 @@ const urgentRequestDate = UrgentRequests.filter((req: any) => {
 
   // Helper function to format time for backend
   const formatForBackend = (date: Date) => {
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00.000Z`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+      date.getDate()
+    )}T${pad(date.getHours())}:${pad(date.getMinutes())}:00.000Z`;
   };
 
   // Helper function to format date for backend
   const formatDateForBackend = (date: Date) => {
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T00:00:00.000Z`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+      date.getDate()
+    )}T00:00:00.000Z`;
   };
 
   // Helper function to pad numbers with leading zero
-  const pad = (num: number) => num.toString().padStart(2, '0');
+  const pad = (num: number) => num.toString().padStart(2, "0");
 
   const handleUpdateClick = (requestId: string) => {
     if (!editDate || !timeFrom || !timeTo) {
@@ -414,7 +474,6 @@ const urgentRequestDate = UrgentRequests.filter((req: any) => {
     }
   };
 
-
   const handleSendOptimizedRequests = async () => {
     try {
       const requestIds =
@@ -437,79 +496,81 @@ const urgentRequestDate = UrgentRequests.filter((req: any) => {
     }
   };
 
-const handleSendUrgentRequests = async () => {
-  try {
-    const UrgentRequestsData =
-      data?.data?.requests
-        ?.filter(
-          (request: UserRequest) =>
-            request.corridorType === "Urgent Block" &&
-            request.optimizeTimeFrom != null &&
-            request.optimizeTimeTo != null
-        )
-        .map((request: UserRequest) => ({
-          id: request.id,
-          optimizeTimeFrom: request.optimizeTimeFrom,
-          optimizeTimeTo: request.optimizeTimeTo,
-        })) || [];
+  const handleSendUrgentRequests = async () => {
+    try {
+      const UrgentRequestsData =
+        data?.data?.requests
+          ?.filter(
+            (request: UserRequest) =>
+              request.corridorType === "Urgent Block" &&
+              request.optimizeTimeFrom != null &&
+              request.optimizeTimeTo != null
+          )
+          .map((request: UserRequest) => ({
+            id: request.id,
+            optimizeTimeFrom: request.optimizeTimeFrom,
+            optimizeTimeTo: request.optimizeTimeTo,
+          })) || [];
 
-    if (UrgentRequestsData.length === 0) {
-      alert("No requests to update");
-      return;
+      if (UrgentRequestsData.length === 0) {
+        alert("No requests to update");
+        return;
+      }
+
+      console.dir(UrgentRequestsData);
+      const response = await adminService.updateSanctionStatus(
+        UrgentRequestsData
+      );
+      if (response.success) {
+        alert("Optimization status updated successfully!");
+      } else {
+        alert("Failed to update optimization status");
+      }
+    } catch (err) {
+      console.error("Failed to update optimization status", err);
+      alert("Error updating optimization status. Please try again.");
     }
+  };
 
-    console.dir(UrgentRequestsData)
-    const response = await adminService.updateSanctionStatus(UrgentRequestsData);
-    if (response.success) {
-      alert("Optimization status updated successfully!");
-    } else {
-      alert("Failed to update optimization status");
+  const handleSendNonUrgentRequests = async () => {
+    try {
+      // Only send the required fields for each non-urgent request
+      const nonUrgentRequestsData =
+        data?.data?.requests
+          ?.filter(
+            (request: UserRequest) =>
+              request.corridorType !== "Urgent Block" &&
+              request.optimizeTimeFrom != null &&
+              request.optimizeTimeTo != null
+          )
+          .map((request: UserRequest) => ({
+            id: request.id,
+            optimizeTimeFrom: request.optimizeTimeFrom,
+            optimizeTimeTo: request.optimizeTimeTo,
+          })) || [];
+
+      if (nonUrgentRequestsData.length === 0) {
+        alert("No requests to update");
+        return;
+      }
+
+      console.dir("nonUrgentRequestsData");
+      console.dir(nonUrgentRequestsData);
+
+      console.dir(data);
+      const response = await adminService.updateSanctionStatus(
+        nonUrgentRequestsData
+      );
+      if (response.success) {
+        alert("Optimization status updated successfully!");
+      } else {
+        alert("Failed to update optimization status");
+      }
+    } catch (err) {
+      console.error("Failed to update optimization status", err);
+      alert("Error updating optimization status. Please try again.");
     }
-  } catch (err) {
-    console.error("Failed to update optimization status", err);
-    alert("Error updating optimization status. Please try again.");
-  }
-};
-
-const handleSendNonUrgentRequests = async () => {
-  try {
-    // Only send the required fields for each non-urgent request
-    const nonUrgentRequestsData =
-      data?.data?.requests
-        ?.filter(
-          (request: UserRequest) =>
-            request.corridorType !== "Urgent Block" &&
-            request.optimizeTimeFrom != null &&
-            request.optimizeTimeTo != null
-        )
-        .map((request: UserRequest) => ({
-          id: request.id,
-          optimizeTimeFrom: request.optimizeTimeFrom,
-          optimizeTimeTo: request.optimizeTimeTo,
-        })) || [];
-
-    if (nonUrgentRequestsData.length === 0) {
-      alert("No requests to update");
-      return;
-    }
-    
-    console.dir("nonUrgentRequestsData")
-    console.dir(nonUrgentRequestsData)
-
-    console.dir(data)
-    const response = await adminService.updateSanctionStatus(nonUrgentRequestsData);
-    if (response.success) {
-      alert("Optimization status updated successfully!");
-    } else {
-      alert("Failed to update optimization status");
-    }
-  } catch (err) {
-    console.error("Failed to update optimization status", err);
-    alert("Error updating optimization status. Please try again.");
-  }
-};
-
-  
+  };
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -528,8 +589,8 @@ const handleSendNonUrgentRequests = async () => {
       if (isNaN(date.getTime())) return "N/A";
 
       // Format as 24-hour time (HH:mm)
-      const hours = date.getUTCHours().toString().padStart(2, '0');
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      const hours = date.getUTCHours().toString().padStart(2, "0");
+      const minutes = date.getUTCMinutes().toString().padStart(2, "0");
       return `${hours}:${minutes}`;
     } catch (error) {
       console.error("Error formatting time:", error, dateString);
@@ -554,14 +615,17 @@ const handleSendNonUrgentRequests = async () => {
     try {
       // Preprocess the requests
       //const preprocessedRequests = await flattenRecords(data.data.requests);
-      const requestsToOptimize = data.data.requests.filter((request: UserRequest) => {
-      const requestDate = format(parseISO(request.date), "yyyy-MM-dd");
-      const selected = format(selectedDate, "yyyy-MM-dd");
+      const requestsToOptimize = data.data.requests.filter(
+        (request: UserRequest) => {
+          const requestDate = format(parseISO(request.date), "yyyy-MM-dd");
+          const selected = format(selectedDate, "yyyy-MM-dd");
 
-      return isUrgentRequests
-        ? request.corridorType === "Urgent Block" && requestDate === selected
-        : request.corridorType !== "Urgent Block";
-    });
+          return isUrgentRequests
+            ? request.corridorType === "Urgent Block" &&
+                requestDate === selected
+            : request.corridorType !== "Urgent Block";
+        }
+      );
 
       // Then preprocess the filtered requests
       const preprocessedRequests = await flattenRecords(requestsToOptimize);
@@ -570,15 +634,21 @@ const handleSendNonUrgentRequests = async () => {
 
       if (result.optimizedData) {
         // Process the optimized data to handle "WrongRequest" values by setting to "00:00"
-        const processedOptimizedData = result.optimizedData.map(request => ({
+        const processedOptimizedData = result.optimizedData.map((request) => ({
           ...request,
-          optimisedTimeFrom: request.optimisedTimeFrom === "Wrong Request" ? "00:00" : request.optimisedTimeFrom,
-          optimisedTimeTo: request.optimisedTimeTo === "Wrong Request" ? "00:00" : request.optimisedTimeTo
+          optimisedTimeFrom:
+            request.optimisedTimeFrom === "Wrong Request"
+              ? "00:00"
+              : request.optimisedTimeFrom,
+          optimisedTimeTo:
+            request.optimisedTimeTo === "Wrong Request"
+              ? "00:00"
+              : request.optimisedTimeTo,
         })) as UserRequest[];
-        
+
         // Save Functionality
         const requestIds =
-        data?.data?.requests?.map((request: UserRequest) => request.id) || [];
+          data?.data?.requests?.map((request: UserRequest) => request.id) || [];
         if (requestIds.length === 0) {
           alert("No requests to optimize");
           return;
@@ -588,12 +658,10 @@ const handleSendNonUrgentRequests = async () => {
         //     "processedOptimizedData":processedOptimizedData,
         //     "requestIds":requestIds
         //   })
-        await adminService.saveOptimizedRequestsCombined(
-          {
-            "processedOptimizedData":processedOptimizedData,
-            "requestIds":requestIds
-          }
-        );
+        await adminService.saveOptimizedRequestsCombined({
+          processedOptimizedData: processedOptimizedData,
+          requestIds: requestIds,
+        });
         setOptimizedData(processedOptimizedData);
         setIsOptimizeDialogOpen(false);
       } else {
@@ -628,7 +696,7 @@ const handleSendNonUrgentRequests = async () => {
       "Optimized Time To",
       "Requested By",
       "Department",
-      "Description"
+      "Description",
     ];
 
     // Create CSV rows
@@ -648,13 +716,15 @@ const handleSendNonUrgentRequests = async () => {
       formatTime(request.optimizeTimeTo || ""),
       request.user?.name || "N/A",
       request.selectedDepartment || "N/A",
-      request.requestremarks || "N/A"
+      request.requestremarks || "N/A",
     ]);
 
     // Combine headers and rows
     const csvContent = [
       headers.join(","),
-      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
+      ...rows.map((row: string[]) =>
+        row.map((cell: string) => `"${cell}"`).join(",")
+      ),
     ].join("\n");
 
     // Create and trigger download
@@ -662,7 +732,10 @@ const handleSendNonUrgentRequests = async () => {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `optimized_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
+    link.setAttribute(
+      "download",
+      `optimized_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -715,12 +788,11 @@ const handleSendNonUrgentRequests = async () => {
             </button>
           </div>
         ) : ( */}
-          <WeeklySwitcher
-            currentWeekStart={currentWeekStart}
-            onWeekChange={handleWeekChange}
-            weekStartsOn={1}
-          />
-        
+        <WeeklySwitcher
+          currentWeekStart={currentWeekStart}
+          onWeekChange={handleWeekChange}
+          weekStartsOn={1}
+        />
       </div>
 
       <div className="flex justify-end py-2 gap-2">
@@ -785,17 +857,18 @@ const handleSendNonUrgentRequests = async () => {
                   Optimize Requests
                 </h2>
                 <span
-                  className={`px-3 py-1 text-sm rounded-full ${isUrgentMode
-                    ? "bg-red-100 text-red-800"
-                    : "bg-blue-100 text-blue-800"
-                    } border border-black`}
+                  className={`px-3 py-1 text-sm rounded-full ${
+                    isUrgentMode
+                      ? "bg-red-100 text-red-800"
+                      : "bg-blue-100 text-blue-800"
+                  } border border-black`}
                 >
                   {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
                 </span>
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setIsOptimizeDialogOpen(false) }
+                  onClick={() => setIsOptimizeDialogOpen(false)}
                   className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black"
                 >
                   Cancel
@@ -823,378 +896,384 @@ const handleSendNonUrgentRequests = async () => {
         </div>
       )}
 
-      
-        <>
-          {/* Corridor Requests Table */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="User Remarks" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+      <>
+        {/* Corridor Requests Table */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+            Corridor Requests
+          </h2>
+          <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full border-collapse text-black bg-white">
+              <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+                <tr className="bg-gray-50">
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="date" title="Date" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Major Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Depot" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Block Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="line" title="Line / Road" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Time" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Optimized Time" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="Work Type" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="User Remarks" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="Activity" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="action" title="Actions" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {corridorRequests.map((request: UserRequest) => (
+                  <tr
+                    key={`request-${request.id}-${request.date}`}
+                    className={`hover:bg-blue-50 transition-colors ${
+                      request.optimizeTimeFrom && request.optimizeTimeTo
                         ? "bg-green-50"
                         : ""
-                        }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
+                    }`}
+                  >
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-28 border p-1 text-sm rounded"
+                        />
+                      ) : (
+                        formatDate(request.date)
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedSection}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedDepo}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.missionBlock}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {getLineOrRoad(request)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <div className="flex gap-1 items-center">
                           <input
-                            type="date"
-                            value={editDate}
-                            onChange={(e) => setEditDate(e.target.value)}
-                            className="w-28 border p-1 text-sm rounded"
+                            type="time"
+                            value={timeFrom}
+                            onChange={(e) => setTimeFrom(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
                           />
-                        ) : (
-                          formatDate(request.date)
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {formatTime(request.demandTimeFrom)} -{" "}
-                        {formatTime(request.demandTimeTo)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-1 items-center">
-                            <input
-                              type="time"
-                              value={timeFrom}
-                              onChange={(e) => setTimeFrom(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={timeTo}
-                              onChange={(e) => setTimeTo(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                          </div>
-                        ) : (
-                          <>
-                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "Wrong Request"
-                              ? formatTime(request.optimizeTimeFrom)
-                              : "N/A"}{" "}
-                            -{" "}
-                            {request.optimizeTimeTo && request.optimizeTimeTo !== "Wrong Request"
-                              ? formatTime(request.optimizeTimeTo)
-                              : "N/A"}
-                          </>
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                       <td className="border border-black p-2 text-sm">
-                        {request.userResponse||"N/A"}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-                     
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleUpdateClick(request.id)}
-                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                              disabled={updateOptimizedTimes.isPending}
-                            >
-                              {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/admin/view-request/${request.id}?from=optimise-table`}
-                              className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                            >
-                              <svg
-                                className="w-3 h-3 mr-1"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              View
-                            </Link>
-                            <button
-                              onClick={() => handleEditClick(request)}
-                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                            >
-                              Edit
-                            </button>
-                         
-                         <button
-                              onClick={() => handleRequestAction(request.id,false)}
-                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                            >
-                              Reject
-                            </button>
-                       
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                          <span>-</span>
+                          <input
+                            type="time"
+                            value={timeTo}
+                            onChange={(e) => setTimeTo(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          {request.optimizeTimeFrom &&
+                          request.optimizeTimeFrom !== "Wrong Request"
+                            ? formatTime(request.optimizeTimeFrom)
+                            : "N/A"}{" "}
+                          -{" "}
+                          {request.optimizeTimeTo &&
+                          request.optimizeTimeTo !== "Wrong Request"
+                            ? formatTime(request.optimizeTimeTo)
+                            : "N/A"}
+                        </>
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.workType}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.userResponse || "N/A"}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.activity}
+                    </td>
 
-          {/* Non-Corridor Requests Table */}
-          <div>
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Non-Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="User Remarks" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-                    
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateClick(request.id)}
+                            className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                            disabled={updateOptimizedTimes.isPending}
+                          >
+                            {updateOptimizedTimes.isPending
+                              ? "Saving..."
+                              : "Save"}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/view-request/${request.id}?from=optimise-table`}
+                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
+                          >
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path
+                                fillRule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            View
+                          </Link>
+                          <button
+                            onClick={() => handleEditClick(request)}
+                            className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                          >
+                            Edit
+                          </button>
+
+                      <button
+                          onClick={() => handleRejectClick(request.id)}
+                          className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                        >
+                          Reject
+                        </button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {nonCorridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Non-Corridor Requests Table */}
+        <div>
+          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+            Non-Corridor Requests
+          </h2>
+          <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full border-collapse text-black bg-white">
+              <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+                <tr className="bg-gray-50">
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="date" title="Date" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Major Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Depot" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Block Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="line" title="Line / Road" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Time" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Optimized Time" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="Work Type" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="User Remarks" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="Activity" />
+                  </th>
+
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="action" title="Actions" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {nonCorridorRequests.map((request: UserRequest) => (
+                  <tr
+                    key={`request-${request.id}-${request.date}`}
+                    className={`hover:bg-blue-50 transition-colors ${
+                      request.optimizeTimeFrom && request.optimizeTimeTo
                         ? "bg-green-50"
                         : ""
-                        }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
+                    }`}
+                  >
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-28 border p-1 text-sm rounded"
+                        />
+                      ) : (
+                        formatDate(request.date)
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedSection}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedDepo}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.missionBlock}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {getLineOrRoad(request)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <div className="flex gap-1 items-center">
                           <input
-                            type="date"
-                            value={editDate}
-                            onChange={(e) => setEditDate(e.target.value)}
-                            className="w-28 border p-1 text-sm rounded"
+                            type="time"
+                            value={timeFrom}
+                            onChange={(e) => setTimeFrom(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
                           />
-                        ) : (
-                          formatDate(request.date)
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {formatTime(request.demandTimeFrom)} -{" "}
-                        {formatTime(request.demandTimeTo)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-1 items-center">
-                            <input
-                              type="time"
-                              value={timeFrom}
-                              onChange={(e) => setTimeFrom(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={timeTo}
-                              onChange={(e) => setTimeTo(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                          </div>
-                        ) : (
-                          <>
-                            {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
-                              ? formatTime(request.optimizeTimeFrom)
-                              : "N/A"}{" "}
-                            -{" "}
-                            {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
-                              ? formatTime(request.optimizeTimeTo)
-                              : "N/A"}
-                          </>
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.userResponse||"N/A"}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-                     
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleUpdateClick(request.id)}
-                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                              disabled={updateOptimizedTimes.isPending}
+                          <span>-</span>
+                          <input
+                            type="time"
+                            value={timeTo}
+                            onChange={(e) => setTimeTo(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          {request.optimizeTimeFrom &&
+                          request.optimizeTimeFrom !== "WrongRequest"
+                            ? formatTime(request.optimizeTimeFrom)
+                            : "N/A"}{" "}
+                          -{" "}
+                          {request.optimizeTimeTo &&
+                          request.optimizeTimeTo !== "WrongRequest"
+                            ? formatTime(request.optimizeTimeTo)
+                            : "N/A"}
+                        </>
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.workType}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.userResponse || "N/A"}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.activity}
+                    </td>
+
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateClick(request.id)}
+                            className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                            disabled={updateOptimizedTimes.isPending}
+                          >
+                            {updateOptimizedTimes.isPending
+                              ? "Saving..."
+                              : "Save"}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/view-request/${request.id}?from=optimise-table`}
+                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
+                          >
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
                             >
-                              {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/admin/view-request/${request.id}?from=optimise-table`}
-                              className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                            >
-                              <svg
-                                className="w-3 h-3 mr-1"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              View
-                            </Link>
-                            <button
-                              onClick={() => handleEditClick(request)}
-                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                            >
-                              Edit
-                            </button>
-                           
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path
+                                fillRule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            View
+                          </Link>
+                          <button
+                            onClick={() => handleEditClick(request)}
+                            className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                          >
+                            Edit
+                          </button>
+
                          <button
-                             onClick={() => handleRequestAction(request.id,false)}
-                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                            >
-                              Reject
-                            </button>
-                   
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          onClick={() => handleRejectClick(request.id)}
+                          className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                        >
+                          Reject
+                        </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </>
-      
+        </div>
+      </>
 
       <div>
-      <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-        Urgent Mode
-      </h2>
-      <button
+        <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
+          Urgent Mode
+        </h2>
+        <button
           onClick={() => {
             setIsOptimizeDialogOpen(true);
             setIsUrgentRequests(true);
@@ -1211,7 +1290,7 @@ const handleSendNonUrgentRequests = async () => {
           Optimise
         </button>
 
-      <button
+        <button
           // onClick={handleSendOptimizedRequests}
           onClick={handleSendUrgentRequests}
           className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
@@ -1224,57 +1303,58 @@ const handleSendNonUrgentRequests = async () => {
             />
           </svg>
           Send
-      </button>
-      <DaySwitcher
-        currentDate={selectedDate}
-        onDateChange={(newDate) => setSelectedDate(newDate)}
-        minDate={minDate}
-        maxDate={maxDate}
-      />
-      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
-        <table className="w-full border-collapse text-black bg-white">
-          <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-            <tr className="bg-gray-50">
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="date" title="Date" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Major Section" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Depot" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="section" title="Block Section" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="line" title="Line / Road" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="time" title="Time" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="time" title="Optimized Time" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="work" title="Work Type" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="work" title="Activity" />
-              </th>
-              <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                <ColumnHeader icon="action" title="Actions" />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {urgentRequestDate.map((request: UserRequest) => (
+        </button>
+        <DaySwitcher
+          currentDate={selectedDate}
+          onDateChange={(newDate) => setSelectedDate(newDate)}
+          minDate={minDate}
+          maxDate={maxDate}
+        />
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
+          <table className="w-full border-collapse text-black bg-white">
+         <thead className={`sticky top-0 ${showRejectionModal ? 'z-0' : 'z-10'} bg-gray-100 shadow`}>
+              <tr className="bg-gray-50">
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="date" title="Date" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Major Section" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Depot" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="section" title="Block Section" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="line" title="Line / Road" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="time" title="Time" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="time" title="Optimized Time" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="work" title="Work Type" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="work" title="Activity" />
+                </th>
+                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <ColumnHeader icon="action" title="Actions" />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {urgentRequestDate.map((request: UserRequest) => (
                 <tr
                   key={`request-${request.id}-${request.date}`}
-                  className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
-                    ? "bg-green-50"
-                    : ""
-                    }`}
+                  className={`hover:bg-blue-50 transition-colors ${
+                    request.optimizeTimeFrom && request.optimizeTimeTo
+                      ? "bg-green-50"
+                      : ""
+                  }`}
                 >
                   <td className="border border-black p-2 text-sm">
                     {editingId === request.id ? (
@@ -1323,11 +1403,13 @@ const handleSendNonUrgentRequests = async () => {
                       </div>
                     ) : (
                       <>
-                        {request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest"
+                        {request.optimizeTimeFrom &&
+                        request.optimizeTimeFrom !== "WrongRequest"
                           ? formatTime(request.optimizeTimeFrom)
                           : "N/A"}{" "}
                         -{" "}
-                        {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest"
+                        {request.optimizeTimeTo &&
+                        request.optimizeTimeTo !== "WrongRequest"
                           ? formatTime(request.optimizeTimeTo)
                           : "N/A"}
                       </>
@@ -1347,7 +1429,9 @@ const handleSendNonUrgentRequests = async () => {
                           className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
                           disabled={updateOptimizedTimes.isPending}
                         >
-                          {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
+                          {updateOptimizedTimes.isPending
+                            ? "Saving..."
+                            : "Save"}
                         </button>
                         <button
                           onClick={handleCancelEdit}
@@ -1382,15 +1466,13 @@ const handleSendNonUrgentRequests = async () => {
                         >
                           Edit
                         </button>
-                      
-                         <button
-                              onClick={() => handleRequestAction(request.id,false)}
-                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                            >
-                              Reject
-                            </button>
-                      
-                         
+
+                        <button
+                          onClick={() => handleRejectClick(request.id)}
+                          className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                        >
+                          Reject
+                        </button>
                       </div>
                     )}
                   </td>
@@ -1400,20 +1482,66 @@ const handleSendNonUrgentRequests = async () => {
           </table>
         </div>
       </div>
+      {showRejectionModal && (
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-20">
+    <div className="bg-white p-4 rounded shadow-lg z-30">
+            <h3 className="font-bold text-lg mb-2">Reason for Rejection</h3>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+              placeholder="Enter reason for rejection..."
+              rows={4}
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setShowRejectionModal(false);
+                  setRejectionReason("");
+                }}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (currentRequestId) {
+                    handleRequestAction(
+                      currentRequestId,
+                      false,
+                      rejectionReason
+                    );
+                  }
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       <div className="flex justify-center gap-3 mb-2 mt-8">
+                      <Link href="/dashboard" className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}>
+                          <span className="text-xl">🏠</span> Home
+                      </Link>
+                      <button
+                          onClick={() => window.history.back()}
+                          className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
+                      >
+                          <span className="text-xl">⬅️</span> Back
+                      </button>
+                  </div>
 
-      
       <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
         © {new Date().getFullYear()} Indian Railways
       </div>
     </div>
   );
 }
-// function min(allDates: Date[]): Date | null {
-//   if (!allDates || allDates.length === 0) return null;
-//   return allDates.reduce((minDate, currDate) =>
-//     currDate < minDate ? currDate : minDate
-//   );
-// }
-
-
-
+function min(allDates: Date[]): Date | null {
+  if (!allDates || allDates.length === 0) return null;
+  return allDates.reduce((minDate, currDate) =>
+    currDate < minDate ? currDate : minDate
+  );
+}

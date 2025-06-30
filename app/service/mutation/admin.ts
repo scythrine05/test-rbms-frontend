@@ -5,7 +5,7 @@ export const useAcceptUserRequest = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, accept }: { id: string; accept: boolean }) =>
+        mutationFn: ({ id, accept }: { id: string; accept: boolean,remark?:string }) =>
             adminService.acceptUserRequest(id, accept),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["requests"] });

@@ -1363,41 +1363,46 @@ export default function CreateBlockRequestPage() {
     return allRoads;
   };
 
-  const handleRoadSelection = (block: string, value: string) => {
-    setFormData((prev) => {
-      const existingProcessedSections = [...prev.processedLineSections];
-      const sectionIndex = existingProcessedSections.findIndex(
-        (section) => section.block === block
-      );
+ const handleRoadSelection = (block: string, value: string) => {
+  setFormData((prev) => {
+    const existingProcessedSections = [...prev.processedLineSections];
+    const sectionIndex = existingProcessedSections.findIndex(
+      (section) => section.block === block
+    );
 
-      if (sectionIndex !== -1) {
-        const section = existingProcessedSections[sectionIndex];
-        if (section.type === "yard") {
-          const updatedSection = {
-            ...section,
-            otherRoads: value,
-          };
-          existingProcessedSections[sectionIndex] = updatedSection;
-        }
-      } else {
-        existingProcessedSections.push({
-          block,
-          type: "yard",
-          lineName: "",
-          otherLines: "",
-          stream: "",
-          road: value,
-          otherRoads: "",
-        });
+    if (sectionIndex !== -1) {
+      // Update existing section
+      const section = existingProcessedSections[sectionIndex];
+      if (section.type === "yard") {
+        // Split the value into road and otherRoads
+        const roads = value.split(",").map(r => r.trim()).filter(Boolean);
+        const updatedSection = {
+          ...section,
+          road: roads[0] || "", // First item is road
+          otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "" // Rest are otherRoads
+        };
+        existingProcessedSections[sectionIndex] = updatedSection;
       }
+    } else {
+      // Create new section
+      const roads = value.split(",").map(r => r.trim()).filter(Boolean);
+      existingProcessedSections.push({
+        block,
+        type: "yard",
+        lineName: "",
+        otherLines: "",
+        stream: "",
+        road: roads[0] || "", // First item is road
+        otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "" // Rest are otherRoads
+      });
+    }
 
-      return {
-        ...prev,
-        processedLineSections: existingProcessedSections,
-        selectedRoad: value,
-      };
-    });
-  };
+    return {
+      ...prev,
+      processedLineSections: existingProcessedSections,
+    };
+  });
+};
 
   // Add state to track if the success page should be shown and the submitted request summary
   const [showSuccessPage, setShowSuccessPage] = useState(false);
@@ -1427,49 +1432,340 @@ export default function CreateBlockRequestPage() {
   }, []);
 
   // Compute corridor time when block section or line changes
-  useEffect(() => {
-    if (!corridorData.length || !blockSectionValue.length) {
-      setCorridorTime(null);
-      return;
-    }
-    // For each selected block section, get the first selected line
-    const firstLines = blockSectionValue.map((block: string) => {
-      const sectionEntry =
-        (formData.processedLineSections || []).find(
-          (s: any) => s.block === block
-        ) || {};
-      return (sectionEntry as any).lineName
-        ? (sectionEntry as any).lineName.split(",")[0]
-        : null;
-    });
-    // Only consider block sections with a selected line
-    const validPairs = blockSectionValue
-      .map((block: string, idx: number) => {
-        const line = firstLines[idx];
-        if (!line) return null;
-        // Find matching corridor row
-        const row = corridorData.find((row: any) => {
-          return (
-            (row["Section/ station"] || row["section"])?.trim() === block &&
-            (row["Line"] || "").trim() === line
-          );
-        });
-        return row || null;
-      })
-      .filter(Boolean);
-    if (!validPairs.length) {
-      setCorridorTime(null);
-      return;
-    }
-    // Find intersection of corridor times (latest from, earliest to)
-    let fromTimes = validPairs.map((row: any) => row["From"]);
-    let toTimes = validPairs.map((row: any) => row["To"]);
-    let duration = validPairs[0]["Duration"];
-    // Use max of fromTimes and min of toTimes
-    const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
-    const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
-    setCorridorTime({ from: maxFrom, to: minTo, duration });
-  }, [corridorData, blockSectionValue, formData.processedLineSections]);
+  // useEffect(() => {
+  //   if (!corridorData.length || !blockSectionValue.length) {
+  //     setCorridorTime(null);
+  //     return;
+  //   }
+  //   // For each selected block section, get the first selected line
+  //   const firstLines = blockSectionValue.map((block: string) => {
+  //     const sectionEntry =
+  //       (formData.processedLineSections || []).find(
+  //         (s: any) => s.block === block
+  //       ) || {};
+  //     return (sectionEntry as any).lineName
+  //       ? (sectionEntry as any).lineName.split(",")[0]
+  //       : null;
+  //   });
+  //   // Only consider block sections with a selected line
+  //   const validPairs = blockSectionValue
+  //     .map((block: string, idx: number) => {
+  //       const line = firstLines[idx];
+  //       if (!line) return null;
+  //       // Find matching corridor row
+  //       const row = corridorData.find((row: any) => {
+  //         return (
+  //           (row["Section/ station"] || row["section"])?.trim() === block &&
+  //           (row["Line"] || "").trim() === line
+  //         );
+  //       });
+  //       return row || null;
+  //     })
+  //     .filter(Boolean);
+  //   if (!validPairs.length) {
+  //     setCorridorTime(null);
+  //     return;
+  //   }
+  //   // Find intersection of corridor times (latest from, earliest to)
+  //   let fromTimes = validPairs.map((row: any) => row["From"]);
+  //   let toTimes = validPairs.map((row: any) => row["To"]);
+  //   let duration = validPairs[0]["Duration"];
+  //   // Use max of fromTimes and min of toTimes
+  //   const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
+  //   const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
+  //   setCorridorTime({ from: maxFrom, to: minTo, duration });
+  // }, [corridorData, blockSectionValue, formData.processedLineSections]);
+// useEffect(() => {
+//   if (!blockSectionValue.length) {
+//     setCorridorTime(null);
+//     return;
+//   }
+
+//   /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
+//   const linePairs = blockSectionValue
+//     .map((block: string) => {
+//       // look up the entry for this block
+//       const sectionEntry =
+//         (formData.processedLineSections || []).find(
+//           (s: any) => s.block === block
+//         ) || {};
+
+//       // first line chosen (if any)
+//       const firstLine = sectionEntry?.lineName
+//         ? sectionEntry.lineName.split(",")[0]
+//         : null;
+
+//       // if no line chosen for this block, skip – road logic will handle it
+//       if (!firstLine) return null;
+
+//       // find matching row in corridorData
+//       const row = corridorData.find((r: any) => {
+//         return (
+//           (r["Section/ station"] || r["section"])?.trim() === block &&
+//           (r["Line"] || "").trim() === firstLine
+//         );
+//       });
+
+//       return row || null;
+//     })
+//     .filter(Boolean); // removes nulls
+
+//   /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
+
+//   const roadTimeMap: Record<string, { from: string; to: string }> = {
+//     "AJJ-RU-Up": { from: "01:30", to: "04:30" },
+//     "AJJ-RU-Down": { from: "00:30", to: "03:30" },
+//     "AJJ-RU-Both": { from: "01:30", to: "04:30" },
+
+//     "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
+//     "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
+//     "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
+
+//     "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
+//     "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
+//     "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
+
+//     "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
+//     "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
+//     "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
+
+//     "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
+//     "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
+//     "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
+
+//     "MAS-GDR-Up": { from: "00:20", to: "03:20" },
+//     "MAS-GDR-Down": { from: "23:30", to: "01:30" },
+//     "MAS-GDR-Both": { from: "00:20", to: "03:20" },
+
+//     "MSB-VM-Up": { from: "21:15", to: "00:15" },
+//     "MSB-VM-Down": { from: "01:30", to: "04:30" },
+//     "MSB-VM-Both": { from: "21:15", to: "00:15" },
+
+//     "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
+//     "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
+//     "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
+//   };
+
+//   const roadPairs = blockSectionValue
+//     .map((block: string) => {
+//       // if a line was already chosen for this block, skip (line logic handled it)
+//       const hadLine =
+//         (formData.processedLineSections || []).some(
+//           (s: any) => s.block === block && s.lineName
+//         );
+//       if (hadLine) return null;
+
+//       // road logic starts here …
+//       const sectionEntry =
+//         (formData.processedLineSections || []).find(
+//           (s: any) => s.block === block
+//         ) || {};
+//       if (!sectionEntry.road) return null;
+
+//       const roads = sectionEntry.road
+//         .split(",")
+//         .map((r: string) => r.trim().toLowerCase());
+
+//       const streamEntry = streamData[block];
+//       const majorSection = formData.selectedSection;
+//       if (!streamEntry || !majorSection) return null;
+
+//       const checkDirection = (dir: "Up" | "Down" | "Both") =>
+//         roads.some((r: string) =>
+//           (streamEntry[`${dir} Direction Affected`] || [])
+//             .map((x: string) => x.trim().toLowerCase())
+//             .includes(r)
+//         );
+
+//       const dirs = ["Both", "Up", "Down"] as const;
+//       for (const dir of dirs) {
+//         if (checkDirection(dir)) {
+//           const time = roadTimeMap[`${majorSection}-${dir}`];
+//           if (time) return { from: time.from, to: time.to };
+//         }
+//       }
+//       return null;
+//     })
+//     .filter(Boolean);
+
+//   /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
+
+//   // nothing found in either? → clear the state
+//   if (!linePairs.length && !roadPairs.length) {
+//     setCorridorTime(null);
+//     return;
+//   }
+
+//   // gather all times from lines + roads
+//   const fromTimes = [
+//     ...linePairs.map((p: any) => p["From"]),
+//     ...roadPairs.map((p: any) => p.from),
+//   ];
+//   const toTimes = [
+//     ...linePairs.map((p: any) => p["To"]),
+//     ...roadPairs.map((p: any) => p.to),
+//   ];
+
+//   const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
+//   const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
+
+//   // duration only exists on line rows – take the first one if any
+//   const duration =
+//     linePairs.length > 0 ? (linePairs[0] as any)["Duration"] : undefined;
+
+//   setCorridorTime({ from: maxFrom, to: minTo, duration });
+// }, [
+//   corridorData,
+//   blockSectionValue,
+//   formData.processedLineSections,
+//   formData.selectedSection,
+// ]);
+useEffect(() => {
+  if (!blockSectionValue.length) {
+    setCorridorTime(null);
+    return;
+  }
+
+  /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
+  const linePairs = blockSectionValue
+    .map((block: string) => {
+      const sectionEntry = (formData.processedLineSections || []).find(
+  (s: { block: string; lineName?: string }) => s.block === block
+) as { block: string; lineName?: string };
+
+const firstLine = sectionEntry?.lineName
+  ? sectionEntry.lineName.split(",")[0]
+  : null;
+
+    
+      if (!firstLine) return null;
+      const row = corridorData.find((r: { [key: string]: string }) => {
+        return (
+          (r["Section/ station"] || r["section"])?.trim() === block &&
+          (r["Line"] || "").trim() === firstLine
+        );
+      });
+
+      return row || null;
+    })
+    .filter(Boolean) as Array<{ [key: string]: string }>; // removes nulls and asserts type
+
+  /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
+
+  const roadTimeMap: Record<string, { from: string; to: string }> = {
+    "AJJ-RU-Up": { from: "01:30", to: "04:30" },
+    "AJJ-RU-Down": { from: "00:30", to: "03:30" },
+    "AJJ-RU-Both": { from: "01:30", to: "04:30" },
+
+    "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
+    "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
+    "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
+
+    "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
+    "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
+    "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
+
+    "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
+    "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
+    "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
+
+    "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
+    "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
+    "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
+
+    "MAS-GDR-Up": { from: "00:20", to: "03:20" },
+    "MAS-GDR-Down": { from: "23:30", to: "01:30" },
+    "MAS-GDR-Both": { from: "00:20", to: "03:20" },
+
+    "MSB-VM-Up": { from: "21:15", to: "00:15" },
+    "MSB-VM-Down": { from: "01:30", to: "04:30" },
+    "MSB-VM-Both": { from: "21:15", to: "00:15" },
+
+    "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
+    "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
+    "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
+  };
+
+  const roadPairs = blockSectionValue
+    .map((block: string) => {
+      // if a line was already chosen for this block, skip (line logic handled it)
+      const hadLine = (formData.processedLineSections || []).some(
+        (s: { block: string; lineName?: string }) => s.block === block && s.lineName
+      );
+      if (hadLine) return null;
+
+      // road logic starts here …
+     const sectionEntry = (formData.processedLineSections || []).find(
+  (s: { block: string; road?: string }) => s.block === block
+);
+
+if (!sectionEntry?.road) return null;
+
+const roads = sectionEntry.road
+  .split(",")
+  .map((r: string) => r.trim().toLowerCase());
+
+      const streamEntry = streamData[block as keyof typeof streamData];
+      const majorSection = formData.selectedSection;
+      if (!streamEntry || !majorSection) return null;
+
+      const checkDirection = (dir: "Up" | "Down" | "Both") =>
+        roads.some((r: string) =>
+          ((streamEntry as any)[`${dir} Direction Affected`] || [])
+            .map((x: string) => x.trim().toLowerCase())
+            .includes(r)
+        );
+
+      const dirs = ["Both", "Up", "Down"] as const;
+      for (const dir of dirs) {
+        if (checkDirection(dir)) {
+          const time = roadTimeMap[`${majorSection}-${dir}`];
+          if (time) return { from: time.from, to: time.to };
+        }
+      }
+      return null;
+    })
+    .filter(Boolean) as Array<{ from: string; to: string }>; // removes nulls and asserts type
+
+  /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
+
+  // nothing found in either? → clear the state
+  if (!linePairs.length && !roadPairs.length) {
+    setCorridorTime(null);
+    return;
+  }
+
+  // gather all times from lines + roads
+  const fromTimes = [
+    ...linePairs.map((p) => p["From"]),
+    ...roadPairs.map((p) => p.from),
+  ].filter((t): t is string => !!t); // ensure all times are strings
+
+  const toTimes = [
+    ...linePairs.map((p) => p["To"]),
+    ...roadPairs.map((p) => p.to),
+  ].filter((t): t is string => !!t); // ensure all times are strings
+
+  if (!fromTimes.length || !toTimes.length) {
+    setCorridorTime(null);
+    return;
+  }
+
+  const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
+  const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
+
+  // duration only exists on line rows – take the first one if any
+  const duration = linePairs[0]?.["Duration"];
+
+  setCorridorTime({ from: maxFrom, to: minTo, duration });
+}, [
+  corridorData,
+  blockSectionValue,
+  formData.processedLineSections,
+  formData.selectedSection,
+  streamData,
+  setCorridorTime,
+]);
 
   // Inline error rendering helper
   const renderError = (field: string) =>
@@ -1810,104 +2106,127 @@ export default function CreateBlockRequestPage() {
                     key={block}
                     className="flex flex-row items-center gap-2 w-full"
                   >
-                    <Select
-                      isMulti
-                      name={`lineOrRoad-${block}`}
-                      options={lineOrRoadOptions}
-                      value={(() => {
-                        const section = formData.processedLineSections?.find(
-                          (s) => s.block === block
-                        );
-                        const selectedValues: {
-                          value: string;
-                          label: string;
-                        }[] = [];
+             <Select
+  isMulti
+  name={`lineOrRoad-${block}`}
+  options={lineOrRoadOptions}
+  value={(() => {
+    const section = formData.processedLineSections?.find(
+      (s) => s.block === block
+    );
+    const selectedValues: {
+      value: string;
+      label: string;
+    }[] = [];
 
-                        if (section?.lineName) {
-                          selectedValues.push({
-                            value: section.lineName,
-                            label: section.lineName,
-                          });
-                        }
+    if (isYard) {
+      // For yards, use road and otherRoads
+      if (section?.road) {
+        selectedValues.push({
+          value: section.road,
+          label: section.road,
+        });
+      }
+      if (section?.otherRoads) {
+        const otherRoadList = section.otherRoads
+          .split(",")
+          .map((road) => road.trim())
+          .filter(Boolean);
+        selectedValues.push(
+          ...otherRoadList.map((road) => ({
+            value: road,
+            label: road,
+          }))
+        );
+      }
+    } else {
+      // For non-yards, use lineName and otherLines (existing logic)
+      if (section?.lineName) {
+        selectedValues.push({
+          value: section.lineName,
+          label: section.lineName,
+        });
+      }
+      if (section?.otherLines) {
+        const otherLineList = section.otherLines
+          .split(",")
+          .map((line) => line.trim())
+          .filter(Boolean);
+        selectedValues.push(
+          ...otherLineList.map((line) => ({
+            value: line,
+            label: line,
+          }))
+        );
+      }
+    }
 
-                        if (section?.otherLines) {
-                          const otherLineList = section.otherLines
-                            .split(",")
-                            .map((line) => line.trim())
-                            .filter(Boolean);
-                          selectedValues.push(
-                            ...otherLineList.map((line) => ({
-                              value: line,
-                              label: line,
-                            }))
-                          );
-                        }
-
-                        return selectedValues;
-                      })()}
-                      onChange={(selected) => {
-                        const values = selected
-                          ? selected.map((opt: any) => opt.value)
-                          : [];
-                        if (isYard) {
-                          handleRoadSelection(block, values.join(","));
-                        } else {
-                          handleLineNameSelection(block, values);
-                        }
-                      }}
-                      classNamePrefix="react-select"
-                      menuPortalTarget={
-                        typeof window !== "undefined" ? document.body : null
-                      }
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          backgroundColor: "#FFB74D",
-                          borderColor: "black",
-                          borderWidth: 2,
-                          borderRadius: 6,
-                          minHeight: "32px",
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                          boxShadow: "none",
-                          padding: "0 2px",
-                        }),
-                        menu: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                        menuPortal: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                        option: (base, state) => ({
-                          ...base,
-                          backgroundColor: state.isSelected
-                            ? "#ffe082"
-                            : state.isFocused
-                            ? "#ffe08299"
-                            : "#FFB74D",
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                          padding: "4px 8px",
-                        }),
-                        placeholder: (base) => ({
-                          ...base,
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                        }),
-                        dropdownIndicator: (base) => ({
-                          ...base,
-                          color: "black",
-                          fontSize: "20px",
-                          padding: 0,
-                        }),
-                      }}
-                      placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
-                      closeMenuOnSelect={false}
-                    />
+    return selectedValues;
+  })()}
+  onChange={(selected) => {
+    const values = selected
+      ? selected.map((opt: any) => opt.value)
+      : [];
+    if (isYard) {
+      // For yards, join the selected values with comma
+      handleRoadSelection(block, values.join(","));
+    } else {
+      handleLineNameSelection(block, values);
+    }
+  }}
+  classNamePrefix="react-select"
+  menuPortalTarget={
+    typeof window !== "undefined" ? document.body : null
+  }
+  styles={{
+    control: (base) => ({
+      ...base,
+      backgroundColor: "#FFB74D",
+      borderColor: "black",
+      borderWidth: 2,
+      borderRadius: 6,
+      minHeight: "32px",
+      fontWeight: "bold",
+      fontSize: "14px",
+      boxShadow: "none",
+      padding: "0 2px",
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: 9999,
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#ffe082"
+        : state.isFocused
+        ? "#ffe08299"
+        : "#FFB74D",
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "14px",
+      padding: "4px 8px",
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "14px",
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: "black",
+      fontSize: "20px",
+      padding: 0,
+    }),
+  }}
+  placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
+  closeMenuOnSelect={false}
+/>
                     {renderError(`${block}.lineName`)}
                     {renderError(`${block}.road`)}
                     {renderError(`${block}.stream`)}
