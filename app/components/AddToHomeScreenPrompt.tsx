@@ -33,7 +33,7 @@ export default function AddToHomeScreenPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 bg-white shadow p-4 rounded">
+    <div className="fixed z-[2000] bottom-4 left-4 bg-white shadow p-4 rounded">
       <p>Add this app to your home screen</p>
       <button
         className="bg-blue-600 text-white px-3 py-1 rounded mt-2"
