@@ -26,6 +26,8 @@ import {
 } from "@/app/lib/helper";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
+import { useQuery } from "@tanstack/react-query";
+import { userRequestService } from "@/app/service/api/user-request";
 
 type Department = "TRD" | "S&T" | "ENGG";
 
@@ -254,7 +256,8 @@ function ReviewBlockRequestModal({
             </div>
             {formData.nonCorridorReason && (
               <div className="mb-2">
-                <b>Reason for Non-Corridor/Urgent Block:</b> {formData.nonCorridorReason}
+                <b>Reason for Non-Corridor/Urgent Block:</b>{" "}
+                {formData.nonCorridorReason}
               </div>
             )}
             {formData.remarks && (
@@ -466,6 +469,13 @@ function getDurationFromTimes(from: string, to: string) {
 type FormDataValue = string | number | boolean | null | string[];
 
 interface FormData {
+
+    freshCautions: {
+    adjacentLinesAffected: string;
+    freshCautionLocationFrom: string;
+    freshCautionLocationTo: string;
+    freshCautionSpeed: string; // or number if you prefer
+  }[];
   powerBlockDisconnectionAssignTo: string;
   sntDisconnectionAssignTo: string;
   date: string;
@@ -544,6 +554,7 @@ export default function CreateBlockRequestPage() {
   const router = useRouter();
 
   const initialFormData: FormData = {
+    
     date: "",
     demandTimeFrom: "",
     demandTimeTo: "",
@@ -601,9 +612,17 @@ export default function CreateBlockRequestPage() {
     sntDisconnectionPointNo: "",
     sntDisconnectionSignalNo: "",
     trdWorkLocation: "",
-    sntDisconnectionAssignTo:"",
-    powerBlockDisconnectionAssignTo:"",
+    sntDisconnectionAssignTo: "",
+    powerBlockDisconnectionAssignTo: "",
     nonCorridorReason: "",
+    freshCautions: [
+    {
+      adjacentLinesAffected: "",
+      freshCautionLocationFrom: "",
+      freshCautionLocationTo: "",
+      freshCautionSpeed: ""
+    }
+  ]
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -635,7 +654,9 @@ export default function CreateBlockRequestPage() {
       window.location.href = "/auth/login";
     },
   });
-// const selectedDepo = "AJJE";   //temprory fix we need to change it
+  const [showPopup, setShowPopup] = useState(false);
+const [popupLink, setPopupLink] = useState("");
+  // const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
   const majorSectionOptions =
@@ -789,9 +810,10 @@ export default function CreateBlockRequestPage() {
 
   const getMinDateString = () => {
     const today = new Date();
-    return `${today.getFullYear()}-${String(
-      today.getMonth() + 1
-    ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(today.getDate()).padStart(2, "0")}`;
   };
 
   const getMaxUrgentDateString = () => {
@@ -862,13 +884,14 @@ export default function CreateBlockRequestPage() {
     }
   };
 
-
-    const shouldForceUrgentBlock = (() => {
+  const shouldForceUrgentBlock = (() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const targetDate = new Date(formData.date);
     targetDate.setHours(0, 0, 0, 0);
-    const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const dayDiff = Math.floor(
+      (targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
     if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
       return true;
     }
@@ -878,7 +901,8 @@ export default function CreateBlockRequestPage() {
       const targetDate = new Date(dateString + "T00:00:00Z");
       targetDate.setUTCHours(0, 0, 0, 0);
       const currentWeekSunday = new Date(today);
-      const daysUntilSunday = today.getUTCDay() === 0 ? 0 : 7 - today.getUTCDay();
+      const daysUntilSunday =
+        today.getUTCDay() === 0 ? 0 : 7 - today.getUTCDay();
       currentWeekSunday.setUTCDate(today.getUTCDate() + daysUntilSunday);
       const nextWeekMonday = new Date(currentWeekSunday);
       nextWeekMonday.setUTCDate(currentWeekSunday.getUTCDate() + 1);
@@ -895,128 +919,284 @@ export default function CreateBlockRequestPage() {
     return isDateInNextWeek(formData.date) && isPastThursdayCutoff();
   })();
 
-
   useEffect(() => {
-    if (shouldForceUrgentBlock && formData.corridorTypeSelection !== "Urgent Block") {
-      setFormData((prev) => ({ ...prev, corridorTypeSelection: "Urgent Block" }));
+    if (
+      shouldForceUrgentBlock &&
+      formData.corridorTypeSelection !== "Urgent Block"
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        corridorTypeSelection: "Urgent Block",
+      }));
     }
   }, [shouldForceUrgentBlock, formData.date]);
-
-
-
-
 
   // Add reviewMode state
   const [reviewMode, setReviewMode] = useState(false);
 
-  // Refactor handleSubmit to work with reviewMode
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reviewMode) {
-      setReviewMode(true); // Enter review mode
+
+
+
+
+
+const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  // ─── 1. Review‑mode guard ──────────────────────────────────────────────
+  if (!reviewMode) {
+    setReviewMode(true);
+    return;
+  }
+
+  setFormSubmitting(true);
+  setFormError(null);
+
+  try {
+    // ─── 2. Fetch existing requests and run block check ──────────────────
+    const existing = await userRequestService.getUserRequests(1, 100);
+    const requests: any[] = Array.isArray(existing?.data.requests) ? existing.data.requests : [];
+    const now = Date.now();
+
+    let hasUnavailedSanctionedBlock = false;
+
+    for (let i = 0; i < requests.length; i++) {
+      const req = requests[i];
+      if (
+        req?.isSanctioned === true &&         // sanctioned
+        req?.availedResponse === null &&      // not availed
+        req?.sanctionedTimeFrom               // has date
+      ) {
+        const sanctionMs = new Date(req.sanctionedTimeFrom).getTime();
+        if (!Number.isNaN(sanctionMs) && now >= sanctionMs) {
+          // sanction start time is in the past (covers >24 h automatically)
+          hasUnavailedSanctionedBlock = true;
+          break;
+        }
+      }
+    }
+
+   if (hasUnavailedSanctionedBlock) {
+  const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
+  setPopupLink(link);
+  setShowPopup(true);
+  setFormSubmitting(false);
+  return;
+}
+
+    // ─── 3. Client‑side validation ───────────────────────────────────────
+    const validation = handleFormValidation();
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      scrollToFirstError(validation.errors);
+      setFormSubmitting(false);
       return;
     }
-    // Only submit in review mode
-    setFormSubmitting(true);
-    setFormError(null);
-    try {
-      const validationResult = handleFormValidation();
-      if (!validationResult.isValid) {
-        setErrors(validationResult.errors);
-        scrollToFirstError(validationResult.errors);
-        setFormSubmitting(false);
-        return;
-      }
-      const validProcessedSections = (
-        formData.processedLineSections || []
-      ).filter((section) => blockSectionValue.includes(section.block));
-      const processedSectionsWithDefaults = validProcessedSections.map(
-        (section) => {
-          if (section.type === "yard") {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: section.stream || "",
-              road: section.road || "",
-              otherRoads: section.otherRoads || "",
-            };
-          } else {
-            return {
-              ...section,
-              lineName: section.lineName || "",
-              otherLines: section.otherLines || "",
-              stream: "",
-              road: "",
-              otherRoads: "",
-            };
+
+    // ─── 4. Prepare processedLineSections ────────────────────────────────
+    const validSecs = (formData.processedLineSections || []).filter((s) =>
+      blockSectionValue.includes(s.block)
+    );
+
+    const processedSections = validSecs.map((s) =>
+      s.type === "yard"
+        ? {
+            ...s,
+            lineName: s.lineName || "",
+            otherLines: s.otherLines || "",
+            stream: s.stream || "",
+            road: s.road || "",
+            otherRoads: s.otherRoads || "",
           }
-        }
-      );
-      const submitData: UserRequestInput = {
-        ...formData,
-        corridorType: formData.corridorTypeSelection,
-        sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
-        powerBlockRequired: formData.powerBlockRequired ?? false,
-        freshCautionRequired: formData.freshCautionRequired ?? false,
-        date: formatDateToISO(formData.date || ""),
-        demandTimeFrom: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeFrom || ""
-        ),
-        demandTimeTo: formatTimeToDatetime(
-          formData.date || "",
-          formData.demandTimeTo || ""
-        ),
-        processedLineSections: processedSectionsWithDefaults,
-        adminAcceptance: false,
-        selectedDepo: formData.selectedDepo
-      };
-      const response = await mutation.mutateAsync(submitData);
-      if (response) {
-        toast.success("Block request submitted successfully!");
-        setSubmittedSummary({
-          date: submitData.date,
-          id: response.data?.divisionId || response.data?.id,
-          blockSection: submitData.missionBlock || "-",
-          lineOrRoad:
-            submitData.processedLineSections &&
-            submitData.processedLineSections.length > 0
-              ? submitData.processedLineSections
-                  .map((s: any) => s.lineName || s.road)
-                  .join(", ")
-              : "-",
-          duration:
-            getDurationFromTimes(
-              formData.demandTimeFrom || "",
-              formData.demandTimeTo || ""
-            ) || "-",
-        });
-        setFormData(initialFormData);
-        setBlockSectionValue([]);
-        setProcessedLineSections([]);
-        setSelectedActivities([]);
-        setCustomActivity("");
-        setErrors({});
-        setShowSuccessPage(true);
-        setReviewMode(false);
-      }
-    } catch (error: any) {
-      console.error("Form submission error:", error);
-      if (error.response) {
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-        console.error("Error response headers:", error.response.headers);
-      }
-      setFormError(
-        error.message ||
-          "An error occurred while submitting the form. Please try again."
-      );
-      toast.error(error.message || "Failed to submit block request");
-    } finally {
-      setFormSubmitting(false);
+        : {
+            ...s,
+            lineName: s.lineName || "",
+            otherLines: s.otherLines || "",
+            stream: "",
+            road: "",
+            otherRoads: "",
+          }
+    );
+
+    // ─── 5. Flatten first fresh‑caution (backend still expects single set)
+    const firstCaution = formData.freshCautions?.[0] || {
+      freshCautionLocationFrom: "",
+      freshCautionLocationTo: "",
+      adjacentLinesAffected: "",
+      freshCautionSpeed: 0,
+    };
+
+    // ─── 6. Build payload ────────────────────────────────────────────────
+    const submitData: UserRequestInput = {
+      ...formData,
+      corridorType: formData.corridorTypeSelection,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
+      powerBlockRequired: formData.powerBlockRequired ?? false,
+      freshCautionRequired: formData.freshCautionRequired ?? false,
+       adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
+  freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
+  freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
+  freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
+      date: formatDateToISO(formData.date || ""),
+      demandTimeFrom: formatTimeToDatetime(formData.date || "", formData.demandTimeFrom || ""),
+      demandTimeTo:   formatTimeToDatetime(formData.date || "", formData.demandTimeTo || ""),
+      processedLineSections: processedSections,
+      adminAcceptance: false,
+      selectedDepo: formData.selectedDepo,
+    };
+
+    // ─── 7. Submit to backend ────────────────────────────────────────────
+    const response = await mutation.mutateAsync(submitData);
+
+    if (response) {
+      toast.success("Block request submitted successfully!");
+      setSubmittedSummary({
+        date: submitData.date,
+        id: response.data?.divisionId || response.data?.id,
+        blockSection: submitData.missionBlock || "-",
+        lineOrRoad:
+          submitData.processedLineSections?.map((s) => s.lineName || s.road).join(", ") || "-",
+        duration: getDurationFromTimes(formData.demandTimeFrom || "", formData.demandTimeTo || "") || "-",
+      });
+
+      // Reset form + UI
+      setFormData(initialFormData);
+      setBlockSectionValue([]);
+      setProcessedLineSections([]);
+      setSelectedActivities([]);
+      setCustomActivity("");
+      setErrors({});
+      setShowSuccessPage(true);
+      setReviewMode(false);
     }
-  };
+  } catch (err: any) {
+    console.error("Form submission error:", err);
+    setFormError(err.message || "Submission failed.");
+    toast.error(err.message || "Failed to submit block request");
+  } finally {
+    setFormSubmitting(false);
+  }
+};
+
+
+
+  // Refactor handleSubmit to work with reviewMode
+//   const handleFormSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!reviewMode) {
+//       setReviewMode(true); // Enter review mode
+//       return;
+//     }
+//     // Only submit in review mode
+//     setFormSubmitting(true);
+//     setFormError(null);
+//     try {
+//       const validationResult = handleFormValidation();
+//       if (!validationResult.isValid) {
+//         setErrors(validationResult.errors);
+//         scrollToFirstError(validationResult.errors);
+//         setFormSubmitting(false);
+//         return;
+//       }
+//       const validProcessedSections = (
+//         formData.processedLineSections || []
+//       ).filter((section) => blockSectionValue.includes(section.block));
+//       const processedSectionsWithDefaults = validProcessedSections.map(
+//         (section) => {
+//           if (section.type === "yard") {
+//             return {
+//               ...section,
+//               lineName: section.lineName || "",
+//               otherLines: section.otherLines || "",
+//               stream: section.stream || "",
+//               road: section.road || "",
+//               otherRoads: section.otherRoads || "",
+//             };
+//           } else {
+//             return {
+//               ...section,
+//               lineName: section.lineName || "",
+//               otherLines: section.otherLines || "",
+//               stream: "",
+//               road: "",
+//               otherRoads: "",
+//             };
+//           }
+//         }
+//       );
+// //       const firstCaution = formData.freshCautions[0] || {
+// //   freshCautionLocationFrom: "",
+// //   freshCautionLocationTo: "",
+// //   adjacentLinesAffected: "",
+// //   freshCautionSpeed: 0,
+// // };
+//       const submitData: UserRequestInput = {
+//         ...formData,
+//         corridorType: formData.corridorTypeSelection,
+//         sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
+//         powerBlockRequired: formData.powerBlockRequired ?? false,
+//         freshCautionRequired: formData.freshCautionRequired ?? false,
+//          adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
+//   freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
+//   freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
+//   freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
+//         date: formatDateToISO(formData.date || ""),
+//         demandTimeFrom: formatTimeToDatetime(
+//           formData.date || "",
+//           formData.demandTimeFrom || ""
+//         ),
+//         demandTimeTo: formatTimeToDatetime(
+//           formData.date || "",
+//           formData.demandTimeTo || ""
+//         ),
+//         processedLineSections: processedSectionsWithDefaults,
+//         adminAcceptance: false,
+//         selectedDepo: formData.selectedDepo,
+//       };
+//       const response = await mutation.mutateAsync(submitData);
+//       if (response) {
+//         toast.success("Block request submitted successfully!");
+//         setSubmittedSummary({
+//           date: submitData.date,
+//           id: response.data?.divisionId || response.data?.id,
+//           blockSection: submitData.missionBlock || "-",
+//           lineOrRoad:
+//             submitData.processedLineSections &&
+//             submitData.processedLineSections.length > 0
+//               ? submitData.processedLineSections
+//                   .map((s: any) => s.lineName || s.road)
+//                   .join(", ")
+//               : "-",
+//           duration:
+//             getDurationFromTimes(
+//               formData.demandTimeFrom || "",
+//               formData.demandTimeTo || ""
+//             ) || "-",
+//         });
+//         setFormData(initialFormData);
+//         setBlockSectionValue([]);
+//         setProcessedLineSections([]);
+//         setSelectedActivities([]);
+//         setCustomActivity("");
+//         setErrors({});
+//         setShowSuccessPage(true);
+//         setReviewMode(false);
+//       }
+//     } catch (error: any) {
+//       console.error("Form submission error:", error);
+//       if (error.response) {
+//         console.error("Error response data:", error.response.data);
+//         console.error("Error response status:", error.response.status);
+//         console.error("Error response headers:", error.response.headers);
+//       }
+//       setFormError(
+//         error.message ||
+//           "An error occurred while submitting the form. Please try again."
+//       );
+//       toast.error(error.message || "Failed to submit block request");
+//     } finally {
+//       setFormSubmitting(false);
+//     }
+//   };
 
   const handleFormValidation = () => {
     const errors: Record<string, string> = {};
@@ -1057,23 +1237,26 @@ export default function CreateBlockRequestPage() {
     if (formData.corridorTypeSelection === "Outside Corridor") {
       if (!formData.routeFrom) errors.routeFrom = "Route from is required";
       if (!formData.routeTo) errors.routeTo = "Route to is required";
-      if (!formData.nonCorridorReason) errors.nonCorridorReason = "Reason is required";
+      if (!formData.nonCorridorReason)
+        errors.nonCorridorReason = "Reason is required";
     }
 
     // Urgent Block validations
     if (formData.corridorTypeSelection === "Urgent Block") {
-      if (formData.freshCautionRequired) {
-        if (!formData.freshCautionSpeed)
-          errors.freshCautionSpeed = "Fresh caution speed is required";
-        if (!formData.freshCautionLocationFrom)
-          errors.freshCautionLocationFrom =
-            "Fresh caution location from is required";
-        if (!formData.freshCautionLocationTo)
-          errors.freshCautionLocationTo =
-            "Fresh caution location to is required";
-      }
-      // if (!formData.adjacentLinesAffected) errors.adjacentLinesAffected = "Adjacent lines affected is required";
-    }
+  if (formData.freshCautionRequired) {
+    formData.freshCautions.forEach((c, i) => {
+      if (!c.freshCautionSpeed)
+        errors[`freshCautions-${i}-speed`] = "Speed required";
+      if (!c.freshCautionLocationFrom)
+        errors[`freshCautions-${i}-from`] = "KM From required";
+      if (!c.freshCautionLocationTo)
+        errors[`freshCautions-${i}-to`] = "KM To required";
+      if (!c.adjacentLinesAffected)
+        errors[`freshCautions-${i}-adj`] = "Direction/Road required";
+    });
+  }
+}
+
 
     // Power Block validations
     if (formData.powerBlockRequired) {
@@ -1109,6 +1292,44 @@ export default function CreateBlockRequestPage() {
 
     return { isValid: true, errors: {} };
   };
+/** ────────────────────────────────
+ *  Fresh Caution helpers
+ *  ────────────────────────────────*/
+const handleFreshCautionChange = <
+  K extends keyof FormData["freshCautions"][number]
+>(
+  index: number,
+  field: K,
+  value: FormData["freshCautions"][number][K]
+) => {
+  setFormData(prev => {
+    const updated = [...prev.freshCautions];
+    updated[index] = { ...updated[index], [field]: value };
+    return { ...prev, freshCautions: updated };
+  });
+};
+
+const addFreshCaution = () => {
+  setFormData(prev => ({
+    ...prev,
+    freshCautions: [
+      ...prev.freshCautions,
+      {
+        adjacentLinesAffected: "",
+        freshCautionLocationFrom: "",
+        freshCautionLocationTo: "",
+        freshCautionSpeed: "",
+      },
+    ],
+  }));
+};
+
+const removeFreshCaution = (index: number) => {
+  setFormData(prev => ({
+    ...prev,
+    freshCautions: prev.freshCautions.filter((_, i) => i !== index),
+  }));
+};
 
   const getInputClassName = (fieldName: string) => {
     return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${
@@ -1158,7 +1379,9 @@ export default function CreateBlockRequestPage() {
       today.setHours(0, 0, 0, 0);
       const targetDate = new Date(formData.date);
       targetDate.setHours(0, 0, 0, 0);
-      const dayDiff = Math.floor((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const dayDiff = Math.floor(
+        (targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
       if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
         setIsDisabled(true);
         setFormData({
@@ -1167,7 +1390,9 @@ export default function CreateBlockRequestPage() {
         });
       } else {
         // Existing restrictions (keep as before)
-        const { urgentOnly, urgentAllowed } = getCorridorTypeRestrictions(formData.date);
+        const { urgentOnly, urgentAllowed } = getCorridorTypeRestrictions(
+          formData.date
+        );
         if (urgentOnly) {
           setIsDisabled(true);
           setFormData({
@@ -1176,7 +1401,10 @@ export default function CreateBlockRequestPage() {
           });
         } else {
           setIsDisabled(false);
-          if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
+          if (
+            formData.corridorTypeSelection === "Urgent Block" &&
+            !urgentAllowed
+          ) {
             setFormData({
               ...formData,
               corridorTypeSelection: null,
@@ -1407,46 +1635,52 @@ export default function CreateBlockRequestPage() {
     return allRoads;
   };
 
- const handleRoadSelection = (block: string, value: string) => {
-  setFormData((prev) => {
-    const existingProcessedSections = [...prev.processedLineSections];
-    const sectionIndex = existingProcessedSections.findIndex(
-      (section) => section.block === block
-    );
+  const handleRoadSelection = (block: string, value: string) => {
+    setFormData((prev) => {
+      const existingProcessedSections = [...prev.processedLineSections];
+      const sectionIndex = existingProcessedSections.findIndex(
+        (section) => section.block === block
+      );
 
-    if (sectionIndex !== -1) {
-      // Update existing section
-      const section = existingProcessedSections[sectionIndex];
-      if (section.type === "yard") {
-        // Split the value into road and otherRoads
-        const roads = value.split(",").map(r => r.trim()).filter(Boolean);
-        const updatedSection = {
-          ...section,
+      if (sectionIndex !== -1) {
+        // Update existing section
+        const section = existingProcessedSections[sectionIndex];
+        if (section.type === "yard") {
+          // Split the value into road and otherRoads
+          const roads = value
+            .split(",")
+            .map((r) => r.trim())
+            .filter(Boolean);
+          const updatedSection = {
+            ...section,
+            road: roads[0] || "", // First item is road
+            otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "", // Rest are otherRoads
+          };
+          existingProcessedSections[sectionIndex] = updatedSection;
+        }
+      } else {
+        // Create new section
+        const roads = value
+          .split(",")
+          .map((r) => r.trim())
+          .filter(Boolean);
+        existingProcessedSections.push({
+          block,
+          type: "yard",
+          lineName: "",
+          otherLines: "",
+          stream: "",
           road: roads[0] || "", // First item is road
-          otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "" // Rest are otherRoads
-        };
-        existingProcessedSections[sectionIndex] = updatedSection;
+          otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "", // Rest are otherRoads
+        });
       }
-    } else {
-      // Create new section
-      const roads = value.split(",").map(r => r.trim()).filter(Boolean);
-      existingProcessedSections.push({
-        block,
-        type: "yard",
-        lineName: "",
-        otherLines: "",
-        stream: "",
-        road: roads[0] || "", // First item is road
-        otherRoads: roads.length > 1 ? roads.slice(1).join(",") : "" // Rest are otherRoads
-      });
-    }
 
-    return {
-      ...prev,
-      processedLineSections: existingProcessedSections,
-    };
-  });
-};
+      return {
+        ...prev,
+        processedLineSections: existingProcessedSections,
+      };
+    });
+  };
 
   // Add state to track if the success page should be shown and the submitted request summary
   const [showSuccessPage, setShowSuccessPage] = useState(false);
@@ -1519,297 +1753,297 @@ export default function CreateBlockRequestPage() {
   //   const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
   //   setCorridorTime({ from: maxFrom, to: minTo, duration });
   // }, [corridorData, blockSectionValue, formData.processedLineSections]);
-// useEffect(() => {
-//   if (!blockSectionValue.length) {
-//     setCorridorTime(null);
-//     return;
-//   }
+  // useEffect(() => {
+  //   if (!blockSectionValue.length) {
+  //     setCorridorTime(null);
+  //     return;
+  //   }
 
-//   /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
-//   const linePairs = blockSectionValue
-//     .map((block: string) => {
-//       // look up the entry for this block
-//       const sectionEntry =
-//         (formData.processedLineSections || []).find(
-//           (s: any) => s.block === block
-//         ) || {};
+  //   /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
+  //   const linePairs = blockSectionValue
+  //     .map((block: string) => {
+  //       // look up the entry for this block
+  //       const sectionEntry =
+  //         (formData.processedLineSections || []).find(
+  //           (s: any) => s.block === block
+  //         ) || {};
 
-//       // first line chosen (if any)
-//       const firstLine = sectionEntry?.lineName
-//         ? sectionEntry.lineName.split(",")[0]
-//         : null;
+  //       // first line chosen (if any)
+  //       const firstLine = sectionEntry?.lineName
+  //         ? sectionEntry.lineName.split(",")[0]
+  //         : null;
 
-//       // if no line chosen for this block, skip – road logic will handle it
-//       if (!firstLine) return null;
+  //       // if no line chosen for this block, skip – road logic will handle it
+  //       if (!firstLine) return null;
 
-//       // find matching row in corridorData
-//       const row = corridorData.find((r: any) => {
-//         return (
-//           (r["Section/ station"] || r["section"])?.trim() === block &&
-//           (r["Line"] || "").trim() === firstLine
-//         );
-//       });
+  //       // find matching row in corridorData
+  //       const row = corridorData.find((r: any) => {
+  //         return (
+  //           (r["Section/ station"] || r["section"])?.trim() === block &&
+  //           (r["Line"] || "").trim() === firstLine
+  //         );
+  //       });
 
-//       return row || null;
-//     })
-//     .filter(Boolean); // removes nulls
+  //       return row || null;
+  //     })
+  //     .filter(Boolean); // removes nulls
 
-//   /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
+  //   /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
 
-//   const roadTimeMap: Record<string, { from: string; to: string }> = {
-//     "AJJ-RU-Up": { from: "01:30", to: "04:30" },
-//     "AJJ-RU-Down": { from: "00:30", to: "03:30" },
-//     "AJJ-RU-Both": { from: "01:30", to: "04:30" },
+  //   const roadTimeMap: Record<string, { from: string; to: string }> = {
+  //     "AJJ-RU-Up": { from: "01:30", to: "04:30" },
+  //     "AJJ-RU-Down": { from: "00:30", to: "03:30" },
+  //     "AJJ-RU-Both": { from: "01:30", to: "04:30" },
 
-//     "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
-//     "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
-//     "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
+  //     "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
+  //     "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
+  //     "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
 
-//     "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
-//     "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
-//     "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
+  //     "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
+  //     "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
+  //     "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
 
-//     "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
-//     "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
-//     "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
+  //     "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
+  //     "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
+  //     "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
 
-//     "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
-//     "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
-//     "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
+  //     "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
+  //     "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
+  //     "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
 
-//     "MAS-GDR-Up": { from: "00:20", to: "03:20" },
-//     "MAS-GDR-Down": { from: "23:30", to: "01:30" },
-//     "MAS-GDR-Both": { from: "00:20", to: "03:20" },
+  //     "MAS-GDR-Up": { from: "00:20", to: "03:20" },
+  //     "MAS-GDR-Down": { from: "23:30", to: "01:30" },
+  //     "MAS-GDR-Both": { from: "00:20", to: "03:20" },
 
-//     "MSB-VM-Up": { from: "21:15", to: "00:15" },
-//     "MSB-VM-Down": { from: "01:30", to: "04:30" },
-//     "MSB-VM-Both": { from: "21:15", to: "00:15" },
+  //     "MSB-VM-Up": { from: "21:15", to: "00:15" },
+  //     "MSB-VM-Down": { from: "01:30", to: "04:30" },
+  //     "MSB-VM-Both": { from: "21:15", to: "00:15" },
 
-//     "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
-//     "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
-//     "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
-//   };
+  //     "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
+  //     "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
+  //     "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
+  //   };
 
-//   const roadPairs = blockSectionValue
-//     .map((block: string) => {
-//       // if a line was already chosen for this block, skip (line logic handled it)
-//       const hadLine =
-//         (formData.processedLineSections || []).some(
-//           (s: any) => s.block === block && s.lineName
-//         );
-//       if (hadLine) return null;
+  //   const roadPairs = blockSectionValue
+  //     .map((block: string) => {
+  //       // if a line was already chosen for this block, skip (line logic handled it)
+  //       const hadLine =
+  //         (formData.processedLineSections || []).some(
+  //           (s: any) => s.block === block && s.lineName
+  //         );
+  //       if (hadLine) return null;
 
-//       // road logic starts here …
-//       const sectionEntry =
-//         (formData.processedLineSections || []).find(
-//           (s: any) => s.block === block
-//         ) || {};
-//       if (!sectionEntry.road) return null;
+  //       // road logic starts here …
+  //       const sectionEntry =
+  //         (formData.processedLineSections || []).find(
+  //           (s: any) => s.block === block
+  //         ) || {};
+  //       if (!sectionEntry.road) return null;
 
-//       const roads = sectionEntry.road
-//         .split(",")
-//         .map((r: string) => r.trim().toLowerCase());
+  //       const roads = sectionEntry.road
+  //         .split(",")
+  //         .map((r: string) => r.trim().toLowerCase());
 
-//       const streamEntry = streamData[block];
-//       const majorSection = formData.selectedSection;
-//       if (!streamEntry || !majorSection) return null;
+  //       const streamEntry = streamData[block];
+  //       const majorSection = formData.selectedSection;
+  //       if (!streamEntry || !majorSection) return null;
 
-//       const checkDirection = (dir: "Up" | "Down" | "Both") =>
-//         roads.some((r: string) =>
-//           (streamEntry[`${dir} Direction Affected`] || [])
-//             .map((x: string) => x.trim().toLowerCase())
-//             .includes(r)
-//         );
+  //       const checkDirection = (dir: "Up" | "Down" | "Both") =>
+  //         roads.some((r: string) =>
+  //           (streamEntry[`${dir} Direction Affected`] || [])
+  //             .map((x: string) => x.trim().toLowerCase())
+  //             .includes(r)
+  //         );
 
-//       const dirs = ["Both", "Up", "Down"] as const;
-//       for (const dir of dirs) {
-//         if (checkDirection(dir)) {
-//           const time = roadTimeMap[`${majorSection}-${dir}`];
-//           if (time) return { from: time.from, to: time.to };
-//         }
-//       }
-//       return null;
-//     })
-//     .filter(Boolean);
+  //       const dirs = ["Both", "Up", "Down"] as const;
+  //       for (const dir of dirs) {
+  //         if (checkDirection(dir)) {
+  //           const time = roadTimeMap[`${majorSection}-${dir}`];
+  //           if (time) return { from: time.from, to: time.to };
+  //         }
+  //       }
+  //       return null;
+  //     })
+  //     .filter(Boolean);
 
-//   /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
+  //   /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
 
-//   // nothing found in either? → clear the state
-//   if (!linePairs.length && !roadPairs.length) {
-//     setCorridorTime(null);
-//     return;
-//   }
+  //   // nothing found in either? → clear the state
+  //   if (!linePairs.length && !roadPairs.length) {
+  //     setCorridorTime(null);
+  //     return;
+  //   }
 
-//   // gather all times from lines + roads
-//   const fromTimes = [
-//     ...linePairs.map((p: any) => p["From"]),
-//     ...roadPairs.map((p: any) => p.from),
-//   ];
-//   const toTimes = [
-//     ...linePairs.map((p: any) => p["To"]),
-//     ...roadPairs.map((p: any) => p.to),
-//   ];
+  //   // gather all times from lines + roads
+  //   const fromTimes = [
+  //     ...linePairs.map((p: any) => p["From"]),
+  //     ...roadPairs.map((p: any) => p.from),
+  //   ];
+  //   const toTimes = [
+  //     ...linePairs.map((p: any) => p["To"]),
+  //     ...roadPairs.map((p: any) => p.to),
+  //   ];
 
-//   const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
-//   const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
+  //   const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
+  //   const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
 
-//   // duration only exists on line rows – take the first one if any
-//   const duration =
-//     linePairs.length > 0 ? (linePairs[0] as any)["Duration"] : undefined;
+  //   // duration only exists on line rows – take the first one if any
+  //   const duration =
+  //     linePairs.length > 0 ? (linePairs[0] as any)["Duration"] : undefined;
 
-//   setCorridorTime({ from: maxFrom, to: minTo, duration });
-// }, [
-//   corridorData,
-//   blockSectionValue,
-//   formData.processedLineSections,
-//   formData.selectedSection,
-// ]);
-useEffect(() => {
-  if (!blockSectionValue.length) {
-    setCorridorTime(null);
-    return;
-  }
+  //   setCorridorTime({ from: maxFrom, to: minTo, duration });
+  // }, [
+  //   corridorData,
+  //   blockSectionValue,
+  //   formData.processedLineSections,
+  //   formData.selectedSection,
+  // ]);
+  useEffect(() => {
+    if (!blockSectionValue.length) {
+      setCorridorTime(null);
+      return;
+    }
 
-  /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
-  const linePairs = blockSectionValue
-    .map((block: string) => {
-      const sectionEntry = (formData.processedLineSections || []).find(
-  (s: { block: string; lineName?: string }) => s.block === block
-) as { block: string; lineName?: string };
+    /* ---------- 1.  LINE‑BASED LOGIC (UNCHANGED) ---------- */
+    const linePairs = blockSectionValue
+      .map((block: string) => {
+        const sectionEntry = (formData.processedLineSections || []).find(
+          (s: { block: string; lineName?: string }) => s.block === block
+        ) as { block: string; lineName?: string };
 
-const firstLine = sectionEntry?.lineName
-  ? sectionEntry.lineName.split(",")[0]
-  : null;
+        const firstLine = sectionEntry?.lineName
+          ? sectionEntry.lineName.split(",")[0]
+          : null;
 
-    
-      if (!firstLine) return null;
-      const row = corridorData.find((r: { [key: string]: string }) => {
-        return (
-          (r["Section/ station"] || r["section"])?.trim() === block &&
-          (r["Line"] || "").trim() === firstLine
+        if (!firstLine) return null;
+        const row = corridorData.find((r: { [key: string]: string }) => {
+          return (
+            (r["Section/ station"] || r["section"])?.trim() === block &&
+            (r["Line"] || "").trim() === firstLine
+          );
+        });
+
+        return row || null;
+      })
+      .filter(Boolean) as Array<{ [key: string]: string }>; // removes nulls and asserts type
+
+    /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
+
+    const roadTimeMap: Record<string, { from: string; to: string }> = {
+      "AJJ-RU-Up": { from: "01:30", to: "04:30" },
+      "AJJ-RU-Down": { from: "00:30", to: "03:30" },
+      "AJJ-RU-Both": { from: "01:30", to: "04:30" },
+
+      "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
+      "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
+      "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
+
+      "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
+      "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
+      "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
+
+      "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
+      "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
+      "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
+
+      "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
+      "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
+      "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
+
+      "MAS-GDR-Up": { from: "00:20", to: "03:20" },
+      "MAS-GDR-Down": { from: "23:30", to: "01:30" },
+      "MAS-GDR-Both": { from: "00:20", to: "03:20" },
+
+      "MSB-VM-Up": { from: "21:15", to: "00:15" },
+      "MSB-VM-Down": { from: "01:30", to: "04:30" },
+      "MSB-VM-Both": { from: "21:15", to: "00:15" },
+
+      "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
+      "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
+      "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
+    };
+
+    const roadPairs = blockSectionValue
+      .map((block: string) => {
+        // if a line was already chosen for this block, skip (line logic handled it)
+        const hadLine = (formData.processedLineSections || []).some(
+          (s: { block: string; lineName?: string }) =>
+            s.block === block && s.lineName
         );
-      });
+        if (hadLine) return null;
 
-      return row || null;
-    })
-    .filter(Boolean) as Array<{ [key: string]: string }>; // removes nulls and asserts type
-
-  /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
-
-  const roadTimeMap: Record<string, { from: string; to: string }> = {
-    "AJJ-RU-Up": { from: "01:30", to: "04:30" },
-    "AJJ-RU-Down": { from: "00:30", to: "03:30" },
-    "AJJ-RU-Both": { from: "01:30", to: "04:30" },
-
-    "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
-    "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
-    "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
-
-    "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
-    "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
-    "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
-
-    "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
-    "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
-    "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
-
-    "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
-    "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
-    "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
-
-    "MAS-GDR-Up": { from: "00:20", to: "03:20" },
-    "MAS-GDR-Down": { from: "23:30", to: "01:30" },
-    "MAS-GDR-Both": { from: "00:20", to: "03:20" },
-
-    "MSB-VM-Up": { from: "21:15", to: "00:15" },
-    "MSB-VM-Down": { from: "01:30", to: "04:30" },
-    "MSB-VM-Both": { from: "21:15", to: "00:15" },
-
-    "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
-    "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
-    "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
-  };
-
-  const roadPairs = blockSectionValue
-    .map((block: string) => {
-      // if a line was already chosen for this block, skip (line logic handled it)
-      const hadLine = (formData.processedLineSections || []).some(
-        (s: { block: string; lineName?: string }) => s.block === block && s.lineName
-      );
-      if (hadLine) return null;
-
-      // road logic starts here …
-     const sectionEntry = (formData.processedLineSections || []).find(
-  (s: { block: string; road?: string }) => s.block === block
-);
-
-if (!sectionEntry?.road) return null;
-
-const roads = sectionEntry.road
-  .split(",")
-  .map((r: string) => r.trim().toLowerCase());
-
-      const streamEntry = streamData[block as keyof typeof streamData];
-      const majorSection = formData.selectedSection;
-      if (!streamEntry || !majorSection) return null;
-
-      const checkDirection = (dir: "Up" | "Down" | "Both") =>
-        roads.some((r: string) =>
-          ((streamEntry as any)[`${dir} Direction Affected`] || [])
-            .map((x: string) => x.trim().toLowerCase())
-            .includes(r)
+        // road logic starts here …
+        const sectionEntry = (formData.processedLineSections || []).find(
+          (s: { block: string; road?: string }) => s.block === block
         );
 
-      const dirs = ["Both", "Up", "Down"] as const;
-      for (const dir of dirs) {
-        if (checkDirection(dir)) {
-          const time = roadTimeMap[`${majorSection}-${dir}`];
-          if (time) return { from: time.from, to: time.to };
+        if (!sectionEntry?.road) return null;
+
+        const roads = sectionEntry.road
+          .split(",")
+          .map((r: string) => r.trim().toLowerCase());
+
+        const streamEntry = streamData[block as keyof typeof streamData];
+        const majorSection = formData.selectedSection;
+        if (!streamEntry || !majorSection) return null;
+
+        const checkDirection = (dir: "Up" | "Down" | "Both") =>
+          roads.some((r: string) =>
+            ((streamEntry as any)[`${dir} Direction Affected`] || [])
+              .map((x: string) => x.trim().toLowerCase())
+              .includes(r)
+          );
+
+        const dirs = ["Both", "Up", "Down"] as const;
+        for (const dir of dirs) {
+          if (checkDirection(dir)) {
+            const time = roadTimeMap[`${majorSection}-${dir}`];
+            if (time) return { from: time.from, to: time.to };
+          }
         }
-      }
-      return null;
-    })
-    .filter(Boolean) as Array<{ from: string; to: string }>; // removes nulls and asserts type
+        return null;
+      })
+      .filter(Boolean) as Array<{ from: string; to: string }>; // removes nulls and asserts type
 
-  /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
+    /* ---------- 3.  COMBINE BOTH RESULTS ---------- */
 
-  // nothing found in either? → clear the state
-  if (!linePairs.length && !roadPairs.length) {
-    setCorridorTime(null);
-    return;
-  }
+    // nothing found in either? → clear the state
+    if (!linePairs.length && !roadPairs.length) {
+      setCorridorTime(null);
+      return;
+    }
 
-  // gather all times from lines + roads
-  const fromTimes = [
-    ...linePairs.map((p) => p["From"]),
-    ...roadPairs.map((p) => p.from),
-  ].filter((t): t is string => !!t); // ensure all times are strings
+    // gather all times from lines + roads
+    const fromTimes = [
+      ...linePairs.map((p) => p["From"]),
+      ...roadPairs.map((p) => p.from),
+    ].filter((t): t is string => !!t); // ensure all times are strings
 
-  const toTimes = [
-    ...linePairs.map((p) => p["To"]),
-    ...roadPairs.map((p) => p.to),
-  ].filter((t): t is string => !!t); // ensure all times are strings
+    const toTimes = [
+      ...linePairs.map((p) => p["To"]),
+      ...roadPairs.map((p) => p.to),
+    ].filter((t): t is string => !!t); // ensure all times are strings
 
-  if (!fromTimes.length || !toTimes.length) {
-    setCorridorTime(null);
-    return;
-  }
+    if (!fromTimes.length || !toTimes.length) {
+      setCorridorTime(null);
+      return;
+    }
 
-  const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
-  const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
+    const maxFrom = fromTimes.reduce((a, b) => (a > b ? a : b));
+    const minTo = toTimes.reduce((a, b) => (a < b ? a : b));
 
-  // duration only exists on line rows – take the first one if any
-  const duration = linePairs[0]?.["Duration"];
+    // duration only exists on line rows – take the first one if any
+    const duration = linePairs[0]?.["Duration"];
 
-  setCorridorTime({ from: maxFrom, to: minTo, duration });
-}, [
-  corridorData,
-  blockSectionValue,
-  formData.processedLineSections,
-  formData.selectedSection,
-  streamData,
-  setCorridorTime,
-]);
+    setCorridorTime({ from: maxFrom, to: minTo, duration });
+  }, [
+    corridorData,
+    blockSectionValue,
+    formData.processedLineSections,
+    formData.selectedSection,
+    streamData,
+    setCorridorTime,
+  ]);
 
   // Inline error rendering helper
   const renderError = (field: string) =>
@@ -2165,114 +2399,114 @@ const roads = sectionEntry.road
                           label: string;
                         }[] = [];
 
-    if (isYard) {
-      // For yards, use road and otherRoads
-      if (section?.road) {
-        selectedValues.push({
-          value: section.road,
-          label: section.road,
-        });
-      }
-      if (section?.otherRoads) {
-        const otherRoadList = section.otherRoads
-          .split(",")
-          .map((road) => road.trim())
-          .filter(Boolean);
-        selectedValues.push(
-          ...otherRoadList.map((road) => ({
-            value: road,
-            label: road,
-          }))
-        );
-      }
-    } else {
-      // For non-yards, use lineName and otherLines (existing logic)
-      if (section?.lineName) {
-        selectedValues.push({
-          value: section.lineName,
-          label: section.lineName,
-        });
-      }
-      if (section?.otherLines) {
-        const otherLineList = section.otherLines
-          .split(",")
-          .map((line) => line.trim())
-          .filter(Boolean);
-        selectedValues.push(
-          ...otherLineList.map((line) => ({
-            value: line,
-            label: line,
-          }))
-        );
-      }
-    }
+                        if (isYard) {
+                          // For yards, use road and otherRoads
+                          if (section?.road) {
+                            selectedValues.push({
+                              value: section.road,
+                              label: section.road,
+                            });
+                          }
+                          if (section?.otherRoads) {
+                            const otherRoadList = section.otherRoads
+                              .split(",")
+                              .map((road) => road.trim())
+                              .filter(Boolean);
+                            selectedValues.push(
+                              ...otherRoadList.map((road) => ({
+                                value: road,
+                                label: road,
+                              }))
+                            );
+                          }
+                        } else {
+                          // For non-yards, use lineName and otherLines (existing logic)
+                          if (section?.lineName) {
+                            selectedValues.push({
+                              value: section.lineName,
+                              label: section.lineName,
+                            });
+                          }
+                          if (section?.otherLines) {
+                            const otherLineList = section.otherLines
+                              .split(",")
+                              .map((line) => line.trim())
+                              .filter(Boolean);
+                            selectedValues.push(
+                              ...otherLineList.map((line) => ({
+                                value: line,
+                                label: line,
+                              }))
+                            );
+                          }
+                        }
 
-    return selectedValues;
-  })()}
-  onChange={(selected) => {
-    const values = selected
-      ? selected.map((opt: any) => opt.value)
-      : [];
-    if (isYard) {
-      // For yards, join the selected values with comma
-      handleRoadSelection(block, values.join(","));
-    } else {
-      handleLineNameSelection(block, values);
-    }
-  }}
-  classNamePrefix="react-select"
-  menuPortalTarget={
-    typeof window !== "undefined" ? document.body : null
-  }
-  styles={{
-    control: (base) => ({
-      ...base,
-      backgroundColor: "#FFB74D",
-      borderColor: "black",
-      borderWidth: 2,
-      borderRadius: 6,
-      minHeight: "32px",
-      fontWeight: "bold",
-      fontSize: "14px",
-      boxShadow: "none",
-      padding: "0 2px",
-    }),
-    menu: (base) => ({
-      ...base,
-      zIndex: 9999,
-    }),
-    menuPortal: (base) => ({
-      ...base,
-      zIndex: 9999,
-    }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isSelected
-        ? "#ffe082"
-        : state.isFocused
-        ? "#ffe08299"
-        : "#FFB74D",
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "14px",
-      padding: "4px 8px",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "14px",
-    }),
-    dropdownIndicator: (base) => ({
-      ...base,
-      color: "black",
-      fontSize: "20px",
-      padding: 0,
-    }),
-  }}
-  placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
-  closeMenuOnSelect={false}
-/>
+                        return selectedValues;
+                      })()}
+                      onChange={(selected) => {
+                        const values = selected
+                          ? selected.map((opt: any) => opt.value)
+                          : [];
+                        if (isYard) {
+                          // For yards, join the selected values with comma
+                          handleRoadSelection(block, values.join(","));
+                        } else {
+                          handleLineNameSelection(block, values);
+                        }
+                      }}
+                      classNamePrefix="react-select"
+                      menuPortalTarget={
+                        typeof window !== "undefined" ? document.body : null
+                      }
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#FFB74D",
+                          borderColor: "black",
+                          borderWidth: 2,
+                          borderRadius: 6,
+                          minHeight: "32px",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          boxShadow: "none",
+                          padding: "0 2px",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        menuPortal: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? "#ffe082"
+                            : state.isFocused
+                            ? "#ffe08299"
+                            : "#FFB74D",
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          padding: "4px 8px",
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }),
+                        dropdownIndicator: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontSize: "20px",
+                          padding: 0,
+                        }),
+                      }}
+                      placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
+                      closeMenuOnSelect={false}
+                    />
                     {renderError(`${block}.lineName`)}
                     {renderError(`${block}.road`)}
                     {renderError(`${block}.stream`)}
@@ -2347,11 +2581,14 @@ const roads = sectionEntry.road
             </div>
           </div>
           {/* Preferred Slot row (styled to match corridor row, boxy, bold, high-contrast) */}
-          <div className="flex flex-row w-full bg-[#F4A460] flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black " style={{ height: '36px' }}>
+          <div
+            className="flex flex-row w-full bg-[#F4A460] flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black "
+            style={{ height: "36px" }}
+          >
             <div
               className="flex flex-row items-center justify-center"
               style={{
-                padding: '0 4px',
+                padding: "0 4px",
               }}
             >
               <span className="text-black font-bold px-3 py-1 text-[13px]">
@@ -2364,8 +2601,8 @@ const roads = sectionEntry.road
                 background: "#F4A460",
                 minWidth: 50,
                 maxWidth: 70,
-                height: '32px',
-                padding: '0 2px',
+                height: "32px",
+                padding: "0 2px",
               }}
             >
               <select
@@ -2390,7 +2627,7 @@ const roads = sectionEntry.road
               >
                 <option value="">--</option>
                 {[...Array(24).keys()].map((h) => (
-                  <option key={h} value={h.toString().padStart(2, "0")}> 
+                  <option key={h} value={h.toString().padStart(2, "0")}>
                     {h.toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2418,7 +2655,7 @@ const roads = sectionEntry.road
               >
                 <option value="">--</option>
                 {[...Array(12).keys()].map((m) => (
-                  <option key={m} value={(m * 5).toString().padStart(2, "0")}> 
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
                     {(m * 5).toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2430,8 +2667,8 @@ const roads = sectionEntry.road
                 background: "#F4A460",
                 minWidth: 30,
                 maxWidth: 40,
-                height: '32px',
-                padding: '0 2px',
+                height: "32px",
+                padding: "0 2px",
               }}
             >
               <span className="text-black font-extrabold px-2 py-1 text-[15px]">
@@ -2444,8 +2681,8 @@ const roads = sectionEntry.road
                 background: "#F4A460",
                 minWidth: 50,
                 maxWidth: 70,
-                height: '32px',
-                padding: '0 4px',
+                height: "32px",
+                padding: "0 4px",
               }}
             >
               <select
@@ -2470,7 +2707,7 @@ const roads = sectionEntry.road
               >
                 <option value="">--</option>
                 {[...Array(24).keys()].map((h) => (
-                  <option key={h} value={h.toString().padStart(2, "0")}> 
+                  <option key={h} value={h.toString().padStart(2, "0")}>
                     {h.toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2498,7 +2735,7 @@ const roads = sectionEntry.road
               >
                 <option value="">--</option>
                 {[...Array(12).keys()].map((m) => (
-                  <option key={m} value={(m * 5).toString().padStart(2, "0")}> 
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
                     {(m * 5).toString().padStart(2, "0")}
                   </option>
                 ))}
@@ -2506,9 +2743,23 @@ const roads = sectionEntry.road
             </div>
           </div>
           {/* Site Location From/To fields */}
-          <div className="flex flex-row items-center gap-2 w-full mt-2 mb-2" style={{ background: '#f3e6ff', padding: '3px 0', borderRadius: '8px', marginTop: '8px', marginBottom: '8px' }}>
-            <label className="font-bold text-black mr-2" style={{ minWidth: 100, fontSize: '13px', paddingLeft: '12px' }}>
-              Site<br />Location
+          <div
+            className="flex flex-row items-center gap-2 w-full mt-2 mb-2"
+            style={{
+              background: "#f3e6ff",
+              padding: "3px 0",
+              borderRadius: "8px",
+              marginTop: "8px",
+              marginBottom: "8px",
+            }}
+          >
+            <label
+              className="font-bold text-black mr-2"
+              style={{ minWidth: 100, fontSize: "13px", paddingLeft: "12px" }}
+            >
+              Site
+              <br />
+              Location
             </label>
             <input
               type="text"
@@ -2564,34 +2815,42 @@ const roads = sectionEntry.road
               <span className="text-black font-bold px-1 py-0.5 text-[12px] text-center w-full">
                 Type of Block
               </span>
-        <select
-              name="corridorTypeSelection"
-              value={formData.corridorTypeSelection || ""}
-              onChange={handleInputChange}
-              className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
-              style={{
-                minWidth: 50,
-                height: 24,
-                appearance: "none",
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right",
-                backgroundSize: "1.2rem",
-              }}
-              required
-              disabled={shouldForceUrgentBlock} // Optional: disable dropdown entirely
-            >
-              <option value="" disabled={!shouldForceUrgentBlock}>Select</option>
-              <option value="Corridor Block" disabled={shouldForceUrgentBlock}>
-                Corridor Block
-              </option>
-              <option value="Non-Corridor Block" disabled={shouldForceUrgentBlock}>
-                Non-Corridor Block
-              </option>
-              {shouldForceUrgentBlock && (
-                <option value="Urgent Block">Urgent Block</option>
-              )}
-            </select>
+              <select
+                name="corridorTypeSelection"
+                value={formData.corridorTypeSelection || ""}
+                onChange={handleInputChange}
+                className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
+                style={{
+                  minWidth: 50,
+                  height: 24,
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right",
+                  backgroundSize: "1.2rem",
+                }}
+                required
+                disabled={shouldForceUrgentBlock} // Optional: disable dropdown entirely
+              >
+                <option value="" disabled={!shouldForceUrgentBlock}>
+                  Select
+                </option>
+                <option
+                  value="Corridor Block"
+                  disabled={shouldForceUrgentBlock}
+                >
+                  Corridor Block
+                </option>
+                <option
+                  value="Non-Corridor Block"
+                  disabled={shouldForceUrgentBlock}
+                >
+                  Non-Corridor Block
+                </option>
+                {shouldForceUrgentBlock && (
+                  <option value="Urgent Block">Urgent Block</option>
+                )}
+              </select>
               {renderError("corridorTypeSelection")}
             </div>
           </div>
@@ -2641,7 +2900,7 @@ const roads = sectionEntry.road
                   // border: " solid black",
                   borderLeft: 0,
                   height: 28,
-                  borderRadius: 20
+                  borderRadius: 20,
                 }}
               >
                 <select
@@ -2751,48 +3010,112 @@ const roads = sectionEntry.road
               </select>
               {renderError("freshCautionRequired")}
             </div>
-            {formData.freshCautionRequired && (
-              <div
-                className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
-                style={{ fontSize: "13px", fontWeight: "bold" }}
-              >
-                <input
-                  name="freshCautionLocationFrom"
-                  value={formData.freshCautionLocationFrom || ""}
-                  onChange={handleInputChange}
-                  placeholder="KM"
-                  required
-                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
-                />
-                <span className="px-1">to</span>
-                <input
-                  name="freshCautionLocationTo"
-                  value={formData.freshCautionLocationTo || ""}
-                  onChange={handleInputChange}
-                  placeholder="KM"
-                  required
-                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
-                />
-                <input
-                  name="adjacentLinesAffected"
-                  value={formData.adjacentLinesAffected || ""}
-                  onChange={handleInputChange}
-                  placeholder="UP/DN/SL/Road No."
-                  required
-                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
-                />
-                <input
-                  type="number"
-                  name="freshCautionSpeed"
-                  value={formData.freshCautionSpeed || ""}
-                  onChange={handleInputChange}
-                  placeholder="Speed"
-                  required
-                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
-                />
-                {renderError("freshCautionSpeed")}
-              </div>
-            )}
+          {/* ───── Fresh Caution ───── */}
+{formData.freshCautionRequired && (
+  <div className="flex flex-col gap-2 mt-2">
+    {formData.freshCautions.map((caution, idx) => (
+      <div
+        key={idx}
+        className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+        style={{ fontSize: "13px", fontWeight: "bold" }}
+      >
+        {/* ◼︎ Direction / Road */}
+        <input
+          list={`adjacentLinesList-${idx}`}
+          value={caution.adjacentLinesAffected}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "adjacentLinesAffected",
+              e.target.value
+            )
+          }
+          placeholder="UP/DN/SL/Road No."
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
+        />
+        <datalist id={`adjacentLinesList-${idx}`}>
+          {blockSectionValue.flatMap(block => {
+            const isYard = block.includes("-YD");
+            return isYard
+              ? getAllRoadsForYard(block).map(r => (
+                  <option key={r} value={r} />
+                ))
+              : (lineData[block as keyof typeof lineData] || []).map(l => (
+                  <option key={l} value={l} />
+                ));
+          })}
+        </datalist>
+
+        {/* ◼︎ KM From / To */}
+        <input
+          value={caution.freshCautionLocationFrom}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionLocationFrom",
+              e.target.value
+            )
+          }
+          placeholder="KM"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
+        <span className="px-1">to</span>
+        <input
+          value={caution.freshCautionLocationTo}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionLocationTo",
+              e.target.value
+            )
+          }
+          placeholder="KM"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
+
+        {/* ◼︎ Speed */}
+        <input
+          type="number"
+          value={caution.freshCautionSpeed}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionSpeed",
+              e.target.value
+            )
+          }
+          placeholder="Speed"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
+
+        {/* ◼︎ Remove */}
+        {formData.freshCautions.length > 1 && (
+          <button
+            type="button"
+            onClick={() => removeFreshCaution(idx)}
+            className="px-2 py-1 text-xs bg-red-600 text-white rounded"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+    ))}
+
+    {/* ➕ Add Button */}
+    <button
+      type="button"
+      onClick={addFreshCaution}
+      className="self-start px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold"
+    >
+      + Add Fresh Caution
+    </button>
+  </div>
+)}
+
           </div>
 
           {/* Power Block Section */}
@@ -3104,6 +3427,36 @@ const roads = sectionEntry.road
                 </svg>
                 Back
               </button>
+
+{showPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/20">
+    <div className="bg-white p-4 rounded shadow-lg w-[90%] max-w-sm text-center border border-gray-300">
+     <h2 className="text-lg font-semibold mb-2 text-black">Pending Block</h2>
+      <p className="text-sm text-gray-700 mb-4">
+        You already have a sanctioned block pending availing.
+      </p>
+      <div className="flex justify-center gap-3">
+        <button
+          onClick={() => setShowPopup(false)}
+          className="bg-gray-300 text-black px-4 py-1 rounded hover:bg-gray-400"
+        >
+          OK
+        </button>
+        <button
+          onClick={() => {
+            window.open(popupLink, "_blank");
+            setShowPopup(false);
+          }}
+          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          Go to Avail Page
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+              
               {reviewMode ? (
                 <button
                   type="submit"
