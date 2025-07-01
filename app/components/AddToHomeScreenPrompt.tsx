@@ -1,46 +1,44 @@
-// components/AddToHomeScreenPrompt.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 
 export default function AddToHomeScreenPrompt() {
-  const [promptEvent, setPromptEvent] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [promptShown, setPromptShown] = useState(false);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
+    const handler = (e: any) => {
       e.preventDefault();
-      setPromptEvent(e);
-      setShowPrompt(true);
+      setDeferredPrompt(e);
     };
 
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    return () =>
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
   }, []);
 
-  const handleInstallClick = async () => {
-    if (!promptEvent) return;
-    (promptEvent as any).prompt();
-    const result = await (promptEvent as any).userChoice;
-    if (result.outcome === "accepted") {
-      console.log("User accepted the A2HS prompt");
-    }
-    setPromptEvent(null);
-    setShowPrompt(false);
-  };
+  // Trigger prompt on first tap/click
+  useEffect(() => {
+    if (!deferredPrompt || promptShown) return;
 
-  if (!showPrompt) return null;
+    const autoTrigger = async () => {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setPromptShown(true);
+      setDeferredPrompt(null);
+    };
 
-  return (
-    <div className="fixed z-[2000] bottom-4 left-4 bg-white shadow p-4 rounded">
-      <p>Add this app to your home screen</p>
-      <button
-        className="bg-blue-600 text-white px-3 py-1 rounded mt-2"
-        onClick={handleInstallClick}
-      >
-        Install
-      </button>
-    </div>
-  );
+    const handleUserInteraction = () => {
+      autoTrigger();
+      window.removeEventListener("click", handleUserInteraction);
+      window.removeEventListener("touchstart", handleUserInteraction);
+    };
+
+    window.addEventListener("click", handleUserInteraction);
+    window.addEventListener("touchstart", handleUserInteraction);
+  }, [deferredPrompt, promptShown]);
+
+  return null; // no UI needed
 }
