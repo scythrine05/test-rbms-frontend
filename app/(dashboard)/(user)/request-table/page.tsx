@@ -899,7 +899,7 @@ const handleDownload = () => {
                           )
                           :
                           (
-                            <span className="text-gray-500">Pending with OPTG</span>
+                            <span className="text-gray-500">Pending with Dept controller</span>
                           )
                         }
                         </>
