@@ -970,11 +970,14 @@ export default function OptimiseTablePage() {
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="date" title="Date" />
                     </th>
+                      <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="date" title="Dept" />
+                    </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="section" title="Major Section" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
+                      <ColumnHeader icon="section" title="SSE" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="section" title="Block Section" />
@@ -983,17 +986,13 @@ export default function OptimiseTablePage() {
                       <ColumnHeader icon="line" title="Line / Road" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Time" />
+                      <ColumnHeader icon="time" title="Demanded" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
+                      <ColumnHeader icon="time" title="Optimize" />
                     </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="User Remarks" />
-                    </th>
+                   
+                  
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="work" title="Activity" />
                     </th>
@@ -1033,6 +1032,9 @@ export default function OptimiseTablePage() {
                         ) : (
                           formatDate(request.date)
                         )}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedDepartment}
                       </td>
                       <td className="border border-black p-2 text-sm">
                         {request.selectedSection}
@@ -1081,12 +1083,8 @@ export default function OptimiseTablePage() {
                           </>
                         )}
                       </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.userResponse || "N/A"}
-                      </td>
+                 
+                   
                       <td className="border border-black p-2 text-sm">
                         {request.activity}
                       </td>
@@ -1168,10 +1166,13 @@ export default function OptimiseTablePage() {
                       <ColumnHeader icon="date" title="Date" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                      <ColumnHeader icon="date" title="Dept" />
+                    </th>
+                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="section" title="Major Section" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
+                      <ColumnHeader icon="section" title="SSE" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="section" title="Block Section" />
@@ -1180,17 +1181,12 @@ export default function OptimiseTablePage() {
                       <ColumnHeader icon="line" title="Line / Road" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Time" />
+                      <ColumnHeader icon="time" title="Demanded" />
                     </th>
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
+                      <ColumnHeader icon="time" title="Optimize" />
                     </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="User Remarks" />
-                    </th>
+                 
                     <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                       <ColumnHeader icon="work" title="Activity" />
                     </th>
@@ -1231,6 +1227,9 @@ export default function OptimiseTablePage() {
                         ) : (
                           formatDate(request.date)
                         )}
+                      </td>
+                      <td className="border border-black p-2 text-sm">
+                        {request.selectedDepartment}
                       </td>
                       <td className="border border-black p-2 text-sm">
                         {request.selectedSection}
@@ -1279,12 +1278,8 @@ export default function OptimiseTablePage() {
                           </>
                         )}
                       </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.userResponse || "N/A"}
-                      </td>
+                   
+                   
                       <td className="border border-black p-2 text-sm">
                         {request.activity}
                       </td>
@@ -1416,11 +1411,14 @@ export default function OptimiseTablePage() {
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="date" title="Date" />
                   </th>
+                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="date" title="Dept" />
+                  </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="section" title="Major Section" />
                   </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                    <ColumnHeader icon="section" title="Depot" />
+                    <ColumnHeader icon="section" title="SSE" />
                   </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="section" title="Block Section" />
@@ -1429,14 +1427,12 @@ export default function OptimiseTablePage() {
                     <ColumnHeader icon="line" title="Line / Road" />
                   </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                    <ColumnHeader icon="time" title="Time" />
+                    <ColumnHeader icon="time" title="Demanded" />
                   </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                    <ColumnHeader icon="time" title="Optimized Time" />
+                    <ColumnHeader icon="time" title="Optimize" />
                   </th>
-                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                    <ColumnHeader icon="work" title="Work Type" />
-                  </th>
+                
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="work" title="Activity" />
                   </th>
@@ -1476,6 +1472,9 @@ export default function OptimiseTablePage() {
                       ) : (
                         formatDate(request.date)
                       )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedDepartment}
                     </td>
                     <td className="border border-black p-2 text-sm">
                       {request.selectedSection}
@@ -1524,9 +1523,7 @@ export default function OptimiseTablePage() {
                         </>
                       )}
                     </td>
-                    <td className="border border-black p-2 text-sm">
-                      {request.workType}
-                    </td>
+                
                     <td className="border border-black p-2 text-sm">
                       {request.activity}
                     </td>
