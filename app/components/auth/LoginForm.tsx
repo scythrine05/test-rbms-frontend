@@ -1,30 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { PhoneLoginInput, phoneLoginSchema } from "@/app/validation/auth";
 import { usePhoneAuth } from "@/app/service/query/auth";
 
-/**
- * Phone Login Form Component
- * Handles user authentication with phone number and OTP
- */
 export default function PhoneLoginForm() {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [otpId, setOtpId] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
-  
-  const { 
-    requestOtp, 
-    verifyOtp, 
-    isRequestingOtp, 
-    isVerifyingOtp, 
-    requestOtpError, 
+  const otpInputRef = useRef<HTMLInputElement | null>(null);
+
+  const {
+    requestOtp,
+    verifyOtp,
+    isRequestingOtp,
+    isVerifyingOtp,
+    requestOtpError,
     verifyOtpError,
-    otpRequestData 
+    otpRequestData,
   } = usePhoneAuth();
 
   const {
@@ -44,7 +41,6 @@ export default function PhoneLoginForm() {
   const phone = watch("phone");
   const isLoading = isRequestingOtp || isVerifyingOtp;
 
-  // Update error state when API errors change
   useEffect(() => {
     if (requestOtpError) {
       setAuthError((requestOtpError as any)?.message || "Failed to send OTP");
@@ -55,7 +51,6 @@ export default function PhoneLoginForm() {
     }
   }, [requestOtpError, verifyOtpError]);
 
-  // Update otpId when received from API
   useEffect(() => {
     if (otpRequestData?.data?.otpId) {
       setOtpId(otpRequestData.data.otpId);
@@ -63,14 +58,44 @@ export default function PhoneLoginForm() {
     }
   }, [otpRequestData]);
 
-  /**
-   * Handle form submission based on current step
-   */
+  // Autofocus and try clipboard OTP on step change
+  useEffect(() => {
+    if (step === "otp") {
+      setTimeout(() => {
+        otpInputRef.current?.focus();
+      }, 100); // slight delay ensures input is ready
+
+      const tryClipboardPaste = async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (/^\d{4,8}$/.test(text)) {
+            setValue("otp", text);
+          }
+        } catch (err) {
+          console.log("Clipboard access blocked or unavailable", err);
+        }
+      };
+
+      tryClipboardPaste();
+    }
+  }, [step]);
+
+  const handleOtpFocus = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (/^\d{4,8}$/.test(text)) {
+        setValue("otp", text);
+        otpInputRef.current?.blur(); // optional: remove focus after autofill
+      }
+    } catch (err) {
+      console.warn("Clipboard read failed:", err);
+    }
+  };
+
   const onSubmit = async (data: PhoneLoginInput) => {
     setAuthError(null);
 
     if (step === "phone") {
-      // Request OTP
       try {
         requestOtp(data.phone);
       } catch (error: any) {
@@ -78,12 +103,11 @@ export default function PhoneLoginForm() {
         setAuthError(error.message || "Failed to send OTP. Please try again.");
       }
     } else if (step === "otp" && otpId) {
-      // Verify OTP
       try {
         verifyOtp({
           phone: data.phone,
           otp: data.otp || "",
-          otpId: otpId
+          otpId,
         });
       } catch (error: any) {
         console.error("Verify OTP error:", error);
@@ -92,13 +116,6 @@ export default function PhoneLoginForm() {
     }
   };
 
-  useEffect(() => {
-    if (step === "otp") {
-      const input = document.querySelector<HTMLInputElement>('input[name="otp"]');
-      input?.focus();
-    }
-  }, [step]);
-  
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -119,7 +136,7 @@ export default function PhoneLoginForm() {
             WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
             WebkitTextFillColor: "white",
             caretColor: "white",
-            opacity: step === "otp" ? 0.7 : 1
+            opacity: step === "otp" ? 0.7 : 1,
           }}
         />
       </div>
@@ -132,6 +149,8 @@ export default function PhoneLoginForm() {
           autoComplete="one-time-code"
           {...register("otp")}
           placeholder="Enter OTP"
+          ref={otpInputRef}
+          onFocus={handleOtpFocus}
           disabled={step === "phone"}
           className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
           style={{
@@ -139,7 +158,7 @@ export default function PhoneLoginForm() {
             WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
             WebkitTextFillColor: "white",
             caretColor: "white",
-            opacity: step === "phone" ? 0.7 : 1
+            opacity: step === "phone" ? 0.7 : 1,
           }}
         />
       </div>
@@ -165,9 +184,13 @@ export default function PhoneLoginForm() {
           border: "none",
         }}
       >
-        {isLoading 
-          ? (step === "phone" ? "Sending OTP..." : "Verifying...") 
-          : (step === "phone" ? "GET OTP" : "Click to Login")}
+        {isLoading
+          ? step === "phone"
+            ? "Sending OTP..."
+            : "Verifying..."
+          : step === "phone"
+          ? "GET OTP"
+          : "Click to Login"}
       </button>
     </form>
   );
