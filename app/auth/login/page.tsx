@@ -1,10 +1,12 @@
 "use client";
 
+import AddToHomeScreenPrompt from "@/app/components/AddToHomeScreenPrompt";
 import LoginForm from "@/app/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between bg-[#c6f5d6] p-2">
+      <AddToHomeScreenPrompt /> 
       {/* Header */}
       <div className="w-full max-w-md mx-auto rounded-lg border-4 border-black bg-yellow-200 mt-2 mb-4 p-2 relative">
         <img
