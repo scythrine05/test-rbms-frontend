@@ -36,7 +36,7 @@ export default function PhoneLoginForm() {
   } = useForm<PhoneLoginInput>({
     resolver: zodResolver(phoneLoginSchema),
     defaultValues: {
-      phone: "",
+      phone: "123456",
       otp: "",
     },
   });
