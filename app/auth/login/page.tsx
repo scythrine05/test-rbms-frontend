@@ -14,7 +14,7 @@ export default function LoginPage() {
         />
         <div className="flex flex-col items-right justify-center ml-18">
           <h1 className="text-center text-2xl sm:text-3xl font-extrabold text-[#b07be0] leading-tight mt-2">
-            Railway Block
+            Rolling Block
             <br />
             Management System
             <br />
