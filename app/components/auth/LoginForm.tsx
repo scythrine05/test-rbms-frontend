@@ -92,6 +92,13 @@ export default function PhoneLoginForm() {
     }
   };
 
+  useEffect(() => {
+    if (step === "otp") {
+      const input = document.querySelector<HTMLInputElement>('input[name="otp"]');
+      input?.focus();
+    }
+  }, [step]);
+  
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
