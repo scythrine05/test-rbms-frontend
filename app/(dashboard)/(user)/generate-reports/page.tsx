@@ -94,7 +94,7 @@ export default function GenerateReportPage() {
   ]);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
   const [selectedMajorSections, setSelectedMajorSections] = useState<string[]>(
-    ["All"]
+    ["MAS-GDR"]
   );
   const [majorSectionOptions, setMajorSectionOptions] = useState<OptionType[]>(
     []
@@ -460,7 +460,8 @@ export default function GenerateReportPage() {
                         className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
                       >
-                        {/* {summary.Department || summary.Section || ""} */}All
+                        {/* {summary.Department || summary.Section || ""} */}
+                        MAS-GDR
                       </td>
                       <td
                         className="border-2 border-black px-2 py-1 text-center"
