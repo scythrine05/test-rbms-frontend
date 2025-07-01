@@ -333,7 +333,7 @@ export default function GenerateReportPage() {
         <span className="text-4xl font-extrabold text-black">
           Block Summary Report
         </span>
-        <span className="text-lg font-bold text-black">DRM/ADRM/SrDOM</span>
+        <span className="text-lg font-bold text-black">SSE/P.way/GDR</span>
         <div className="mt-2 bg-[#7be09b] px-6 py-1 rounded-2xl">
           <span className="text-xl font-bold text-white">
             Blocks Granted/Availed/Pending
@@ -463,18 +463,18 @@ export default function GenerateReportPage() {
                         {/* {summary.Department || summary.Section || ""} */}
                         MAS-GDR
                       </td>
-                      <td
-                        className="border-2 border-black px-2 py-1 text-center"
-                        style={{ color: "black" }}
-                      >
-                        {summary.Demanded}
-                      </td>
-                      <td
-                        className="border-2 border-black px-2 py-1 text-center"
-                        style={{ color: "black" }}
-                      >
-                        {summary.Approved}
-                      </td>
+                  <td
+  className="border-2 border-black px-2 py-1 text-center"
+  style={{ color: "black" }}
+>
+  {(summary.Demanded / 17).toFixed(2)}
+</td>
+<td
+  className="border-2 border-black px-2 py-1 text-center"
+  style={{ color: "black" }}
+>
+  {(summary.Approved / 17).toFixed(2)}
+</td>
                       <td
                         className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
@@ -511,24 +511,28 @@ export default function GenerateReportPage() {
                   <>
                     <tr className="bg-[#ff914d] text-white font-bold">
                       <td className="border-2 border-black px-2 py-1 text-center">Total</td>
-                      <td
-                        className="border-2 border-black px-2 py-1 text-center"
-                        style={{ color: "black" }}
-                      >
-                        {pastBlockSummary.reduce(
-                          (sum, item) => sum + (item.Demanded || 0),
-                          0
-                        )}
-                      </td>
-                      <td
-                        className="border-2 border-black px-2 py-1 text-center"
-                        style={{ color: "black" }}
-                      >
-                        {pastBlockSummary.reduce(
-                          (sum, item) => sum + (item.Approved || 0),
-                          0
-                        )}
-                      </td>
+                <td
+  className="border-2 border-black px-2 py-1 text-center"
+  style={{ color: "black" }}
+>
+  {(
+    pastBlockSummary.reduce(
+      (sum, item) => sum + (item.Demanded || 0),
+      0
+    ) / 17
+  ).toFixed(2)}
+</td>
+<td
+  className="border-2 border-black px-2 py-1 text-center"
+  style={{ color: "black" }}
+>
+  {(
+    pastBlockSummary.reduce(
+      (sum, item) => sum + (item.Approved || 0),
+      0
+    ) / 17
+  ).toFixed(2)}
+</td>
                       <td
                         className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
