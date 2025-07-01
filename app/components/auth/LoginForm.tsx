@@ -104,6 +104,7 @@ export default function PhoneLoginForm() {
           type="tel"
           {...register("phone")}
           placeholder="Phone Number"
+          typeof="tel"
           disabled={step === "otp"}
           className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
           style={{
@@ -120,6 +121,8 @@ export default function PhoneLoginForm() {
       <div className="w-full flex items-center mb-6">
         <input
           type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
           {...register("otp")}
           placeholder="Enter OTP"
           disabled={step === "phone"}
