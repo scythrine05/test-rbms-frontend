@@ -294,9 +294,9 @@ export default function OptimiseTablePage() {
     data?.data?.requests?.filter((request: UserRequest) => {
       return isUrgentMode //false
         ? request.corridorType === "Urgent Block" ||
-            request.workType === "EMERGENCY"
+        request.workType === "EMERGENCY"
         : request.corridorType !== "Urgent Block" &&
-            request.workType !== "EMERGENCY";
+        request.workType !== "EMERGENCY";
     }) || [];
 
   const UrgentRequests =
@@ -372,17 +372,27 @@ export default function OptimiseTablePage() {
     return isSameDay(requestDate, selectedDate);
   });
 
-  // Separate corridor and non-corridor requests
-  const corridorRequests = filteredRequests.filter(
-    (request: UserRequest) =>
-      request.corridorType === "Corridor" ||
-      request.corridorType === "Corridor Block"
-  );
-  const nonCorridorRequests = filteredRequests.filter(
-    (request: UserRequest) =>
-      request.corridorType === "Outside Corridor" ||
-      request.corridorType === "Non-Corridor Block"
-  );
+  // --- Custom: Only show requests that are pending with me, not sanctioned, and after today ---
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const pendingRequests = (data?.data?.requests || []).filter((request: UserRequest) => {
+    if (request.status !== "APPROVED" || request.isSanctioned) return false;
+    if (!request.date) return false;
+    const reqDate = new Date(request.date);
+    reqDate.setHours(0, 0, 0, 0);
+    return reqDate > today;
+  });
+
+  // Group and sort
+  const urgentRequests = pendingRequests
+    .filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY")
+    .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const corridorRequestsFiltered = pendingRequests
+    .filter((r: UserRequest) => r.corridorType === "Corridor" || r.corridorType === "Corridor Block")
+    .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const nonCorridorRequestsFiltered = pendingRequests
+    .filter((r: UserRequest) => r.corridorType === "Outside Corridor" || r.corridorType === "Non-Corridor Block")
+    .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
   const [isUrgentRequests, setIsUrgentRequests] = useState<boolean>(false);
@@ -631,7 +641,7 @@ export default function OptimiseTablePage() {
 
           return isUrgentRequests
             ? request.corridorType === "Urgent Block" &&
-                requestDate === selected
+            requestDate === selected
             : request.corridorType !== "Urgent Block";
         }
       );
@@ -791,6 +801,9 @@ export default function OptimiseTablePage() {
     document.body.removeChild(link);
   };
 
+  // Add state to track which row's Modify/Return is open
+  const [modifyReturnOpenId, setModifyReturnOpenId] = useState<string | null>(null);
+
   if (isLoading) {
     return (
       <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
@@ -812,35 +825,16 @@ export default function OptimiseTablePage() {
   return (
     <div className="min-h-screen w-screen flex flex-col justify-between bg-white p-3 border border-black">
       <div>
+        {/* Overall Title */}
+        <h1 className="text-2xl font-bold text-center mb-6 text-[#13529e]">Pending Requests With Me</h1>
         {showSuccess && (
           <div className="fixed top-20 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
             Operation successful!
           </div>
         )}
 
-        <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
-          <h1 className="text-lg font-bold text-[#13529e]">
-            Approved Requests
-          </h1>
-          {/* {isUrgentMode ? (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleWeekChange("prev")}
-              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-800"
-            >
-              Previous Day
-            </button>
-            <span className="text-sm font-medium text-black">
-              Date: {format(currentWeekStart, "dd-MM-yyyy")}
-            </span>
-            <button
-              onClick={() => handleWeekChange("next")}
-              className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-800"
-            >
-              Next Day
-            </button>
-          </div>
-        ) : ( */}
+        {/* Week Switcher at the top */}
+        <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center mb-4">
           <WeeklySwitcher
             currentWeekStart={currentWeekStart}
             onWeekChange={handleWeekChange}
@@ -848,570 +842,167 @@ export default function OptimiseTablePage() {
           />
         </div>
 
-        <div className="flex justify-end py-2 gap-2">
-          <button
-            onClick={() => {
-              setIsOptimizeDialogOpen(true);
-              setIsUrgentRequests(false);
-            }}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
-          >
-            <svg
-              className="w-4 h-4 mr-1"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Optimise
-          </button>
-          <button
-            // onClick={handleSendOptimizedRequests}
-            onClick={handleSendNonUrgentRequests}
-            className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
-          >
-            <svg
-              className="w-4 h-4 mr-1"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Send
-          </button>
-          {optimizedData && (
+        {/* Urgent Blocks Section - now at the top */}
+        <div className="mt-4 mb-8">
+          <h2 className="border-b-2 pb-2 border-[#13529e] text-lg font-semibold text-[#13529e]">Urgent Blocks</h2>
+          <div className="flex justify-end py-2 gap-2">
             <button
-              onClick={handleDownloadCSV}
-              className="px-3 py-1 text-sm bg-green-600 text-white border border-green-800 cursor-pointer hover:bg-green-700 flex items-center"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Download CSV
-            </button>
-          )}
-        </div>
-
-        {/* Optimization Dialog */}
-        {isOptimizeDialogOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-black">
-            <div className="bg-white p-6 w-full max-w-md border border-black">
-              <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-bold text-[#13529e]">
-                    Optimize Requests
-                  </h2>
-                  <span
-                    className={`px-3 py-1 text-sm rounded-full ${
-                      isUrgentMode
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
-                    } border border-black`}
-                  >
-                    {isUrgentMode ? "Urgent Mode" : "Normal Mode"}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsOptimizeDialogOpen(false)}
-                    className="px-4 py-1 text-sm bg-white text-[#13529e] border border-black"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleOptimize()}
-                    disabled={optimizeMutation.isPending}
-                    className="px-4 py-1 text-sm bg-[#13529e] text-white border border-black disabled:opacity-50"
-                  >
-                    {optimizeMutation.isPending ? "Optimizing..." : "Optimize"}
-                  </button>
-                </div>
-              </div>
-              <div className="mb-4 space-y-2">
-                <p>Are you sure you want to optimize the requests for:</p>
-                <p className="font-medium">
-                  Week: {format(weekStart, "dd MMM")} -{" "}
-                  {format(weekEnd, "dd MMM yyyy")}
-                </p>
-                <p className="font-medium">
-                  Total Requests: {data?.data?.requests?.length || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <>
-          {/* Corridor Requests Table */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                      <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Dept" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="SSE" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Demanded" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimize" />
-                    </th>
-                   
-                  
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corridorRequests.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={11}
-                        className="border border-black p-2 text-sm text-left"
-                      >
-                        No requests found.
-                      </td>
-                    </tr>
-                  )}
-                  {corridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${
-                        request.optimizeTimeFrom && request.optimizeTimeTo
-                          ? "bg-green-50"
-                          : ""
-                      }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <input
-                            type="date"
-                            value={editDate}
-                            onChange={(e) => setEditDate(e.target.value)}
-                            className="w-28 border p-1 text-sm rounded"
-                          />
-                        ) : (
-                          formatDate(request.date)
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepartment}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {formatTime(request.demandTimeFrom)} -{" "}
-                        {formatTime(request.demandTimeTo)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-1 items-center">
-                            <input
-                              type="time"
-                              value={timeFrom}
-                              onChange={(e) => setTimeFrom(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={timeTo}
-                              onChange={(e) => setTimeTo(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                          </div>
-                        ) : (
-                          <>
-                            {request.optimizeTimeFrom &&
-                            request.optimizeTimeFrom !== "Wrong Request"
-                              ? formatTime(request.optimizeTimeFrom)
-                              : "N/A"}{" "}
-                            -{" "}
-                            {request.optimizeTimeTo &&
-                            request.optimizeTimeTo !== "Wrong Request"
-                              ? formatTime(request.optimizeTimeTo)
-                              : "N/A"}
-                          </>
-                        )}
-                      </td>
-                 
-                   
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleUpdateClick(request.id)}
-                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                              disabled={updateOptimizedTimes.isPending}
-                            >
-                              {updateOptimizedTimes.isPending
-                                ? "Saving..."
-                                : "Save"}
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/admin/view-request/${request.id}?from=optimise-table`}
-                              className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                            >
-                              <svg
-                                className="w-3 h-3 mr-1"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              View
-                            </Link>
-                            <button
-                              onClick={() => handleEditClick(request)}
-                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                            >
-                              Edit
-                            </button>
-
-                            {shouldShowRejectButton(request) && (
-                              <button
-                                onClick={() => handleRejectClick(request.id)}
-                                className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                              >
-                                Reject
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Non-Corridor Requests Table */}
-          <div>
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Non-Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Dept" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="SSE" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Demanded" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimize" />
-                    </th>
-                 
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {nonCorridorRequests.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={11}
-                        className="border border-black p-2 text-sm text-left"
-                      >
-                        No requests found.
-                      </td>
-                    </tr>
-                  )}
-                  {nonCorridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${
-                        request.optimizeTimeFrom && request.optimizeTimeTo
-                          ? "bg-green-50"
-                          : ""
-                      }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <input
-                            type="date"
-                            value={editDate}
-                            onChange={(e) => setEditDate(e.target.value)}
-                            className="w-28 border p-1 text-sm rounded"
-                          />
-                        ) : (
-                          formatDate(request.date)
-                        )}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepartment}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {formatTime(request.demandTimeFrom)} -{" "}
-                        {formatTime(request.demandTimeTo)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-1 items-center">
-                            <input
-                              type="time"
-                              value={timeFrom}
-                              onChange={(e) => setTimeFrom(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                            <span>-</span>
-                            <input
-                              type="time"
-                              value={timeTo}
-                              onChange={(e) => setTimeTo(e.target.value)}
-                              className="w-20 border p-1 text-sm rounded"
-                            />
-                          </div>
-                        ) : (
-                          <>
-                            {request.optimizeTimeFrom &&
-                            request.optimizeTimeFrom !== "WrongRequest"
-                              ? formatTime(request.optimizeTimeFrom)
-                              : "N/A"}{" "}
-                            -{" "}
-                            {request.optimizeTimeTo &&
-                            request.optimizeTimeTo !== "WrongRequest"
-                              ? formatTime(request.optimizeTimeTo)
-                              : "N/A"}
-                          </>
-                        )}
-                      </td>
-                   
-                   
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-
-                      <td className="border border-black p-2 text-sm">
-                        {editingId === request.id ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleUpdateClick(request.id)}
-                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                              disabled={updateOptimizedTimes.isPending}
-                            >
-                              {updateOptimizedTimes.isPending
-                                ? "Saving..."
-                                : "Save"}
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/admin/view-request/${request.id}?from=optimise-table`}
-                              className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                            >
-                              <svg
-                                className="w-3 h-3 mr-1"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              View
-                            </Link>
-                            <button
-                              onClick={() => handleEditClick(request)}
-                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                            >
-                              Edit
-                            </button>
-
-                            {shouldShowRejectButton(request) && (
-                              <button
-                                onClick={() => handleRejectClick(request.id)}
-                                className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
-                              >
-                                Reject
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-
-        <div className="mt-4">
-          <h2 className="border-t-2 pt-2 border-[#13529e] text-lg font-semibold  text-[#13529e]">
-            Urgent Mode
-          </h2>
-          <div className="flex mr-0 mb-2 flex-row-reverse">
-            <button
-              // onClick={handleSendOptimizedRequests}
               onClick={handleSendUrgentRequests}
-              className="px-3 py-1 ml-2  text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Send
-            </button>
-
-            <button
-              onClick={() => {
-                setIsOptimizeDialogOpen(true);
-                setIsUrgentRequests(true);
-              }}
               className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
             >
-              <svg
-                className="w-4 h-4 mr-1"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                  clipRule="evenodd"
-                />
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              Sanction
+            </button>
+            <button
+              onClick={() => { setIsOptimizeDialogOpen(true); setIsUrgentRequests(true); }}
+              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
               Optimise
             </button>
           </div>
-          <DaySwitcher
-            currentDate={selectedDate}
-            onDateChange={(newDate) => setSelectedDate(newDate)}
-            minDate={startOfWeek(currentWeekStart, { weekStartsOn: 1 })}
-            maxDate={addDays(weekStart, 7)}
-          />
           <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
             <table className="w-full border-collapse text-black bg-white">
-              <thead
-                className={`sticky top-0 ${
-                  showRejectionModal ? "z-0" : "z-10"
-                } bg-gray-100 shadow`}
-              >
+              <thead className={`sticky top-0 ${showRejectionModal ? "z-0" : "z-10"} bg-gray-100 shadow`}>
+                <tr className="bg-gray-50">
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="date" title="Date" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="date" title="Dept" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="Major Section" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="SSE" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="section" title="Block Section" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="line" title="Line / Road" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="time" title="Demanded" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="time" title="Optimize" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="work" title="Activity" /></th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10"><ColumnHeader icon="action" title="Actions" /></th>
+                </tr>
+              </thead>
+              <tbody>
+                {urgentRequests.length === 0 && (
+                  <tr>
+                    <td colSpan={11} className="border border-black p-2 text-sm text-left">No requests found.</td>
+                  </tr>
+                )}
+                {urgentRequests.map((request: UserRequest) => (
+                  <tr key={`request-${request.id}-${request.date}`} className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo ? "bg-green-50" : ""}`}>
+                    <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
+                    <td className="border border-black p-2 text-sm">{request.selectedDepartment}</td>
+                    <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
+                    <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
+                    <td className="border border-black p-2 text-sm">{request.missionBlock}</td>
+                    <td className="border border-black p-2 text-sm">{getLineOrRoad(request)}</td>
+                    <td className="border border-black p-2 text-sm">{formatTime(request.demandTimeFrom)} - {formatTime(request.demandTimeTo)}</td>
+                    <td className="border border-black p-2 text-sm">{request.optimizeTimeFrom && request.optimizeTimeFrom !== "WrongRequest" ? formatTime(request.optimizeTimeFrom) : "N/A"} - {request.optimizeTimeTo && request.optimizeTimeTo !== "WrongRequest" ? formatTime(request.optimizeTimeTo) : "N/A"}</td>
+                    <td className="border border-black p-2 text-sm">{request.activity}</td>
+                    <td className="border border-black p-2 text-sm">
+                      <div className="flex gap-2">
+                        {editingId === request.id ? (
+                          <>
+                            <button
+                              onClick={() => handleUpdateClick(request.id)}
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              disabled={updateOptimizedTimes.isPending}
+                            >
+                              {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : modifyReturnOpenId === request.id ? (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                              onClick={() => { setEditingId(request.id); setEditDate(request.date.split("T")[0]); setTimeFrom(request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : ""); setTimeTo(request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : ""); setModifyReturnOpenId(null); }}
+                            >
+                              Modify
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-500 text-white border border-black rounded"
+                              onClick={() => { handleRejectClick(request.id); setModifyReturnOpenId(null); }}
+                            >
+                              Return
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                              onClick={() => setModifyReturnOpenId(null)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              onClick={
+                                () => {
+                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
+                                    handleSendUrgentRequests();
+                                  } else {
+                                    handleSendNonUrgentRequests();
+                                  }
+                                }
+                              }
+                            >
+                              Sanction
+                            </button>
+                            {shouldShowRejectButton(request) && (
+                              <button
+                                className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                                onClick={() => setModifyReturnOpenId(request.id)}
+                              >
+                                Modify/Return
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Corridor Requests Section (with its own controls) */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">Corridor Requests</h2>
+          <div className="flex justify-end py-2 gap-2">
+            <button
+              onClick={handleSendNonUrgentRequests}
+              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              Sanction
+            </button>
+            <button
+              onClick={() => { setIsOptimizeDialogOpen(true); setIsUrgentRequests(false); }}
+              className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black cursor-pointer hover:bg-gray-50 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+              Optimise
+            </button>
+          </div>
+          <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full border-collapse text-black bg-white">
+              <thead className="sticky top-0 z-10 bg-gray-100 shadow">
                 <tr className="bg-gray-50">
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="date" title="Date" />
                   </th>
-                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="date" title="Dept" />
                   </th>
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
@@ -1432,7 +1023,7 @@ export default function OptimiseTablePage() {
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="time" title="Optimize" />
                   </th>
-                
+
                   <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
                     <ColumnHeader icon="work" title="Activity" />
                   </th>
@@ -1442,7 +1033,7 @@ export default function OptimiseTablePage() {
                 </tr>
               </thead>
               <tbody>
-                {urgentRequestDate.length === 0 && (
+                {corridorRequestsFiltered.length === 0 && (
                   <tr>
                     <td
                       colSpan={11}
@@ -1452,14 +1043,13 @@ export default function OptimiseTablePage() {
                     </td>
                   </tr>
                 )}
-                {urgentRequestDate.map((request: UserRequest) => (
+                {corridorRequestsFiltered.map((request: UserRequest) => (
                   <tr
                     key={`request-${request.id}-${request.date}`}
-                    className={`hover:bg-blue-50 transition-colors ${
-                      request.optimizeTimeFrom && request.optimizeTimeTo
-                        ? "bg-green-50"
-                        : ""
-                    }`}
+                    className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                      ? "bg-green-50"
+                      : ""
+                      }`}
                   >
                     <td className="border border-black p-2 text-sm">
                       {editingId === request.id ? (
@@ -1512,77 +1102,88 @@ export default function OptimiseTablePage() {
                       ) : (
                         <>
                           {request.optimizeTimeFrom &&
-                          request.optimizeTimeFrom !== "WrongRequest"
+                            request.optimizeTimeFrom !== "WrongRequest"
                             ? formatTime(request.optimizeTimeFrom)
                             : "N/A"}{" "}
                           -{" "}
                           {request.optimizeTimeTo &&
-                          request.optimizeTimeTo !== "WrongRequest"
+                            request.optimizeTimeTo !== "WrongRequest"
                             ? formatTime(request.optimizeTimeTo)
                             : "N/A"}
                         </>
                       )}
                     </td>
-                
+
                     <td className="border border-black p-2 text-sm">
                       {request.activity}
                     </td>
-                    <td className="border border-black p-2 text-sm">
-                      {editingId === request.id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleUpdateClick(request.id)}
-                            className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
-                            disabled={updateOptimizedTimes.isPending}
-                          >
-                            {updateOptimizedTimes.isPending
-                              ? "Saving..."
-                              : "Save"}
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/view-request/${request.id}?from=optimise-table`}
-                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                          >
-                            <svg
-                              className="w-3 h-3 mr-1"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path
-                                fillRule="evenodd"
-                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            View
-                          </Link>
-                          <button
-                            onClick={() => handleEditClick(request)}
-                            className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
-                          >
-                            Edit
-                          </button>
 
-                          {shouldShowRejectButton(request) && (
+                    <td className="border border-black p-2 text-sm">
+                      <div className="flex gap-2">
+                        {editingId === request.id ? (
+                          <>
                             <button
-                              onClick={() => handleRejectClick(request.id)}
-                              className="px-2 py-1 text-xs bg-red-500 text-white border border-black rounded"
+                              onClick={() => handleUpdateClick(request.id)}
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              disabled={updateOptimizedTimes.isPending}
                             >
-                              Reject
+                              {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
                             </button>
-                          )}
-                        </div>
-                      )}
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : modifyReturnOpenId === request.id ? (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                              onClick={() => { setEditingId(request.id); setEditDate(request.date.split("T")[0]); setTimeFrom(request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : ""); setTimeTo(request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : ""); setModifyReturnOpenId(null); }}
+                            >
+                              Modify
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-500 text-white border border-black rounded"
+                              onClick={() => { handleRejectClick(request.id); setModifyReturnOpenId(null); }}
+                            >
+                              Return
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                              onClick={() => setModifyReturnOpenId(null)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              onClick={
+                                () => {
+                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
+                                    handleSendUrgentRequests();
+                                  } else {
+                                    handleSendNonUrgentRequests();
+                                  }
+                                }
+                              }
+                            >
+                              Sanction
+                            </button>
+                            {shouldShowRejectButton(request) && (
+                              <button
+                                className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                                onClick={() => setModifyReturnOpenId(request.id)}
+                              >
+                                Modify/Return
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1590,7 +1191,210 @@ export default function OptimiseTablePage() {
             </table>
           </div>
         </div>
-        {showRejectionModal && (
+
+        {/* Non-Corridor Requests Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-2 text-[#13529e]">Non-Corridor Requests</h2>
+          <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full border-collapse text-black bg-white">
+              <thead className="sticky top-0 z-10 bg-gray-100 shadow">
+                <tr className="bg-gray-50">
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="date" title="Date" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="date" title="Dept" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Major Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="SSE" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="section" title="Block Section" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="line" title="Line / Road" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Demanded" />
+                  </th>
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="time" title="Optimize" />
+                  </th>
+
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="work" title="Activity" />
+                  </th>
+
+                  <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
+                    <ColumnHeader icon="action" title="Actions" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {nonCorridorRequestsFiltered.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={11}
+                      className="border border-black p-2 text-sm text-left"
+                    >
+                      No requests found.
+                    </td>
+                  </tr>
+                )}
+                {nonCorridorRequestsFiltered.map((request: UserRequest) => (
+                  <tr
+                    key={`request-${request.id}-${request.date}`}
+                    className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
+                      ? "bg-green-50"
+                      : ""
+                      }`}
+                  >
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-28 border p-1 text-sm rounded"
+                        />
+                      ) : (
+                        formatDate(request.date)
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedDepartment}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedSection}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.selectedDepo}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {request.missionBlock}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {getLineOrRoad(request)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {formatTime(request.demandTimeFrom)} -{" "}
+                      {formatTime(request.demandTimeTo)}
+                    </td>
+                    <td className="border border-black p-2 text-sm">
+                      {editingId === request.id ? (
+                        <div className="flex gap-1 items-center">
+                          <input
+                            type="time"
+                            value={timeFrom}
+                            onChange={(e) => setTimeFrom(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
+                          />
+                          <span>-</span>
+                          <input
+                            type="time"
+                            value={timeTo}
+                            onChange={(e) => setTimeTo(e.target.value)}
+                            className="w-20 border p-1 text-sm rounded"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          {request.optimizeTimeFrom &&
+                            request.optimizeTimeFrom !== "WrongRequest"
+                            ? formatTime(request.optimizeTimeFrom)
+                            : "N/A"}{" "}
+                          -{" "}
+                          {request.optimizeTimeTo &&
+                            request.optimizeTimeTo !== "WrongRequest"
+                            ? formatTime(request.optimizeTimeTo)
+                            : "N/A"}
+                        </>
+                      )}
+                    </td>
+
+                    <td className="border border-black p-2 text-sm">
+                      {request.activity}
+                    </td>
+
+                    <td className="border border-black p-2 text-sm">
+                      <div className="flex gap-2">
+                        {editingId === request.id ? (
+                          <>
+                            <button
+                              onClick={() => handleUpdateClick(request.id)}
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              disabled={updateOptimizedTimes.isPending}
+                            >
+                              {updateOptimizedTimes.isPending ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 text-xs bg-gray-400 text-white border border-black rounded"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : modifyReturnOpenId === request.id ? (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-yellow-500 text-white border border-black rounded"
+                              onClick={() => { setEditingId(request.id); setEditDate(request.date.split("T")[0]); setTimeFrom(request.optimizeTimeFrom ? formatTime(request.optimizeTimeFrom) : ""); setTimeTo(request.optimizeTimeTo ? formatTime(request.optimizeTimeTo) : ""); setModifyReturnOpenId(null); }}
+                            >
+                              Modify
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-500 text-white border border-black rounded"
+                              onClick={() => { handleRejectClick(request.id); setModifyReturnOpenId(null); }}
+                            >
+                              Return
+                            </button>
+                            <button
+                              className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                              onClick={() => setModifyReturnOpenId(null)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="px-2 py-1 text-xs bg-green-600 text-white border border-black rounded"
+                              onClick={
+                                () => {
+                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
+                                    handleSendUrgentRequests();
+                                  } else {
+                                    handleSendNonUrgentRequests();
+                                  }
+                                }
+                              }
+                            >
+                              Sanction
+                            </button>
+                            {shouldShowRejectButton(request) && (
+                              <button
+                                className="px-2 py-1 text-xs bg-gray-300 text-black border border-black rounded"
+                                onClick={() => setModifyReturnOpenId(request.id)}
+                              >
+                                Modify/Return
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Optimization Dialog */}
+        {isOptimizeDialogOpen && (
           <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-20">
             <div className="bg-white p-4 rounded shadow-lg z-30">
               <h3 className="font-bold text-lg mb-2">Reason for Rejection</h3>
@@ -1655,6 +1459,7 @@ export default function OptimiseTablePage() {
     </div>
   );
 }
+
 function min(allDates: Date[]): Date | null {
   if (!allDates || allDates.length === 0) return null;
   return allDates.reduce((minDate, currDate) =>
