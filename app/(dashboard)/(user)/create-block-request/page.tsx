@@ -2245,7 +2245,7 @@ export default function CreateBlockRequestPage() {
                 {/* Type of Block - compact, right of date */}
                 {formData.date && (
                   <div className="flex flex-row items-center gap-2 ml-2">
-                    <label className="text-[22px] font-bold text-black mr-2">Type:</label>
+                    {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
                     {isDisabled ? (
                       <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[22px] font-extrabold text-black shadow-sm">U</span>
                     ) : (
@@ -2255,7 +2255,7 @@ export default function CreateBlockRequestPage() {
                           className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
                           onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
                         >
-                          N
+                          C
                         </button>
                         <button
                           type="button"
@@ -2275,6 +2275,29 @@ export default function CreateBlockRequestPage() {
                 </span>
               )}
             </div>
+            {/* If not Corridor Block, show reason box (compact) */}
+          {formData.corridorTypeSelection &&
+            !["Corridor Block", "Corridor"].includes(
+              formData.corridorTypeSelection
+            ) && (
+              <div className="w-full mt-1">
+                <textarea
+                  name="nonCorridorReason"
+                  value={formData.nonCorridorReason || ""}
+                  onChange={handleInputChange}
+                  placeholder="Reasons for asking Block outside Corridor or Emergency Block"
+                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[13px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
+                  style={{
+                    minHeight: "32px",
+                    fontSize: "13px",
+                    marginTop: 0,
+                    marginBottom: 0,
+                  }}
+                  required
+                />
+                {renderError("nonCorridorReason")}
+              </div>
+            )}
             {/* Major Section Dropdown - compact, no label */}
             <div className="flex flex-row items-center gap-4 w-full mt-2">
               <select
@@ -2544,21 +2567,25 @@ export default function CreateBlockRequestPage() {
               );
             })}
             {/* Corridor for this section info bar (only once, after all lines/roads selects) */}
-            <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-row items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
+            <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
               <span className="text-[20px] font-bold text-black text-center mr-4">
                 Corridor for this section
               </span>
               <span className="text-[20px] font-bold text-black text-center">
-                {corridorTime?.from || '--:--'} <span className="mx-2">TO</span> {corridorTime?.to || '--:--'}
+                {corridorTime?.from || '--:--'} 
+                  <span className="mx-2">
+                    TO
+                  </span> 
+                {corridorTime?.to || '--:--'}
               </span>
             </div>
             {/* Preferred Slot and Site Location grouped in a box - ALIGNED, PROFESSIONAL, NO OVERFLOW, SINGLE LINE */}
             <div className="w-full mt-1 mb-4 p-6 rounded-2xl border-4 border-[#b6e6c6] bg-[#f7f7a1] flex flex-col gap-4 shadow-lg min-w-0">
               {/* Preferred Slot label */}
-              <span className="text-black font-bold text-[20px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
               {/* Time selectors and duration row - always single line, scrollable if needed */}
-              <div className="flex flex-row flex-nowrap items-center w-full gap-2 overflow-x-auto pl-1">
-                <div className="flex flex-row items-center bg-[#fffbe9] gap-x-1 border-2 border-black rounded-xl shadow-sm px-2 py-1 min-w-0" style={{ fontSize: '16px' }}>
+              <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto pl-1 border-2 border-black rounded-2xl bg-[#fffbe9]">
+              <span className="text-black font-bold text-[20px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
+                <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0" style={{ fontSize: '16px' }}>
                   <select
                     name="demandTimeFromHour"
                     value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : ""}
@@ -2633,27 +2660,29 @@ export default function CreateBlockRequestPage() {
               </div>
               {/* Site Location row */}
               <div className="flex flex-row items-center gap-4 w-full pl-1">
-                <div className="flex flex-row items-center bg-[#fffbe9] border-2 border-black rounded-xl px-3 py-2 min-w-0 gap-x-2" style={{ minWidth: 320 }}>
+                <div className="flex flex-col items-center bg-[#fffbe9] border-2 border-black rounded-xl px-3 py-2 min-w-0 gap-x-2 w-full" >
                   <span className="font-bold text-black text-[20px] leading-none mr-2 whitespace-nowrap">Site Location</span>
-                  <input
-                    type="text"
-                    name="workLocationFrom"
-                    value={formData.workLocationFrom || ""}
-                    onChange={handleInputChange}
-                    placeholder="From"
-                    className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
-                    required
-                  />
-                  <span className="font-bold text-black text-[20px] mx-1">to</span>
-                  <input
-                    type="text"
-                    name="workLocationTo"
-                    value={formData.workLocationTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="To"
-                    className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
-                    required
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      name="workLocationFrom"
+                      value={formData.workLocationFrom || ""}
+                      onChange={handleInputChange}
+                      placeholder="From"
+                      className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      required
+                    />
+                    <span className="font-bold text-black text-[20px] mx-1">to</span>
+                    <input
+                      type="text"
+                      name="workLocationTo"
+                      value={formData.workLocationTo || ""}
+                      onChange={handleInputChange}
+                      placeholder="To"
+                      className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      required
+                    />
+                </div>
                 </div>
               </div>
             </div>
@@ -2728,142 +2757,7 @@ export default function CreateBlockRequestPage() {
               )}
             </div>
           </div>
-
-          {/* Site Location From/To fields */}
-          <div
-            className="flex flex-row items-center gap-2 w-full mt-2 mb-2"
-            style={{
-              background: "#f3e6ff",
-              padding: "3px 0",
-              borderRadius: "8px",
-              marginTop: "8px",
-              marginBottom: "8px",
-            }}
-          >
-            <label
-              className="font-bold text-black mr-2"
-              style={{ minWidth: 100, fontSize: "13px", paddingLeft: "12px" }}
-            >
-              Site
-              <br />
-              Location
-            </label>
-            <input
-              type="text"
-              name="workLocationFrom"
-              value={formData.workLocationFrom || ""}
-              onChange={handleInputChange}
-              placeholder="From"
-              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
-              style={{ minWidth: 80, maxWidth: 120 }}
-              required
-            />
-            <input
-              type="text"
-              name="workLocationTo"
-              value={formData.workLocationTo || ""}
-              onChange={handleInputChange}
-              placeholder="To"
-              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
-              style={{ minWidth: 80, maxWidth: 120 }}
-              required
-            />
-          </div>
-          {/* Duration and Type of Block row, full width, equal size, compact */}
-          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-1 ">
-            <div
-              className="flex flex-row items-center justify-center flex-1"
-              style={{
-                background: "#90ee90",
-                border: "2px solid black",
-                borderRadius: "6px",
-                minWidth: 100,
-              }}
-            >
-              <span className="text-black font-bold text-[12px] text-center w-full bg-green-300 rounded-md px-2 py-1 shadow-sm">
-                <span className="block">Duration:</span>
-                <span className="block">
-                  {getDurationFromTimes(
-                    formData.demandTimeFrom || "",
-                    formData.demandTimeTo || ""
-                  ) || "Hours"}
-                </span>
-              </span>
-            </div>
-            <div
-              className="flex flex-row items-center justify-center flex-1"
-              style={{
-                background: "#FFC266",
-                border: "2px solid black",
-                borderRadius: "6px",
-                minWidth: 100,
-              }}
-            >
-              <span className="text-black font-bold px-1 py-0.5 text-[12px] text-center w-full">
-                Type of Block
-              </span>
-              <select
-                name="corridorTypeSelection"
-                value={formData.corridorTypeSelection || ""}
-                onChange={handleInputChange}
-                className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
-                style={{
-                  minWidth: 50,
-                  height: 24,
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right",
-                  backgroundSize: "1.2rem",
-                }}
-                required
-                disabled={shouldForceUrgentBlock} // Optional: disable dropdown entirely
-              >
-                <option value="" disabled={!shouldForceUrgentBlock}>
-                  Select
-                </option>
-                <option
-                  value="Corridor Block"
-                  disabled={shouldForceUrgentBlock}
-                >
-                  Corridor Block
-                </option>
-                <option
-                  value="Non-Corridor Block"
-                  disabled={shouldForceUrgentBlock}
-                >
-                  Non-Corridor Block
-                </option>
-                {shouldForceUrgentBlock && (
-                  <option value="Urgent Block">Urgent Block</option>
-                )}
-              </select>
-              {renderError("corridorTypeSelection")}
-            </div>
-          </div>
-          {/* If not Corridor Block, show reason box (compact) */}
-          {formData.corridorTypeSelection &&
-            !["Corridor Block", "Corridor"].includes(
-              formData.corridorTypeSelection
-            ) && (
-              <div className="w-full mt-1">
-                <textarea
-                  name="nonCorridorReason"
-                  value={formData.nonCorridorReason || ""}
-                  onChange={handleInputChange}
-                  placeholder="Reasons for asking Block outside Corridor or Emergency Block"
-                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[13px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
-                  style={{
-                    minHeight: "32px",
-                    fontSize: "13px",
-                    marginTop: 0,
-                    marginBottom: 0,
-                  }}
-                  required
-                />
-                {renderError("nonCorridorReason")}
-              </div>
-            )}
+        
           {/* Fresh Caution Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
@@ -3225,12 +3119,24 @@ export default function CreateBlockRequestPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 gap-4">
+            <button
+              type="submit"
+              className="w-full rounded-2xl bg-[#99f61f] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+            >
+              Home
+            </button>
+            <button
+              type="submit"
+              className="w-full rounded-2xl bg-[#e3e3e3] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+            >
+              Back
+            </button>
             <button
               type="submit"
               className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
             >
-              SUBMIT BLOCK REQUEST
+              SUBMIT
             </button>
           </div>
         </form>
