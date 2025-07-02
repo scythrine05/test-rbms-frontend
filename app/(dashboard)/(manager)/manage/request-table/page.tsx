@@ -1123,7 +1123,7 @@ export default function ManagerRequestTablePage() {
       {/* Department Name */}
       <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
         <span className="text-xl font-bold text-black">
-          {session?.user?.department || "..."} Department
+          {session?.user?.department || "..."} Controller
         </span>
       </div>
 
@@ -1154,21 +1154,14 @@ export default function ManagerRequestTablePage() {
         </button>
       </div> */}
 
-      <div className="text-center">
-        <h1
-          style={{
-            background: "#B57CF6",
-            color: "white",
-            width: "96%",
-            margin: "0 auto",
-            padding: "0 10px",
-            borderRadius: "3px",
-            marginTop: "16px",
-          }}
-        >
-          View Block Details
-        </h1>
-      </div>
+      <div className="mx-4">
+  <div 
+    className="bg-[#B57CF6] text-white text-center p-2 border-2 border-black rounded-none"
+    style={{ marginTop: "16px" }}
+  >
+    View Block Details
+  </div>
+</div>
       {/* Filters Row: All filters in a single row */}
       <div className="mx-4  flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-black">
         {/* Date Range */}
@@ -1428,7 +1421,7 @@ export default function ManagerRequestTablePage() {
       <div className="mx-2 overflow-x-auto">
         <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
           <table className="w-full text-black text-sm relative">
-            <thead>
+            <thead className="sticky top-0 z-20">
               <tr className="bg-[#E8F4F8] text-black">
                 <th className="border-2 border-black p-1">Date</th>
                 <th className="border-2 border-black p-1">ID</th>
@@ -1443,7 +1436,7 @@ export default function ManagerRequestTablePage() {
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="h-[300px] overflow-auto">
               {filtersApplied?
              (filteredRequests.map((request: UserRequest, index: number) => {
                 const status = getDisplayStatus(request);
@@ -1494,7 +1487,7 @@ export default function ManagerRequestTablePage() {
                 );
               }))  :<tr>
       <td colSpan={7} className="text-center p-4 border border-black">
-        {`Click "Enter" to apply filters and view requests`}
+       {`Click "Enter" to apply filters and view requests`}
       </td>
     </tr>
             }
@@ -1504,7 +1497,7 @@ export default function ManagerRequestTablePage() {
         </div>
       </div>
 
-      <div className="text-center">
+      <div className="text-center mt-2">
         <h3
           className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full"
           style={{ color: "black" }}
@@ -1521,22 +1514,24 @@ export default function ManagerRequestTablePage() {
           </span>
         </h3>
       </div>
-
-      {/* Action Buttons below the scrollable window */}
-      <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
-        <button
-          onClick={handleDownloadExcel}
-          className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold"
-        >
-          Download
-        </button>
-        <Link
-          href="/dashboard"
-          className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold"
-        >
-          Home
-        </Link>
-      </div>
+{/* Simple Footer Buttons */}
+<div className="mx-4 mt-4 flex justify-center gap-4">
+  <button
+    onClick={handleDownloadExcel}
+    className="bg-[#FFA07A] px-6 py-1 rounded-lg border-2 border-black font-bold text-sm"
+  >
+    Download
+  </button>
+  <Link
+    href="/dashboard"
+    className="bg-[#90EE90] px-6 py-1 rounded-lg border-2 border-black font-bold text-sm"
+  >
+    Home
+  </Link>
+</div>
     </div>
   );
 }
+
+
+
