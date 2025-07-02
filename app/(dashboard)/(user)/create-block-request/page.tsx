@@ -2228,26 +2228,27 @@ export default function CreateBlockRequestPage() {
             {/* Date of Block */}
             <div className="flex flex-col md:flex-row md:items-center gap-6 w-full">
               <label className="text-[24px] font-bold text-black min-w-[180px]" htmlFor="date-of-block">
-                Date of Blockd
+                Date of Block
               </label>
                 <div className="flex flex-row items-center gap-4 w-full">
-                <input
-                  id="date-of-block"
-                  type="date"
-                  name="date"
-                  value={formData.date || ""}
-                  onChange={handleInputChange}
-                  className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#f7d6f7] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b07be0] min-w-[180px] max-w-[240px]"
-                  aria-required="true"
-                  aria-label="Select date of block"
-                  style={{ boxShadow: '2px 2px 6px #bbb' }}
-                  min={getMinDateString()}
-                  max={(() => {
-                  const today = new Date();
-                  today.setDate(today.getDate() + 30);
-                  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-                  })()}
-                />
+                  <input
+                    id="date-of-block"
+                    type="date"
+                    name="date"
+                    value={formData.date || ""}
+                    onChange={handleInputChange}
+                    className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#f7d6f7] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b07be0] min-w-[180px] max-w-[240px]"
+                    aria-required="true"
+                    aria-label="Select date of block"
+                    style={{ boxShadow: '2px 2px 6px #bbb' }}
+                    min={getMinDateString()}
+                    max={(() => {
+                      const today = new Date();
+                      today.setDate(today.getDate() + 30);
+                      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+                    })()}
+                    placeholder="Select date"
+                  />
                 {/* Type of Block - compact, right of date */}
                 {formData.date && (
                   <div className="flex flex-row items-center gap-2 ml-2">
@@ -2292,10 +2293,9 @@ export default function CreateBlockRequestPage() {
                   value={formData.nonCorridorReason || ""}
                   onChange={handleInputChange}
                   placeholder="Reasons for asking Block outside Corridor or Emergency Block"
-                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[13px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
+                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[20px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
                   style={{
                     minHeight: "32px",
-                    fontSize: "13px",
                     marginTop: 0,
                     marginBottom: 0,
                   }}
@@ -2767,7 +2767,7 @@ export default function CreateBlockRequestPage() {
           {/* Fresh Caution Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[13px]">
+              <span className="text-black font-bold text-[20px]">
                 Whether Fresh Caution will be imposed after block
               </span>
               <select
@@ -2779,9 +2779,9 @@ export default function CreateBlockRequestPage() {
                     freshCautionRequired: e.target.value === "Y",
                   })
                 }
-                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
+                className="ml-2 border-2  border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 50,
+                  width: 70,
                   height: 24,
                   appearance: "none",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
@@ -2906,7 +2906,7 @@ export default function CreateBlockRequestPage() {
           {/* Power Block Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[13px]">
+              <span className="text-black font-bold text-[20px]">
                 Whether Power Block also needed:
               </span>
               <select
@@ -2920,7 +2920,7 @@ export default function CreateBlockRequestPage() {
                 }
                 className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 50,
+                  width: 70,
                   height: 24,
                   appearance: "none",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
@@ -2996,7 +2996,7 @@ export default function CreateBlockRequestPage() {
           {/* S&T Disconnection Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[13px]">
+              <span className="text-black font-bold text-[20px]">
                 Whether S&T Disconnection is needed:
               </span>
               <select
@@ -3010,7 +3010,7 @@ export default function CreateBlockRequestPage() {
                 }
                 className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 50,
+                  width: 70,
                   height: 24,
                   appearance: "none",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
