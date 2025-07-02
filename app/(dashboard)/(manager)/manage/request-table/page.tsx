@@ -735,6 +735,7 @@ export default function ManagerRequestTablePage() {
   });
 
   // Dropdown states
+  const [filtersApplied, setFiltersApplied] = useState(false);
   const [sectionDropdownOpen, setSectionDropdownOpen] = useState(false);
   const [sseDropdownOpen, setSseDropdownOpen] = useState(false);
   const [blockTypeDropdownOpen, setBlockTypeDropdownOpen] = useState(false);
@@ -845,7 +846,7 @@ export default function ManagerRequestTablePage() {
     if (request.status === "APPROVED" && request.isSanctioned) {
       return {
         label: "Sanctioned",
-        style: { background: "#d6ecd2", color: "#11332b" },
+        style: { background: "#B2FBA5", color: "#11332b" },
       };
     }
     // Pending with OPTG (yellow)
@@ -883,7 +884,7 @@ export default function ManagerRequestTablePage() {
     if (request.status === "PENDING" && request.managerAcceptance === false) {
       return {
         label: "Pending with me",
-        style: { background: "#d47ed4", color: "#222" },
+        style: { background: "#f69697", color: "#222" },
       };
     }
     // Burst (orange)
@@ -1013,79 +1014,79 @@ export default function ManagerRequestTablePage() {
   //   }
   // };
   const handleDownloadExcel = async () => {
-  try {
-    if (!filteredRequests || filteredRequests.length === 0) {
-      alert("No data available to download!");
-      return;
-    }
+    try {
+      if (!filteredRequests || filteredRequests.length === 0) {
+        alert("No data available to download!");
+        return;
+      }
 
-    // Import xlsx library dynamically to reduce bundle size
-    const XLSX = await import('xlsx');
+      // Import xlsx library dynamically to reduce bundle size
+      const XLSX = await import("xlsx");
 
-    // Define Excel headers
-    const headers = [
-      "Date",
-      "Request ID",
-      "Block Section",
-      "Line/Road",
-      "Activity",
-      "Status",
-      "Start Time (HH:MM)",
-      "End Time (HH:MM)",
-      "Corridor Type",
-      "SSE Name",
-      "Work Location",
-      "Remarks",
-    ];
-
-    // Map data to Excel rows
-    const rows = filteredRequests.map((request) => {
-      // Function to get exact time as stored in DB
-      const getExactTime = (dateString: string | null) => {
-        if (!dateString) return "N/A";
-
-        try {
-          // Extract exactly what's after 'T' and before '.'
-          const isoString = new Date(dateString).toISOString();
-          const timePart = isoString.split("T")[1].split(".")[0];
-          return timePart.substring(0, 5); // Get HH:MM
-        } catch {
-          return "N/A";
-        }
-      };
-
-      return [
-        formatDate(request.date),
-        request.divisionId || request.id,
-        request.missionBlock,
-        request.processedLineSections?.[0]?.road || request.processedLineSections?.[0]?.lineName,
-        request.activity,
-        request.status || "N/A", // Added status which was in headers but missing in rows
-        getExactTime(request.demandTimeFrom),
-        getExactTime(request.demandTimeTo),
-        request.corridorType,
-        request.user?.name || "N/A",
-        request.workLocationFrom,
-        request.requestremarks,
+      // Define Excel headers
+      const headers = [
+        "Date",
+        "Request ID",
+        "Block Section",
+        "Line/Road",
+        "Activity",
+        "Status",
+        "Start Time (HH:MM)",
+        "End Time (HH:MM)",
+        "Corridor Type",
+        "SSE Name",
+        "Work Location",
+        "Remarks",
       ];
-    });
 
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
+      // Map data to Excel rows
+      const rows = filteredRequests.map((request) => {
+        // Function to get exact time as stored in DB
+        const getExactTime = (dateString: string | null) => {
+          if (!dateString) return "N/A";
 
-    // Generate Excel file and trigger download
-    const dateString = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `block_requests_${dateString}.xlsx`);
-    
-  } catch (error) {
-    console.error("Download failed:", error);
-    alert("Failed to generate Excel file. Please check console for details.");
-  }
-};
+          try {
+            // Extract exactly what's after 'T' and before '.'
+            const isoString = new Date(dateString).toISOString();
+            const timePart = isoString.split("T")[1].split(".")[0];
+            return timePart.substring(0, 5); // Get HH:MM
+          } catch {
+            return "N/A";
+          }
+        };
+
+        return [
+          formatDate(request.date),
+          request.divisionId || request.id,
+          request.missionBlock,
+          request.processedLineSections?.[0]?.road ||
+            request.processedLineSections?.[0]?.lineName,
+          request.activity,
+          request.status || "N/A", // Added status which was in headers but missing in rows
+          getExactTime(request.demandTimeFrom),
+          getExactTime(request.demandTimeTo),
+          request.corridorType,
+          request.user?.name || "N/A",
+          request.workLocationFrom,
+          request.requestremarks,
+        ];
+      });
+
+      // Create worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
+
+      // Generate Excel file and trigger download
+      const dateString = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(workbook, `block_requests_${dateString}.xlsx`);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to generate Excel file. Please check console for details.");
+    }
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
@@ -1108,16 +1109,16 @@ export default function ManagerRequestTablePage() {
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
-          RBMS
+          RBMS-MAS-DIVN
         </span>
       </div>
 
       {/* Main Title on Light Blue */}
-      <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
+      {/* <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
         <span className="text-2xl md:text-3xl font-bold text-black text-center">
-          Departmental Control
+          ENGG Controller
         </span>
-      </div>
+      </div> */}
 
       {/* Department Name */}
       <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
@@ -1127,37 +1128,54 @@ export default function ManagerRequestTablePage() {
       </div>
 
       {/* View Block Details Button */}
-      <div className="w-full flex justify-center mt-4">
-        <button className="bg-[#FFF86B] px-8 py-2 rounded-full border-4 border-[#13529e] text-lg font-bold text-[#13529e] shadow-md hover:bg-[#B57CF6] hover:text-white transition-colors">
-          View Block Details
-        </button>
-      </div>
 
       {/* Pending Requests Section */}
       <div className="mx-4 mt-6">
-        <div className="bg-[#FF6B6B] grid grid-cols-3 gap-0 border-2 border-black">
+        <div className="bg-[#f69697] grid grid-cols-3 gap-0 border-2 border-black">
           <div className="p-3 text-black font-bold border-r-2 border-black">
             REQUESTS PENDING WITH ME
           </div>
           <div className="p-3 text-black font-bold border-r-2 border-black text-center">
-            Nos. {pendingWithMeCount}
+            {pendingWithMeCount}.Nos
           </div>
-          <Link
-            href="/manage/pending-requests"
-            className="p-3 text-black font-bold text-center hover:bg-[#FF5555]"
-          >
-            Click to View
-          </Link>
+        <Link
+      href="/manage/pending-requests"
+      className="p-3 text-black font-bold text-center hover:bg-[#FF5555] flex items-center justify-center"
+    >
+      <span className="bg-white px-4 py-1 rounded-full border-2 border-black hover:bg-gray-100">
+        Click to View
+      </span>
+    </Link>
         </div>
       </div>
+      {/* <div className="w-full flex justify-center mt-4">
+        <button className="bg-[#FFF86B] px-8 py-2 rounded-full border-4 border-[#13529e] text-lg font-bold text-[#13529e] shadow-md hover:bg-[#B57CF6] hover:text-white transition-colors">
+          View Block Details
+        </button>
+      </div> */}
 
+      <div className="text-center">
+        <h1
+          style={{
+            background: "#B57CF6",
+            color: "white",
+            width: "96%",
+            margin: "0 auto",
+            padding: "0 10px",
+            borderRadius: "3px",
+            marginTop: "16px",
+          }}
+        >
+          View Block Details
+        </h1>
+      </div>
       {/* Filters Row: All filters in a single row */}
-      <div className="mx-4 mt-4 flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-black">
+      <div className="mx-4  flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-black">
         {/* Date Range */}
         <div className="flex items-center gap-1">
-          <span className="bg-[#E6E6FA] px-2 py-1 border border-black font-bold text-black rounded-l-md text-xs">
+          {/* <span className="bg-[#E6E6FA] px-2 py-1 border border-black font-bold text-black rounded-l-md text-xs">
             Custom view
-          </span>
+          </span> */}
           <input
             type="date"
             value={customDateRange.start}
@@ -1176,43 +1194,6 @@ export default function ManagerRequestTablePage() {
             className="p-1 border border-black text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
           />
         </div>
-
-        {/* Block Type Dropdown */}
-        <div className="relative inline-block">
-          <button
-            onClick={() => setBlockTypeDropdownOpen((v) => !v)}
-            className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
-          >
-            Block Type:{" "}
-            {blockType.length === 0 ? "All" : `${blockType.length} selected`}
-            <span className="ml-1">▼</span>
-          </button>
-          {blockTypeDropdownOpen && (
-            <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg">
-              {blockTypeOptions.map((opt) => (
-                <label
-                  key={opt.value}
-                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
-                >
-                  <input
-                    type="checkbox"
-                    checked={blockType.includes(opt.value)}
-                    onChange={() =>
-                      setBlockType((prev) =>
-                        prev.includes(opt.value)
-                          ? prev.filter((s) => s !== opt.value)
-                          : [...prev, opt.value]
-                      )
-                    }
-                    className="mr-2 accent-[#B57CF6]"
-                  />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Section Dropdown */}
         <div className="relative inline-block">
           <button
@@ -1288,24 +1269,53 @@ export default function ManagerRequestTablePage() {
             </div>
           )}
         </div>
+
+        {/* Block Type Dropdown */}
+        <div className="relative inline-block">
+          <button
+            onClick={() => setBlockTypeDropdownOpen((v) => !v)}
+            className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-xs"
+          >
+            Block Type:{" "}
+            {blockType.length === 0 ? "All" : `${blockType.length} selected`}
+            <span className="ml-1">▼</span>
+          </button>
+          {blockTypeDropdownOpen && (
+            <div className="absolute z-50 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg">
+              {blockTypeOptions.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
+                >
+                  <input
+                    type="checkbox"
+                    checked={blockType.includes(opt.value)}
+                    onChange={() =>
+                      setBlockType((prev) =>
+                        prev.includes(opt.value)
+                          ? prev.filter((s) => s !== opt.value)
+                          : [...prev, opt.value]
+                      )
+                    }
+                    className="mr-2 accent-[#B57CF6]"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+         <button
+          onClick={() => setFiltersApplied(true)}
+    className="bg-[#B57CF6] px-4 py-1 rounded-full border-2 border-black font-semibold text-white hover:bg-[#A56CE6] text-xs"
+  >
+    Enter
+  </button>
       </div>
 
       {/* Filter Summary */}
-      <div className="text-center">
-        <h1
-          style={{
-            background: "#a0d815",
-            color: "white",
-            width: "96%",
-            margin: "0 auto",
-            padding: "0 10px",
-            borderRadius: "3px",
-          }}
-        >
-          Block Summary
-        </h1>
-      </div>
-      <div
+
+      {/* <div
         style={{
           display: "flex",
           width: "98%",
@@ -1315,9 +1325,9 @@ export default function ManagerRequestTablePage() {
           position: "relative",
           overflow: "hidden",
         }}
-      >
-        {/* Fixed Date Range - doesn't scroll */}
-        <div
+      > */}
+      {/* Fixed Date Range - doesn't scroll */}
+      {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1362,10 +1372,10 @@ export default function ManagerRequestTablePage() {
             }}
             disabled
           />
-        </div>
+        </div> */}
 
-        {/* Scrollable Filter Fields */}
-        <div
+      {/* Scrollable Filter Fields */}
+      {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1404,15 +1414,15 @@ export default function ManagerRequestTablePage() {
             </span>
             <span style={{ color: "black" }}>{sse.join(", ")}</span>
           </div>
-        </div>
+        </div> */}
 
-        {/* Hide scrollbar (for Chrome/Safari) */}
-        <style>{`
+      {/* Hide scrollbar (for Chrome/Safari) */}
+      {/* <style>{`
           div::-webkit-scrollbar {
             display: none;
           }
-        `}</style>
-      </div>
+        `}</style> */}
+      {/* </div> */}
 
       {/* Requests Table */}
       <div className="mx-2 overflow-x-auto">
@@ -1424,9 +1434,9 @@ export default function ManagerRequestTablePage() {
                 <th className="border-2 border-black p-1">ID</th>
                 <th className="border-2 border-black p-1">Block Section</th>
                 <th className="border-2 border-black p-1">
-                  UP/DN/SL/RO AD NO.
+                  Line
                 </th>
-                <th className="border-2 border-black p-1">Duration</th>
+                <th className="border-2 border-black p-1">Demanded</th>
                 <th className="border-2 border-black p-1">Activity</th>
                 <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#E8F4F8]">
                   Status
@@ -1434,7 +1444,8 @@ export default function ManagerRequestTablePage() {
               </tr>
             </thead>
             <tbody>
-              {filteredRequests.map((request: UserRequest, index: number) => {
+              {filtersApplied?
+             (filteredRequests.map((request: UserRequest, index: number) => {
                 const status = getDisplayStatus(request);
                 // Determine background color based on index (even or odd)
                 const rowBgColor =
@@ -1460,14 +1471,16 @@ export default function ManagerRequestTablePage() {
                       {request.missionBlock}
                     </td>
                     <td className="border border-black p-1 text-center">
-                      {request.processedLineSections?.[0]?.lineName ||request.processedLineSections?.[0]?.road|| "N/A"}
+                      {request.processedLineSections?.[0]?.lineName ||
+                        request.processedLineSections?.[0]?.road ||
+                        "N/A"}
                     </td>
                     <td className="border border-black p-1 text-center">
                       {formatTime(request.demandTimeFrom)} -{" "}
                       {formatTime(request.demandTimeTo)}
                     </td>
                     <td className="border border-black p-1">
-                      {request.workType}
+                      {request.activity}
                     </td>
                     <td
                       className="border border-black p-1 sticky right-0 z-10 text-center font-bold"
@@ -1479,7 +1492,13 @@ export default function ManagerRequestTablePage() {
                     </td>
                   </tr>
                 );
-              })}
+              }))  :<tr>
+      <td colSpan={7} className="text-center p-4 border border-black">
+        Click "Enter" to apply filters and view requests
+      </td>
+    </tr>
+            }
+             
             </tbody>
           </table>
         </div>

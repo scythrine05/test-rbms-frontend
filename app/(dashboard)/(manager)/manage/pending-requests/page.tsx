@@ -532,12 +532,86 @@ export default function PendingRequestsPage() {
     if (!isLoading && !error && pendingRequests.length === 0) {
         notFound();
     }
+    const handleDownloadExcel = async () => {
+    try {
+      if (!pendingRequests || pendingRequests.length === 0) {
+        alert("No data available to download!");
+        return;
+      }
+
+      // Import xlsx library dynamically to reduce bundle size
+      const XLSX = await import("xlsx");
+
+      // Define Excel headers
+      const headers = [
+        "Date",
+        "Request ID",
+        "Block Section",
+        "Line/Road",
+        "Activity",
+        "Status",
+        "Start Time (HH:MM)",
+        "End Time (HH:MM)",
+        "Corridor Type",
+        "SSE Name",
+        "Work Location",
+        "Remarks",
+      ];
+
+      // Map data to Excel rows
+      const rows = pendingRequests.map((request) => {
+        // Function to get exact time as stored in DB
+        const getExactTime = (dateString: string | null) => {
+          if (!dateString) return "N/A";
+
+          try {
+            // Extract exactly what's after 'T' and before '.'
+            const isoString = new Date(dateString).toISOString();
+            const timePart = isoString.split("T")[1].split(".")[0];
+            return timePart.substring(0, 5); // Get HH:MM
+          } catch {
+            return "N/A";
+          }
+        };
+
+        return [
+          formatDate(request.date),
+          request.divisionId || request.id,
+          request.missionBlock,
+          request.processedLineSections?.[0]?.road ||
+            request.processedLineSections?.[0]?.lineName,
+          request.activity,
+          request.status || "N/A", // Added status which was in headers but missing in rows
+          getExactTime(request.demandTimeFrom),
+          getExactTime(request.demandTimeTo),
+          request.corridorType,
+          request.user?.name || "N/A",
+          request.workLocationFrom,
+          request.requestremarks,
+        ];
+      });
+
+      // Create worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Block Requests");
+
+      // Generate Excel file and trigger download
+      const dateString = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(workbook, `block_requests_${dateString}.xlsx`);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to generate Excel file. Please check console for details.");
+    }
+  };
 
     return (
         <div className="min-h-screen bg-[#FFFDF5]">
             {/* Top Yellow Bar */}
             <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS-MAS-DIVN</span>
             </div>
 
             {/* Main Title on Light Blue */}
@@ -547,7 +621,7 @@ export default function PendingRequestsPage() {
 
             {/* Department Name */}
             <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
-                <span className="text-xl font-bold text-black">{session?.user?.department || "..."} Department</span>
+                <span className="text-xl font-bold text-black">{session?.user?.department || "..."} Controller</span>
             </div>
 
             {/* Bulk Actions */}
@@ -598,8 +672,8 @@ export default function PendingRequestsPage() {
                                 <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Date</th>
                                 <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">ID</th>
                                 <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Block Section</th>
-                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">UP/DN/SL/RO AD NO.</th>
-                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Duration</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Line</th>
+                                <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Demanded</th>
                                 <th className="border-2 border-black px-2 py-2 bg-[#D6F3FF]">Activity</th>
                                 <th className="border-2 border-black px-2 py-2 sticky right-0 z-10 bg-[#D6F3FF] w-32">Actions</th>
                             </tr>
@@ -618,7 +692,7 @@ export default function PendingRequestsPage() {
                                     <td className="border border-black px-2 py-1 text-center align-middle">{formatDate(request.date)}</td>
                                     <td className="border border-black px-2 py-1 text-center align-middle">
                                         <Link href={`/manage/view-request/${request.id}`} className="text-[#13529e] hover:underline font-semibold">
-                                            {request.id}
+                                            {request.divisionId||request.id}
                                         </Link>
                                     </td>
                                     <td className="border border-black px-2 py-1 align-middle">{request.missionBlock}</td>
@@ -632,14 +706,14 @@ export default function PendingRequestsPage() {
                                                 disabled={isAccepting || isRejecting}
                                                 className="px-2 py-1 text-xs md:text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 font-bold"
                                             >
-                                                {isAccepting ? "Accepting..." : "Accept"}
+                                                {isAccepting ? "Accepting..." : "F"}
                                             </button>
                                             <button
                                                 onClick={() => handleReject(request.id)}
                                                 disabled={isAccepting || isRejecting}
                                                 className="px-2 py-1 text-xs md:text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 font-bold"
                                             >
-                                                {isRejecting ? "Rejecting..." : "Reject"}
+                                                {isRejecting ? "Rejecting..." : "R"}
                                             </button>
                                         </div>
                                     </td>
@@ -652,7 +726,7 @@ export default function PendingRequestsPage() {
 
             {/* Action Buttons */}
             <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
-                <button className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
+                <button  onClick={handleDownloadExcel} className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
                     Download
                 </button>
                 <Link href="/manage/request-table" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold">
@@ -664,12 +738,12 @@ export default function PendingRequestsPage() {
             {showRejectModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                        <h3 className="text-lg font-bold mb-4">Reject Request{requestToReject === 'bulk' ? 's' : ''}</h3>
+                        <h3 className="text-lg font-bold mb-4 text-black " >Reason{requestToReject === 'bulk' ? 's' : ''}</h3>
                         <textarea
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
-                            placeholder="Enter reason for rejection"
-                            className="w-full p-2 border border-gray-300 rounded mb-4"
+                            placeholder="Enter reason"
+                            className="w-full p-2 border border-gray-300 rounded mb-4 text-black"
                             rows={4}
                         />
                         <div className="flex justify-end gap-2">
@@ -688,7 +762,7 @@ export default function PendingRequestsPage() {
                                 disabled={isRejecting}
                                 className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                             >
-                                {isRejecting ? "Submitting..." : "Reject"}
+                                {isRejecting ? "Submitting..." : "Return"}
                             </button>
                         </div>
                     </div>

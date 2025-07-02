@@ -136,7 +136,9 @@ export default function DashboardPage() {
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            {/* <span className="text-xs font-semibold text-gray-700 tracking-wide">MANAGER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span> */}
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">ENGG CONTROLLER</span>
+
           </div>
         </div>
         {/* Navigation buttons */}

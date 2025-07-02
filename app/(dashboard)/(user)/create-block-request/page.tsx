@@ -620,9 +620,9 @@ export default function CreateBlockRequestPage() {
         adjacentLinesAffected: "",
         freshCautionLocationFrom: "",
         freshCautionLocationTo: "",
-        freshCautionSpeed: ""
-      }
-    ]
+        freshCautionSpeed: "",
+      },
+    ],
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -948,6 +948,8 @@ export default function CreateBlockRequestPage() {
       return;
     }
 
+    setFormSubmitting(true);
+    setFormError(null);
     setFormSubmitting(true);
     setFormError(null);
 
@@ -2055,54 +2057,81 @@ export default function CreateBlockRequestPage() {
       <div className="min-h-screen flex flex-col items-center bg-[#fcfaf3]">
         <div className="w-full max-w-2xl mx-auto mt-4">
           <div className="text-center bg-[#f7f7a1] rounded-t-2xl p-4 border-b-2 border-[#b6f7e6]">
-            <span className="text-4xl font-extrabold text-[#b07be0]">RBMS</span>
+            <span className="text-[24px] font-extrabold text-[#b07be0]">
+              RBMS-MAS-DIVN
+            </span>
           </div>
           <div className="bg-[#fffaf0] rounded-b-2xl p-4 sm:p-6 w-full max-w-2xl overflow-auto">
             <div className="bg-[#c6e6f7] rounded-xl p-4 mb-6 w-full overflow-auto">
-              <h2 className="text-2xl font-extrabold mb-4 text-[#222]">
+              <h2 className="text-[24px] font-extrabold mb-4 text-[#222]">
                 Your Block Request has been Registered
               </h2>
               <table className="w-full mb-2 border rounded-xl overflow-hidden shadow-md">
-                <thead>
-                  <tr className="bg-[#e6f7c6]">
-                    <th className="px-2 py-1 border text-black font-bold">
-                      Date
-                    </th>
-                    <th className="px-2 py-1 border text-black font-bold">
-                      ID
-                    </th>
-                    <th className="px-2 py-1 border text-black font-bold">
-                      Block Section
-                    </th>
-                    <th className="px-2 py-1 border text-black font-bold">
-                      UP/DN/SL/Road
-                    </th>
-                    <th className="px-2 py-1 border text-black font-bold">
-                      Duration
-                    </th>
-                  </tr>
-                </thead>
                 <tbody>
-                  <tr className="text-center bg-white border-b shadow-sm hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-2 border text-black font-semibold">
-                      {submittedSummary?.date
-                        ? new Date(submittedSummary.date).toLocaleDateString(
-                          "en-GB"
-                        )
-                        : "-"}
+                  {/* Date Row */}
+                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
+                      <div className="font-bold text-black text-[20px]">
+                        Date
+                      </div>
+                      <div className="text-black text-[20px]">
+                        {submittedSummary?.date
+                          ? new Date(submittedSummary.date).toLocaleDateString(
+                              "en-GB",
+                              {
+                                year: "2-digit",
+                                month: "2-digit",
+                                day: "2-digit",
+                              }
+                            )
+                          : "-"}
+                      </div>
                     </td>
+                  </tr>
 
-                    <td className="px-2 py-2 border text-black font-semibold">
-                      {submittedSummary?.id || "-"}
+                  {/* ID Row */}
+                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
+                      <div className="font-bold text-black text-[20px]">ID</div>
+                      <div className="text-black text-[20px]">
+                        {submittedSummary?.id || "-"}
+                      </div>
                     </td>
-                    <td className="px-2 py-2 border text-black font-semibold">
-                      {submittedSummary?.blockSection || "-"}
+                  </tr>
+
+                  {/* Block Section Row */}
+                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
+                      <div className="font-bold text-black text-[20px]">
+                        Block Section
+                      </div>
+                      <div className="text-black text-[20px]">
+                        {submittedSummary?.blockSection || "-"}
+                      </div>
                     </td>
-                    <td className="px-2 py-2 border text-black font-semibold">
-                      {submittedSummary?.lineOrRoad || "-"}
+                  </tr>
+
+                  {/* Line Row */}
+                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
+                      <div className="font-bold text-black text-[20px]">
+                        Line
+                      </div>
+                      <div className="text-black text-[20px]">
+                        {submittedSummary?.lineOrRoad || "-"}
+                      </div>
                     </td>
-                    <td className="px-2 py-2 border text-black font-semibold">
-                      {submittedSummary?.duration || "-"}
+                  </tr>
+
+                  {/* Demanded Row */}
+                  <tr className="bg-white hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
+                      <div className="font-bold text-black text-[20px]">
+                        Demanded
+                      </div>
+                      <div className="text-black text-[20px]">
+                        {submittedSummary?.duration || "-"}
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -2110,7 +2139,7 @@ export default function CreateBlockRequestPage() {
             </div>
             <div className="flex flex-col gap-6 items-center mt-8 w-full">
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => {
                   setFormData(initialFormData);
                   setBlockSectionValue([]);
@@ -2125,58 +2154,58 @@ export default function CreateBlockRequestPage() {
                 ENTER MORE BLOCK REQUESTS
               </button>
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => router.push("/edit-request")}
               >
                 EDIT OR CANCEL PREVIOUS REQUESTS
               </button>
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => router.push("/request-table")}
               >
                 SUMMARY OF MY BLOCK REQUESTS
               </button>
+              <div className="mt-6">
+                <button
+                  className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-[20px] font-bold text-black"
+                  onClick={() => router.push("/dashboard")}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 32 32"
+                    stroke="black"
+                    strokeWidth={2}
+                    className="w-6 h-6"
+                  >
+                    <rect
+                      x="6"
+                      y="12"
+                      width="20"
+                      height="12"
+                      rx="2"
+                      fill="#fffbe9"
+                      stroke="black"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M4 14L16 4L28 14"
+                      stroke="black"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                  Home
+                </button>
+              </div>
               <button
-                className="w-full rounded-2xl bg-[#ff5c42] text-white font-bold text-lg py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
+                className="w-full rounded-2xl bg-[#ff5c42] text-white font-bold text-[20px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
                 onClick={() => signOut()}
               >
                 CLOSE THE APP AND LOGOUT
               </button>
             </div>
           </div>
-        </div>
-        <div className="mt-8">
-          <button
-            className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-lg font-bold text-black"
-            onClick={() => router.push("/dashboard")}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 32 32"
-              stroke="black"
-              strokeWidth={2}
-              className="w-6 h-6"
-            >
-              <rect
-                x="6"
-                y="12"
-                width="20"
-                height="12"
-                rx="2"
-                fill="#fffbe9"
-                stroke="black"
-                strokeWidth="2"
-              />
-              <path
-                d="M4 14L16 4L28 14"
-                stroke="black"
-                strokeWidth="2"
-                fill="none"
-              />
-            </svg>
-            Home
-          </button>
         </div>
       </div>
     );
