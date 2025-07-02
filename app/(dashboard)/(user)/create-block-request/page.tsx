@@ -3132,12 +3132,34 @@ export default function CreateBlockRequestPage() {
             >
               Back
             </button>
-            <button
-              type="submit"
-              className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
-            >
-              SUBMIT
-            </button>
+                  {reviewMode ? (
+                <button
+                  type="submit"
+                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-sm font-extrabold text-white hover:bg-[#e6aee0] ${
+                    formSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={formSubmitting}
+                  style={{
+                    width: "150px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    letterSpacing: "1px",
+                    border: "none",
+                  }}
+                >
+                  {formSubmitting ? "SUBMITTING..." : "CLICK TO CONFIRM"}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className={`bg-[#eeb8f7] border-2 border-black rounded px-6 py-2 text-lg font-extrabold text-white hover:bg-[#e6aee0] ${
+                    formSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={formSubmitting}
+                >
+                  {formSubmitting ? "SUBMITTING..." : "SUBMIT"}
+                </button>
+              )}
           </div>
         </form>
       </div>
