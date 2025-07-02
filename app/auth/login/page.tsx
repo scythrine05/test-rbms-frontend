@@ -51,7 +51,7 @@ export default function LoginPage() {
       </div>
 
       {/* Train image at the bottom */}
-      <div
+      {/* <div
         className="relative w-full"
         style={{ height: "60vw", minHeight: "200px", maxHeight: "350px" }}
       >
@@ -66,7 +66,28 @@ export default function LoginPage() {
             maxHeight: "unset",
           }}
         />
-      </div>
+      </div> */}
+
+
+      <div className="w-full mt-[28vw] sm:mt-[26vw] md:mt-[24vw] lg:mt-[22vw]">
+  
+  <div
+    className="relative w-full"
+    style={{ height: "60vw", minHeight: "200px", maxHeight: "350px" }}
+  >
+    <img
+      src="/train image.png"
+      alt="Train"
+      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
+      style={{
+        height: "100vw",
+        width: "auto",
+        maxWidth: "unset",
+        maxHeight: "unset",
+      }}
+    />
+  </div>
+</div>
     </div>
   );
 }

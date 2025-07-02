@@ -335,14 +335,14 @@ const handleDownloadExcel =async () => {
         <span className="text-2xl md:text-3xl font-bold text-black text-center">
           Traffic Controller(Blocks)
         </span>
-        <div className="w-full flex justify-center mt-3">
+        {/* <div className="w-full flex justify-center mt-3">
           <h1
             className="bg-[#cfd4ff] py-1 px-6 rounded-full font-bold text-center"
             style={{ width: "600px" }}
           >
             Block Details
           </h1>
-        </div>
+        </div> */}
       </div>
 
       {/* Summary Box */}
@@ -364,7 +364,22 @@ const handleDownloadExcel =async () => {
             >
               Click to View
             </Link>
+            <div className="relative">
+  <select
+    className="bg-[#FF6B6B] border border-black px-2 py-1 rounded text-sm font-semibold cursor-pointer focus:outline-none appearance-none pr-6"
+  >
+    <option value="">DEPT</option>
+    <option value="ENGG">ENGG</option>
+    <option value="S&T">S&T</option>
+    <option value="TRD">TRD</option>
+  </select>
+  <div className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-black text-xs">
+    ▼
+  </div>
+</div>
+
           </div>
+          
         </div>
       </div>
       {/* Filters Row: All filters in a single row */}
@@ -482,7 +497,7 @@ const handleDownloadExcel =async () => {
             alignItems: "center",
           }}
         >
-          Block Summary
+          View Summary of Upcomming Block Request
         </h1>
         <div
           style={{

@@ -176,7 +176,7 @@ export default function DashboardPage() {
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-lg font-bold text-black tracking-wide">ADMIN DESIGNATION</span>
+            <span className="text-lg font-bold text-black tracking-wide">DESGN:Traffic Controller</span>
           </div>
         </div>
         {/* Navigation buttons */}
