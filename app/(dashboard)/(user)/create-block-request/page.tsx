@@ -2228,9 +2228,9 @@ export default function CreateBlockRequestPage() {
             {/* Date of Block */}
             <div className="flex flex-col md:flex-row md:items-center gap-6 w-full">
               <label className="text-[24px] font-bold text-black min-w-[180px]" htmlFor="date-of-block">
-                Date of Block
+                Date of Blockd
               </label>
-              <div className="flex flex-row items-center gap-4 w-full">
+                <div className="flex flex-row items-center gap-4 w-full">
                 <input
                   id="date-of-block"
                   type="date"
@@ -2241,34 +2241,40 @@ export default function CreateBlockRequestPage() {
                   aria-required="true"
                   aria-label="Select date of block"
                   style={{ boxShadow: '2px 2px 6px #bbb' }}
+                  min={getMinDateString()}
+                  max={(() => {
+                  const today = new Date();
+                  today.setDate(today.getDate() + 30);
+                  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+                  })()}
                 />
                 {/* Type of Block - compact, right of date */}
                 {formData.date && (
                   <div className="flex flex-row items-center gap-2 ml-2">
-                    {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
-                    {isDisabled ? (
-                      <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[22px] font-extrabold text-black shadow-sm">U</span>
-                    ) : (
-                      <div className="flex flex-row gap-2">
-                        <button
-                          type="button"
-                          className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
-                          onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
-                        >
-                          C
-                        </button>
-                        <button
-                          type="button"
-                          className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
-                          onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Outside Corridor' } } as any)}
-                        >
-                          NC
-                        </button>
-                      </div>
-                    )}
+                  {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
+                  {isDisabled ? (
+                    <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[22px] font-extrabold text-black shadow-sm">U</span>
+                  ) : (
+                    <div className="flex flex-row gap-2">
+                    <button
+                      type="button"
+                      className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
+                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
+                    >
+                      C
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
+                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Outside Corridor' } } as any)}
+                    >
+                      NC
+                    </button>
+                    </div>
+                  )}
                   </div>
                 )}
-              </div>
+                </div>
               {errors.date && (
                 <span className="text-[20px] text-[#e07a5f] font-medium mt-2 block">
                   {errors.date}
