@@ -137,7 +137,7 @@ export default function ViewRequestPage() {
             href="/other-requests"
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
-            Back to List
+            Back 
           </Link>
           {request.DisconnAcceptance === "PENDING" && (
             <div className="flex gap-2">

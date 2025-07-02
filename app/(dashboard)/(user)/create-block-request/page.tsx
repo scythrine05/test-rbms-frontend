@@ -2199,7 +2199,7 @@ export default function CreateBlockRequestPage() {
                 </button>
               </div>
               <button
-                className="w-full rounded-2xl bg-[#ff5c42] text-white font-bold text-[20px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
+                className="w-full rounded-2xl bg-[#f69697] text-white font-bold text-[20px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
                 onClick={() => signOut()}
               >
                 CLOSE THE APP AND LOGOUT
@@ -2219,7 +2219,9 @@ export default function CreateBlockRequestPage() {
       </div>
       {/* Sub-header */}
       <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[32px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>Enter New Block Request</span>
+        <span className="text-[32px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
+  {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
+</span>
       </div>
       {/* Form Card */}
       <div className="w-full max-w-3xl mt-0 p-10 bg-[#c6e6f7] border-4 border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
@@ -3146,6 +3148,26 @@ export default function CreateBlockRequestPage() {
             >
               Back
             </button>
+
+            {showReviewModal && (
+  <ReviewBlockRequestModal
+    isOpen={showReviewModal}
+    onClose={() => setShowReviewModal(false)}
+    onConfirm={() => {
+      setReviewMode(true);
+      setShowReviewModal(false);
+      // Programmatically submit the form
+      const form = document.querySelector('form');
+      if (form) form.requestSubmit();
+    }}
+    formData={formData}
+    blockSectionValue={blockSectionValue}
+    processedLineSections={processedLineSections}
+    selectedActivities={selectedActivities}
+    customActivity={customActivity}
+    formSubmitting={formSubmitting}
+  />
+)}
                   {reviewMode ? (
                 <button
                   type="submit"

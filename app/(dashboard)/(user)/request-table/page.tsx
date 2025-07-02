@@ -760,7 +760,7 @@ const handleDownload = () => {
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
-          RBMS
+          RBMS-MAS-DIVN
         </span>
       </div>
 
@@ -775,7 +775,7 @@ const handleDownload = () => {
       <div className="flex justify-center mt-2">
         <div className="flex gap-2">
           <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
-            User:
+            DESGN:
           </span>
           <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
             {userName}
@@ -808,16 +808,16 @@ const handleDownload = () => {
                     Block Section
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">
-                    UP/DN/SL/Rpad
+                    Line/Road
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[20%]">
                     Activity
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
-                    Demand Duration
+                    Demanded
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
-                    Sanctioned Duration
+                     Offered Time
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Status

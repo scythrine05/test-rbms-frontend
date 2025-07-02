@@ -1427,7 +1427,7 @@ export default function ManagerRequestTablePage() {
                 <th className="border-2 border-black p-1">ID</th>
                 <th className="border-2 border-black p-1">Block Section</th>
                 <th className="border-2 border-black p-1">
-                  Line
+                  Line/Road
                 </th>
                 <th className="border-2 border-black p-1">Demanded</th>
                 <th className="border-2 border-black p-1">Activity</th>
