@@ -2215,7 +2215,7 @@ export default function CreateBlockRequestPage() {
     <div className="min-h-screen flex flex-col items-center justify-start bg-[#f7fafc] py-0">
       {/* Header */}
       <div className="w-full bg-[#fff9b2] py-6 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[48px] font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS</span>
+        <span className="text-[48px] font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS-MAS-DIVN</span>
       </div>
       {/* Sub-header */}
       <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">

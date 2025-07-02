@@ -42,13 +42,13 @@ export default function DashboardPage() {
         {/* RBMS badge */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#8ed974] rounded-2xl px-8 py-2">
-            <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS</span>
+            <span className="text-4xl font-extrabold text-[#b07be0] tracking-wide">RBMS-MAS-DIVN</span>
           </div>
         </div>
         {/* Designation bar */}
         <div className="w-full flex justify-center mt-4">
           <div className="bg-[#ffeaea] rounded-full px-6 py-2 border border-black flex flex-col items-center" style={{ maxWidth: '90vw' }}>
-            <span className="text-xs font-semibold text-gray-700 tracking-wide">USER DESIGNATION:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
+            <span className="text-xs font-semibold text-gray-700 tracking-wide">DESGN:<span className="text-sm font-bold text-black">{session?.user?.name || ''}</span></span>
           </div>
         </div>
         {/* Navigation buttons */}
