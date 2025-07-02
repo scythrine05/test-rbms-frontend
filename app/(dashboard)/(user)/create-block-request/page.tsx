@@ -3127,14 +3127,22 @@ export default function CreateBlockRequestPage() {
           {/* Submit Button */}
           <div className="flex justify-center mt-8 gap-4">
             <button
-              type="submit"
+              type="button"
+              onClick={() => { window.location.href = "/dashboard"; }}
               className="w-full rounded-2xl bg-[#99f61f] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
             >
               Home
             </button>
             <button
-              type="submit"
+              type="button"
               className="w-full rounded-2xl bg-[#e3e3e3] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+              onClick={() => {
+                if (reviewMode) {
+                  setReviewMode(false);
+                } else {
+                  router.back();
+                }
+              }}
             >
               Back
             </button>
