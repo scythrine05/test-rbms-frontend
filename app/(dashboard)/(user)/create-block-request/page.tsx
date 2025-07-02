@@ -2289,11 +2289,10 @@ const removeFreshCaution = (index: number) => {
                 }))}
                 required
                 onChange={(selected) => {
-                  const limited = selected ? selected.slice(0, 2) : [];
-                  const values = limited.map((opt: any) => opt.value);
-
+                  const values = selected
+                    ? selected.map((opt: any) => opt.value)
+                    : [];
                   setBlockSectionValue(values);
-
                   setFormData((prev) => ({
                     ...prev,
                     processedLineSections: (
