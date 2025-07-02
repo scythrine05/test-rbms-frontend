@@ -1494,7 +1494,7 @@ export default function ManagerRequestTablePage() {
                 );
               }))  :<tr>
       <td colSpan={7} className="text-center p-4 border border-black">
-        Click "Enter" to apply filters and view requests
+        {`Click "Enter" to apply filters and view requests`}
       </td>
     </tr>
             }
