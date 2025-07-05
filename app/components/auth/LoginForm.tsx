@@ -113,7 +113,7 @@ export default function PhoneLoginForm() {
           placeholder="Phone Number"
           typeof="tel"
           disabled={step === "otp"}
-          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
           style={{
             boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
             WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
@@ -133,7 +133,7 @@ export default function PhoneLoginForm() {
           {...register("otp")}
           placeholder="Enter OTP"
           disabled={step === "phone"}
-          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
+          className="flex-1 bg-[#eeb8f7] text-white font-semibold rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder-white placeholder:font-bold border-none"
           style={{
             boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
             WebkitBoxShadow: "0 0 0 1000px #eeb8f7 inset",
@@ -155,7 +155,7 @@ export default function PhoneLoginForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="flex items-center justify-center font-bold text-black text-base"
+        className="flex items-center justify-center font-bold text-black text-2xl"
         style={{
           width: "180px",
           height: "100px",

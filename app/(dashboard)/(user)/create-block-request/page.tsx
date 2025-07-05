@@ -2770,7 +2770,7 @@ export default function CreateBlockRequestPage() {
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
               <span className="text-black font-bold text-[24px]">
-                Whether Fresh Caution will be imposed after block
+                Fresh Caution Needed ?
               </span>
               <select
                 name="freshCautionRequired"
@@ -2819,7 +2819,7 @@ export default function CreateBlockRequestPage() {
                       }
                       placeholder="UP/DN/SL/Road No."
                       required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
+                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
                     />
                     <datalist id={`adjacentLinesList-${idx}`}>
                       {blockSectionValue.flatMap(block => {
@@ -2846,9 +2846,9 @@ export default function CreateBlockRequestPage() {
                       }
                       placeholder="KM"
                       required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                     />
-                    <span className="px-1">to</span>
+                    <span className="px-1 text-2xl text-black">to</span>
                     <input
                       value={caution.freshCautionLocationTo}
                       onChange={e =>
@@ -2860,7 +2860,7 @@ export default function CreateBlockRequestPage() {
                       }
                       placeholder="KM"
                       required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                     />
 
                     {/* ◼︎ Speed */}
@@ -2876,7 +2876,7 @@ export default function CreateBlockRequestPage() {
                       }
                       placeholder="Speed"
                       required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
                     />
 
                     {/* ◼︎ Remove */}
@@ -2884,7 +2884,7 @@ export default function CreateBlockRequestPage() {
                       <button
                         type="button"
                         onClick={() => removeFreshCaution(idx)}
-                        className="px-2 py-1 text-xs bg-red-600 text-white rounded"
+                        className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
                       >
                         Remove
                       </button>
@@ -2896,7 +2896,7 @@ export default function CreateBlockRequestPage() {
                 <button
                   type="button"
                   onClick={addFreshCaution}
-                  className="self-start px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold"
+                  className="self-start px-2 py-1 bg-green-600 text-white rounded text-2xl font-semibold"
                 >
                   + Add Fresh Caution
                 </button>
@@ -2905,11 +2905,13 @@ export default function CreateBlockRequestPage() {
 
           </div>
 
+          <hr className="border-black border-1"/>
+
           {/* Power Block Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
               <span className="text-black font-bold text-[24px]">
-                Whether Power Block also needed:
+                Power Block Needed ?
               </span>
               <select
                 name="powerBlockRequired"
@@ -2940,7 +2942,7 @@ export default function CreateBlockRequestPage() {
             {formData.powerBlockRequired && (
               <div className="flex flex-col gap-2 mt-2">
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     KM From:
                   </span>
                   <input
@@ -2950,9 +2952,9 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     KM To:
                   </span>
                   <input
@@ -2962,9 +2964,9 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Road No.:
                   </span>
                   <input
@@ -2974,11 +2976,11 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Road No."
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
                 </div>
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Requirements:
                   </span>
                   <textarea
@@ -2987,19 +2989,20 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Enter power block requirements"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
                     style={{ minHeight: "32px" }}
                   />
                 </div>
               </div>
             )}
           </div>
+          <hr className="border-black border-1"/>
 
           {/* S&T Disconnection Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
               <span className="text-black font-bold text-[24px]">
-                Whether S&T Disconnection is needed:
+                S&T Disconnection Needed ?
               </span>
               <select
                 name="sntDisconnectionRequired"
@@ -3030,7 +3033,7 @@ export default function CreateBlockRequestPage() {
             {formData.sntDisconnectionRequired && (
               <div className="flex flex-col gap-2 mt-2">
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Line From:
                   </span>
                   <input
@@ -3040,9 +3043,9 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Line To:
                   </span>
                   <input
@@ -3052,9 +3055,9 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Point No.:
                   </span>
                   <input
@@ -3064,9 +3067,9 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Point No."
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Signal No.:
                   </span>
                   <input
@@ -3076,11 +3079,11 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Signal No."
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
                 </div>
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Requirements:
                   </span>
                   <textarea
@@ -3089,12 +3092,12 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Enter S&T disconnection requirements"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
                     style={{ minHeight: "32px" }}
                   />
                 </div>
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-[13px]">
+                  <span className="text-black font-bold text-2xl">
                     Assign To:
                   </span>
                   <input
@@ -3104,12 +3107,13 @@ export default function CreateBlockRequestPage() {
                     onChange={handleInputChange}
                     placeholder="Name"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[13px]"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
                   />
                 </div>
               </div>
             )}
           </div>
+          <hr className="border-black border-1"/>
 
           {/* Remarks */}
           <div className="flex flex-row flex-wrap gap-1">
@@ -3171,13 +3175,12 @@ export default function CreateBlockRequestPage() {
                   {reviewMode ? (
                 <button
                   type="submit"
-                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-sm font-extrabold text-white hover:bg-[#e6aee0] ${
+                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-2xl font-extrabold text-white hover:bg-[#e6aee0] ${
                     formSubmitting ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={formSubmitting}
                   style={{
-                    width: "150px",
-                    height: "70px",
+
                     borderRadius: "50%",
                     letterSpacing: "1px",
                     border: "none",

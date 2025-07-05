@@ -15,7 +15,7 @@ export default function LoginPage() {
           className="absolute left-0 right-5 top-0 w-25 h-32 object-contain"
         />
         <div className="flex flex-col items-right justify-center ml-18">
-          <h1 className="text-center text-2xl sm:text-3xl font-extrabold text-[#b07be0] leading-tight mt-2">
+          <h1 className="text-center text-2xl font-extrabold text-[#b07be0] leading-tight mt-2">
             Rolling Block
             <br />
             Management System
@@ -33,17 +33,7 @@ export default function LoginPage() {
       {/* Yellow oval for developer credit */}
 
       <div className="w-full flex justify-center mt-2 mb-2">
-        <div
-          className=" text-center flex items-center justify-center font-bold text-black text-base"
-          style={{
-            width: "380px",
-            height: "100px",
-            backgroundColor: "#f9e38e",
-            borderRadius: "50%",
-            letterSpacing: "1px",
-            border: "none",
-          }}
-        >
+        <div className="w-full h-[100px] bg-[#f9e38e] rounded-[50%] flex flex-col items-center justify-center font-bold text-black text-2xl text-center tracking-wide border-none">
           App designed & developed by
           <br />
           Southern Railway
