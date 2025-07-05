@@ -759,43 +759,43 @@ const handleDownload = () => {
 
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
+        <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
           RBMS-MAS-DIVN
         </span>
       </div>
 
       {/* Main Title on Light Blue */}
       <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-        <span className="text-2xl md:text-3xl font-bold text-black text-center">
+        <span className="text-[24px] md:text-3xl font-bold text-black text-center">
           Summary of My Block Requests
         </span>
       </div>
 
       {/* User Info Row */}
-      <div className="flex justify-center mt-2">
-        <div className="flex gap-2">
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
-            DESGN:
-          </span>
-          <span className="bg-[#FFB74D] border border-black px-4 py-1.5 font-bold text-base text-black rounded">
-            {userName}
-          </span>
-        </div>
-      </div>
+   <div className="flex justify-center mt-3">
+  <div className="flex gap-3">
+    <span className="bg-[#FFB74D] border-2 border-black px-5 py-2 font-bold text-2xl text-black rounded-lg">
+      DESGN:
+    </span>
+    <span className="bg-[#FFB74D] border-2 border-black px-5 py-2 font-bold text-2xl text-black rounded-lg">
+      {userName}
+    </span>
+  </div>
+</div>
 
       {/* Summary Box */}
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
-          <div className="text-xl font-bold text-black text-center py-2">
+          <div className="text-[24px] font-bold text-black text-center py-2">
             SUMMARY OF NEXT 10 DAYS
           </div>
-          <div className="italic text-center text-sm text-black pb-2">
+          <div className="italic text-center text-[24px] text-black pb-2">
             (Click ID to see full details or to Edit)
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl mx-2 mb-2">
-            <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+            <table className="w-full border border-black rounded-xl overflow-hidden text-[24px]">
               <thead>
                 <tr className="bg-[#D6F3FF] text-black">
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">
@@ -916,16 +916,16 @@ const handleDownload = () => {
       { session?.user?.department !== "ENGG" && (
       <div className="flex justify-center mt-3 mb-6">
         <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
-          <div className="text-xl font-bold text-black text-center py-2">
+          <div className="text-[24px] font-bold text-black text-center py-2">
             SUMMARY OF OTHER REQUEST FOR NEXT 10 DAYS
           </div>
-          <div className="italic text-center text-sm text-black pb-2">
+          <div className="italic text-center text-[24px] text-black pb-2">
             (Click ID to see full details or to Edit)
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl mx-2 mb-2">
-            <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+            <table className="w-full border border-black rounded-xl overflow-hidden text-[24px]">
               <thead>
                 <tr className="bg-[#D6F3FF] text-black">
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">
@@ -1113,7 +1113,7 @@ const handleDownload = () => {
       {/* Fixed Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
         <div className=" text-center">
-          <h3 style={{ background: "#E6E6FA", color: "black" }}>
+          <h3 style={{ background: "#E6E6FA", color: "black" ,fontSize:"24px"}}>
             Customised Summary
           </h3>
         </div>
@@ -1122,7 +1122,7 @@ const handleDownload = () => {
           <div className="flex justify-center items-center gap-4 mb-4  py-3 w-full rounded-lg">
             <div className="flex items-center gap-4 flex-wrap justify-center">
               <div className="flex flex-col">
-                <label className="text-xs font-medium mb-1 text-black">
+                <label className="text-[24px] font-medium mb-1 text-black">
                   From Date
                 </label>
                 <input
@@ -1141,7 +1141,7 @@ const handleDownload = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <label className="text-xs font-medium mb-1 text-black">
+                <label className="text-[24px] font-medium mb-1 text-black">
                   To Date
                 </label>
                 <input
@@ -1162,7 +1162,7 @@ const handleDownload = () => {
               </div>
 
               <div className="w-60 text-center mt-2">
-                <h3 className="bg-[#E6E6FA] text-black text-sm font-medium px-3 py-1 rounded">
+                <h3 className="bg-[#E6E6FA] text-black text-[24px] font-medium px-3 py-1 rounded">
                   For printing the summary,
                   <br />
                   click Download
@@ -1171,7 +1171,7 @@ const handleDownload = () => {
 
               <button
                 onClick={handleDownload}
-                className="mt-1 bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-base font-bold text-black hover:bg-[#FFA726]"
+                className="mt-1 bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-[24px] font-bold text-black hover:bg-[#FFA726]"
               >
                 Download XLSX
               </button>
@@ -1183,14 +1183,14 @@ const handleDownload = () => {
             <Link
               href="/dashboard"
               className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
-              style={{ color: "black" }}
+              style={{ color: "black",fontSize:"24px" }}
             >
               <span className="text-xl">🏠</span> Home
             </Link>
             <button
               onClick={() => window.history.back()}
               className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold"
-              style={{ color: "black" }}
+              style={{ color: "black",fontSize:"24px" }}
             >
               <span className="text-xl">⬅️</span> Back
             </button>
@@ -1203,7 +1203,7 @@ const handleDownload = () => {
                 await signOut({ redirect: true, callbackUrl: "/auth/login" });
               }}
               className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
-              style={{ color: "black" }}
+              style={{ color: "black",fontSize:"24px" }}
             >
               Logout
             </button>

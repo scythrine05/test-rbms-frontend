@@ -1108,7 +1108,7 @@ export default function ManagerRequestTablePage() {
     <div className="min-h-screen bg-[#FFFDF5]">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
+        <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
           RBMS-MAS-DIVN
         </span>
       </div>
@@ -1122,7 +1122,7 @@ export default function ManagerRequestTablePage() {
 
       {/* Department Name */}
       <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
-        <span className="text-xl font-bold text-black">
+        <span className="text-[24px] font-bold text-black">
           {session?.user?.department || "..."} Controller
         </span>
       </div>
@@ -1132,15 +1132,15 @@ export default function ManagerRequestTablePage() {
       {/* Pending Requests Section */}
       <div className="mx-4 mt-6">
         <div className="bg-[#f69697] grid grid-cols-3 gap-0 border-2 border-black">
-          <div className="p-3 text-black font-bold border-r-2 border-black">
+          <div className="p-3 text-black font-bold border-r-2 border-black text-[24px]">
             REQUESTS PENDING WITH ME
           </div>
-          <div className="p-3 text-black font-bold border-r-2 border-black text-center">
+          <div className="p-3 text-black font-bold border-r-2 border-black text-center text-[24px]">
             {pendingWithMeCount}.Nos
           </div>
         <Link
       href="/manage/pending-requests"
-      className="p-3 text-black font-bold text-center hover:bg-[#FF5555] flex items-center justify-center"
+      className="p-3 text-black font-bold text-center hover:bg-[#FF5555] flex items-center justify-center text-[24]"
     >
       <span className="bg-white px-4 py-1 rounded-full border-2 border-black hover:bg-gray-100">
         Click to View
@@ -1157,7 +1157,7 @@ export default function ManagerRequestTablePage() {
       <div className="mx-4">
   <div 
     className="bg-[#B57CF6] text-white text-center p-2 border-2 border-black rounded-none"
-    style={{ marginTop: "16px" }}
+    style={{ marginTop: "16px",fontSize: "24px" }}
   >
     View Block Details
   </div>
@@ -1418,9 +1418,9 @@ export default function ManagerRequestTablePage() {
       {/* </div> */}
 
       {/* Requests Table */}
-      <div className="mx-2 overflow-x-auto">
+      <div className="mx-2 overflow-x-auto text-[24px]">
         <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
-          <table className="w-full text-black text-sm relative">
+          <table className="w-full text-black  relative">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#E8F4F8] text-black">
                 <th className="border-2 border-black p-1">Date</th>
@@ -1500,16 +1500,16 @@ export default function ManagerRequestTablePage() {
       <div className="text-center mt-2">
         <h3
           className="inline-flex bg-[#cfd4ff]  py-1 px-6 rounded-full"
-          style={{ color: "black" }}
+          style={{ color: "black",fontSize:"24px" }}
         >
           Click ID to see details of a Block.
         </h3>
         <h3
           className="bg-[#cfd4ff]  mt-1 rounded-full py-2"
-          style={{ color: "black" }}
+          style={{ color: "black",fontSize:"24px" }}
         >
           For printing the complete table, click to download in{" "}
-          <span className="font-bold" style={{ color: "#5ec4e2" }}>
+          <span className="font-bold" style={{ color: "#5ec4e2",fontSize:"24px" }}>
             .xlsx format
           </span>
         </h3>
@@ -1518,13 +1518,13 @@ export default function ManagerRequestTablePage() {
 <div className="mx-4 mt-4 flex justify-center gap-4">
   <button
     onClick={handleDownloadExcel}
-    className="bg-[#FFA07A] px-6 py-1 rounded-lg border-2 border-black font-bold text-sm"
+    className="bg-[#FFA07A] px-6 py-1 rounded-lg border-2 border-black font-bold text-[24px]"
   >
     Download
   </button>
   <Link
     href="/dashboard"
-    className="bg-[#90EE90] px-6 py-1 rounded-lg border-2 border-black font-bold text-sm"
+    className="bg-[#90EE90] px-6 py-1 rounded-lg border-2 border-black font-bold text-[24px]"
   >
     Home
   </Link>

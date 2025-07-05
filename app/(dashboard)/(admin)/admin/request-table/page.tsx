@@ -426,13 +426,13 @@ export default function AdminRequestTablePage() {
     <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 pb-32 relative">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-        <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
-          RBMS
+        <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
+          RBMS-MAS-DIVIN
         </span>
       </div>
       {/* Main Title on Light Blue */}
       <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-        <span className="text-2xl md:text-3xl font-bold text-black text-center">
+        <span className="text-[24px] md:text-3xl font-bold text-black text-center">
           Traffic Controller
         </span>
       </div>
@@ -440,20 +440,20 @@ export default function AdminRequestTablePage() {
       {/* Requests Pending With Me CTA */}
       <div className="flex justify-center mt-8 mb-6">
         <div className="w-full max-w-2xl rounded-2xl border-4 border-[#FFB3B3] bg-[#FFF0F0] shadow-lg p-0">
-          <div className="text-xl font-bold text-[#B22222] text-center py-3 tracking-wide">
+          <div className="text-[24px] font-bold text-[#B22222] text-center py-3 tracking-wide">
             REQUESTS PENDING WITH ME
           </div>
-          <div className="italic text-center text-sm text-[#B22222] pb-2">
+          <div className="italic text-center text-[20px] text-[#B22222] pb-2">
             (Click to view and optimise)
           </div>
           <div className="flex justify-center items-center gap-6 py-4">
-            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-lg">
+            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
               <span>Nos.</span>
               <span>{pendingWithMeCount}</span>
             </div>
             <Link
               href="/admin/optimise-table"
-              className="bg-[#FFF0F0] border-2 border-[#FF6B6B] px-8 py-2 rounded text-lg font-bold text-[#B22222] hover:bg-[#FFD6D6] shadow transition"
+              className="bg-[#FFF0F0] border-2 border-[#FF6B6B] px-8 py-2 rounded text-[20px] font-bold text-[#B22222] hover:bg-[#FFD6D6] shadow transition"
             >
               Click to View
             </Link>
@@ -479,7 +479,7 @@ export default function AdminRequestTablePage() {
       {/* View Summary of Upcoming Blocks CTA */}
       <div className="flex justify-center mb-8">
         <div className="w-full max-w-4xl rounded-2xl border-4 border-[#00B4D8] bg-[#CAF0F8] shadow-lg p-0">
-          <div className="text-xl font-bold text-[#0077B6] text-center py-3 tracking-wide">
+          <div className="text-[22px] font-bold text-[#0077B6] text-center py-3 tracking-wide">
             View Summary of Upcoming Blocks
           </div>
           <div className="px-6 pb-4">
@@ -577,9 +577,9 @@ export default function AdminRequestTablePage() {
                 </div>
               </div>
               {/* Click to View Button (moved here) */}
-              <div className="flex items-center">
+              <div className="flex-grow flex justify-center">
                 <button
-                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded text-lg font-bold text-white hover:bg-[#48CAE4] shadow transition"
+                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded text-[20px] font-bold text-white hover:bg-[#48CAE4] shadow transition "
                   onClick={handleApplySummaryFilters}
                 >
                   Click to View
@@ -590,7 +590,7 @@ export default function AdminRequestTablePage() {
             {showTable && (
               <div className="mx-2 overflow-x-auto">
                 <div className="max-h-[60vh] overflow-y-auto border-2 border-[#00B4D8] rounded-lg bg-white">
-                  <table className="w-full text-black text-sm relative">
+                  <table className="w-full text-black text-[20px] relative">
                     <thead>
                       <tr className="bg-[#e49edd] text-black">
                         <th className="border-2 border-black p-1">Date</th>
@@ -675,15 +675,15 @@ export default function AdminRequestTablePage() {
       {/* Info Texts */}
       <div className="text-center mt-1 mb-32">
         <h3
-          className="inline-flex bg-[#cfd4ff] py-1 px-6 rounded-full text-black text-base font-medium mb-2"
+          className="inline-flex bg-[#cfd4ff] py-1 px-6 rounded-full text-black text-base font-medium mb-2 text-[20px]"
         >
           Click ID to see details of a Block.
         </h3>
         <h3
-          className="bg-[#cfd4ff] rounded-full py-2 px-4 text-black text-base font-medium"
+          className="bg-[#cfd4ff] rounded-full py-2 px-4 text-black text-[20px] font-medium"
         >
           For printing the complete table, click to download in{' '}
-          <span className="font-bold text-[#00B4D8]">.xlsx format</span>
+          <span className="font-bold text-[#00B4D8] text-[20px]">.xlsx format</span>
         </h3>
       </div>
 

@@ -123,19 +123,19 @@ export default function ReviseBlockPage() {
         <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 pb-32">
             {/* Top Yellow Bar */}
             <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">
-                    RBMS
+                <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
+          RBMS-MAS-DIVI
                 </span>
             </div>
             {/* Main Title on Light Blue */}
             <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-                <span className="text-2xl md:text-3xl font-bold text-black text-center">
+                <span className="text-[24px] md:text-3xl font-bold text-black text-center">
                     Traffic Controller(Blocks)
                 </span>
                 <div className="w-full flex justify-center mt-3">
                     <h1
                         className="bg-[#cfd4ff] py-1 px-6 rounded-full font-bold text-center"
-                        style={{ width: "600px", color: 'black' }}
+                        style={{ width: "600px", color: 'black' ,fontSize:"24px"}}
                     >
                         Revise the block for the day
                     </h1>
@@ -145,7 +145,7 @@ export default function ReviseBlockPage() {
             {/* Section Row (no date picker) */}
             <div className="flex flex-wrap justify-center items-center gap-4 mt-6 mb-2">
                 <div className="flex items-center gap-2 bg-white border border-black rounded-lg px-4 py-2">
-                    <span className="font-bold text-black">Section:</span>
+                    <span className="font-bold text-black text-[24px]">Section:</span>
                     <select
                         className="bg-[#e6f7fa] border border-black rounded px-2 py-1 font-bold text-black"
                         value={selectedSection}
@@ -160,7 +160,7 @@ export default function ReviseBlockPage() {
 
             {/* Sanctioned request count */}
             <div className="w-full flex justify-center mt-2 mb-4">
-                <div className="bg-[#ffb366] text-black font-bold px-8 py-3 rounded shadow border border-black text-lg">
+                <div className="bg-[#ffb366] text-black font-bold px-8 py-3 rounded shadow border border-black text-[20px]">
                     Sanctioned request for today in <span className="text-[#13529e]">{selectedSection}</span> is {filteredRequests.length}
                 </div>
             </div>
@@ -170,7 +170,7 @@ export default function ReviseBlockPage() {
                 {ACTIONS.map((action) => (
                     <button
                         key={action.key}
-                        className={`py-4 rounded-lg font-bold text-lg border-2 border-black transition-colors text-black ${activeAction === action.key ? 'bg-[#7be09b]' : 'bg-[#1dcaff]'}`}
+                        className={`py-4 rounded-lg font-bold text-[20px] border-2 border-black transition-colors text-black ${activeAction === action.key ? 'bg-[#7be09b]' : 'bg-[#1dcaff]'}`}
                         onClick={() => setActiveAction(action.key)}
                     >
                         {action.label}
@@ -180,12 +180,12 @@ export default function ReviseBlockPage() {
 
             {/* Bulk revise area or cancel message */}
             {activeAction === 'cancel' && selectedBlocks.size > 0 && (
-                <div className="w-full max-w-3xl mx-auto bg-[#ffe066] border-2 border-black rounded-lg p-4 mb-6 flex flex-col items-center gap-2 text-black font-bold text-lg">
+                <div className="w-full max-w-3xl mx-auto bg-[#ffe066] border-2 border-black rounded-lg p-4 mb-6 flex flex-col items-center gap-2 text-black font-bold text-[20px]">
                     You are cancelling {selectedBlocks.size} block{selectedBlocks.size > 1 ? 's' : ''}.
                 </div>
             )}
             {(activeAction === 'prepone' || activeAction === 'postpone') && selectedBlocks.size > 0 && (
-                <div className="w-full max-w-3xl mx-auto bg-[#ffe066] border-2 border-black rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center gap-4">
+                <div className="w-full max-w-3xl mx-auto bg-[#ffe066] border-2 border-black rounded-lg p-4 mb-6 flex flex-col md:flex-row items-center gap-4 text-[20px]">
                     <div className="font-bold text-lg mb-2 md:mb-0 text-black">Revised date and time</div>
                     <div className="flex flex-wrap gap-2 items-center text-black">
                         <span className="font-bold">From</span>
@@ -200,7 +200,7 @@ export default function ReviseBlockPage() {
 
             {/* Blocks Table */}
             <div className="mx-2 overflow-x-auto">
-                <table className="w-full text-black text-sm relative rounded-lg overflow-hidden">
+                <table className="w-full text-black text-sm relative rounded-lg overflow-hidden text-[20px]">
                     <thead>
                         <tr className="bg-[#e49edd] text-black">
                             <th className="border-2 border-black p-1"><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>

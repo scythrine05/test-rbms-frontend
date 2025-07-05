@@ -316,19 +316,19 @@ const handleDeleteSection = (indexToRemove: number) => {
     <div className="min-h-screen bg-gray-50 font-sans">
       <div className="max-w-md mx-auto p-2">
         <div className="bg-yellow-100 rounded-t-xl p-2 border-b-2 border-teal-200 text-center">
-          <span className="text-4xl font-extrabold text-purple-600 tracking-wide">
-            RBMS
+          <span className="text-[24px] font-extrabold text-purple-600 tracking-wide">
+            RBMS-MAS-DIVN
           </span>
         </div>
 
         <div className="bg-blue-100 rounded-b-xl p-3">
-          <div className="bg-green-500 text-gray-800 font-bold text-xl rounded-xl p-2 text-center mb-4 border-2 border-green-700 tracking-wide">
+          <div className="bg-green-500 text-gray-800 font-bold text-[23px] rounded-xl p-2 text-center mb-4 border-2 border-green-700 tracking-wide">
             Edit/Cancel the Block ID {userDataById?.data.divisionId||formData.id}
           </div>
 
           <div className="flex gap-3 justify-center mb-4">
             <button
-              className="flex-1 max-w-[160px] rounded-xl bg-blue-800 text-white font-bold text-xl py-2 border-2 border-gray-800 shadow-sm relative"
+              className="flex-1 max-w-[160px] rounded-xl bg-blue-800 text-white font-bold text-[22px] py-2 border-2 border-gray-800 shadow-sm relative"
               type="submit"
               form="edit-block-form"
             >
@@ -338,7 +338,7 @@ const handleDeleteSection = (indexToRemove: number) => {
               </span>
             </button>
             <button
-              className="flex-1 max-w-[160px] rounded-xl bg-red-600 text-white font-bold text-xl py-3 border-2 border-gray-800 shadow-sm"
+              className="flex-1 max-w-[160px] rounded-xl bg-red-600 text-white font-bold text-[22px] py-3 border-2 border-gray-800 shadow-sm"
               onClick={() => setCancelModal(true)}
               type="button"
             >
@@ -401,7 +401,7 @@ const handleDeleteSection = (indexToRemove: number) => {
             onSubmit={handleSubmit}
             className="w-full bg-white rounded-xl shadow-sm border-2 border-gray-800 mb-6 overflow-hidden"
           >
-            <table className="w-full border-collapse font-sans text-sm table-fixed">
+            <table className="w-full border-collapse font-sans text-[20px] table-fixed">
               <tbody>
                 <tr>
                   <td className="bg-purple-200 font-semibold p-1.5 w-1/4 text-gray-900" >
@@ -548,22 +548,22 @@ const handleDeleteSection = (indexToRemove: number) => {
 {formData.processedLineSections.map((section, index) => (
   <tr key={index} className="border-b border-gray-200 align-top">
     {/* Label: Block Section/Yard */}
-    <td className="font-semibold text-sm text-gray-800 p-2 whitespace-normal break-words w-1/4">
+    <td className="font-semibold text-[20px] text-gray-800 p-2 whitespace-normal break-words w-1/4">
       Block Section/ Yard
     </td>
 
     {/* Value: Block */}
-    <td className="text-sm text-gray-900 p-2 whitespace-normal break-words w-1/4">
+    <td className="text-[20px] text-gray-900 p-2 whitespace-normal break-words w-1/4">
       {section.block || "-"}
     </td>
 
     {/* Label: Line(s) or Road(s) */}
-    <td className="font-semibold text-sm text-gray-800 p-2 whitespace-normal break-words w-1/6">
+    <td className="font-semibold text-[20px] text-gray-800 p-2 whitespace-normal break-words w-1/6">
       {section.type === "line" ? "Line(s)" : "Road(s)"}
     </td>
 
     {/* Value + X icon, X stays right */}
-    <td className="text-sm text-gray-900 p-2 w-full align-top">
+    <td className="text-[20px] text-gray-900 p-2 w-full align-top">
       <div className="flex justify-between items-start gap-2 flex-wrap">
         <span className="whitespace-normal break-words flex-1">
           {section.type === "line"
@@ -987,7 +987,7 @@ const handleDeleteSection = (indexToRemove: number) => {
   <div className="flex justify-center">
     <button
       type="submit"
-      className="bg-[#8ed973] text-gray-900 font-bold text-lg py-1 px-6 rounded border-none shadow-sm hover:bg-green-500 transition-colors"
+      className="bg-[#8ed973] text-gray-900 font-bold text-[20px] py-1 px-6 rounded border-none shadow-sm hover:bg-green-500 transition-colors"
     >
       Submit Revised Request
     </button>

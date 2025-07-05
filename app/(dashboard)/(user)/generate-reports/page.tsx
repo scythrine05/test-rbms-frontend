@@ -324,18 +324,18 @@ export default function GenerateReportPage() {
     <div className="min-h-screen w-full bg-[#fffbe9] flex flex-col items-center">
       {/* RBMS Header */}
       <div className="w-full bg-[#fff35c] flex flex-col items-center py-2 rounded-t-2xl">
-        <span className="text-5xl font-extrabold text-[#b07be0] tracking-wide">
-          RBMS
+        <span className="text-[24px] font-extrabold text-[#b07be0] tracking-wide">
+          RBMS-MAS-DIVN
         </span>
       </div>
       {/* Block Summary Report Title */}
       <div className="w-full bg-[#b7e3ee] flex flex-col items-center pt-2 pb-1">
-        <span className="text-4xl font-extrabold text-black">
+        <span className="text-[24px] font-extrabold text-black">
           Block Summary Report
         </span>
-        <span className="text-lg font-bold text-black">SSE/P.way/GDR</span>
+        <span className="text-[24px] font-bold text-black">SSE/P.way/GDR</span>
         <div className="mt-2 bg-[#7be09b] px-6 py-1 rounded-2xl">
-          <span className="text-xl font-bold text-white">
+          <span className="text-[24px] font-bold text-white">
             Blocks Granted/Availed/Pending
           </span>
         </div>
@@ -368,11 +368,11 @@ export default function GenerateReportPage() {
         {/* Submit Button */}
          <div className="flex flex-col flex-1 min-w-[180px] w-full">
               <div className="flex justify-center w-full mb-1">
-                <span className="text-lg font-bold text-black">
+                <span className="text-[24px] font-bold text-black">
                   Select Period
                 </span>
               </div>
-              <div className="flex flex-row items-center gap-1 w-full">
+              <div className="flex flex-row items-center justify-center gap-1 mb-1 w-full">
                 <input
                   type="date"
                   className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center"
@@ -395,7 +395,7 @@ export default function GenerateReportPage() {
             </div>
         <div className="w-full flex justify-center mb-2">
           <button
-            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-lg shadow border border-[#00b347] text-lg"
+            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-lg shadow border border-[#00b347] text-[24px]"
             onClick={handleSubmit(onSubmit)}
             disabled={loading}
           >
@@ -406,7 +406,7 @@ export default function GenerateReportPage() {
         <div className="w-full mt-4">
           <div className="flex w-full">
             <div
-              className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1"
+              className="flex-1 bg-[#ff914d] text-[24px] font-bold border-2 border-black px-2 py-1"
               style={{ color: "black" }}
             >
               (A)Block Summary:{" "}
@@ -414,7 +414,7 @@ export default function GenerateReportPage() {
               {formatDisplayDate(watch("endDate")) || "........"}
             </div>
             <div
-              className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1"
+              className="flex-1 bg-[#ff914d] text-[24px] font-bold border-2 border-black px-2 py-1"
               style={{ color: "black" }}
             >
               Department:{" "}
@@ -427,7 +427,7 @@ export default function GenerateReportPage() {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-2 border-black">
               <thead>
-                <tr className="bg-[#f7c7ac] text-black text-lg font-bold">
+                <tr className="bg-[#f7c7ac] text-black text-[24px] font-bold">
                   <th className="border-2 border-black px-2 py-1">Section</th>
                   <th className="border-2 border-black px-2 py-1">Demanded</th>
                   <th className="border-2 border-black px-2 py-1">Approved</th>
@@ -579,7 +579,7 @@ export default function GenerateReportPage() {
         {/* (B) Summary of Upcoming Blocks */}
         <div className="w-full max-w-4xl mt-8">
           <div className="flex w-full items-center">
-            <div className="flex-1 bg-[#f1a983] text-xl font-bold border-2 border-black px-2 py-1">
+            <div className="flex-1 bg-[#f1a983] text-[24px] font-bold border-2 border-black px-2 py-1">
               (B) Summary of Upcoming Blocks
             </div>
             <div className="flex items-center gap-2 ml-4">
@@ -664,7 +664,7 @@ export default function GenerateReportPage() {
               </tbody>
             </table> */}
 
-            <table className="w-full border-2 border-black mt-1 text-sm">
+            <table className="w-full border-2 border-black mt-1 text-[24px]">
               <thead>
                 <tr className="bg-[#e49edd] text-black text-lg font-bold">
                   <th className="border-2 border-black px-2 py-1">Section</th>
@@ -743,23 +743,23 @@ export default function GenerateReportPage() {
         {/* Info Bar and Navigation */}
         <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between mt-8 mb-4 px-2">
           <div className="flex items-center gap-2 bg-[#cfd4ff] px-4 py-2 rounded-2xl border-2 ">
-            <span className="text-lg font-bold text-black">Click</span>
-            <span className="bg-[#00b347] text-white font-bold px-2 py-1 rounded">
+            <span className="text-[24px] font-bold text-black">Click</span>
+            <span className="bg-[#00b347] text-white font-bold px-2 py-1 rounded text-[24px]">
               Section/Block ID
             </span>
-            <span className="text-lg font-bold text-black">
+            <span className="text-lg font-bold text-black text-[24px]">
               to see further details.
             </span>
           </div>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <button
-              className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black"
+              className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-full px-6 py-2 text-[24px] font-bold text-black"
               onClick={() => router.back()}
             >
               <span className="text-2xl">⬅️</span> Back
             </button>
             <Link href="/drm">
-              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
+              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-full px-6 py-2 text-[24px] font-bold text-black">
                 <span className="text-2xl">🏠</span> Home
               </button>
             </Link>

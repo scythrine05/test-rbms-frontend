@@ -39,31 +39,31 @@ export default function BlockSummaryPage() {
         <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 pb-32">
             {/* Top Bar */}
             <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+                <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">RBMS-MAS-DIVIN</span>
             </div>
             <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-                <span className="text-2xl md:text-3xl font-bold text-black text-center">Block Summary Report</span>
+                <span className="text-[24px] md:text-3xl font-bold text-black text-center">Block Summary Report</span>
             </div>
             <div className="w-full bg-[#D6F3FF] py-2 flex flex-col items-center">
-                <span className="text-xl font-bold text-black">{session?.user?.department || "..."} Department</span>
+                <span className="text-[24px] font-bold text-black">{session?.user?.department || "..."} Department</span>
             </div>
             {/* Date Range Filter */}
             <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-center justify-center mt-6 mb-4">
-                <label className="text-base font-semibold text-black">From</label>
+                <label className="text-[20px] font-semibold text-black">From</label>
                 <input
                     type="date"
                     value={dateRange.start}
                     onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))}
                     className="p-1 border border-black text-black bg-white rounded"
                 />
-                <label className="text-base font-semibold text-black">To</label>
+                <label className="text-[20px] font-semibold text-black">To</label>
                 <input
                     type="date"
                     value={dateRange.end}
                     onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))}
                     className="p-1 border border-black text-black bg-white rounded"
                 />
-                <button type="submit" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-base font-bold text-black hover:bg-[#FFA726]">Generate</button>
+                <button type="submit" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-[20px] font-bold text-black hover:bg-[#FFA726]">Generate</button>
             </form>
             {/* Table */}
             {showTable && (
@@ -73,7 +73,7 @@ export default function BlockSummaryPage() {
                     ) : error ? (
                         <div className="text-center py-8 text-lg font-bold text-red-600">Error loading data</div>
                     ) : (
-                        <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+                        <table className="w-full border border-black rounded-xl overflow-hidden text-[20px]">
                             <thead>
                                 <tr className="bg-[#D6F3FF] text-black">
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">Date</th>

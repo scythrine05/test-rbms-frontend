@@ -119,20 +119,20 @@ export default function EditRequestsPage() {
             <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative pb-32">
                 {/* Top Yellow Bar */}
                 <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-                    <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS</span>
+                    <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">RBMS-MAS-DIVN</span>
                 </div>
                 {/* Main Title on Light Blue */}
                 <div className="w-full bg-[#D6F3FF] py-3 flex flex-col items-center border-b-2 border-black">
-                    <span className="text-2xl md:text-3xl font-bold text-black text-center">Edit/Cancel Previous Block Requests</span>
+                    <span className="text-[24px] md:text-3xl font-bold text-black text-center">Edit/Cancel Previous Block Requests</span>
                 </div>
                 {/* Table Box */}
                 <div className="flex justify-center mt-3 mb-6">
                     <div className="w-full rounded-2xl border-2 border-[#B5B5B5] bg-[#F5E7B2] shadow p-0">
-                        <div className="text-xl font-bold text-black text-center py-2">MY UPCOMING BLOCK REQUESTS</div>
-                        <div className="italic text-center text-sm text-black pb-2">(Click ID to edit or cancel)</div>
+                        <div className="text-[24px] font-bold text-black text-center py-2">MY UPCOMING BLOCK REQUESTS</div>
+                        <div className="italic text-center text-[24px] text-black pb-2">(Click ID to edit or cancel)</div>
                         {/* Table */}
                         <div className="overflow-x-auto rounded-xl mx-2 mb-2">
-                            <table className="w-full border border-black rounded-xl overflow-hidden text-sm">
+                            <table className="w-full border border-black rounded-xl overflow-hidden text-[24px]">
                                 <thead>
                                     <tr className="bg-[#D6F3FF] text-black">
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">Date</th>
@@ -146,7 +146,7 @@ export default function EditRequestsPage() {
                                 <tbody>
                                     {userRequests.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="text-center text-gray-600 py-8">No block requests found for your account.</td>
+                                            <td colSpan={6} className="text-center text-gray-600 py-8 text-[24px] ">No block requests found for your account.</td>
                                         </tr>
                                     ) : (
                                         userRequests.map((request: any, idx: number) => (
@@ -180,14 +180,14 @@ export default function EditRequestsPage() {
                                                     {isEditable(request.date) ? (
                                                         <button
                                                             onClick={() => router.push(`/edit-request/${request.id}`)}
-                                                            className="bg-[#b7b7f7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#e6e6fa] transition"
+                                                            className="bg-[#b7b7f7] text-black px-2 py-1 rounded border border-black text-[24px] hover:bg-[#e6e6fa] transition"
                                                         >
                                                             Edit
                                                         </button>
                                                     ) : (
                                                         <button
                                                             onClick={() => handleCancel(request.id)}
-                                                            className="bg-[#ffb7b7] text-black px-2 py-1 rounded border border-black text-xs hover:bg-[#ffcccc] transition"
+                                                            className="bg-[#ffb7b7] text-black px-2 py-1 rounded border border-black text-[24px] hover:bg-[#ffcccc] transition"
                                                         >
                                                             Cancel
                                                         </button>
@@ -207,13 +207,13 @@ export default function EditRequestsPage() {
                         <div className="flex justify-center gap-3 mb-2">
                             <button
                                 onClick={() => router.push('/dashboard')}
-                                className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
+                                className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black",fontSize: "24px"}}
                             >
                                 <span className="text-xl">🏠</span> Home
                             </button>
                             <button
                                 onClick={() => window.history.back()}
-                                className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black"}}
+                                className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black",fontSize: "24px"}}
                             >
                                 <span className="text-xl">⬅️</span> Back
                             </button>
@@ -228,12 +228,12 @@ export default function EditRequestsPage() {
                                     const { signOut } = await import('next-auth/react');
                                     await signOut({ redirect: true, callbackUrl: '/auth/login' });
                                 }}
-                                className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
+                                className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-[24px] font-bold text-black"
                             >
                                 Logout
                             </button>
                         </div>
-                        <div className="text-[10px] text-gray-600 border-t border-black pt-1 text-right">
+                        <div className="text-[12px] text-gray-600 border-t border-black pt-1 text-right">
                             © {new Date().getFullYear()} Indian Railways
                         </div>
                     </div>

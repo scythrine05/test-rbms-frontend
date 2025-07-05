@@ -279,7 +279,7 @@ export default function ViewRequestPage() {
 
       <div className="mb-4 px-2 py-1 inline-block">
         <span
-          className={`px-2 py-0.5 text-sm ${getStatusBadgeClass(
+          className={`px-2 py-0.5 text-xl font-medium ${getStatusBadgeClass(
             request.managerAcceptance ? "APPROVED" : "PENDING"
           )}`}
         >
@@ -289,37 +289,37 @@ export default function ViewRequestPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="border border-black p-3">
-          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+          <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             Request Information
           </h2>
           <table className="w-full text-sm">
             <tbody>
               <tr>
-                <td className="py-1 font-medium">Request ID:</td>
+                <td className="py-1 font-medium text-[18px]">Request ID:</td>
                 <td className="py-1">{request.id}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Date:</td>
+                <td className="py-1 font-medium text-[18px]">Date:</td>
                 <td className="py-1">{formatDate(request.date)}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Created:</td>
+                <td className="py-1 font-medium text-[18px]">Created:</td>
                 <td className="py-1">{formatDate(request.createdAt)}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Requested By:</td>
+                <td className="py-1 font-medium text-[18px]">Requested By:</td>
                 <td className="py-1">{request.user.name}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Department:</td>
+                <td className="py-1 font-medium text-[18px]">Department:</td>
                 <td className="py-1">{request.selectedDepartment}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Section:</td>
+                <td className="py-1 font-medium text-[18px]">Section:</td>
                 <td className="py-1">{request.selectedSection}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Depot:</td>
+                <td className="py-1 font-medium text-[18px]">Depot:</td>
                 <td className="py-1">{request.selectedDepo}</td>
               </tr>
             </tbody>
@@ -327,21 +327,21 @@ export default function ViewRequestPage() {
         </div>
 
         <div className="border border-black p-3">
-          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+          <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             Work Details
           </h2>
           <table className="w-full text-sm">
             <tbody>
               <tr>
-                <td className="py-1 font-medium">Work Type:</td>
+                <td className="py-1 font-medium text-[18px]">Work Type:</td>
                 <td className="py-1">{request.workType}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Activity:</td>
+                <td className="py-1 font-medium text-[18px]">Activity:</td>
                 <td className="py-1">{request.activity}</td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Time:</td>
+                <td className="py-1 font-medium text-[18px]">Time:</td>
                 {/* <td className="py-1">
                   {formatTime(request.demandTimeFrom)} to{" "}
                   {formatTime(request.demandTimeTo)}
@@ -353,12 +353,12 @@ export default function ViewRequestPage() {
                 </td>
               </tr>
               <tr>
-                <td className="py-1 font-medium">Block Section:</td>
+                <td className="py-1 font-medium text-[18px]">Block Section:</td>
                 <td className="py-1">{request.missionBlock}</td>
               </tr>
               {request.workLocationFrom ? (
                 <tr>
-                  <td className="py-1 font-medium">Work Location:</td>
+                  <td className="py-1 font-medium text-[18px]">Work Location:</td>
                   <td className="py-1">
                     {request.workLocationFrom}
                   </td>
@@ -372,24 +372,24 @@ export default function ViewRequestPage() {
       {request.processedLineSections &&
         request.processedLineSections.length > 0 && (
           <div className="border border-black p-3 mb-4">
-            <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+            <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
               Block Sections Detail
             </h2>
             <div className="space-y-3">
               {request.processedLineSections.map((section, index) => (
                 <div key={index} className="border border-gray-200 p-2">
-                  <h3 className="font-medium text-[#13529e]">
+                  <h3 className="font-medium text-[#13529e] text-[18px]">
                     {section.block}
                   </h3>
                   {section.type === "line"|| section.type==="regular" ? (
                     <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="text-xs font-medium">Line:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[18px]">Line:</span>
                         <div className="py-1">{section.lineName || "N/A"}</div>
                       </div>
                       {section.otherLines && (
-                        <div>
-                          <span className="text-xs font-medium">
+                        <div >
+                          <span className="text-[18px] font-medium">
                             Other Lines Affected:
                           </span>
                           <div className="py-1">{section.otherLines}</div>
@@ -399,16 +399,16 @@ export default function ViewRequestPage() {
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-xs font-medium">Stream:</span>
+                        <span className="text-[18px] font-medium">Stream:</span>
                         <div className="py-1">{section.stream || "N/A"}</div>
                       </div>
                       <div>
-                        <span className="text-xs font-medium">Road:</span>
+                        <span className="text-[18px] font-medium">Road:</span>
                         <div className="py-1">{section.road || "N/A"}</div>
                       </div>
                       {section.otherRoads && (
                         <div className="col-span-2">
-                          <span className="text-xs font-medium">
+                          <span className="text-[18px] font-medium">
                             Other Roads Affected:
                           </span>
                           <div className="py-1">{section.otherRoads}</div>
@@ -424,13 +424,13 @@ export default function ViewRequestPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="border border-black p-3">
-          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+          <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             System Disconnections
           </h2>
           <table className="w-full text-sm">
             <tbody>
               <tr>
-                <td className="py-1 font-medium">Power Block Required:</td>
+                <td className="py-1 text-[18px]">Power Block Required:</td>
                 <td className="py-1">
                   {request?.powerBlockRequired && request.powerBlockRequired
                     ? "Yes"
@@ -439,19 +439,19 @@ export default function ViewRequestPage() {
               </tr>
               {request.powerBlockRequired && request.powerBlockRequirements && (
                 <tr>
-                  <td className="py-1 font-medium">Power Block Details:</td>
+                  <td className="py-1 text-[18px]">Power Block Details:</td>
                   <td className="py-1">
                     {request.powerBlockRequirements?.join(", ") || "N/A"}
                   </td>
                 </tr>
               )}
               <tr>
-                <td className="py-1 font-medium">Elementary Section:</td>
+                <td className="py-1 text-[18px]">Elementary Section:</td>
                 <td className="py-1">{request.elementarySection}</td>
               </tr>
 
               <tr>
-                <td className="py-1 font-medium">
+                <td className="py-1 text-[18px]">
                   S&T Disconnection Required:
                 </td>
                 <td className="py-1">
@@ -461,7 +461,7 @@ export default function ViewRequestPage() {
               {request.sntDisconnectionRequired &&
                 request.sntDisconnectionRequirements && (
                   <tr>
-                    <td className="py-1 font-medium">
+                    <td className="py-1 text-[18px]">
                       S&T Disconnection Details:
                     </td>
                     <td className="py-1">
@@ -471,7 +471,7 @@ export default function ViewRequestPage() {
                   </tr>
                 )}
               <tr>
-                <td className="py-1 font-medium">S&T Lines:</td>
+                <td className="py-1 text-[18px]">S&T Lines:</td>
                 <td className="py-1">
                   {request.sntDisconnectionLineFrom} to{" "}
                   {request.sntDisconnectionLineTo}
@@ -485,7 +485,7 @@ export default function ViewRequestPage() {
               </tr>
               {request.sigDisconnection && request.sntDisconnectionRequired && (
                 <tr>
-                  <td className="py-1 font-medium">
+                  <td className="py-1 text-[18px]">
                     Signal Disconnection Details:
                   </td>
                   <td className="py-1">
@@ -498,13 +498,13 @@ export default function ViewRequestPage() {
         </div>
 
         <div className="border border-black p-3">
-          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+          <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             Safety & Additional Information
           </h2>
           <table className="w-full text-sm">
             <tbody>
               <tr>
-                <td className="py-1 font-medium">Fresh Caution Required:</td>
+                <td className="py-1 text-[18px]">Fresh Caution Required:</td>
                 <td className="py-1">
                   {request.freshCautionRequired ? "Yes" : "No"}
                 </td>
@@ -512,12 +512,12 @@ export default function ViewRequestPage() {
               {request.freshCautionRequired && (
                 <>
                   <tr>
-                    <td className="py-1 font-medium">Caution Speed:</td>
+                    <td className="py-1 text-[18px]">Caution Speed:</td>
                     <td className="py-1">{request.freshCautionSpeed} km/h</td>
                   </tr>
                   {request.freshCautionLocationFrom && (
                     <tr>
-                      <td className="py-1 font-medium">Caution Location:</td>
+                      <td className="py-1 text-[18px]">Caution Location:</td>
                       <td className="py-1">
                         {request.freshCautionLocationFrom} to{" "}
                         {request.freshCautionLocationTo}
@@ -527,12 +527,12 @@ export default function ViewRequestPage() {
                 </>
               )}
               <tr>
-                <td className="py-1 font-medium">Adjacent lines affected:</td>
+                <td className="py-1 text-[18px]">Adjacent lines affected:</td>
                 <td className="py-1">{request.adjacentLinesAffected}</td>
               </tr>
               {request.repercussions && (
                 <tr>
-                  <td className="py-1 font-medium">Repercussions:</td>
+                  <td className="py-1 text-[18px]">Repercussions:</td>
                   <td className="py-1">{request.repercussions}</td>
                 </tr>
               )}
@@ -551,11 +551,11 @@ export default function ViewRequestPage() {
       )} */}
 
  <div className="border border-black p-3 mb-4">
-          <h2 className="text-md font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
+          <h2 className="text-[24px] font-bold text-[#13529e] mb-2 border-b border-gray-200 pb-1">
             Remarks
           </h2>
           {/* <p className="text-sm">{request.requestremarks}</p> */}
-          <p className="text-sm">
+          <p className="text-[18px]">
   {request.requestremarks?.trim() ? request.requestremarks : "Nil"}
 </p>
 

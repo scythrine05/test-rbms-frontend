@@ -198,7 +198,7 @@ function ReviewBlockRequestModal({
             Review the Block Request Before Submission
           </h2>
           <div className="space-y-3 text-black text-base">
-            <div className="flex flex-wrap gap-4 mb-2">
+            <div className="flex flex-wrap gap-4">
               <div className="flex-1 min-w-[180px]">
                 <b>Date of Block:</b> {formData.date}
               </div>
@@ -2071,7 +2071,7 @@ export default function CreateBlockRequestPage() {
                   {/* Date Row */}
                   <tr className="bg-white border-b hover:bg-[#f7f7fa]">
                     <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[20px]">
+                      <div className="font-bold text-black text-[24px]">
                         Date
                       </div>
                       <div className="text-black text-[20px]">
@@ -2092,7 +2092,7 @@ export default function CreateBlockRequestPage() {
                   {/* ID Row */}
                   <tr className="bg-white border-b hover:bg-[#f7f7fa]">
                     <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[20px]">ID</div>
+                      <div className="font-bold text-black text-[24px]">ID</div>
                       <div className="text-black text-[20px]">
                         {submittedSummary?.id || "-"}
                       </div>
@@ -2102,10 +2102,10 @@ export default function CreateBlockRequestPage() {
                   {/* Block Section Row */}
                   <tr className="bg-white border-b hover:bg-[#f7f7fa]">
                     <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[20px]">
+                      <div className="font-bold text-black text-[24px]">
                         Block Section
                       </div>
-                      <div className="text-black text-[20px]">
+                      <div className="text-black text-[24px]">
                         {submittedSummary?.blockSection || "-"}
                       </div>
                     </td>
@@ -2114,7 +2114,7 @@ export default function CreateBlockRequestPage() {
                   {/* Line Row */}
                   <tr className="bg-white border-b hover:bg-[#f7f7fa]">
                     <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[20px]">
+                      <div className="font-bold text-black text-[24px]">
                         Line
                       </div>
                       <div className="text-black text-[20px]">
@@ -2126,10 +2126,10 @@ export default function CreateBlockRequestPage() {
                   {/* Demanded Row */}
                   <tr className="bg-white hover:bg-[#f7f7fa]">
                     <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[20px]">
+                      <div className="font-bold text-black text-[24px]">
                         Demanded
                       </div>
-                      <div className="text-black text-[20px]">
+                      <div className="text-black text-[24px]">
                         {submittedSummary?.duration || "-"}
                       </div>
                     </td>
@@ -2215,24 +2215,24 @@ export default function CreateBlockRequestPage() {
     <div className="min-h-screen flex flex-col items-center justify-start bg-[#f7fafc] py-0">
       {/* Header */}
       <div className="w-full bg-[#fff9b2] py-6 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[48px] font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS-MAS-DIVN</span>
+        <span className="text-[24px] font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS-MAS-DIVN</span>
       </div>
       {/* Sub-header */}
       <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[32px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
+        <span className="text-[24px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
   {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
 </span>
       </div>
       {/* Form Card */}
-      <div className="w-full max-w-3xl mt-0 p-10 bg-[#c6e6f7] border-4 border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
+      <div className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4 border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
         <form onSubmit={handleFormSubmit} className="space-y-10">
           <div className="grid grid-cols-1 gap-y-8 mb-8">
             {/* Date of Block */}
-            <div className="flex flex-col md:flex-row md:items-center gap-6 w-full">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
               <label className="text-[24px] font-bold text-black min-w-[180px]" htmlFor="date-of-block">
                 Date of Block
               </label>
-                <div className="flex flex-row items-center gap-4 w-full">
+                <div className="flex flex-row items-center gap-2 w-full">
                   <input
                     id="date-of-block"
                     type="date"
@@ -2256,19 +2256,19 @@ export default function CreateBlockRequestPage() {
                   <div className="flex flex-row items-center gap-2 ml-2">
                   {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
                   {isDisabled ? (
-                    <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[22px] font-extrabold text-black shadow-sm">U</span>
+                    <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">U</span>
                   ) : (
                     <div className="flex flex-row gap-2">
                     <button
                       type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
+                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
                       onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
                     >
                       C
                     </button>
                     <button
                       type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[22px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
+                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
                       onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Outside Corridor' } } as any)}
                     >
                       NC
@@ -2279,23 +2279,23 @@ export default function CreateBlockRequestPage() {
                 )}
                 </div>
               {errors.date && (
-                <span className="text-[20px] text-[#e07a5f] font-medium mt-2 block">
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
                   {errors.date}
                 </span>
               )}
             </div>
             {/* If not Corridor Block, show reason box (compact) */}
-          {formData.corridorTypeSelection &&
+           {formData.corridorTypeSelection &&
             !["Corridor Block", "Corridor"].includes(
               formData.corridorTypeSelection
             ) && (
-              <div className="w-full mt-1">
+              <div className="w-full">
                 <textarea
                   name="nonCorridorReason"
                   value={formData.nonCorridorReason || ""}
                   onChange={handleInputChange}
                   placeholder="Reasons for asking Block outside Corridor or Emergency Block"
-                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[20px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
+                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
                   style={{
                     minHeight: "32px",
                     marginTop: 0,
@@ -2307,7 +2307,7 @@ export default function CreateBlockRequestPage() {
               </div>
             )}
             {/* Major Section Dropdown - compact, no label */}
-            <div className="flex flex-row items-center gap-4 w-full mt-2">
+            <div className="flex flex-row items-center gap-4 w-full ">
               <select
                 id="major-section"
                 name="selectedSection"
@@ -2323,7 +2323,7 @@ export default function CreateBlockRequestPage() {
                   Select Major Section
                 </option>
                 {majorSectionOptions.map((section: string) => (
-                  <option key={section} value={section} className="text-[22px]">
+                  <option key={section} value={section} className="text-[24px]">
                     {section}
                   </option>
                 ))}
@@ -2335,7 +2335,7 @@ export default function CreateBlockRequestPage() {
               )}
             </div>
             {/* Block Section/Yard Multi-select - max 2 selections */}
-            <div className="flex flex-row items-center gap-4 w-full mt-2">
+            <div className="flex flex-row items-center gap-3 w-full mt-1">
               <Select
                 isMulti
                 name="blockSection"
@@ -2370,7 +2370,7 @@ export default function CreateBlockRequestPage() {
                     fontWeight: "bold",
                     fontSize: "22px",
                     boxShadow: "none",
-                    padding: "0 2px",
+                    padding: "0 1px",
                   }),
                   menu: (base) => ({ ...base, zIndex: 9999 }),
                   multiValue: (base) => ({
@@ -2407,7 +2407,7 @@ export default function CreateBlockRequestPage() {
                         : "#ffe6b3",
                     color: "black",
                     fontWeight: "bold",
-                    fontSize: "22px",
+                    fontSize: "24px",
                     padding: "4px 8px",
                   }),
                   placeholder: (base) => ({
@@ -2428,7 +2428,7 @@ export default function CreateBlockRequestPage() {
                 isOptionDisabled={() => blockSectionValue.length >= 2}
               />
               {errors.missionBlock && (
-                <span className="text-[20px] text-[#e07a5f] font-medium mt-2 block">
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-1 block">
                   {errors.missionBlock}
                 </span>
               )}
@@ -2452,9 +2452,9 @@ export default function CreateBlockRequestPage() {
                   (s: any) => s.block === block
                 ) || {};
               return (
-                <div key={block} className="flex flex-col gap-1 w-full mt-2">
-                  <span className="text-[20px] font-bold text-black mb-1">Select {isYard ? 'Road(s)' : 'Line(s)'} for <span className="text-[#3a506b]">{block}</span></span>
-                  <div className="flex flex-row items-center gap-4 w-full">
+                <div key={block} className="flex flex-col gap-1 w-full">
+                  <span className="text-[24px] font-bold text-black mb-1">Select {isYard ? 'Road(s)' : 'Line(s)'} for <span className="text-[#3a506b]">{block}</span></span>
+                  <div className="flex flex-row items-center gap-3 w-full">
                     <Select
                       isMulti
                       name={`lineOrRoad-${block}`}
@@ -2509,7 +2509,7 @@ export default function CreateBlockRequestPage() {
                           borderRadius: 12,
                           minHeight: "44px",
                           fontWeight: "bold",
-                          fontSize: "22px",
+                          fontSize: "24px",
                           boxShadow: "none",
                           padding: "0 2px",
                         }),
@@ -2528,7 +2528,7 @@ export default function CreateBlockRequestPage() {
                           ...base,
                           color: "black",
                           fontWeight: "bold",
-                          fontSize: "22px",
+                          fontSize: "24px",
                           padding: "2px 8px",
                         }),
                         multiValueRemove: (base) => ({
@@ -2555,7 +2555,7 @@ export default function CreateBlockRequestPage() {
                           ...base,
                           color: "black",
                           fontWeight: "bold",
-                          fontSize: "22px",
+                          fontSize: "24px",
                         }),
                         dropdownIndicator: (base) => ({
                           ...base,
@@ -2576,10 +2576,10 @@ export default function CreateBlockRequestPage() {
             })}
             {/* Corridor for this section info bar (only once, after all lines/roads selects) */}
             <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
-              <span className="text-[20px] font-bold text-black text-center mr-4">
+              <span className="text-[24px] font-bold text-black text-center mr-4">
                 Corridor for this section
               </span>
-              <span className="text-[20px] font-bold text-black text-center">
+              <span className="text-[24px] font-bold text-black text-center">
                 {corridorTime?.from || '--:--'} 
                   <span className="mx-2">
                     TO
@@ -2592,7 +2592,7 @@ export default function CreateBlockRequestPage() {
               {/* Preferred Slot label */}
               {/* Time selectors and duration row - always single line, scrollable if needed */}
               <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto pl-1 border-2 border-black rounded-2xl bg-[#fffbe9]">
-              <span className="text-black font-bold text-[20px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
+              <span className="text-black font-bold text-[24px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
                 <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0" style={{ fontSize: '16px' }}>
                   <select
                     name="demandTimeFromHour"
@@ -2627,7 +2627,7 @@ export default function CreateBlockRequestPage() {
                       <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
                     ))}
                   </select>
-                  <span className="text-black font-bold text-[16px] px-1">TO</span>
+                  <span className="text-black font-bold text-[24px] px-1">TO</span>
                   <select
                     name="demandTimeToHour"
                     value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : ""}
@@ -2669,7 +2669,7 @@ export default function CreateBlockRequestPage() {
               {/* Site Location row */}
               <div className="flex flex-row items-center gap-4 w-full pl-1">
                 <div className="flex flex-col items-center bg-[#fffbe9] border-2 border-black rounded-xl px-3 py-2 min-w-0 gap-x-2 w-full" >
-                  <span className="font-bold text-black text-[20px] leading-none mr-2 whitespace-nowrap">Site Location</span>
+                  <span className="font-bold text-black text-[24px] leading-none mr-2 whitespace-nowrap">Site Location</span>
                   <div>
                     <input
                       type="text"
@@ -2680,7 +2680,7 @@ export default function CreateBlockRequestPage() {
                       className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
                       required
                     />
-                    <span className="font-bold text-black text-[20px] mx-1">to</span>
+                    <span className="font-bold text-black text-[24px] mx-1">to</span>
                     <input
                       type="text"
                       name="workLocationTo"
@@ -2700,13 +2700,13 @@ export default function CreateBlockRequestPage() {
           <div className="w-full flex flex-row gap-8 items-center bg-[#e6f7c6] rounded-2xl p-6 mb-8 border-2 border-[#b6e6c6] shadow">
             {/* Type of Work dropdown */}
             <div className="flex-1">
-              <label htmlFor="workType" className="block text-[20px] font-bold text-black mb-2">Type of Work</label>
+              <label htmlFor="workType" className="block text-[24px] font-bold text-black mb-2">Type of Work</label>
               <select
                 id="workType"
                 name="workType"
                 value={formData.workType || ""}
                 onChange={handleInputChange}
-                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[20px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
+                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
                 style={{ minHeight: '48px' }}
                 aria-required="true"
               >
@@ -2714,7 +2714,7 @@ export default function CreateBlockRequestPage() {
                   Select Type of Work
                 </option>
                 {workTypeOptions.map((type: string) => (
-                  <option key={type} value={type} className="text-[18px]">
+                  <option key={type} value={type} className="text-[24px]">
                     {type}
                   </option>
                 ))}
@@ -2727,13 +2727,13 @@ export default function CreateBlockRequestPage() {
             </div>
             {/* Activity dropdown */}
             <div className="flex-1">
-              <label htmlFor="activity" className="block text-[20px] font-bold text-black mb-2">Activity</label>
+              <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-8 ">Activity</label>
               <select
                 id="activity"
                 name="activity"
                 value={formData.activity || ""}
                 onChange={handleInputChange}
-                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[20px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
+                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3  text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
                 style={{ minHeight: '48px' }}
                 aria-required="true"
                 disabled={!formData.workType}
@@ -2742,7 +2742,7 @@ export default function CreateBlockRequestPage() {
                   {formData.workType ? 'Select Activity' : 'Select Type of Work first'}
                 </option>
                 {activityOptions.map((activity: string) => (
-                  <option key={activity} value={activity} className="text-[18px]">
+                  <option key={activity} value={activity} className="text-[24px]">
                     {activity}
                   </option>
                 ))}
@@ -2751,7 +2751,7 @@ export default function CreateBlockRequestPage() {
               {formData.activity === "others" && (
                 <input
                   type="text"
-                  className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[18px] font-medium bg-white text-[#3a506b] shadow mt-4 focus:outline-none focus:ring-2 focus:ring-[#b7cbe8]"
+                  className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[24px] font-medium bg-white text-[#3a506b] shadow mt-4 focus:outline-none focus:ring-2 focus:ring-[#b7cbe8]"
                   placeholder="Enter custom activity"
                   value={customActivity}
                   onChange={(e) => setCustomActivity(e.target.value)}
@@ -2759,7 +2759,7 @@ export default function CreateBlockRequestPage() {
                 />
               )}
               {errors.activity && (
-                <span className="text-[18px] text-[#e07a5f] font-medium mt-2 block">
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
                   {errors.activity}
                 </span>
               )}
@@ -2769,7 +2769,7 @@ export default function CreateBlockRequestPage() {
           {/* Fresh Caution Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[20px]">
+              <span className="text-black font-bold text-[24px]">
                 Whether Fresh Caution will be imposed after block
               </span>
               <select
@@ -2804,7 +2804,7 @@ export default function CreateBlockRequestPage() {
                   <div
                     key={idx}
                     className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
-                    style={{ fontSize: "13px", fontWeight: "bold" }}
+                    style={{ fontSize: "24px", fontWeight: "bold" }}
                   >
                     {/* ◼︎ Direction / Road */}
                     <input
@@ -2908,7 +2908,7 @@ export default function CreateBlockRequestPage() {
           {/* Power Block Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[20px]">
+              <span className="text-black font-bold text-[24px]">
                 Whether Power Block also needed:
               </span>
               <select
@@ -2998,7 +2998,7 @@ export default function CreateBlockRequestPage() {
           {/* S&T Disconnection Section */}
           <div className="w-full mt-2">
             <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[20px]">
+              <span className="text-black font-bold text-[24px]">
                 Whether S&T Disconnection is needed:
               </span>
               <select
@@ -3113,7 +3113,7 @@ export default function CreateBlockRequestPage() {
 
           {/* Remarks */}
           <div className="flex flex-row flex-wrap gap-1">
-            <span className="text-black font-bold text-[13px]">
+            <span className="text-black font-bold text-[24px]">
               Remarks:
             </span>
             <textarea
@@ -3121,7 +3121,7 @@ export default function CreateBlockRequestPage() {
               value={formData.remarks || ""}
               onChange={handleInputChange}
               placeholder="Enter any additional remarks"
-              className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[13px]"
+              className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[24px]"
               style={{ minHeight: "32px" }}
             />
           </div>
@@ -3131,13 +3131,13 @@ export default function CreateBlockRequestPage() {
             <button
               type="button"
               onClick={() => { window.location.href = "/dashboard"; }}
-              className="w-full rounded-2xl bg-[#99f61f] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+              className="w-full rounded-2xl bg-[#99f61f] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
             >
               Home
             </button>
             <button
               type="button"
-              className="w-full rounded-2xl bg-[#e3e3e3] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+              className="w-full rounded-2xl bg-[#e3e3e3] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
               onClick={() => {
                 if (reviewMode) {
                   setReviewMode(false);
