@@ -31,6 +31,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { managerService } from "@/app/service/api/manager";
+import dayjs from "dayjs";
 
 // Components
 const Pagination = ({
@@ -834,7 +835,7 @@ const handleDownload = () => {
                     className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}
                   >
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                      {formatDate(request.date)}
+                      {dayjs(request.date).format("DD-MM-YY")}
                     </td>
                     <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
                       <Link

@@ -719,6 +719,7 @@ import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { useSession } from "next-auth/react";
 import { useRef } from "react";
+import dayjs from "dayjs";
 
 export default function ManagerRequestTablePage() {
   const router = useRouter();
@@ -1132,7 +1133,7 @@ export default function ManagerRequestTablePage() {
       {/* Pending Requests Section */}
       <div className="mx-4 mt-6">
         <div className="bg-[#f69697] grid grid-cols-3 gap-0 border-2 border-black">
-          <div className="p-3 text-black font-bold border-r-2 border-black text-[24px]">
+          <div className="p-3 text-black font-bold border-r-2 border-black text-[20px]">
             REQUESTS PENDING WITH ME
           </div>
           <div className="p-3 text-black font-bold border-r-2 border-black text-center text-[24px]">
@@ -1450,7 +1451,7 @@ export default function ManagerRequestTablePage() {
                     className={`${rowBgColor} hover:bg-[#F3F3F3]`}
                   >
                     <td className="border border-black p-1 text-center">
-                      {formatDate(request.date)}
+                      {dayjs(request.date).format("DD-MM-YY")}
                     </td>
                     <td className="border border-black p-1 text-center">
                       <Link

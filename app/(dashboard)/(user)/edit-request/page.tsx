@@ -138,7 +138,7 @@ export default function EditRequestsPage() {
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[12%]">Date</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">ID</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">Block Section</th>
-                                        <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">UP/DN/SL/Rpad</th>
+                                        <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">Line/Road</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Duration</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Edit/Cancel</th>
                                     </tr>
@@ -151,7 +151,7 @@ export default function EditRequestsPage() {
                                     ) : (
                                         userRequests.map((request: any, idx: number) => (
                                             <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
-                                                <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{dayjs(request.date).format("DD-MM-YYYY")}</td>
+                                                <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">{dayjs(request.date).format("DD-MM-YY")}</td>
                                                 <td className="border border-black px-2 py-1 whitespace-nowrap text-center">
                                                     <button
                                                         onClick={() => {

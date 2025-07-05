@@ -1,805 +1,849 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminService } from "@/app/service/api/admin";
-import {
-  format,
-  parseISO,
-  addDays,
-  subDays,
-  startOfWeek,
-  endOfWeek,
-} from "date-fns";
-import { UserRequest } from "@/app/service/api/manager";
-import { useUrgentMode } from "@/app/context/UrgentModeContext";
-import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
+import { useState, useEffect, useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
+import Select, { MultiValue } from "react-select";
+import { toast } from "react-hot-toast";
+import { format } from "date-fns";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useGenerateReport } from "@/app/service/query/hq";
+import { MajorSection } from "@/app/lib/store";
+import { useSession } from "next-auth/react";
+import { managerService, UserRequest } from "@/app/service/api/manager";
+import { useQuery } from "@tanstack/react-query";
 
-// Header icons for tables
-const HeaderIcon = ({ type }: { type: string }) => {
-  switch (type) {
-    case "date":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg>
-      );
-    case "section":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-      );
-    case "line":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
-      );
-    case "time":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-      );
-    case "work":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /><path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" /></svg>
-      );
-    case "corridor":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5z" /></svg>
-      );
-    case "user":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a5 5 0 100 10A5 5 0 0010 2zm-7 16a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
-      );
-    case "reason":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M18 13V7a2 2 0 00-2-2H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2zm-2 0H4V7h12v6z" /></svg>
-      );
-    case "action":
-      return (
-        <svg className="w-3.5 h-3.5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V3a1 1 0 102 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-      );
-    default:
-      return null;
-  }
-};
+interface OptionType {
+  value: string;
+  label: string;
+}
 
-const ColumnHeader = ({ icon, title }: { icon: string; title: string }) => (
-  <div className="flex items-center">
-    <HeaderIcon type={icon} />
-    <span>{title}</span>
-  </div>
-);
+interface FormData {
+  startDate: string;
+  endDate: string;
+  department: OptionType[];
+  blockType: OptionType[];
+  majorSection: OptionType[];
+}
 
-const getLineOrRoad = (request: UserRequest) => {
-  if (
-    request.processedLineSections &&
-    Array.isArray(request.processedLineSections) &&
-    request.processedLineSections.length > 0
-  ) {
-    return request.processedLineSections
-      .map((section) => {
-        if (section.type === "yard") {
-          if (section.stream && section.road) {
-            return `${section.stream}/${section.road}`;
-          }
-          if (section.stream) {
-            return section.stream;
-          }
-          if (section.road) {
-            return section.road;
-          }
-        } else if (section.lineName) {
-          return section.lineName;
-        }
-        return null;
-      })
-      .filter(Boolean)
-      .join(", ") || "N/A";
-  }
-  return "N/A";
-};
+// Interfaces aligned with the API service
+interface PastBlockSummary {
+  SectionId?: string;
+  Section: string;
+  Demanded: number;
+  Approved: number;
+  Granted: number;
+  Availed: number;
+  Percentage?: number;
+  PercentGranted?: number;
+  PercentAvailed?: number;
+  Department?: String;
+  corridorType?: String;
+  MissionBlock?: String;
+}
 
-export default function OptimiseTablePage() {
+interface DetailedData {
+  Date: string;
+  Section: string;
+  Duration: number;
+  Type: string;
+  Status: string;
+}
+
+const locationOptions: OptionType[] = [
+  { value: "MAS", label: "MAS" },
+  { value: "SA", label: "SA" },
+  { value: "MCU", label: "MCU" },
+  { value: "TPJ", label: "TPJ" },
+  { value: "PGT", label: "PGT" },
+  { value: "TVC", label: "TVC" },
+];
+
+const blockTypeOptions: OptionType[] = [
+  { value: "All", label: "All" },
+  { value: "Corridor", label: "Corridor" },
+  { value: "Non-corridor", label: "Outside corridor" },
+  { value: "Emergency", label: "Emergency" },
+  { value: "Mega", label: "Mega Block" },
+];
+
+const departmentOptions: OptionType[] = [
+  { value: "Engineering", label: "Engineering" },
+  { value: "ST", label: "S & T" },
+  { value: "TRD", label: "TRD" },
+];
+
+export default function GenerateReportPage() {
+  const [pastBlockSummary, setPastBlockSummary] = useState<PastBlockSummary[]>(
+    []
+  );
+  const [loading, setLoading] = useState(false);
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>(["All"]);
+  const [selectedBlockTypes, setSelectedBlockTypes] = useState<string[]>([
+    "All",
+  ]);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([
+    "Engineering",
+  ]);
+  const [selectedMajorSections, setSelectedMajorSections] = useState<string[]>(
+    []
+  );
+  const [majorSectionOptions, setMajorSectionOptions] = useState<OptionType[]>(
+    []
+  );
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { isUrgentMode } = useUrgentMode();
-  const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [departmentTab, setDepartmentTab] = useState<'all' | 'engg' | 'trd' | 'snt'>('all');
-  const [workTypeFilter, setWorkTypeFilter] = useState<string>("ALL");
-  const [activityFilter, setActivityFilter] = useState<string>("ALL");
-  const [timeSlotFilter, setTimeSlotFilter] = useState<string>("ALL");
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>();
+  const { data: session } = useSession();
 
-  // Initialize currentWeekStart from URL parameter or default to current date
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const dateParam = searchParams.get('date');
-    if (dateParam) {
-      return new Date(dateParam);
-    }
-    const today = new Date();
-    const lastSaturday = subDays(today, (today.getDay() + 1) % 7);
-    return startOfWeek(lastSaturday, { weekStartsOn: 6 });
+  // Parameters for the query
+  const [queryParams, setQueryParams] = useState({
+    startDate: "",
+    endDate: "",
+    majorSections: [] as string[],
+    department: ["Engineering"],
+    blockType: ["All"],
   });
 
-  // Update URL when currentWeekStart changes
+  // Get user's location and set up major section options
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('date', format(currentWeekStart, 'yyyy-MM-dd'));
-    router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentWeekStart, router, searchParams]);
+    if (session?.user?.location) {
+      const userLocation = session.user.location;
+      setSelectedLocations([userLocation]);
 
-  // For urgent mode, use the same day for start and end
-  // For non-urgent mode, use Saturday to Friday (matching optimised-table-data)
-  const weekStart = isUrgentMode
-    ? currentWeekStart
-    : startOfWeek(currentWeekStart, { weekStartsOn: 6 }); // Explicitly start from Saturday
-  const weekEnd = isUrgentMode
-    ? currentWeekStart
-    : endOfWeek(weekStart, { weekStartsOn: 6 }); // Explicitly end on Friday
-
-  // In urgent mode, we use the same date for both start and end dates
-  // This ensures we only get data for a single day in urgent mode
-  const apiStartDate = format(weekStart, "yyyy-MM-dd");
-  const apiEndDate = isUrgentMode ? apiStartDate : format(weekEnd, "yyyy-MM-dd");
-
-  // Add debug logging for date range
-  console.log('Date Range:', apiStartDate, 'to', apiEndDate);
-  console.log('Is Urgent Mode:', isUrgentMode);
-  console.log('Current Date/Time:', new Date().toISOString());
-  const limit = 5000;
-  // Fetch approved requests data
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["approved-requests", page, apiStartDate, apiEndDate, isUrgentMode],
-    queryFn: () =>
-      adminService.getOptimizeRequests(
-        apiStartDate,
-        apiEndDate,
-        page,
-        limit
-      ),
-  });
-
-  // Get unique work types and activities for filters
-  const uniqueWorkTypes = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.workType).filter(Boolean) || [])) as string[];
-  const uniqueActivities = Array.from(new Set(data?.data?.requests?.map((r: UserRequest) => r.activity).filter(Boolean) || [])) as string[];
-
-  // Time slot helper function
-  const getTimeSlot = (timeStr: string) => {
-    if (!timeStr) return "N/A";
-    const hour = new Date(timeStr).getUTCHours();
-    if (hour >= 20 || hour < 4) return "20:00-04:00";
-    if (hour >= 4 && hour < 12) return "04:00-12:00";
-    return "12:00-20:00";
-  };
-
-  // Filter requests based on department and other filters
-  const filteredRequests = data?.data?.requests?.filter((request: UserRequest) => {
-    const departmentMatch = departmentTab === 'all' ||
-      (departmentTab === 'snt' ? request.selectedDepartment?.toUpperCase() === 'S&T' :
-        request.selectedDepartment?.toUpperCase() === departmentTab.toUpperCase());
-    const workTypeMatch = workTypeFilter === "ALL" || request.workType === workTypeFilter;
-    const activityMatch = activityFilter === "ALL" || request.activity === activityFilter;
-    const timeSlotMatch = timeSlotFilter === "ALL" || getTimeSlot(request.demandTimeFrom) === timeSlotFilter;
-
-    return departmentMatch && workTypeMatch && activityMatch && timeSlotMatch;
-  }) || [];
-
-  // Separate corridor and non-corridor requests
-  const corridorRequests = filteredRequests.filter(
-    (request: UserRequest) => request.corridorType === "Corridor"
-  );
-
-  const nonCorridorRequests = filteredRequests.filter(
-    (request: UserRequest) => request.corridorType === "Outside Corridor"
-  );
-
-  const [sanctionedData, setSanctionedData] = useState<UserRequest[] | null>(null);
-
-  // Format date and time helpers
-  const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), "dd-MM-yyyy");
-    } catch {
-      return dateString;
-    }
-  };
-
-  const formatTime = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "N/A";
-
-      const hours = date.getUTCHours().toString().padStart(2, '0');
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-      return `${hours}:${minutes}`;
-    } catch (error) {
-      console.error("Error formatting time:", error, dateString);
-      return "N/A";
-    }
-  };
-
-  // Function to navigate to previous or next period (day for urgent, week for non-urgent)
-  const handleWeekChange = (direction: "prev" | "next") => {
-    setCurrentWeekStart((prev) => {
-      if (isUrgentMode) {
-        return direction === "prev" ? subDays(prev, 1) : addDays(prev, 1);
-      } else {
-        return direction === "prev" ? subDays(prev, 7) : addDays(prev, 7);
+      // Set up major section options based on user's location
+      if (MajorSection[userLocation as keyof typeof MajorSection]) {
+        const sections =
+          MajorSection[userLocation as keyof typeof MajorSection];
+        const options = sections.map((section) => ({
+          value: section,
+          label: section,
+        }));
+        setMajorSectionOptions([{ value: "All", label: "All" }, ...options]);
       }
-    });
-    setPage(1); // Reset to first page when changing periods
+    }
+  }, [session]);
+
+  // Use the react-query hook with enabled: false initially
+  const {
+    data: reportData,
+    isLoading,
+    error,
+    refetch,
+  } = useGenerateReport(queryParams);
+
+  // Watch for query results and loading state
+  useEffect(() => {
+    setLoading(isLoading);
+    console.log("Full reportData:", reportData);
+
+    if (reportData && reportData.data) {
+      // Safe access of nested properties with detailed logging
+      console.log(
+        "pastBlockSummary raw data:",
+        reportData.data.pastBlockSummary
+      );
+      console.log("detailedData raw data:", reportData.data.detailedData);
+
+      // Handle data even if the property names don't exactly match
+      const pastData = reportData.data.pastBlockSummary || [];
+      setPastBlockSummary(pastData);
+      console.log("Set pastBlockSummary to:", pastData);
+
+      // Set the detailed data directly
+      const detailedData = reportData.data.detailedData || [];
+      console.log("Set upcomingBlocks to:", detailedData);
+
+      setReportGenerated(true);
+      toast.success(reportData.message || "Report generated successfully");
+    }
+  }, [reportData, isLoading]);
+
+  // Watch for query errors
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching report data:", error);
+      toast.error("Failed to generate report");
+      setLoading(false);
+    }
+  }, [error]);
+
+  // Function to handle row click for section details
+  const handleSectionClick = (section: string) => {
+    toast.success(`Viewing details for section: ${section}`);
+    // In a real implementation, this would navigate to a detail view
+    // router.push(`/dashboard/drm/drm/section-details/${section}`);
   };
 
-  const getAdjacentLinesAffected = (request: UserRequest): string => {
-    if (request.adjacentLinesAffected) {
-      return request.adjacentLinesAffected;
+  // Handler for major section selection
+  const handleMajorSectionChange = (options: MultiValue<OptionType>) => {
+    if (Array.isArray(options) && options.length > 0) {
+      const selectedValues = options.map((option) => option.value);
+
+      // Check if 'All' is included in the selected options
+      if (selectedValues.includes("All")) {
+        // If 'All' is selected, include all major sections except 'All' itself
+        const allSpecificSections = majorSectionOptions
+          .map((option) => option.value)
+          .filter((value) => value !== "All");
+        setSelectedMajorSections(allSpecificSections);
+      } else {
+        // Otherwise just set the selected values
+        setSelectedMajorSections(selectedValues);
+      }
+    } else {
+      setSelectedMajorSections([]);
+    }
+  };
+
+  // Toggle selection for buttons
+  const toggleBlockType = (blockType: string) => {
+    if (blockType === "All") {
+      setSelectedBlockTypes(["All"]);
+    } else {
+      const newTypes = selectedBlockTypes.includes(blockType)
+        ? selectedBlockTypes.filter((type) => type !== blockType)
+        : [...selectedBlockTypes.filter((type) => type !== "All"), blockType];
+      setSelectedBlockTypes(newTypes.length > 0 ? newTypes : ["All"]);
+    }
+  };
+
+  const toggleDepartment = (department: string) => {
+    if (selectedDepartments.includes(department)) {
+      if (selectedDepartments.length > 1) {
+        setSelectedDepartments(
+          selectedDepartments.filter((dept) => dept !== department)
+        );
+      }
+    } else {
+      setSelectedDepartments([...selectedDepartments, department]);
+    }
+  };
+
+  const onSubmit = async (data: FormData) => {
+    // Validate dates
+    if (!data.startDate || !data.endDate) {
+      toast.error("Please enter both start and end dates");
+      return;
     }
 
-    if (request.processedLineSections) {
-      const affectedLines = request.processedLineSections.map(section => {
-        if (section.type === 'yard') {
-          return section.otherRoads;
-        }
-        return section.otherLines;
-      }).filter(Boolean).join(", ");
+    try {
+      // Format dates to DD/MM/YY format for API
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
 
-      return affectedLines || "N/A";
+      const formattedStartDate = format(startDate, "dd/MM/yy");
+      const formattedEndDate = format(endDate, "dd/MM/yy");
+
+      // Update query parameters
+      setQueryParams({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        majorSections: selectedMajorSections,
+        department: selectedDepartments,
+        blockType: selectedBlockTypes,
+      });
+
+      // Trigger the query - react-query will handle the loading state
+      await refetch();
+    } catch (error) {
+      console.error("Error initiating report generation:", error);
+      toast.error("Failed to generate report");
     }
-
-    return "N/A";
   };
 
-  const handleDownloadCSV = () => {
-    if (!data?.data?.requests) return;
-
-    // Get the current filtered requests
-    const requestsToDownload = filteredRequests;
-
-    // Create CSV headers
-    const headers = [
-      "Date",
-      "Major Section",
-      "Depot",
-      "Block Section",
-      "Line/Road",
-      "Adjacent Lines Affected",
-      "Work Type",
-      "Corridor Type",
-      "Activity",
-      "Demanded Time From",
-      "Demanded Time To",
-      "Optimized Time From",
-      "Optimized Time To",
-      "Sanctioned Time From",
-      "Sanctioned Time To",
-      "Requested By",
-      "Department",
-      "Description"
-    ];
-
-    // Create CSV rows
-    const rows = requestsToDownload.map((request: UserRequest) => [
-      formatDate(request.date),
-      request.selectedSection || "N/A",
-      request.selectedDepo || "N/A",
-      request.missionBlock || "N/A",
-      getLineOrRoad(request),
-      request.adjacentLinesAffected || getAdjacentLinesAffected(request),
-      request.workType || "N/A",
-      request.corridorType || "N/A",
-      request.activity || "N/A",
-      formatTime(request.demandTimeFrom || ""),
-      formatTime(request.demandTimeTo || ""),
-      formatTime(request.optimizeTimeFrom || ""),
-      formatTime(request.optimizeTimeTo || ""),
-      formatTime(request.sanctionedTimeFrom || ""),
-      formatTime(request.sanctionedTimeTo || ""),
-      request.user?.name || "N/A",
-      request.selectedDepartment || "N/A",
-      request.requestremarks || "N/A"
-    ]);
-
-    // Combine headers and rows
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row: string[]) => row.map((cell: string) => `"${cell}"`).join(","))
-    ].join("\n");
-
-    // Create and trigger download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `sanctioned_requests_${format(currentWeekStart, "yyyy-MM-dd")}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const formatDateInput = (value: string) => {
+    // Format as DD/MM/YY
+    if (!value) return "";
+    const [day, month, year] = value.split("/");
+    if (!day || !month || !year) return value;
+    return `${day}/${month}/${year}`;
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
-        <div className="text-center py-5">Loading approved requests...</div>
-      </div>
-    );
+  // Format the selected dates for display
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("en-GB"); // DD/MM/YYYY
+  };
+
+  // (B) Summary of Upcoming Blocks
+  const [upcomingSectionFilter, setUpcomingSectionFilter] =
+    useState<string>("All");
+  const sectionOptionsB: string[] = Array.from(
+    new Set(
+      reportData?.data?.detailedData?.map((b: DetailedData) => b.Section) || []
+    )
+  );
+  const filteredUpcomingBlocks: DetailedData[] =
+    upcomingSectionFilter === "All"
+      ? reportData?.data?.detailedData || []
+      : reportData?.data?.detailedData?.filter(
+          (b: DetailedData) => b.Section === upcomingSectionFilter
+        ) || [];
+  function formatDateB(dateString: string) {
+    if (!dateString) return "";
+    // Accepts both MM/DD/YYYY and DD/MM/YYYY
+    const parts = dateString.split("/");
+    if (parts.length === 3) {
+      // Try MM/DD/YYYY first
+      const d1 = new Date(dateString);
+      if (!isNaN(d1.getTime())) return d1.toLocaleDateString("en-GB");
+      // Try DD/MM/YYYY
+      const d2 = new Date(parts[2] + "-" + parts[1] + "-" + parts[0]);
+      if (!isNaN(d2.getTime())) return d2.toLocaleDateString("en-GB");
+    }
+    return dateString;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white p-3 border border-black flex items-center justify-center">
-        <div className="text-center py-5 text-red-600">
-          Error loading approved requests. Please try again.
-        </div>
-      </div>
-    );
-  }
+  const upcomingBlocks: DetailedData[] = reportData?.data?.detailedData || [];
 
-  const totalPages = data?.data?.totalPages || 1;
+  const [sectionDropdownOpenB, setSectionDropdownOpenB] = useState(false);
+  const sectionDropdownRefB = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="bg-white p-3 border border-black">
-      {/* Header and week navigation */}
-      <div className="border-b-2 border-[#13529e] pb-3 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-bold text-[#13529e]">Sanctioned Requests</h1>
-          <span className={`px-3 py-1 text-sm rounded-full ${isUrgentMode ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'} border border-black`}>
-            {isUrgentMode ? 'Urgent Mode' : 'Normal Mode'}
+    <div className="min-h-screen w-full bg-[#fffbe9] flex flex-col items-center">
+      {/* RBMS Header */}
+      <div className="w-full bg-[#fff35c] flex flex-col items-center py-2 rounded-t-2xl">
+        <span className="text-[24px] font-extrabold text-[#b07be0] tracking-wide">
+          RBMS-MAS-DIVI
+        </span>
+      </div>
+      {/* Block Summary Report Title */}
+      <div className="w-full bg-[#b7e3ee] flex flex-col items-center pt-2 pb-1">
+        <span className="text-[24px] font-extrabold text-black">
+          Block Summary Report
+        </span>
+        <span className="text-lg font-bold text-black">DRM/ADRM/SrDOM</span>
+        <div className="mt-2 bg-[#7be09b] px-6 py-1 rounded-2xl">
+          <span className="text-xl font-bold text-white">
+            Blocks Granted/Availed/Pending
           </span>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleDownloadCSV}
-            className="px-3 py-1 text-sm bg-green-600 text-white border border-black hover:bg-green-700"
-          >
-            Download CSV
-          </button>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="gov-input text-sm"
-          >
-            <option value="ALL">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="ACCEPTED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-          <WeeklySwitcher
-            currentWeekStart={currentWeekStart}
-            onWeekChange={handleWeekChange}
-            isUrgentMode={isUrgentMode}
-            weekStartsOn={1}
-          />
-        </div>
       </div>
-
-      {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg border border-[#13529e] mb-4 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Work Type</label>
-            <select
-              value={workTypeFilter}
-              onChange={(e) => setWorkTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Work Types</option>
-              {uniqueWorkTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Activity</label>
-            <select
-              value={activityFilter}
-              onChange={(e) => setActivityFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Activities</option>
-              {uniqueActivities.map((activity) => (
-                <option key={activity} value={activity}>{activity}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-[#13529e]">Time Slot</label>
-            <select
-              value={timeSlotFilter}
-              onChange={(e) => setTimeSlotFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-[#13529e] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#13529e] focus:border-[#13529e] text-gray-700"
-            >
-              <option value="ALL">All Time Slots</option>
-              <option value="20:00-04:00">Night (20:00-04:00)</option>
-              <option value="04:00-12:00">Morning (04:00-12:00)</option>
-              <option value="12:00-20:00">Afternoon (12:00-20:00)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Department Tabs */}
-      <div className="border-b border-gray-200 mb-4">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setDepartmentTab('all')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'all'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            All Requests
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY").length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY").length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('engg')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'engg'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Engineering
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'ENGG').length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('trd')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'trd'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            TRD
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'TRD').length || 0}
-            </span>
-          </button>
-          <button
-            onClick={() => setDepartmentTab('snt')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${departmentTab === 'snt'
-              ? 'border-[#13529e] text-[#13529e]'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            S&T
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-              {isUrgentMode
-                ? data?.data?.requests?.filter((r: UserRequest) => (r.corridorType === "Urgent Block" || r.workType === "EMERGENCY") && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0
-                : data?.data?.requests?.filter((r: UserRequest) => r.corridorType !== "Urgent Block" && r.workType !== "EMERGENCY" && r.selectedDepartment?.toUpperCase() === 'S&T').length || 0}
-            </span>
-          </button>
-        </nav>
-      </div>
-
-      {!isUrgentMode && (
-        <>
-          {/* Corridor Requests Table */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
-                        ? "bg-green-50"
-                        : ""
-                        }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {formatDate(request.date)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.optimizeTimeFrom
-                          ? formatTime(request.optimizeTimeFrom)
-                          : "N/A"}{" "}
-                        -{" "}
-                        {request.optimizeTimeTo
-                          ? formatTime(request.optimizeTimeTo)
-                          : "N/A"}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/view-request/${request.id}?from=sanction-table-data`}
-                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                          >
-                            <svg
-                              className="w-3 h-3 mr-1"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path
-                                fillRule="evenodd"
-                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            View
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Wrap the main content in a max-w-screen-lg mx-auto w-full container */}
+      <div className="max-w-screen-lg mx-auto w-full">
+        {/* Filters Section */}
+        <div className="w-full bg-[#fffbe9] px-2 py-2">
+          <div className="flex flex-row gap-8 items-end w-full flex-wrap">
+            {/* Choose Section Dropdown */}
+            <div className="flex flex-col flex-1 min-w-[90px] max-w-[110px] w-full">
+              <span className="text-lg font-bold text-black mb-1 whitespace-nowrap">
+                Choose Section
+              </span>
+              <Select
+                options={majorSectionOptions}
+                isMulti={true}
+                value={majorSectionOptions.filter((opt) =>
+                  selectedMajorSections.includes(opt.value)
+                )}
+                onChange={(opts) => handleMajorSectionChange(opts)}
+                classNamePrefix="section-select"
+                styles={{
+                  container: (base) => ({
+                    ...base,
+                    width: "100%",
+                    maxWidth: "110px",
+                    minWidth: "90px",
+                  }),
+                  control: (base) => ({
+                    ...base,
+                    borderColor: "#00bfff",
+                    borderWidth: 2,
+                    borderRadius: 0,
+                    minHeight: 32,
+                    fontSize: 14,
+                    width: "100%",
+                    maxWidth: "110px",
+                    minWidth: "90px",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected ? "#b7e3ee" : "#fff",
+                    color: "#000",
+                    fontWeight: "bold",
+                    fontSize: 14,
+                  }),
+                  menu: (base) => ({ ...base, zIndex: 50 }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: "#e0e0ff",
+                    color: "#000",
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: "#000",
+                    fontWeight: "bold",
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    color: "#b07be0",
+                    ":hover": { backgroundColor: "#b07be0", color: "white" },
+                  }),
+                }}
+                placeholder="Section"
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
+                menuPortalTarget={
+                  typeof window !== "undefined" ? document.body : undefined
+                }
+                menuPosition="fixed"
+              />
             </div>
-          </div>
-
-          {/* Non-Corridor Requests Table */}
-          <div>
-            <h2 className="text-lg font-semibold mb-2 text-[#13529e]">
-              Non-Corridor Requests
-            </h2>
-            <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-              <table className="w-full border-collapse text-black bg-white">
-                <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-                  <tr className="bg-gray-50">
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="date" title="Date" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Major Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Depot" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="section" title="Block Section" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="line" title="Line / Road" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="time" title="Optimized Time" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Work Type" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="work" title="Activity" />
-                    </th>
-                    <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                      <ColumnHeader icon="action" title="Actions" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {nonCorridorRequests.map((request: UserRequest) => (
-                    <tr
-                      key={`request-${request.id}-${request.date}`}
-                      className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
-                        ? "bg-green-50"
-                        : ""
-                        }`}
-                    >
-                      <td className="border border-black p-2 text-sm">
-                        {formatDate(request.date)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedSection}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.selectedDepo}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.missionBlock}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {getLineOrRoad(request)}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.optimizeTimeFrom
-                          ? formatTime(request.optimizeTimeFrom)
-                          : "N/A"}{" "}
-                        -{" "}
-                        {request.optimizeTimeTo
-                          ? formatTime(request.optimizeTimeTo)
-                          : "N/A"}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.workType}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        {request.activity}
-                      </td>
-                      <td className="border border-black p-2 text-sm">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/view-request/${request.id}?from=sanction-table-data`}
-                            className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                          >
-                            <svg
-                              className="w-3 h-3 mr-1"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                              <path
-                                fillRule="evenodd"
-                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            View
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
-
-      {isUrgentMode && (
-        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
-          <table className="w-full border-collapse text-black bg-white">
-            <thead className="sticky top-0 z-10 bg-gray-100 shadow">
-              <tr className="bg-gray-50">
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="date" title="Date" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Major Section" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Depot" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="section" title="Block Section" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="line" title="Line / Road" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="time" title="Optimized Time" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="work" title="Work Type" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="work" title="Activity" />
-                </th>
-                <th className="border border-black p-2 text-left text-sm font-semibold text-black sticky top-0 bg-gray-100 z-10">
-                  <ColumnHeader icon="action" title="Actions" />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request: UserRequest) => (
-                <tr
-                  key={`request-${request.id}-${request.date}`}
-                  className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo
-                    ? "bg-green-50"
-                    : ""
-                    }`}
+            {/* Select Period */}
+            <div className="flex flex-col flex-1 min-w-[180px] w-full">
+              <div className="flex justify-center w-full mb-1">
+                <span className="text-lg font-bold text-black">
+                  Select Period
+                </span>
+              </div>
+              <div className="flex flex-row items-center gap-1 w-full">
+                <input
+                  type="date"
+                  className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center"
+                  style={{ color: "black" }}
+                  {...register("startDate")}
+                />
+                <span
+                  className="text-base font-bold"
+                  style={{ color: "black" }}
                 >
-                  <td className="border border-black p-2 text-sm">
-                    {formatDate(request.date)}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.selectedSection}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.selectedDepo}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.missionBlock}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {getLineOrRoad(request)}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.optimizeTimeFrom
-                      ? formatTime(request.optimizeTimeFrom)
-                      : "N/A"}{" "}
-                    -{" "}
-                    {request.optimizeTimeTo
-                      ? formatTime(request.optimizeTimeTo)
-                      : "N/A"}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.workType}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    {request.activity}
-                  </td>
-                  <td className="border border-black p-2 text-sm">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/view-request/${request.id}?from=sanction-table-data`}
-                        className="px-2 py-1 text-xs bg-[#13529e] hover:bg-[#0e4080] text-white border border-[#0e4080] rounded flex items-center"
-                      >
-                        <svg
-                          className="w-3 h-3 mr-1"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        View
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  to
+                </span>
+                <input
+                  type="date"
+                  className="border-2 border-[#e57373] rounded-md px-1 py-1 w-full max-w-[120px] text-base font-bold text-center"
+                  style={{ color: "black" }}
+                  {...register("endDate")}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+        {/* Block Type Filters (first line) */}
+        <div className="w-full flex flex-wrap justify-center gap-2 mt-2 mb-1">
+          {blockTypeOptions.map((opt) => (
+            <button
+              key={opt.value}
+              className={`rounded-full px-3 py-1 text-base font-semibold border border-[#b7e3ee] flex items-center gap-1 transition-colors duration-150 ${
+                selectedBlockTypes.includes(opt.value)
+                  ? "bg-[#b7e3ee] text-black"
+                  : "bg-[#e0e0ff] text-black"
+              }`}
+              onClick={() => toggleBlockType(opt.value)}
+              type="button"
+            >
+              {selectedBlockTypes.includes(opt.value) && (
+                <span className="text-green-600 font-bold">✔</span>
+              )}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {/* Department Filters (second line) */}
+        <div className="w-full flex flex-wrap justify-center gap-2 mb-2">
+          {departmentOptions.map((opt) => (
+            <button
+              key={opt.value}
+              className={`rounded-full px-3 py-1 text-base font-semibold border flex items-center gap-1 transition-colors duration-150
+                ${
+                  opt.value === "Engineering"
+                    ? selectedDepartments.includes(opt.value)
+                      ? "bg-[#e49edd] border-[#b07be0] text-black"
+                      : "bg-[#f3e6f7] border-[#b07be0] text-black"
+                    : opt.value === "ST"
+                    ? selectedDepartments.includes(opt.value)
+                      ? "bg-[#fff35c] border-[#e0e0e0] text-black"
+                      : "bg-[#fffbe9] border-[#e0e0e0] text-black"
+                    : selectedDepartments.includes(opt.value)
+                    ? "bg-[#c7f7c7] border-[#7be09b] text-black"
+                    : "bg-[#e0fff0] border-[#7be09b] text-black"
+                }`}
+              onClick={() => toggleDepartment(opt.value)}
+              type="button"
+            >
+              {selectedDepartments.includes(opt.value) && (
+                <span className="text-green-600 font-bold">✔</span>
+              )}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {/* Submit Button */}
+        <div className="w-full flex justify-center mb-2">
+          <button
+            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-lg shadow border border-[#00b347] text-lg"
+            onClick={handleSubmit(onSubmit)}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Submit"}
+          </button>
+        </div>
+        {/* (A) Block Summary Table */}
+        <div className="w-full mt-4">
+          <div className="flex w-full">
+            <div
+              className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1"
+              style={{ color: "black" }}
+            >
+              (A)Block Summary:{" "}
+              {formatDisplayDate(watch("startDate")) || "........"} to{" "}
+              {formatDisplayDate(watch("endDate")) || "........"}
+            </div>
+            <div
+              className="flex-1 bg-[#ff914d] text-xl font-bold border-2 border-black px-2 py-1"
+              style={{ color: "black" }}
+            >
+              Department:{" "}
+              {selectedDepartments.length > 0
+                ? selectedDepartments.join(", ")
+                : "............."}{" "}
+              (in Hrs)
+            </div>
+          </div>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-2 border-black">
+              <thead>
+                <tr className="bg-[#f7c7ac] text-black text-lg font-bold">
+                  <th className="border-2 border-black px-2 py-1">Section</th>
+                  <th className="border-2 border-black px-2 py-1">Demanded</th>
+                  <th className="border-2 border-black px-2 py-1">Approved</th>
+                  <th className="border-2 border-black px-2 py-1">Granted</th>
+                  <th className="border-2 border-black px-2 py-1">% Granted</th>
+                  <th className="border-2 border-black px-2 py-1">Availed</th>
+                  <th className="border-2 border-black px-2 py-1">% Availed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pastBlockSummary.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="text-center py-4"
+                      style={{ color: "black" }}
+                    >
+                      No data found.
+                    </td>
+                  </tr>
+                ) : (
+                  pastBlockSummary.map((summary: any, idx: number) => (
+                    <tr
+                      className={`font-bold ${
+                        idx % 2 === 0 ? "bg-[#f4dcf1]" : "bg-white"
+                      }`}
+                      key={idx}
+                    >
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.Department || summary.Section || ""}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.Demanded}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.Approved}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.Granted}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.PercentGranted !== undefined
+                          ? summary.PercentGranted + "%"
+                          : ""}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.Availed}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {summary.PercentAvailed !== undefined
+                          ? summary.PercentAvailed + "%"
+                          : ""}
+                      </td>
+                    </tr>
+                  ))
+                )}
 
-      <div className="text-[10px] text-gray-600 mt-2 border-t border-black pt-1 text-right">
-        © {new Date().getFullYear()} Indian Railways
+                {pastBlockSummary.length > 0 && (
+                  <>
+                    <tr className="bg-[#ff914d] text-white font-bold">
+                      <td className="border-2 border-black px-2 py-1 text-center">Total</td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Demanded || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Approved || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Granted || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+               {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.PercentGranted || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.Availed || 0),
+                          0
+                        )}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                   {pastBlockSummary.reduce(
+                          (sum, item) => sum + (item.PercentAvailed || 0),
+                          0
+                        )}
+                      </td>
+                    </tr>
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {/* (B) Summary of Upcoming Blocks */}
+        <div className="w-full max-w-4xl mt-8">
+          <div className="flex w-full items-center">
+            <div className="flex-1 bg-[#f1a983] text-xl font-bold border-2 border-black px-2 py-1">
+              (B) Summary of Upcoming Blocks
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <div className="relative inline-block" ref={sectionDropdownRefB}>
+                <button
+                  onClick={() => setSectionDropdownOpenB((v) => !v)}
+                  className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-black font-semibold text-black flex items-center gap-2 text-base min-w-[100px]"
+                >
+                  {upcomingSectionFilter === "All"
+                    ? "All"
+                    : upcomingSectionFilter}
+                  <span className="ml-1">▼</span>
+                </button>
+                {sectionDropdownOpenB && (
+                  <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-black rounded shadow-lg max-h-60 overflow-y-auto">
+                    <div
+                      className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-base"
+                      onClick={() => {
+                        setUpcomingSectionFilter("All");
+                        setSectionDropdownOpenB(false);
+                      }}
+                    >
+                      All
+                    </div>
+                    {sectionOptionsB.map((section: string) => (
+                      <div
+                        key={section}
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-base"
+                        onClick={() => {
+                          setUpcomingSectionFilter(section);
+                          setSectionDropdownOpenB(false);
+                        }}
+                      >
+                        {section}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto w-full max-w-full">
+            {/* <table className="w-full border-2 border-black mt-1 text-sm">
+              <thead>
+                <tr className="bg-[#e49edd] text-black text-lg font-bold">
+                  <th className="border-2 border-black px-2 py-1">Section</th>
+                  <th className="border-2 border-black px-2 py-1">Date</th>
+                  <th className="border-2 border-black px-2 py-1">Type</th>
+                  <th className="border-2 border-black px-2 py-1">Duration</th>
+                  <th className="border-2 border-black px-2 py-1">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUpcomingBlocks.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-4" style={{color:"black"}}>No data found.</td></tr>
+                ) : filteredUpcomingBlocks.slice(0, 200).map((block: DetailedData, idx: number) => {
+                  // Status color logic
+                  let statusLabel = '';
+                  let statusStyle = { background: '#fff', color: '#222' };
+                  if (block.Status === 'APPROVED') {
+                    statusLabel = 'Pending with Optg';
+                    statusStyle = { background: '#fff86b', color: '#222' };
+                  } else if (block.Status === 'PENDING') {
+                    statusLabel = 'Pending with dept control';
+                    statusStyle = { background: '#d47ed4', color: '#222' };
+                  } else if (block.Status === 'REJECTED') {
+                    statusLabel = 'Returned by Optg';
+                    statusStyle = { background: '#ff4e36', color: '#fff' };
+                  } else {
+                    statusLabel = block.Status;
+                  }
+                  return (
+                    <tr key={idx} className="bg-white hover:bg-[#F3F3F3]">
+                      <td className="border-2 border-black px-2 py-1 font-bold text-black">{block.Section}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{formatDateB(block.Date)}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{block.Type}</td>
+                      <td className="border-2 border-black px-2 py-1 text-black">{block.Duration}</td>
+                      <td className="border-2 border-black px-2 py-1 font-bold text-center text-black" style={statusStyle}>{statusLabel}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table> */}
+
+            <table className="w-full border-2 border-black mt-1 text-sm">
+              <thead>
+                <tr className="bg-[#e49edd] text-black text-lg font-bold">
+                  <th className="border-2 border-black px-2 py-1">Section</th>
+                  <th className="border-2 border-black px-2 py-1">Date</th>
+                  <th className="border-2 border-black px-2 py-1">Type</th>
+                  <th className="border-2 border-black px-2 py-1">Duration</th>
+                  <th className="border-2 border-black px-2 py-1">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUpcomingBlocks.length === 0 ? (
+                  <tr className="bg-white">
+                    <td
+                      colSpan={5}
+                      className="text-center py-4"
+                      style={{ color: "black" }}
+                    >
+                      No data found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUpcomingBlocks
+                    .slice(0, 200)
+                    .map((block: DetailedData, idx: number) => {
+                      // Status color logic
+                      let statusLabel = "";
+                      let statusStyle = { background: "#fff", color: "#222" };
+                      if (block.Status === "APPROVED") {
+                        statusLabel = "Pending with Optg";
+                        statusStyle = { background: "#fff86b", color: "#222" };
+                      } else if (block.Status === "PENDING") {
+                        statusLabel = "Pending with dept control";
+                        statusStyle = { background: "#d47ed4", color: "#222" };
+                      } else if (block.Status === "REJECTED") {
+                        statusLabel = "Returned by Optg";
+                        statusStyle = { background: "#ff4e36", color: "#fff" };
+                      } else {
+                        statusLabel = block.Status;
+                      }
+
+                      // Row background alternates between pink and white
+                      const rowBgColor =
+                        idx % 2 === 0 ? "bg-white" : "bg-[#f5d0f2]";
+
+                      return (
+                        <tr
+                          key={idx}
+                          className={`${rowBgColor} hover:bg-[#F3F3F3]`}
+                        >
+                          <td className="border-2 border-black px-2 py-1 font-bold text-black">
+                            {block.Section}
+                          </td>
+                          <td className="border-2 border-black px-2 py-1 text-black">
+                            {formatDateB(block.Date)}
+                          </td>
+                          <td className="border-2 border-black px-2 py-1 text-black">
+                            {block.Type}
+                          </td>
+                          <td className="border-2 border-black px-2 py-1 text-black">
+                            {block.Duration}
+                          </td>
+                          <td
+                            className="border-2 border-black px-2 py-1 font-bold text-center text-black"
+                            style={statusStyle}
+                          >
+                            {statusLabel}
+                          </td>
+                        </tr>
+                      );
+                    })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {/* Info Bar and Navigation */}
+        <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between mt-8 mb-4 px-2">
+          <div className="flex items-center gap-2 bg-[#cfd4ff] px-4 py-2 rounded-2xl border-2 ">
+            <span className="text-lg font-bold text-black">Click</span>
+            <span className="bg-[#00b347] text-white font-bold px-2 py-1 rounded">
+              Section/Block ID
+            </span>
+            <span className="text-lg font-bold text-black">
+              to see further details.
+            </span>
+          </div>
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <button
+              className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black"
+              onClick={() => router.back()}
+            >
+              <span className="text-2xl">⬅️</span> Back
+            </button>
+            <Link href="/drm">
+              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
+                <span className="text-2xl">🏠</span> Home
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

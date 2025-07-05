@@ -312,13 +312,13 @@ export default function GenerateReportPage() {
     <div className="min-h-screen w-full bg-[#fffbe9] flex flex-col items-center">
       {/* RBMS Header */}
       <div className="w-full bg-[#fff35c] flex flex-col items-center py-2 rounded-t-2xl">
-        <span className="text-5xl font-extrabold text-[#b07be0] tracking-wide">
-          RBMS
+        <span className="text-[24px] font-extrabold text-[#b07be0] tracking-wide">
+          RBMS-MAS-DIVI
         </span>
       </div>
       {/* Block Summary Report Title */}
       <div className="w-full bg-[#b7e3ee] flex flex-col items-center pt-2 pb-1">
-        <span className="text-4xl font-extrabold text-black">
+        <span className="text-[24px] font-extrabold text-black">
           Block Summary Report
         </span>
         <span className="text-lg font-bold text-black">DRM/ADRM/SrDOM</span>

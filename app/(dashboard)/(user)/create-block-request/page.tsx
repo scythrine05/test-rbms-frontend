@@ -685,6 +685,67 @@ export default function CreateBlockRequestPage() {
     label: block,
   }));
 
+
+
+// Utility functions to map between block sections and yards
+const getYardsFromBlockSection = (block: string): string[] => {
+  if (!block.includes('-')) return [];
+  const parts = block.split('-');
+  // Handle cases like "MASS-BBQ" (2 parts) and "MAS-BBQ" (2 parts)
+  if (parts.length === 2) {
+    const [from, to] = parts;
+    return [`${from}-YD`, `${to}-YD`];
+  }
+  // Handle cases like "VPY-KOK-TNP" (3 parts)
+  return parts.map(part => `${part}-YD`);
+};
+
+const getBlockSectionsFromYard = (yard: string, majorSection: string): string[] => {
+  if (!yard.includes('-YD')) return [];
+  const station = yard.replace('-YD', '');
+  
+  // Get all block sections for the major section
+  const allBlocks = blockSection[majorSection as keyof typeof blockSection] || [];
+  
+  // Find block sections that include this station
+  return allBlocks.filter(block => 
+    block.includes('-') && 
+    (block.startsWith(`${station}-`) || block.endsWith(`-${station}`))
+  );
+};
+
+
+
+const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]) => {
+  if (blockSectionValue.length === 0) {
+    return blockSectionOptions;
+  }
+
+  const relatedOptions = new Set<string>();
+
+  blockSectionValue.forEach(selected => {
+    if (selected.endsWith('-YD')) {
+      // Selected a yard - show its related blocks
+      const blocks = getBlockSectionsFromYard(selected, formData.selectedSection);
+      blocks.forEach(block => relatedOptions.add(block));
+    } else {
+      // Selected a block - show its related yards
+      const yards = getYardsFromBlockSection(selected);
+      yards.forEach(yard => relatedOptions.add(yard));
+    }
+    
+    // Always keep the selected values
+    relatedOptions.add(selected);
+  });
+
+  return blockSectionOptions.filter(option => relatedOptions.has(option));
+};
+
+
+
+
+
+
   const getTomorrowDateString = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2336,97 +2397,97 @@ export default function CreateBlockRequestPage() {
             </div>
             {/* Block Section/Yard Multi-select - max 2 selections */}
             <div className="flex flex-row items-center gap-3 w-full mt-1">
-              <Select
-                isMulti
-                name="blockSection"
-                options={blockSectionOptions.map((block: string) => ({
-                  value: block,
-                  label: block,
-                }))}
-                value={blockSectionValue.map((val: string) => ({
-                  value: val,
-                  label: val,
-                }))}
-                onChange={(selected) => {
-                  const values = selected ? selected.map((opt: any) => opt.value) : [];
-                  if (values.length <= 2) {
-                    setBlockSectionValue(values);
-                    setFormData((prev) => ({
-                      ...prev,
-                      missionBlock: values.join(","),
-                      processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
-                    }));
-                  }
-                }}
-                classNamePrefix="react-select"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "#ffe6b3",
-                    borderColor: "black",
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    minHeight: "44px",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    boxShadow: "none",
-                    padding: "0 1px",
-                  }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
-                  multiValue: (base) => ({
-                    ...base,
-                    backgroundColor: "#f6fff6",
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    border: "1.5px solid #b6e6c6",
-                    borderRadius: 8,
-                    marginRight: 4,
-                  }),
-                  multiValueLabel: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    padding: "2px 8px",
-                  }),
-                  multiValueRemove: (base) => ({
-                    ...base,
-                    color: "#e07a5f",
-                    ":hover": {
-                      backgroundColor: "#f6fff6",
-                      color: "#b91c1c",
-                    },
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? "#ffe082"
-                      : state.isFocused
-                        ? "#ffe08299"
-                        : "#ffe6b3",
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "24px",
-                    padding: "4px 8px",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                  }),
-                  dropdownIndicator: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontSize: "24px",
-                    padding: 0,
-                  }),
-                }}
-                placeholder="Select up to 2 Block Sections/Yards"
-                closeMenuOnSelect={false}
-                isOptionDisabled={() => blockSectionValue.length >= 2}
-              />
+           <Select
+  isMulti
+  name="blockSection"
+  options={getFilteredOptions(formData.selectedSection, blockSectionValue).map((block: string) => ({
+    value: block,
+    label: block,
+  }))}
+  value={blockSectionValue.map((val: string) => ({
+    value: val,
+    label: val,
+  }))}
+  onChange={(selected) => {
+    const values = selected ? selected.map((opt: any) => opt.value) : [];
+    if (values.length <= 2) {
+      setBlockSectionValue(values);
+      setFormData((prev) => ({
+        ...prev,
+        missionBlock: values.join(","),
+        processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
+      }));
+    }
+  }}
+  classNamePrefix="react-select"
+  styles={{
+    control: (base) => ({
+      ...base,
+      backgroundColor: "#ffe6b3",
+      borderColor: "black",
+      borderWidth: 2,
+      borderRadius: 12,
+      minHeight: "44px",
+      fontWeight: "bold",
+      fontSize: "22px",
+      boxShadow: "none",
+      padding: "0 1px",
+    }),
+    menu: (base) => ({ ...base, zIndex: 9999 }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: "#f6fff6",
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "22px",
+      border: "1.5px solid #b6e6c6",
+      borderRadius: 8,
+      marginRight: 4,
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "22px",
+      padding: "2px 8px",
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: "#e07a5f",
+      ":hover": {
+        backgroundColor: "#f6fff6",
+        color: "#b91c1c",
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#ffe082"
+        : state.isFocused
+          ? "#ffe08299"
+          : "#ffe6b3",
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "24px",
+      padding: "4px 8px",
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: "black",
+      fontWeight: "bold",
+      fontSize: "22px",
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: "black",
+      fontSize: "24px",
+      padding: 0,
+    }),
+  }}
+  placeholder="Select up to 2 Block Sections/Yards"
+  closeMenuOnSelect={false}
+  isOptionDisabled={() => blockSectionValue.length >= 2}
+/>
               {errors.missionBlock && (
                 <span className="text-[24px] text-[#e07a5f] font-medium mt-1 block">
                   {errors.missionBlock}
