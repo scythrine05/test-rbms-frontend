@@ -231,7 +231,7 @@ function ReviewBlockRequestModal({
                   : "Planned"}
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 mb-2 text-[13px]">
+            <div className="flex flex-wrap gap-4 my-2 text-2xl">
               <div className="flex-1 min-w-[180px] ">
                 <b>Preferred Slot:</b> {formData.demandTimeFrom} to{" "}
                 {formData.demandTimeTo}
@@ -2281,11 +2281,11 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
       {/* Sub-header */}
       <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">
         <span className="text-[24px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
-  {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
-</span>
+          {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
+        </span>
       </div>
       {/* Form Card */}
-      <div className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4 border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
+      <div className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4  border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
         <form onSubmit={handleFormSubmit} className="space-y-10">
           <div className="grid grid-cols-1 gap-y-8 mb-8">
             {/* Date of Block */}
@@ -2356,7 +2356,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                   value={formData.nonCorridorReason || ""}
                   onChange={handleInputChange}
                   placeholder="Reasons for asking Block outside Corridor or Emergency Block"
-                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
+                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-600"
                   style={{
                     minHeight: "32px",
                     marginTop: 0,
@@ -2378,7 +2378,14 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 aria-required="true"
                 aria-label="Select major section"
                 required
-                style={{ boxShadow: '2px 2px 6px #bbb' }}
+                
+                style={{
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 0.5rem center",
+                  backgroundSize: "1.2rem",
+                }}
               >
                 <option value="" disabled>
                   Select Major Section
@@ -2397,97 +2404,97 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
             {/* Block Section/Yard Multi-select - max 2 selections */}
             <div className="flex flex-row items-center gap-3 w-full mt-1">
-           <Select
-  isMulti
-  name="blockSection"
-  options={getFilteredOptions(formData.selectedSection, blockSectionValue).map((block: string) => ({
-    value: block,
-    label: block,
-  }))}
-  value={blockSectionValue.map((val: string) => ({
-    value: val,
-    label: val,
-  }))}
-  onChange={(selected) => {
-    const values = selected ? selected.map((opt: any) => opt.value) : [];
-    if (values.length <= 2) {
-      setBlockSectionValue(values);
-      setFormData((prev) => ({
-        ...prev,
-        missionBlock: values.join(","),
-        processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
-      }));
-    }
-  }}
-  classNamePrefix="react-select"
-  styles={{
-    control: (base) => ({
-      ...base,
-      backgroundColor: "#ffe6b3",
-      borderColor: "black",
-      borderWidth: 2,
-      borderRadius: 12,
-      minHeight: "44px",
-      fontWeight: "bold",
-      fontSize: "22px",
-      boxShadow: "none",
-      padding: "0 1px",
-    }),
-    menu: (base) => ({ ...base, zIndex: 9999 }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: "#f6fff6",
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "22px",
-      border: "1.5px solid #b6e6c6",
-      borderRadius: 8,
-      marginRight: 4,
-    }),
-    multiValueLabel: (base) => ({
-      ...base,
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "22px",
-      padding: "2px 8px",
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      color: "#e07a5f",
-      ":hover": {
-        backgroundColor: "#f6fff6",
-        color: "#b91c1c",
-      },
-    }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isSelected
-        ? "#ffe082"
-        : state.isFocused
-          ? "#ffe08299"
-          : "#ffe6b3",
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "24px",
-      padding: "4px 8px",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: "black",
-      fontWeight: "bold",
-      fontSize: "22px",
-    }),
-    dropdownIndicator: (base) => ({
-      ...base,
-      color: "black",
-      fontSize: "24px",
-      padding: 0,
-    }),
-  }}
-  placeholder="Select up to 2 Block Sections/Yards"
-  closeMenuOnSelect={false}
-  isOptionDisabled={() => blockSectionValue.length >= 2}
-/>
+              <Select
+                isMulti
+                name="blockSection"
+                options={getFilteredOptions(formData.selectedSection, blockSectionValue).map((block: string) => ({
+                  value: block,
+                  label: block,
+                }))}
+                value={blockSectionValue.map((val: string) => ({
+                  value: val,
+                  label: val,
+                }))}
+                onChange={(selected) => {
+                  const values = selected ? selected.map((opt: any) => opt.value) : [];
+                  if (values.length <= 2) {
+                    setBlockSectionValue(values);
+                    setFormData((prev) => ({
+                      ...prev,
+                      missionBlock: values.join(","),
+                      processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
+                    }));
+                  }
+                }}
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: "#ffe6b3",
+                    borderColor: "black",
+                    borderWidth: 2,
+                    borderRadius: 12,
+                    minHeight: "44px",
+                    fontWeight: "bold",
+                    fontSize: "22px",
+                    boxShadow: "none",
+                    padding: "0 1px",
+                  }),
+                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: "#f6fff6",
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "22px",
+                    border: "1.5px solid #b6e6c6",
+                    borderRadius: 8,
+                    marginRight: 4,
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "22px",
+                    padding: "2px 8px",
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    color: "#e07a5f",
+                    ":hover": {
+                      backgroundColor: "#f6fff6",
+                      color: "#b91c1c",
+                    },
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#ffe082"
+                      : state.isFocused
+                        ? "#ffe08299"
+                        : "#ffe6b3",
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "24px",
+                    padding: "4px 8px",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "22px",
+                  }),
+                  dropdownIndicator: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontSize: "24px",
+                    padding: 0,
+                  }),
+                }}
+                placeholder="Select up to 2 Block Sections/Yards"
+                closeMenuOnSelect={false}
+                isOptionDisabled={() => blockSectionValue.length >= 2}
+              />
               {errors.missionBlock && (
                 <span className="text-[24px] text-[#e07a5f] font-medium mt-1 block">
                   {errors.missionBlock}
@@ -2652,7 +2659,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             <div className="w-full mt-1 mb-4 p-6 rounded-2xl border-4 border-[#b6e6c6] bg-[#f7f7a1] flex flex-col gap-4 shadow-lg min-w-0">
               {/* Preferred Slot label */}
               {/* Time selectors and duration row - always single line, scrollable if needed */}
-              <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto pl-1 border-2 border-black rounded-2xl bg-[#fffbe9]">
+              <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-[#fffbe9]">
               <span className="text-black font-bold text-[24px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
                 <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0" style={{ fontSize: '16px' }}>
                   <select
@@ -2729,7 +2736,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </div>
               {/* Site Location row */}
               <div className="flex flex-row items-center gap-4 w-full pl-1">
-                <div className="flex flex-col items-center bg-[#fffbe9] border-2 border-black rounded-xl px-3 py-2 min-w-0 gap-x-2 w-full" >
+                <div className="flex flex-col items-center bg-[#fffbe9] border-2 border-[#b7cbe8] rounded-xl px-3 py-4 space-y-4 min-w-0 gap-x-2 w-full" >
                   <span className="font-bold text-black text-[24px] leading-none mr-2 whitespace-nowrap">Site Location</span>
                   <div>
                     <input
@@ -2767,12 +2774,19 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 name="workType"
                 value={formData.workType || ""}
                 onChange={handleInputChange}
-                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
-                style={{ minHeight: '48px' }}
+                className="h-full w-full border-2 border-[#b7cbe8] rounded-xl px-4 pr-8 py-3 text-[24px] font-bold bg-white text-[#3a506b]  focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
                 aria-required="true"
+                style={{
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  backgroundSize: "1.2rem",
+                }}
               >
-                <option value="" disabled>
+                <option value="" disabled >
                   Select Type of Work
+                  
                 </option>
                 {workTypeOptions.map((type: string) => (
                   <option key={type} value={type} className="text-[24px]">
@@ -2788,16 +2802,21 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
             {/* Activity dropdown */}
             <div className="flex-1">
-              <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-8 ">Activity</label>
+              <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-2">Activity</label>
               <select
                 id="activity"
                 name="activity"
                 value={formData.activity || ""}
                 onChange={handleInputChange}
-                className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3  text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
-                style={{ minHeight: '48px' }}
+                className="h-full w-full border-2 border-[#b7cbe8] rounded-xl px-4 pr-8 py-3 text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
                 aria-required="true"
-                disabled={!formData.workType}
+                style={{
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 8px center",
+                  backgroundSize: "1.2rem",
+                }}
               >
                 <option value="" disabled>
                   {formData.workType ? 'Select Activity' : 'Select Type of Work first'}
@@ -2826,153 +2845,151 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               )}
             </div>
           </div>
-        
-          {/* Fresh Caution Section */}
-          <div className="w-full mt-2">
-            <div className="flex items-center mb-1">
-              <span className="text-black font-bold text-[24px]">
-                Fresh Caution Needed ?
-              </span>
-              <select
-                name="freshCautionRequired"
-                value={formData.freshCautionRequired ? "Y" : "N"}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    freshCautionRequired: e.target.value === "Y",
-                  })
-                }
-                className="ml-2 border-2  border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
-                style={{
-                  width: 70,
-                  height: 24,
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "1.2rem",
-                }}
-              >
-                <option value="N">N</option>
-                <option value="Y">Y</option>
-              </select>
-              {renderError("freshCautionRequired")}
-            </div>
-            {/* ───── Fresh Caution ───── */}
-            {formData.freshCautionRequired && (
-              <div className="flex flex-col gap-2 mt-2">
-                {formData.freshCautions.map((caution, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
-                    style={{ fontSize: "24px", fontWeight: "bold" }}
-                  >
-                    {/* ◼︎ Direction / Road */}
-                    <input
-                      list={`adjacentLinesList-${idx}`}
-                      value={caution.adjacentLinesAffected}
-                      onChange={e =>
-                        handleFreshCautionChange(
-                          idx,
-                          "adjacentLinesAffected",
-                          e.target.value
-                        )
-                      }
-                      placeholder="UP/DN/SL/Road No."
-                      required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
-                    />
-                    <datalist id={`adjacentLinesList-${idx}`}>
-                      {blockSectionValue.flatMap(block => {
-                        const isYard = block.includes("-YD");
-                        return isYard
-                          ? getAllRoadsForYard(block).map(r => (
-                            <option key={r} value={r} />
-                          ))
-                          : (lineData[block as keyof typeof lineData] || []).map(l => (
-                            <option key={l} value={l} />
-                          ));
-                      })}
-                    </datalist>
-
-                    {/* ◼︎ KM From / To */}
-                    <input
-                      value={caution.freshCautionLocationFrom}
-                      onChange={e =>
-                        handleFreshCautionChange(
-                          idx,
-                          "freshCautionLocationFrom",
-                          e.target.value
-                        )
-                      }
-                      placeholder="KM"
-                      required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                    />
-                    <span className="px-1 text-2xl text-black">to</span>
-                    <input
-                      value={caution.freshCautionLocationTo}
-                      onChange={e =>
-                        handleFreshCautionChange(
-                          idx,
-                          "freshCautionLocationTo",
-                          e.target.value
-                        )
-                      }
-                      placeholder="KM"
-                      required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                    />
-
-                    {/* ◼︎ Speed */}
-                    <input
-                      type="number"
-                      value={caution.freshCautionSpeed}
-                      onChange={e =>
-                        handleFreshCautionChange(
-                          idx,
-                          "freshCautionSpeed",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Speed"
-                      required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
-                    />
-
-                    {/* ◼︎ Remove */}
-                    {formData.freshCautions.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeFreshCaution(idx)}
-                        className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                {/* ➕ Add Button */}
-                <button
-                  type="button"
-                  onClick={addFreshCaution}
-                  className="self-start px-2 py-1 bg-green-600 text-white rounded text-2xl font-semibold"
+          <div className="flex flex-col gap-2 border-2 border-[#b6e6c6] shadow rounded-2xl px-4 py-2 bg-white">
+            {/* Fresh Caution Section */}
+            <div className="w-full mt-2 bg-fuchsia-100 rounded-2xl ">
+              <div className="flex justify-between items-center mb-1 bg-fuchsia-300  rounded-2xl  px-2">
+                <span className="text-black font-bold text-[24px] ">
+                  Fresh Caution Needed?
+                </span>
+                <select
+                  name="freshCautionRequired"
+                  value={formData.freshCautionRequired ? "Y" : "N"}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      freshCautionRequired: e.target.value === "Y",
+                    })
+                  }
+                  className="ml-2 pr-8 border-2  border-black rounded 
+                  px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
+                  style={{
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 0.5rem center",
+                    backgroundSize: "1.2rem",
+                  }}
                 >
-                  + Add Fresh Caution
+                  <option value="N">N</option>
+                  <option value="Y">Y</option>
+                </select>
+                {renderError("freshCautionRequired")}
+              </div>
+              {/* ───── Fresh Caution ───── */}
+              {formData.freshCautionRequired && (
+                <div className="flex flex-col gap-2 mt-2 pb-2">
+                  {formData.freshCautions.map((caution, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+                      style={{ fontSize: "24px", fontWeight: "bold" }}
+                    >
+                      {/* ◼︎ Direction / Road */}
+                      <input
+                        list={`adjacentLinesList-${idx}`}
+                        value={caution.adjacentLinesAffected}
+                        onChange={e =>
+                          handleFreshCautionChange(
+                            idx,
+                            "adjacentLinesAffected",
+                            e.target.value
+                          )
+                        }
+                        placeholder="UP/DN/SL/Road No."
+                        required
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
+                      />
+                      <datalist id={`adjacentLinesList-${idx}`}>
+                        {blockSectionValue.flatMap(block => {
+                          const isYard = block.includes("-YD");
+                          return isYard
+                            ? getAllRoadsForYard(block).map(r => (
+                              <option key={r} value={r} />
+                            ))
+                            : (lineData[block as keyof typeof lineData] || []).map(l => (
+                              <option key={l} value={l} />
+                            ));
+                        })}
+                      </datalist>
+
+                      {/* ◼︎ KM From / To */}
+                      <input
+                        value={caution.freshCautionLocationFrom}
+                        onChange={e =>
+                          handleFreshCautionChange(
+                            idx,
+                            "freshCautionLocationFrom",
+                            e.target.value
+                          )
+                        }
+                        placeholder="KM"
+                        required
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                      />
+                      <span className="px-1 text-2xl text-black">to</span>
+                      <input
+                        value={caution.freshCautionLocationTo}
+                        onChange={e =>
+                          handleFreshCautionChange(
+                            idx,
+                            "freshCautionLocationTo",
+                            e.target.value
+                          )
+                        }
+                        placeholder="KM"
+                        required
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                      />
+
+                      {/* ◼︎ Speed */}
+                      <input
+                        type="number"
+                        value={caution.freshCautionSpeed}
+                        onChange={e =>
+                          handleFreshCautionChange(
+                            idx,
+                            "freshCautionSpeed",
+                            e.target.value
+                          )
+                        }
+                        placeholder="Speed"
+                        required
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
+                      />
+
+                      {/* ◼︎ Remove */}
+                      {formData.freshCautions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeFreshCaution(idx)}
+                          className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* ➕ Add Button */}
+                  <button
+                    type="button"
+                    onClick={addFreshCaution}
+                    className="self-center px-2 py-1  bg-green-600 text-white rounded text-2xl font-semibold"
+                  >
+                    + Add Fresh Caution
                 </button>
               </div>
             )}
 
           </div>
 
-          <hr className="border-black border-1"/>
 
           {/* Power Block Section */}
-          <div className="w-full mt-2">
-            <div className="flex items-center mb-1">
+          <div className="w-full mt-2 bg-indigo-200 rounded-2xl">
+            <div className="flex justify-between items-center mb-1 bg-indigo-400  rounded-2xl  px-2">
               <span className="text-black font-bold text-[24px]">
-                Power Block Needed ?
+                Power Block Needed?
               </span>
               <select
                 name="powerBlockRequired"
@@ -2983,12 +3000,11 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     powerBlockRequired: e.target.value === "Y",
                   })
                 }
-                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
+                className="ml-2 pr-8 border-2  border-black  
+                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 70,
-                  height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -3001,11 +3017,8 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
             {/* ───── Power Block ───── */}
             {formData.powerBlockRequired && (
-              <div className="flex flex-col gap-2 mt-2">
+              <div className="flex flex-col gap-2 mt-2 pb-2">
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-2xl">
-                    KM From:
-                  </span>
                   <input
                     type="number"
                     name="powerBlockKmFrom"
@@ -3013,10 +3026,10 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                    className="flex-1 border-2  border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
                   <span className="text-black font-bold text-2xl">
-                    KM To:
+                    to
                   </span>
                   <input
                     type="number"
@@ -3025,11 +3038,8 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     onChange={handleInputChange}
                     placeholder="KM"
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
-                  <span className="text-black font-bold text-2xl">
-                    Road No.:
-                  </span>
                   <input
                     type="text"
                     name="powerBlockRoad"
@@ -3037,7 +3047,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     onChange={handleInputChange}
                     placeholder="Road No."
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
                   />
                 </div>
                 <div className="flex flex-row flex-wrap gap-1">
@@ -3057,13 +3067,12 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </div>
             )}
           </div>
-          <hr className="border-black border-1"/>
 
           {/* S&T Disconnection Section */}
-          <div className="w-full mt-2">
-            <div className="flex items-center mb-1">
+          <div className="w-full mt-2 bg-teal-200 rounded-2xl">
+            <div className="flex justify-between items-center mb-1 bg-teal-400 rounded-2xl  px-2">
               <span className="text-black font-bold text-[24px]">
-                S&T Disconnection Needed ?
+                S&T Disconnection Needed?
               </span>
               <select
                 name="sntDisconnectionRequired"
@@ -3074,12 +3083,11 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     sntDisconnectionRequired: e.target.value === "Y",
                   })
                 }
-                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
+                className="ml-2 pr-8 border-2  border-black rounded 
+                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
                 style={{
-                  width: 70,
-                  height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -3092,9 +3100,9 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
             {/* ───── S&T Disconnection ───── */}
             {formData.sntDisconnectionRequired && (
-              <div className="flex flex-col gap-2 mt-2">
+              <div className="flex flex-col items-center gap-2 mt-2 pb-2">
                 <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-2xl">
+                  {/* <span className="text-black font-bold text-2xl">
                     Line From:
                   </span>
                   <input
@@ -3117,19 +3125,87 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     placeholder="KM"
                     required
                     className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <span className="text-black font-bold text-2xl">
-                    Point No.:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionPointNo"
-                    value={formData.sntDisconnectionPointNo || ""}
-                    onChange={handleInputChange}
-                    placeholder="Point No."
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
+                  /> */}
+
+              <div className="flex flex-col min-[424px]:flex-row w-full space-x-2">
+            <div className="bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2 mb-2">
+              <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
+                Point No.
+              </label>
+              <div className="flex flex-col gap-1">
+                {(formData.sntDisconnectionPointNo?.split(",") || [""]).map((point, index, arr) => (
+                  <div
+                    className="flex items-center gap-1 relative group"
+                    key={index}
+                  >
+                    <input
+                      type="text"
+                      value={point}
+                      onChange={e => {
+                        const points = [...(formData.sntDisconnectionPointNo?.split(",") || [])];
+                        points[index] = e.target.value;
+                        handleInputChange({
+                          target: {
+                            name: "sntDisconnectionPointNo",
+                            value: points.filter((p) => p.trim() !== "").join(","),
+                          }
+                        } as React.ChangeEvent<HTMLInputElement>);
+                      }}
+                      placeholder={`Point No. ${index + 1}`}
+                      required
+                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-40 text-2xl "
+                    />
+                    {arr.length > 1 && (
+                      <button
+                        type="button"
+                        aria-label="Remove point"
+                        onClick={() => {
+                          const points = formData.sntDisconnectionPointNo?.split(",") || [];
+                          const updated = points.filter((_, i) => i !== index);
+                          handleInputChange({
+                            target: {
+                              name: "sntDisconnectionPointNo",
+                              value: updated.join(","),
+                            }
+                          } as React.ChangeEvent<HTMLInputElement>);
+                        }}
+                        className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
+                        style={{ lineHeight: 0 }}
+                      >
+                        <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+                          <circle cx="10" cy="10" r="10" fill="#fff" />
+                          <path d="M6 6l8 8M14 6l-8 8" stroke="#b71c1c" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {/* Only show Add Point if less than 2 non-empty items */}
+                {(formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "").length || 0) < 2 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const points = formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "") || [];
+                      points.push("");
+                      handleInputChange({
+                        target: {
+                          name: "sntDisconnectionPointNo",
+                          value: points.join(","),
+                        }
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
+                    className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  >
+                    <svg width="18" height="18" fill="none" viewBox="0 0 20 20">
+                      <circle cx="10" cy="10" r="10" fill="#fff" />
+                      <path d="M10 5v10M5 10h10" stroke="#166534" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Add Point
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className=" w-full min-w-20 max-w-full min-[424px]:max-w-[230px]">
                   <span className="text-black font-bold text-2xl">
                     Signal No.:
                   </span>
@@ -3140,10 +3216,12 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     onChange={handleInputChange}
                     placeholder="Signal No."
                     required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
                   />
+                  </div>
                 </div>
-                <div className="flex flex-row flex-wrap gap-1">
+                </div>
+                <div className="flex flex-row flex-wrap gap-1 w-full">
                   <span className="text-black font-bold text-2xl">
                     Requirements:
                   </span>
@@ -3157,7 +3235,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     style={{ minHeight: "32px" }}
                   />
                 </div>
-                <div className="flex flex-row flex-wrap gap-1">
+                <div className="flex flex-row flex-wrap gap-1 w-full">
                   <span className="text-black font-bold text-2xl">
                     Assign To:
                   </span>
@@ -3174,7 +3252,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </div>
             )}
           </div>
-          <hr className="border-black border-1"/>
+          </div>
 
           {/* Remarks */}
           <div className="flex flex-row flex-wrap gap-1">
@@ -3186,8 +3264,8 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               value={formData.remarks || ""}
               onChange={handleInputChange}
               placeholder="Enter any additional remarks"
+              rows={1}
               className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[24px]"
-              style={{ minHeight: "32px" }}
             />
           </div>
 
@@ -3215,24 +3293,24 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </button>
 
             {showReviewModal && (
-  <ReviewBlockRequestModal
-    isOpen={showReviewModal}
-    onClose={() => setShowReviewModal(false)}
-    onConfirm={() => {
-      setReviewMode(true);
-      setShowReviewModal(false);
-      // Programmatically submit the form
-      const form = document.querySelector('form');
-      if (form) form.requestSubmit();
-    }}
-    formData={formData}
-    blockSectionValue={blockSectionValue}
-    processedLineSections={processedLineSections}
-    selectedActivities={selectedActivities}
-    customActivity={customActivity}
-    formSubmitting={formSubmitting}
-  />
-)}
+              <ReviewBlockRequestModal
+                isOpen={showReviewModal}
+                onClose={() => setShowReviewModal(false)}
+                onConfirm={() => {
+                  setReviewMode(true);
+                  setShowReviewModal(false);
+                  // Programmatically submit the form
+                  const form = document.querySelector('form');
+                  if (form) form.requestSubmit();
+                }}
+                formData={formData}
+                blockSectionValue={blockSectionValue}
+                processedLineSections={processedLineSections}
+                selectedActivities={selectedActivities}
+                customActivity={customActivity}
+                formSubmitting={formSubmitting}
+              />
+            )}
                   {reviewMode ? (
                 <button
                   type="submit"
