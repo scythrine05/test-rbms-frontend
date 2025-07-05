@@ -21,6 +21,7 @@ import { flattenRecords } from "@/app/lib/optimse";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { useUrgentMode } from "@/app/context/UrgentModeContext";
 import { DaySwitcher } from "@/app/components/ui/DaySwitcher";
+import dayjs from "dayjs";
 
 // Header icons for tables
 const HeaderIcon = ({ type }: { type: string }) => {
@@ -889,7 +890,7 @@ export default function OptimiseTablePage() {
                 )}
                 {urgentRequests.map((request: UserRequest) => (
                   <tr key={`request-${request.id}-${request.date}`} className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo ? "bg-green-50" : ""}`}>
-                    <td className="border border-black p-2 text-sm">{formatDate(request.date)}</td>
+                    <td className="border border-black p-2 text-sm">{dayjs(request.date).format("DD-MM-YY")}</td>
                     <td className="border border-black p-2 text-sm">{request.selectedDepartment}</td>
                     <td className="border border-black p-2 text-sm">{request.selectedSection}</td>
                     <td className="border border-black p-2 text-sm">{request.selectedDepo}</td>
@@ -1060,7 +1061,7 @@ export default function OptimiseTablePage() {
                           className="w-28 border p-1 text-sm rounded"
                         />
                       ) : (
-                        formatDate(request.date)
+                        dayjs(request.date).format("DD-MM-YY")
                       )}
                     </td>
                     <td className="border border-black p-2 text-sm">
@@ -1261,7 +1262,7 @@ export default function OptimiseTablePage() {
                           className="w-28 border p-1 text-sm rounded"
                         />
                       ) : (
-                        formatDate(request.date)
+                        dayjs(request.date).format("DD-MM-YY")
                       )}
                     </td>
                     <td className="border border-black p-2 text-sm">

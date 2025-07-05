@@ -6,6 +6,7 @@ import { adminService } from "@/app/service/api/admin";
 import { format, parseISO, isAfter, isToday } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dayjs from "dayjs";
 
 const ACTIONS = [
     { key: "continue", label: "Stop train and continue the block", color: "#1dcaff" },
@@ -221,7 +222,7 @@ export default function ReviseBlockPage() {
                                 <td className="border border-black p-1 text-center">
                                     <input type="checkbox" checked={selectedBlocks.has(block.id)} onChange={() => toggleBlock(block.id)} />
                                 </td>
-                                <td className="border border-black p-1 text-center">{formatDate(block.date)}</td>
+                                <td className="border border-black p-1 text-center">{dayjs(block.date).format("DD-MM-YY")}</td>
                                 <td className="border border-black p-1 text-center">{block.divisionId || block.id}</td>
                                 <td className="border border-black p-1 text-center">
                                     {block.blockSection ||

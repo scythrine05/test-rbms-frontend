@@ -133,14 +133,14 @@ export default function ViewRequestPage() {
     <div className="bg-white p-3 border border-black mb-3 text-black">
       <div className="border-b-2 border-[#13529e] pb-3 mb-4 flex justify-between items-center">
         <h1 className="text-lg font-bold text-[#13529e]">
-          Block Request Details
+          Block Details
         </h1>
         <div className="flex gap-2">
           <Link
             href={data?.data ? getBackUrl(data.data) : '/admin/optimise-table'}
             className="px-3 py-1 text-sm bg-white text-[#13529e] border border-black"
           >
-            Back to List
+            Back
           </Link>
           {request.adminRequestStatus === "PENDING" && (
             <button
@@ -148,7 +148,7 @@ export default function ViewRequestPage() {
               disabled={isProcessing}
               className="px-3 py-1 text-sm bg-red-600 text-white border border-black disabled:opacity-50"
             >
-              {isProcessing ? "Processing..." : "Reject Request"}
+              {isProcessing ? "Processing..." : "Delete/Cancel"}
             </button>
           )}
         </div>

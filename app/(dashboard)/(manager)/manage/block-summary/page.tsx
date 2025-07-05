@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { managerService } from "@/app/service/api/manager";
+import dayjs from "dayjs";
 
 export default function BlockSummaryPage() {
     const { data: session } = useSession();
@@ -79,7 +80,7 @@ export default function BlockSummaryPage() {
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">Date</th>
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">ID</th>
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">Block Section</th>
-                                    <th className="border border-black px-2 py-1 whitespace-nowrap">UP/DN/SL/RO AD NO.</th>
+                                    <th className="border border-black px-2 py-1 whitespace-nowrap">Line/Road</th>
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">Activity</th>
                                     <th className="border border-black px-2 py-1 whitespace-nowrap">Status</th>
                                 </tr>
@@ -87,7 +88,7 @@ export default function BlockSummaryPage() {
                             <tbody>
                                 {data?.data?.requests?.map((request: any, idx: number) => (
                                     <tr key={request.id} className={idx % 2 === 0 ? "bg-[#FFF86B]" : "bg-[#E6E6FA]"}>
-                                        <td className="border border-black px-2 py-1 text-center text-black">{format(new Date(request.date), "dd-MM-yyyy")}</td>
+                                        <td className="border border-black px-2 py-1 text-center text-black">{dayjs(request.date).format("DD-MM-YY")}</td>
                                         <td className="border border-black px-2 py-1 text-center text-black">{request.id.slice(-4)}</td>
                                         <td className="border border-black px-2 py-1 text-black">{request.missionBlock}</td>
                                         <td className="border border-black px-2 py-1 text-center text-black">{request.processedLineSections?.[0]?.lineName || 'N/A'}</td>

@@ -6,6 +6,7 @@ import { managerService, UserRequest } from "@/app/service/api/manager";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import dayjs from "dayjs";
 
 export default function AdminRequestTablePage() {
   const { data: session } = useSession();
@@ -443,7 +444,7 @@ export default function AdminRequestTablePage() {
           <div className="text-[24px] font-bold text-[#B22222] text-center py-3 tracking-wide">
             REQUESTS PENDING WITH ME
           </div>
-          <div className="italic text-center text-[20px] text-[#B22222] pb-2">
+          <div className="italic text-center text-[24px] text-[#B22222] pb-2">
             (Click to view and optimise)
           </div>
           <div className="flex justify-center items-center gap-6 py-4">
@@ -453,7 +454,7 @@ export default function AdminRequestTablePage() {
             </div>
             <Link
               href="/admin/optimise-table"
-              className="bg-[#FFF0F0] border-2 border-[#FF6B6B] px-8 py-2 rounded text-[20px] font-bold text-[#B22222] hover:bg-[#FFD6D6] shadow transition"
+              className="bg-[#FFF0F0] border-2 border-[#FF6B6B] px-8 py-2 rounded text-[24px] font-bold text-[#B22222] hover:bg-[#FFD6D6] shadow transition"
             >
               Click to View
             </Link>
@@ -479,7 +480,7 @@ export default function AdminRequestTablePage() {
       {/* View Summary of Upcoming Blocks CTA */}
       <div className="flex justify-center mb-8">
         <div className="w-full max-w-4xl rounded-2xl border-4 border-[#00B4D8] bg-[#CAF0F8] shadow-lg p-0">
-          <div className="text-[22px] font-bold text-[#0077B6] text-center py-3 tracking-wide">
+          <div className="text-[24px] font-bold text-[#0077B6] text-center py-3 tracking-wide">
             View Summary of Upcoming Blocks
           </div>
           <div className="px-6 pb-4">
@@ -487,38 +488,38 @@ export default function AdminRequestTablePage() {
             <div className="flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-[#00B4D8] mb-2">
               {/* Date Range */}
               <div className="flex items-center gap-1">
-                <span className="bg-[#E6E6FA] px-2 py-1 border border-[#00B4D8] font-bold text-black rounded-l-md text-xs">
+                <span className="bg-[#E6E6FA] px-2 py-1 border border-[#00B4D8] font-bold text-black rounded-l-md text-[24px]">
                   date
                 </span>
                 <input
                   type="date"
                   value={pendingSummaryFilters.start}
                   onChange={(e) => handlePendingDateChange('start', e.target.value)}
-                  className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+                  className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-[24px]"
                 />
-                <span className="px-1 text-black text-xs">to</span>
+                <span className="px-1 text-black text-[24px]">to</span>
                 <input
                   type="date"
                   value={pendingSummaryFilters.end}
                   onChange={(e) => handlePendingDateChange('end', e.target.value)}
-                  className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-xs"
+                  className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-[24px]"
                 />
               </div>
               {/* Block Type Dropdown (Radio) */}
               <div className="relative inline-block">
                 <button
                   onClick={() => setBlockTypeDropdownOpen((v) => !v)}
-                  className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-[#00B4D8] font-semibold text-black flex items-center gap-2 text-xs"
+                  className="bg-[#E6E6FA] px-3 py-1 rounded-full border-2 border-[#00B4D8] font-semibold text-black flex items-center gap-2 text-[24px]"
                 >
                   Type
-                  <span className="ml-1">▼</span>
+                  <span className="ml-1 text-sm">▼</span>
                 </button>
                 {blockTypeDropdownOpen && (
                   <div className="absolute z-10 mt-2 w-40 bg-white border-2 border-[#00B4D8] rounded shadow-lg">
                     {blockTypeOptions.map((opt) => (
                       <label
                         key={opt.value}
-                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-[20px]"
                       >
                         <input
                           type="checkbox"
@@ -536,17 +537,17 @@ export default function AdminRequestTablePage() {
               <div className="relative inline-block">
                 <button
                   onClick={() => setSectionDropdownOpen((v) => !v)}
-                  className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-[#00B4D8] font-semibold text-black flex items-center gap-2 text-xs"
+                  className="bg-[#B2F3F5] px-3 py-1 rounded-full border-2 border-[#00B4D8] font-semibold text-black flex items-center gap-2 text-[24px]"
                 >
                   Section
-                  <span className="ml-1">▼</span>
+                  <span className="ml-1 text-sm">▼</span>
                 </button>
                 {sectionDropdownOpen && (
                   <div className="absolute z-50 mt-2 w-40 bg-white border-2 border-[#00B4D8] rounded shadow-lg max-h-60 overflow-y-auto">
                     {sectionOptions.map((section) => (
                       <label
                         key={section}
-                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-xs"
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-[#D6F3FF] text-black text-[20px]"
                       >
                         <input
                           type="checkbox"
@@ -563,7 +564,7 @@ export default function AdminRequestTablePage() {
               {/* Dept Dropdown */}
               <div className="relative inline-block">
                 <select
-                  className="bg-[#00B4D8] border-2 border-[#00B4D8] px-2 py-1 rounded text-sm font-semibold cursor-pointer focus:outline-none appearance-none pr-6 text-white min-w-[80px]"
+                  className="bg-[#00B4D8] border-2 border-[#00B4D8] px-2 py-1 rounded text-[24px] font-semibold cursor-pointer focus:outline-none appearance-none pr-6 text-white min-w-[80px]"
                   value={pendingSummaryFilters.dept}
                   onChange={handlePendingDeptChange}
                 >
@@ -579,7 +580,7 @@ export default function AdminRequestTablePage() {
               {/* Click to View Button (moved here) */}
               <div className="flex-grow flex justify-center">
                 <button
-                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded text-[20px] font-bold text-white hover:bg-[#48CAE4] shadow transition "
+                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded text-[24px] font-bold text-white hover:bg-[#48CAE4] shadow transition "
                   onClick={handleApplySummaryFilters}
                 >
                   Click to View
@@ -590,17 +591,17 @@ export default function AdminRequestTablePage() {
             {showTable && (
               <div className="mx-2 overflow-x-auto">
                 <div className="max-h-[60vh] overflow-y-auto border-2 border-[#00B4D8] rounded-lg bg-white">
-                  <table className="w-full text-black text-[20px] relative">
+                  <table className="w-full text-black text-[24px] relative">
                     <thead>
                       <tr className="bg-[#e49edd] text-black">
                         <th className="border-2 border-black p-1">Date</th>
                         <th className="border-2 border-black p-1">ID</th>
                         <th className="border-2 border-black p-1">Block Section</th>
-                        <th className="border-2 border-black p-1">Demanded Time</th>
-                        <th className="border-2 border-black p-1">Sanctioned Time</th>
+                        <th className="border-2 border-black p-1">Demanded</th>
+                        <th className="border-2 border-black p-1">Offered</th>
                         <th className="border-2 border-black p-1">Block Type</th>
                         <th className="border-2 border-black p-1">
-                          UP/DN/SL/RO AD NO.
+                          Line/Road
                         </th>
                         <th className="border-2 border-black p-1">Activity</th>
                         <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#e49edd]">
@@ -617,7 +618,7 @@ export default function AdminRequestTablePage() {
                             className={idx % 2 === 0 ? "bg-[#FFC0CB]" : "bg-white"}
                           >
                             <td className="border border-black p-1 text-center">
-                              {formatDate(request.date)}
+                              {dayjs(request.date).format("DD-MM-YY")}
                             </td>
                             <td className="border border-black p-1 text-center">
                               <Link
@@ -675,15 +676,15 @@ export default function AdminRequestTablePage() {
       {/* Info Texts */}
       <div className="text-center mt-1 mb-32">
         <h3
-          className="inline-flex bg-[#cfd4ff] py-1 px-6 rounded-full text-black text-base font-medium mb-2 text-[20px]"
+          className="inline-flex bg-[#cfd4ff] py-1 px-6 rounded-full text-black text-base font-medium mb-2 text-[24px]"
         >
           Click ID to see details of a Block.
         </h3>
         <h3
-          className="bg-[#cfd4ff] rounded-full py-2 px-4 text-black text-[20px] font-medium"
+          className="bg-[#cfd4ff] rounded-full py-2 px-4 text-black text-[24px] font-medium"
         >
           For printing the complete table, click to download in{' '}
-          <span className="font-bold text-[#00B4D8] text-[20px]">.xlsx format</span>
+          <span className="font-bold text-[#00B4D8] text-[24px]">.xlsx format</span>
         </h3>
       </div>
 
@@ -691,13 +692,13 @@ export default function AdminRequestTablePage() {
       <div className="fixed bottom-0 left-0 w-full bg-white border-t-2 border-[#A084E8] py-4 flex justify-center gap-8 z-50 shadow-xl">
         <button
           onClick={() => handleDownloadExcel(summaryFilteredRequests)}
-          className="bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-lg border-2 border-[#FF6B6B] font-bold text-lg text-[#5D3587] shadow transition"
+          className="bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-lg border-2 border-[#FF6B6B] font-bold text-[24px] text-[#5D3587] shadow transition"
         >
           Download
         </button>
         <Link
           href="/dashboard"
-          className="bg-[#90EE90] hover:bg-[#B6FFB6] px-12 py-3 rounded-lg border-2 border-[#00B894] font-bold text-lg text-[#0077B6] shadow transition flex items-center justify-center"
+          className="bg-[#90EE90] hover:bg-[#B6FFB6] px-12 py-3 rounded-lg border-2 border-[#00B894] font-bold text-[24px] text-[#0077B6] shadow transition flex items-center justify-center"
         >
           Home
         </Link>
