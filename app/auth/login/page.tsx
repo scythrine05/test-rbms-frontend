@@ -33,7 +33,7 @@ export default function LoginPage() {
       {/* Yellow oval for developer credit */}
 
       <div className="w-full flex justify-center mt-2 mb-2">
-        <div className="w-full h-[100px] bg-[#f9e38e] rounded-[50%] flex flex-col items-center justify-center font-bold text-black text-2xl text-center tracking-wide border-none">
+        <div className="w-fit px-10 h-[100px] bg-[#f9e38e] flex flex-col items-center justify-center font-bold text-black text-2xl text-center tracking-wide border-none">
           App designed & developed by
           <br />
           Southern Railway

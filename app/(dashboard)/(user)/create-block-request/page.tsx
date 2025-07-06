@@ -93,8 +93,8 @@ const selectStyles = {
     backgroundColor: state.isSelected
       ? "#e0e7ef"
       : state.isFocused
-        ? "#f3f4f6"
-        : "white",
+      ? "#f3f4f6"
+      : "white",
     fontSize: "12px",
     padding: "4px 8px",
     "&:hover": {
@@ -127,16 +127,16 @@ const getSelectStyles = (hasError: boolean) => {
       borderColor: hasError
         ? "#dc2626"
         : state.isFocused
-          ? "#2461aa"
-          : "#45526c",
+        ? "#2461aa"
+        : "#45526c",
       borderWidth: hasError ? "2px" : "1px",
       borderRadius: "4px",
       padding: "2px",
       boxShadow: hasError
         ? "0 0 0 1px rgba(220, 38, 38, 0.2)"
         : state.isFocused
-          ? "0 0 0 1px rgba(37, 99, 176, 0.1)"
-          : "none",
+        ? "0 0 0 1px rgba(37, 99, 176, 0.1)"
+        : "none",
       fontSize: "14px",
       minHeight: "36px",
       "&:hover": {
@@ -198,7 +198,7 @@ function ReviewBlockRequestModal({
             Review the Block Request Before Submission
           </h2>
           <div className="space-y-3 text-black text-base">
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 mb-2">
               <div className="flex-1 min-w-[180px]">
                 <b>Date of Block:</b> {formData.date}
               </div>
@@ -231,7 +231,7 @@ function ReviewBlockRequestModal({
                   : "Planned"}
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 my-2 text-2xl">
+            <div className="flex flex-wrap gap-4 mb-2 text-[13px]">
               <div className="flex-1 min-w-[180px] ">
                 <b>Preferred Slot:</b> {formData.demandTimeFrom} to{" "}
                 {formData.demandTimeTo}
@@ -309,7 +309,7 @@ function ReviewBlockRequestModal({
                   <div>
                     <b>Requirements:</b>{" "}
                     {formData.powerBlockRequirements &&
-                      formData.powerBlockRequirements.length > 0
+                    formData.powerBlockRequirements.length > 0
                       ? formData.powerBlockRequirements.join(", ")
                       : "-"}
                   </div>
@@ -335,7 +335,7 @@ function ReviewBlockRequestModal({
                   <div>
                     <b>Requirements:</b>{" "}
                     {formData.sntDisconnectionRequirements &&
-                      formData.sntDisconnectionRequirements.length > 0
+                    formData.sntDisconnectionRequirements.length > 0
                       ? formData.sntDisconnectionRequirements.join(", ")
                       : "-"}
                   </div>
@@ -398,8 +398,8 @@ const otherAffectedSelectStyles = {
     backgroundColor: state.isSelected
       ? "#e0e7ef"
       : state.isFocused
-        ? "#e5e7eb"
-        : "white",
+      ? "#e5e7eb"
+      : "white",
     fontSize: "13px",
     padding: "6px 10px",
     fontWeight: state.isSelected ? "bold" : "normal",
@@ -470,7 +470,7 @@ type FormDataValue = string | number | boolean | null | string[];
 
 interface FormData {
 
-  freshCautions: {
+    freshCautions: {
     adjacentLinesAffected: string;
     freshCautionLocationFrom: string;
     freshCautionLocationTo: string;
@@ -497,10 +497,10 @@ interface FormData {
   workType: string;
   activity: string;
   corridorTypeSelection:
-  | "Corridor"
-  | "Outside Corridor"
-  | "Urgent Block"
-  | null;
+    | "Corridor"
+    | "Outside Corridor"
+    | "Urgent Block"
+    | null;
   corridorType: "Corridor" | "Outside Corridor" | "Urgent Block" | null;
   selectedStream: string;
   selectedRoad: string;
@@ -554,7 +554,7 @@ export default function CreateBlockRequestPage() {
   const router = useRouter();
 
   const initialFormData: FormData = {
-
+    
     date: "",
     demandTimeFrom: "",
     demandTimeTo: "",
@@ -616,13 +616,13 @@ export default function CreateBlockRequestPage() {
     powerBlockDisconnectionAssignTo: "",
     nonCorridorReason: "",
     freshCautions: [
-      {
-        adjacentLinesAffected: "",
-        freshCautionLocationFrom: "",
-        freshCautionLocationTo: "",
-        freshCautionSpeed: "",
-      },
-    ],
+    {
+      adjacentLinesAffected: "",
+      freshCautionLocationFrom: "",
+      freshCautionLocationTo: "",
+      freshCautionSpeed: ""
+    }
+  ]
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -655,42 +655,18 @@ export default function CreateBlockRequestPage() {
     },
   });
   const [showPopup, setShowPopup] = useState(false);
-  const [popupLink, setPopupLink] = useState("");
+const [popupLink, setPopupLink] = useState("");
   // const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
-  // const majorSectionOptions =
-  //   userLocation && MajorSection[userLocation as keyof typeof MajorSection]
-  //     ? MajorSection[userLocation as keyof typeof MajorSection]
-  //     : [];
-
-  // const selectedDepo = "AJJE";   //temprory fix we need to change it
-
-const userDepot = session?.user.depot;      
-const userDept = session?.user.department??""; 
-
-const locationSections = 
-  userLocation && MajorSection[userLocation as keyof typeof MajorSection] 
-    ? MajorSection[userLocation as keyof typeof MajorSection] 
-    : [];
-
-const majorSectionOptions = userDepot === "OVERALL"
-  ? locationSections 
-  : locationSections.filter(section => {
-      const depotData :any= depot[section as keyof typeof depot];
-      if (!depotData) return false;
-
-  
-      if (!(userDept in depotData)) return false;
-      
-   
-      return depotData[userDept].includes(userDepot);
-    });
-
+  const majorSectionOptions =
+    userLocation && MajorSection[userLocation as keyof typeof MajorSection]
+      ? MajorSection[userLocation as keyof typeof MajorSection]
+      : [];
   const selectedMajorSection = formData.selectedSection;
   const blockSectionOptions =
     selectedMajorSection &&
-      blockSection[selectedMajorSection as keyof typeof blockSection]
+    blockSection[selectedMajorSection as keyof typeof blockSection]
       ? blockSection[selectedMajorSection as keyof typeof blockSection]
       : [];
   const userDepartment = session?.user.department;
@@ -708,67 +684,6 @@ const majorSectionOptions = userDepot === "OVERALL"
     value: block,
     label: block,
   }));
-
-
-
-// Utility functions to map between block sections and yards
-const getYardsFromBlockSection = (block: string): string[] => {
-  if (!block.includes('-')) return [];
-  const parts = block.split('-');
-  // Handle cases like "MASS-BBQ" (2 parts) and "MAS-BBQ" (2 parts)
-  if (parts.length === 2) {
-    const [from, to] = parts;
-    return [`${from}-YD`, `${to}-YD`];
-  }
-  // Handle cases like "VPY-KOK-TNP" (3 parts)
-  return parts.map(part => `${part}-YD`);
-};
-
-const getBlockSectionsFromYard = (yard: string, majorSection: string): string[] => {
-  if (!yard.includes('-YD')) return [];
-  const station = yard.replace('-YD', '');
-  
-  // Get all block sections for the major section
-  const allBlocks = blockSection[majorSection as keyof typeof blockSection] || [];
-  
-  // Find block sections that include this station
-  return allBlocks.filter(block => 
-    block.includes('-') && 
-    (block.startsWith(`${station}-`) || block.endsWith(`-${station}`))
-  );
-};
-
-
-
-const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]) => {
-  if (blockSectionValue.length === 0) {
-    return blockSectionOptions;
-  }
-
-  const relatedOptions = new Set<string>();
-
-  blockSectionValue.forEach(selected => {
-    if (selected.endsWith('-YD')) {
-      // Selected a yard - show its related blocks
-      const blocks = getBlockSectionsFromYard(selected, formData.selectedSection);
-      blocks.forEach(block => relatedOptions.add(block));
-    } else {
-      // Selected a block - show its related yards
-      const yards = getYardsFromBlockSection(selected);
-      yards.forEach(yard => relatedOptions.add(yard));
-    }
-    
-    // Always keep the selected values
-    relatedOptions.add(selected);
-  });
-
-  return blockSectionOptions.filter(option => relatedOptions.has(option));
-};
-
-
-
-
-
 
   const getTomorrowDateString = () => {
     const tomorrow = new Date();
@@ -1024,69 +939,67 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
 
 
 
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    // ─── 1. Review‑mode guard ──────────────────────────────────────────────
-    if (!reviewMode) {
-      setReviewMode(true);
+  // ─── 1. Review‑mode guard ──────────────────────────────────────────────
+  if (!reviewMode) {
+    setReviewMode(true);
+    return;
+  }
+
+  setFormSubmitting(true);
+  setFormError(null);
+
+  try {
+    // ─── 2. Fetch existing requests and run block check ──────────────────
+    const existing = await userRequestService.getUserRequests(1, 100);
+    const requests: any[] = Array.isArray(existing?.data.requests) ? existing.data.requests : [];
+    const now = Date.now();
+
+    let hasUnavailedSanctionedBlock = false;
+
+    for (let i = 0; i < requests.length; i++) {
+      const req = requests[i];
+      if (
+        req?.isSanctioned === true &&         // sanctioned
+        req?.availedResponse === null &&      // not availed
+        req?.sanctionedTimeFrom               // has date
+      ) {
+        const sanctionMs = new Date(req.sanctionedTimeFrom).getTime();
+        if (!Number.isNaN(sanctionMs) && now >= sanctionMs) {
+          // sanction start time is in the past (covers >24 h automatically)
+          hasUnavailedSanctionedBlock = true;
+          break;
+        }
+      }
+    }
+
+   if (hasUnavailedSanctionedBlock) {
+  const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
+  setPopupLink(link);
+  setShowPopup(true);
+  setFormSubmitting(false);
+  return;
+}
+
+    // ─── 3. Client‑side validation ───────────────────────────────────────
+    const validation = handleFormValidation();
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      scrollToFirstError(validation.errors);
+      setFormSubmitting(false);
       return;
     }
 
-    setFormSubmitting(true);
-    setFormError(null);
-    setFormSubmitting(true);
-    setFormError(null);
+    // ─── 4. Prepare processedLineSections ────────────────────────────────
+    const validSecs = (formData.processedLineSections || []).filter((s) =>
+      blockSectionValue.includes(s.block)
+    );
 
-    try {
-      // ─── 2. Fetch existing requests and run block check ──────────────────
-      const existing = await userRequestService.getUserRequests(1, 100);
-      const requests: any[] = Array.isArray(existing?.data.requests) ? existing.data.requests : [];
-      const now = Date.now();
-
-      let hasUnavailedSanctionedBlock = false;
-
-      for (let i = 0; i < requests.length; i++) {
-        const req = requests[i];
-        if (
-          req?.isSanctioned === true &&         // sanctioned
-          req?.availedResponse === null &&      // not availed
-          req?.sanctionedTimeFrom               // has date
-        ) {
-          const sanctionMs = new Date(req.sanctionedTimeFrom).getTime();
-          if (!Number.isNaN(sanctionMs) && now >= sanctionMs) {
-            // sanction start time is in the past (covers >24 h automatically)
-            hasUnavailedSanctionedBlock = true;
-            break;
-          }
-        }
-      }
-
-      if (hasUnavailedSanctionedBlock) {
-        const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
-        setPopupLink(link);
-        setShowPopup(true);
-        setFormSubmitting(false);
-        return;
-      }
-
-      // ─── 3. Client‑side validation ───────────────────────────────────────
-      const validation = handleFormValidation();
-      if (!validation.isValid) {
-        setErrors(validation.errors);
-        scrollToFirstError(validation.errors);
-        setFormSubmitting(false);
-        return;
-      }
-
-      // ─── 4. Prepare processedLineSections ────────────────────────────────
-      const validSecs = (formData.processedLineSections || []).filter((s) =>
-        blockSectionValue.includes(s.block)
-      );
-
-      const processedSections = validSecs.map((s) =>
-        s.type === "yard"
-          ? {
+    const processedSections = validSecs.map((s) =>
+      s.type === "yard"
+        ? {
             ...s,
             lineName: s.lineName || "",
             otherLines: s.otherLines || "",
@@ -1094,7 +1007,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             road: s.road || "",
             otherRoads: s.otherRoads || "",
           }
-          : {
+        : {
             ...s,
             lineName: s.lineName || "",
             otherLines: s.otherLines || "",
@@ -1102,188 +1015,188 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             road: "",
             otherRoads: "",
           }
-      );
+    );
 
-      // ─── 5. Flatten first fresh‑caution (backend still expects single set)
-      const firstCaution = formData.freshCautions?.[0] || {
-        freshCautionLocationFrom: "",
-        freshCautionLocationTo: "",
-        adjacentLinesAffected: "",
-        freshCautionSpeed: 0,
-      };
+    // ─── 5. Flatten first fresh‑caution (backend still expects single set)
+    const firstCaution = formData.freshCautions?.[0] || {
+      freshCautionLocationFrom: "",
+      freshCautionLocationTo: "",
+      adjacentLinesAffected: "",
+      freshCautionSpeed: 0,
+    };
 
-      // ─── 6. Build payload ────────────────────────────────────────────────
-      const submitData: UserRequestInput = {
-        ...formData,
-        corridorType: formData.corridorTypeSelection,
-        sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
-        powerBlockRequired: formData.powerBlockRequired ?? false,
-        freshCautionRequired: formData.freshCautionRequired ?? false,
-        adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
-        freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
-        freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
-        freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
-        date: formatDateToISO(formData.date || ""),
-        demandTimeFrom: formatTimeToDatetime(formData.date || "", formData.demandTimeFrom || ""),
-        demandTimeTo: formatTimeToDatetime(formData.date || "", formData.demandTimeTo || ""),
-        processedLineSections: processedSections,
-        adminAcceptance: false,
-        selectedDepo: formData.selectedDepo,
-      };
+    // ─── 6. Build payload ────────────────────────────────────────────────
+    const submitData: UserRequestInput = {
+      ...formData,
+      corridorType: formData.corridorTypeSelection,
+      sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
+      powerBlockRequired: formData.powerBlockRequired ?? false,
+      freshCautionRequired: formData.freshCautionRequired ?? false,
+       adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
+  freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
+  freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
+  freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
+      date: formatDateToISO(formData.date || ""),
+      demandTimeFrom: formatTimeToDatetime(formData.date || "", formData.demandTimeFrom || ""),
+      demandTimeTo:   formatTimeToDatetime(formData.date || "", formData.demandTimeTo || ""),
+      processedLineSections: processedSections,
+      adminAcceptance: false,
+      selectedDepo: formData.selectedDepo,
+    };
 
-      // ─── 7. Submit to backend ────────────────────────────────────────────
-      const response = await mutation.mutateAsync(submitData);
+    // ─── 7. Submit to backend ────────────────────────────────────────────
+    const response = await mutation.mutateAsync(submitData);
 
-      if (response) {
-        toast.success("Block request submitted successfully!");
-        setSubmittedSummary({
-          date: submitData.date,
-          id: response.data?.divisionId || response.data?.id,
-          blockSection: submitData.missionBlock || "-",
-          lineOrRoad:
-            submitData.processedLineSections?.map((s) => s.lineName || s.road).join(", ") || "-",
-          duration: getDurationFromTimes(formData.demandTimeFrom || "", formData.demandTimeTo || "") || "-",
-        });
+    if (response) {
+      toast.success("Block request submitted successfully!");
+      setSubmittedSummary({
+        date: submitData.date,
+        id: response.data?.divisionId || response.data?.id,
+        blockSection: submitData.missionBlock || "-",
+        lineOrRoad:
+          submitData.processedLineSections?.map((s) => s.lineName || s.road).join(", ") || "-",
+        duration: getDurationFromTimes(formData.demandTimeFrom || "", formData.demandTimeTo || "") || "-",
+      });
 
-        // Reset form + UI
-        setFormData(initialFormData);
-        setBlockSectionValue([]);
-        setProcessedLineSections([]);
-        setSelectedActivities([]);
-        setCustomActivity("");
-        setErrors({});
-        setShowSuccessPage(true);
-        setReviewMode(false);
-      }
-    } catch (err: any) {
-      console.error("Form submission error:", err);
-      setFormError(err.message || "Submission failed.");
-      toast.error(err.message || "Failed to submit block request");
-    } finally {
-      setFormSubmitting(false);
+      // Reset form + UI
+      setFormData(initialFormData);
+      setBlockSectionValue([]);
+      setProcessedLineSections([]);
+      setSelectedActivities([]);
+      setCustomActivity("");
+      setErrors({});
+      setShowSuccessPage(true);
+      setReviewMode(false);
     }
-  };
+  } catch (err: any) {
+    console.error("Form submission error:", err);
+    setFormError(err.message || "Submission failed.");
+    toast.error(err.message || "Failed to submit block request");
+  } finally {
+    setFormSubmitting(false);
+  }
+};
 
 
 
   // Refactor handleSubmit to work with reviewMode
-  //   const handleFormSubmit = async (e: React.FormEvent) => {
-  //     e.preventDefault();
-  //     if (!reviewMode) {
-  //       setReviewMode(true); // Enter review mode
-  //       return;
-  //     }
-  //     // Only submit in review mode
-  //     setFormSubmitting(true);
-  //     setFormError(null);
-  //     try {
-  //       const validationResult = handleFormValidation();
-  //       if (!validationResult.isValid) {
-  //         setErrors(validationResult.errors);
-  //         scrollToFirstError(validationResult.errors);
-  //         setFormSubmitting(false);
-  //         return;
-  //       }
-  //       const validProcessedSections = (
-  //         formData.processedLineSections || []
-  //       ).filter((section) => blockSectionValue.includes(section.block));
-  //       const processedSectionsWithDefaults = validProcessedSections.map(
-  //         (section) => {
-  //           if (section.type === "yard") {
-  //             return {
-  //               ...section,
-  //               lineName: section.lineName || "",
-  //               otherLines: section.otherLines || "",
-  //               stream: section.stream || "",
-  //               road: section.road || "",
-  //               otherRoads: section.otherRoads || "",
-  //             };
-  //           } else {
-  //             return {
-  //               ...section,
-  //               lineName: section.lineName || "",
-  //               otherLines: section.otherLines || "",
-  //               stream: "",
-  //               road: "",
-  //               otherRoads: "",
-  //             };
-  //           }
-  //         }
-  //       );
-  // //       const firstCaution = formData.freshCautions[0] || {
-  // //   freshCautionLocationFrom: "",
-  // //   freshCautionLocationTo: "",
-  // //   adjacentLinesAffected: "",
-  // //   freshCautionSpeed: 0,
-  // // };
-  //       const submitData: UserRequestInput = {
-  //         ...formData,
-  //         corridorType: formData.corridorTypeSelection,
-  //         sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
-  //         powerBlockRequired: formData.powerBlockRequired ?? false,
-  //         freshCautionRequired: formData.freshCautionRequired ?? false,
-  //          adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
-  //   freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
-  //   freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
-  //   freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
-  //         date: formatDateToISO(formData.date || ""),
-  //         demandTimeFrom: formatTimeToDatetime(
-  //           formData.date || "",
-  //           formData.demandTimeFrom || ""
-  //         ),
-  //         demandTimeTo: formatTimeToDatetime(
-  //           formData.date || "",
-  //           formData.demandTimeTo || ""
-  //         ),
-  //         processedLineSections: processedSectionsWithDefaults,
-  //         adminAcceptance: false,
-  //         selectedDepo: formData.selectedDepo,
-  //       };
-  //       const response = await mutation.mutateAsync(submitData);
-  //       if (response) {
-  //         toast.success("Block request submitted successfully!");
-  //         setSubmittedSummary({
-  //           date: submitData.date,
-  //           id: response.data?.divisionId || response.data?.id,
-  //           blockSection: submitData.missionBlock || "-",
-  //           lineOrRoad:
-  //             submitData.processedLineSections &&
-  //             submitData.processedLineSections.length > 0
-  //               ? submitData.processedLineSections
-  //                   .map((s: any) => s.lineName || s.road)
-  //                   .join(", ")
-  //               : "-",
-  //           duration:
-  //             getDurationFromTimes(
-  //               formData.demandTimeFrom || "",
-  //               formData.demandTimeTo || ""
-  //             ) || "-",
-  //         });
-  //         setFormData(initialFormData);
-  //         setBlockSectionValue([]);
-  //         setProcessedLineSections([]);
-  //         setSelectedActivities([]);
-  //         setCustomActivity("");
-  //         setErrors({});
-  //         setShowSuccessPage(true);
-  //         setReviewMode(false);
-  //       }
-  //     } catch (error: any) {
-  //       console.error("Form submission error:", error);
-  //       if (error.response) {
-  //         console.error("Error response data:", error.response.data);
-  //         console.error("Error response status:", error.response.status);
-  //         console.error("Error response headers:", error.response.headers);
-  //       }
-  //       setFormError(
-  //         error.message ||
-  //           "An error occurred while submitting the form. Please try again."
-  //       );
-  //       toast.error(error.message || "Failed to submit block request");
-  //     } finally {
-  //       setFormSubmitting(false);
-  //     }
-  //   };
+//   const handleFormSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!reviewMode) {
+//       setReviewMode(true); // Enter review mode
+//       return;
+//     }
+//     // Only submit in review mode
+//     setFormSubmitting(true);
+//     setFormError(null);
+//     try {
+//       const validationResult = handleFormValidation();
+//       if (!validationResult.isValid) {
+//         setErrors(validationResult.errors);
+//         scrollToFirstError(validationResult.errors);
+//         setFormSubmitting(false);
+//         return;
+//       }
+//       const validProcessedSections = (
+//         formData.processedLineSections || []
+//       ).filter((section) => blockSectionValue.includes(section.block));
+//       const processedSectionsWithDefaults = validProcessedSections.map(
+//         (section) => {
+//           if (section.type === "yard") {
+//             return {
+//               ...section,
+//               lineName: section.lineName || "",
+//               otherLines: section.otherLines || "",
+//               stream: section.stream || "",
+//               road: section.road || "",
+//               otherRoads: section.otherRoads || "",
+//             };
+//           } else {
+//             return {
+//               ...section,
+//               lineName: section.lineName || "",
+//               otherLines: section.otherLines || "",
+//               stream: "",
+//               road: "",
+//               otherRoads: "",
+//             };
+//           }
+//         }
+//       );
+// //       const firstCaution = formData.freshCautions[0] || {
+// //   freshCautionLocationFrom: "",
+// //   freshCautionLocationTo: "",
+// //   adjacentLinesAffected: "",
+// //   freshCautionSpeed: 0,
+// // };
+//       const submitData: UserRequestInput = {
+//         ...formData,
+//         corridorType: formData.corridorTypeSelection,
+//         sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
+//         powerBlockRequired: formData.powerBlockRequired ?? false,
+//         freshCautionRequired: formData.freshCautionRequired ?? false,
+//          adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
+//   freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
+//   freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
+//   freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
+//         date: formatDateToISO(formData.date || ""),
+//         demandTimeFrom: formatTimeToDatetime(
+//           formData.date || "",
+//           formData.demandTimeFrom || ""
+//         ),
+//         demandTimeTo: formatTimeToDatetime(
+//           formData.date || "",
+//           formData.demandTimeTo || ""
+//         ),
+//         processedLineSections: processedSectionsWithDefaults,
+//         adminAcceptance: false,
+//         selectedDepo: formData.selectedDepo,
+//       };
+//       const response = await mutation.mutateAsync(submitData);
+//       if (response) {
+//         toast.success("Block request submitted successfully!");
+//         setSubmittedSummary({
+//           date: submitData.date,
+//           id: response.data?.divisionId || response.data?.id,
+//           blockSection: submitData.missionBlock || "-",
+//           lineOrRoad:
+//             submitData.processedLineSections &&
+//             submitData.processedLineSections.length > 0
+//               ? submitData.processedLineSections
+//                   .map((s: any) => s.lineName || s.road)
+//                   .join(", ")
+//               : "-",
+//           duration:
+//             getDurationFromTimes(
+//               formData.demandTimeFrom || "",
+//               formData.demandTimeTo || ""
+//             ) || "-",
+//         });
+//         setFormData(initialFormData);
+//         setBlockSectionValue([]);
+//         setProcessedLineSections([]);
+//         setSelectedActivities([]);
+//         setCustomActivity("");
+//         setErrors({});
+//         setShowSuccessPage(true);
+//         setReviewMode(false);
+//       }
+//     } catch (error: any) {
+//       console.error("Form submission error:", error);
+//       if (error.response) {
+//         console.error("Error response data:", error.response.data);
+//         console.error("Error response status:", error.response.status);
+//         console.error("Error response headers:", error.response.headers);
+//       }
+//       setFormError(
+//         error.message ||
+//           "An error occurred while submitting the form. Please try again."
+//       );
+//       toast.error(error.message || "Failed to submit block request");
+//     } finally {
+//       setFormSubmitting(false);
+//     }
+//   };
 
   const handleFormValidation = () => {
     const errors: Record<string, string> = {};
@@ -1330,19 +1243,19 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
 
     // Urgent Block validations
     if (formData.corridorTypeSelection === "Urgent Block") {
-      if (formData.freshCautionRequired) {
-        formData.freshCautions.forEach((c, i) => {
-          if (!c.freshCautionSpeed)
-            errors[`freshCautions-${i}-speed`] = "Speed required";
-          if (!c.freshCautionLocationFrom)
-            errors[`freshCautions-${i}-from`] = "KM From required";
-          if (!c.freshCautionLocationTo)
-            errors[`freshCautions-${i}-to`] = "KM To required";
-          if (!c.adjacentLinesAffected)
-            errors[`freshCautions-${i}-adj`] = "Direction/Road required";
-        });
-      }
-    }
+  if (formData.freshCautionRequired) {
+    formData.freshCautions.forEach((c, i) => {
+      if (!c.freshCautionSpeed)
+        errors[`freshCautions-${i}-speed`] = "Speed required";
+      if (!c.freshCautionLocationFrom)
+        errors[`freshCautions-${i}-from`] = "KM From required";
+      if (!c.freshCautionLocationTo)
+        errors[`freshCautions-${i}-to`] = "KM To required";
+      if (!c.adjacentLinesAffected)
+        errors[`freshCautions-${i}-adj`] = "Direction/Road required";
+    });
+  }
+}
 
 
     // Power Block validations
@@ -1379,58 +1292,61 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
 
     return { isValid: true, errors: {} };
   };
-  /** ────────────────────────────────
-   *  Fresh Caution helpers
-   *  ────────────────────────────────*/
-  const handleFreshCautionChange = <
-    K extends keyof FormData["freshCautions"][number]
-  >(
-    index: number,
-    field: K,
-    value: FormData["freshCautions"][number][K]
-  ) => {
-    setFormData(prev => {
-      const updated = [...prev.freshCautions];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, freshCautions: updated };
-    });
-  };
+/** ────────────────────────────────
+ *  Fresh Caution helpers
+ *  ────────────────────────────────*/
+const handleFreshCautionChange = <
+  K extends keyof FormData["freshCautions"][number]
+>(
+  index: number,
+  field: K,
+  value: FormData["freshCautions"][number][K]
+) => {
+  setFormData(prev => {
+    const updated = [...prev.freshCautions];
+    updated[index] = { ...updated[index], [field]: value };
+    return { ...prev, freshCautions: updated };
+  });
+};
 
-  const addFreshCaution = () => {
-    setFormData(prev => ({
-      ...prev,
-      freshCautions: [
-        ...prev.freshCautions,
-        {
-          adjacentLinesAffected: "",
-          freshCautionLocationFrom: "",
-          freshCautionLocationTo: "",
-          freshCautionSpeed: "",
-        },
-      ],
-    }));
-  };
+const addFreshCaution = () => {
+  setFormData(prev => ({
+    ...prev,
+    freshCautions: [
+      ...prev.freshCautions,
+      {
+        adjacentLinesAffected: "",
+        freshCautionLocationFrom: "",
+        freshCautionLocationTo: "",
+        freshCautionSpeed: "",
+      },
+    ],
+  }));
+};
 
-  const removeFreshCaution = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      freshCautions: prev.freshCautions.filter((_, i) => i !== index),
-    }));
-  };
+const removeFreshCaution = (index: number) => {
+  setFormData(prev => ({
+    ...prev,
+    freshCautions: prev.freshCautions.filter((_, i) => i !== index),
+  }));
+};
 
   const getInputClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   const getSelectClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-green-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-green-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   const getTextareaClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   useEffect(() => {
@@ -2142,81 +2058,54 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
       <div className="min-h-screen flex flex-col items-center bg-[#fcfaf3]">
         <div className="w-full max-w-2xl mx-auto mt-4">
           <div className="text-center bg-[#f7f7a1] rounded-t-2xl p-4 border-b-2 border-[#b6f7e6]">
-            <span className="text-[24px] font-extrabold text-[#b07be0]">
-              RBMS-MAS-DIVN
-            </span>
+            <span className="text-4xl font-extrabold text-[#b07be0]">RBMS</span>
           </div>
           <div className="bg-[#fffaf0] rounded-b-2xl p-4 sm:p-6 w-full max-w-2xl overflow-auto">
             <div className="bg-[#c6e6f7] rounded-xl p-4 mb-6 w-full overflow-auto">
-              <h2 className="text-[24px] font-extrabold mb-4 text-[#222]">
+              <h2 className="text-2xl font-extrabold mb-4 text-[#222]">
                 Your Block Request has been Registered
               </h2>
               <table className="w-full mb-2 border rounded-xl overflow-hidden shadow-md">
+                <thead>
+                  <tr className="bg-[#e6f7c6]">
+                    <th className="px-2 py-1 border text-black font-bold">
+                      Date
+                    </th>
+                    <th className="px-2 py-1 border text-black font-bold">
+                      ID
+                    </th>
+                    <th className="px-2 py-1 border text-black font-bold">
+                      Block Section
+                    </th>
+                    <th className="px-2 py-1 border text-black font-bold">
+                      UP/DN/SL/Road
+                    </th>
+                    <th className="px-2 py-1 border text-black font-bold">
+                      Duration
+                    </th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {/* Date Row */}
-                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[24px]">
-                        Date
-                      </div>
-                      <div className="text-black text-[20px]">
-                        {submittedSummary?.date
-                          ? new Date(submittedSummary.date).toLocaleDateString(
-                              "en-GB",
-                              {
-                                year: "2-digit",
-                                month: "2-digit",
-                                day: "2-digit",
-                              }
-                            )
-                          : "-"}
-                      </div>
+                  <tr className="text-center bg-white border-b shadow-sm hover:bg-[#f7f7fa]">
+                    <td className="px-2 py-2 border text-black font-semibold">
+                      {submittedSummary?.date
+                        ? new Date(submittedSummary.date).toLocaleDateString(
+                            "en-GB"
+                          )
+                        : "-"}
                     </td>
-                  </tr>
 
-                  {/* ID Row */}
-                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[24px]">ID</div>
-                      <div className="text-black text-[20px]">
-                        {submittedSummary?.id || "-"}
-                      </div>
+                    <td className="px-2 py-2 border text-black font-semibold">
+                      {submittedSummary?.id || "-"}
                     </td>
-                  </tr>
-
-                  {/* Block Section Row */}
-                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[24px]">
-                        Block Section
-                      </div>
-                      <div className="text-black text-[24px]">
-                        {submittedSummary?.blockSection || "-"}
-                      </div>
+                    <td className="px-2 py-2 border text-black font-semibold">
+                      {submittedSummary?.blockSection || "-"}
                     </td>
-                  </tr>
-
-                  {/* Line Row */}
-                  <tr className="bg-white border-b hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[24px]">
-                        Line
-                      </div>
-                      <div className="text-black text-[20px]">
-                        {submittedSummary?.lineOrRoad || "-"}
-                      </div>
+                    <td className="px-2 py-2 border text-black font-semibold">
+                      {submittedSummary?.lineOrRoad || "-"}
                     </td>
-                  </tr>
-
-                  {/* Demanded Row */}
-                  <tr className="bg-white hover:bg-[#f7f7fa]">
-                    <td className="px-2 py-1 border-t border-b-0 border-l-0 border-r-0">
-                      <div className="font-bold text-black text-[24px]">
-                        Demanded
-                      </div>
-                      <div className="text-black text-[24px]">
-                        {submittedSummary?.duration || "-"}
-                      </div>
+                    <td className="px-2 py-2 border text-black font-semibold">
+                      {submittedSummary?.duration || "-"}
                     </td>
                   </tr>
                 </tbody>
@@ -2224,7 +2113,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
             <div className="flex flex-col gap-6 items-center mt-8 w-full">
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => {
                   setFormData(initialFormData);
                   setBlockSectionValue([]);
@@ -2239,52 +2128,19 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 ENTER MORE BLOCK REQUESTS
               </button>
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => router.push("/edit-request")}
               >
                 EDIT OR CANCEL PREVIOUS REQUESTS
               </button>
               <button
-                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-[20px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+                className="w-full rounded-2xl bg-[#e6e6fa] text-black font-bold text-lg py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
                 onClick={() => router.push("/request-table")}
               >
                 SUMMARY OF MY BLOCK REQUESTS
               </button>
-              <div className="mt-6">
-                <button
-                  className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-[20px] font-bold text-black"
-                  onClick={() => router.push("/dashboard")}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 32 32"
-                    stroke="black"
-                    strokeWidth={2}
-                    className="w-6 h-6"
-                  >
-                    <rect
-                      x="6"
-                      y="12"
-                      width="20"
-                      height="12"
-                      rx="2"
-                      fill="#fffbe9"
-                      stroke="black"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M4 14L16 4L28 14"
-                      stroke="black"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                  </svg>
-                  Home
-                </button>
-              </div>
               <button
-                className="w-full rounded-2xl bg-[#f69697] text-white font-bold text-[20px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
+                className="w-full rounded-2xl bg-[#ff5c42] text-white font-bold text-lg py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
                 onClick={() => signOut()}
               >
                 CLOSE THE APP AND LOGOUT
@@ -2292,97 +2148,727 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             </div>
           </div>
         </div>
+        <div className="mt-8">
+          <button
+            className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-lg font-bold text-black"
+            onClick={() => router.push("/dashboard")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 32 32"
+              stroke="black"
+              strokeWidth={2}
+              className="w-6 h-6"
+            >
+              <rect
+                x="6"
+                y="12"
+                width="20"
+                height="12"
+                rx="2"
+                fill="#fffbe9"
+                stroke="black"
+                strokeWidth="2"
+              />
+              <path
+                d="M4 14L16 4L28 14"
+                stroke="black"
+                strokeWidth="2"
+                fill="none"
+              />
+            </svg>
+            Home
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-[#f7fafc] py-0">
-      {/* Header */}
-      <div className="w-full bg-[#fff9b2] py-6 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[24px] font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS-MAS-DIVN</span>
-      </div>
-      {/* Sub-header */}
-      <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[24px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
-          {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
+    <div className="min-h-screen w-full flex flex-col items-center bg-[#b6e6c6]">
+      {/* Top Yellow Bar */}
+      <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
+        <span
+          className="text-5xl font-extrabold text-[#B57CF6] tracking-widest"
+          style={{ letterSpacing: "0.1em" }}
+        >
+          RBMS
         </span>
       </div>
-      {/* Form Card */}
-      <div className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4  border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
-        <form onSubmit={handleFormSubmit} className="space-y-10">
-          <div className="grid grid-cols-1 gap-y-8 mb-8">
-            {/* Date of Block */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
-              <label className="text-[24px] font-bold text-black min-w-[180px]" htmlFor="date-of-block">
-                Date of Block
-              </label>
-                <div className="flex flex-row items-center gap-2 w-full">
-                  <input
-                    id="date-of-block"
-                    type="date"
-                    name="date"
-                    value={formData.date || ""}
-                    onChange={handleInputChange}
-                    className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#f7d6f7] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b07be0] min-w-[180px] max-w-[240px]"
-                    aria-required="true"
-                    aria-label="Select date of block"
-                    style={{ boxShadow: '2px 2px 6px #bbb' }}
-                    min={getMinDateString()}
-                    max={(() => {
-                      const today = new Date();
-                      today.setDate(today.getDate() + 30);
-                      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-                    })()}
-                    placeholder="Select date"
-                  />
-                {/* Type of Block - compact, right of date */}
-                {formData.date && (
-                  <div className="flex flex-row items-center gap-2 ml-2">
-                  {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
-                  {isDisabled ? (
-                    <span className="px-5 py-2 rounded-lg bg-[#f7f7a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">U</span>
-                  ) : (
-                    <div className="flex flex-row gap-2">
-                    <button
-                      type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
-                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
-                    >
-                      C
-                    </button>
-                    <button
-                      type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
-                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Outside Corridor' } } as any)}
-                    >
-                      NC
-                    </button>
-                    </div>
-                  )}
-                  </div>
-                )}
-                </div>
-              {errors.date && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.date}
-                </span>
-              )}
+      {/* Main Title on Green */}
+      <div className="w-full bg-[#d6f7a1] py-4 flex flex-col items-center border-b-2 border-black">
+        <span
+          className="text-2xl font-extrabold text-black text-center"
+          style={{ letterSpacing: "0.02em" }}
+        >
+          {reviewMode
+            ? "Review the Block Request Before Submission"
+            : "Enter New Block Request"}
+        </span>
+      </div>
+      {/* Blue rounded box for Date and Major Section */}
+      <form
+        onSubmit={handleFormSubmit}
+        className="w-full flex justify-center mt-0"
+      >
+        <div
+          className="rounded-t-3xl rounded-b-2xl bg-[#c6e6f7] border-2 border-black p-5 pt-4 w-full max-w-2xl flex flex-col items-start overflow-auto"
+          style={{
+            boxShadow: "0 4px 12px #0002",
+            borderTopLeftRadius: "32px",
+            borderTopRightRadius: "32px",
+            borderBottomLeftRadius: "24px",
+            borderBottomRightRadius: "24px",
+            maxHeight: "90vh",
+          }}
+        >
+          <div className="flex flex-row items-center gap-4 mb-4 w-full">
+            <label
+              className="text-xl font-bold text-black"
+              htmlFor="date-of-block"
+            >
+              Date of Block
+            </label>
+            <input
+              id="date-of-block"
+              type="date"
+              name="date"
+              placeholder="dd:mm:yyyy"
+              value={formData.date || ""}
+              onChange={handleInputChange}
+              min={getMinDateString()} // Prevent selection of past dates
+              className="bg-[#f7d6f7] border-2 border-black rounded px-6 py-2 text-xl font-bold text-black text-center shadow-md focus:outline-none focus:ring-2 focus:ring-purple-300"
+              style={{ minWidth: "180px", maxWidth: "220px" }}
+              required
+            />
+            {renderError("date")}
+          </div>
+          <div className="flex flex-row items-center gap-4 w-full">
+            <select
+              name="selectedSection"
+              value={formData.selectedSection || ""}
+              onChange={handleInputChange}
+              className="bg-[#e6f7c6] border-2 border-black rounded px-3 py-2 text-lg font-bold text-black appearance-none shadow-inner focus:outline-none focus:ring-2 focus:ring-green-300"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.5rem center",
+                backgroundSize: "2rem",
+                minWidth: "220px",
+              }}
+              required
+            >
+              <option value="" disabled>
+                {formData.selectedSection
+                  ? formData.selectedSection
+                  : "Major Section"}
+              </option>
+              {majorSectionOptions.map((section: string) => (
+                <option key={section} value={section}>
+                  {section}
+                </option>
+              ))}
+            </select>
+            {renderError("selectedSection")}
+          </div>
+          {/* Block Section/Yard and Line/Road dropdowns (compact layout) */}
+          <div className="flex flex-col gap-1 w-full mt-2">
+            {/* Block Section/Yard Multi-select */}
+            <div className="w-full flex items-center gap-2">
+              <Select
+                isMulti
+                name="blockSection"
+                options={blockSectionOptions.map((block: string) => ({
+                  value: block,
+                  label: block,
+                }))}
+                value={blockSectionValue.map((val: string) => ({
+                  value: val,
+                  label: val,
+                }))}
+                required
+                onChange={(selected) => {
+                  const values = selected
+                    ? selected.map((opt: any) => opt.value)
+                    : [];
+                  setBlockSectionValue(values);
+                  setFormData((prev) => ({
+                    ...prev,
+                    processedLineSections: (
+                      prev.processedLineSections || []
+                    ).filter((s: any) => values.includes(s.block)),
+                  }));
+                }}
+                classNamePrefix="react-select"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: "#FFB74D",
+                    borderColor: "black",
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    minHeight: "32px",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    boxShadow: "none",
+                    padding: "0 2px",
+                  }),
+                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: "#fff3",
+                    color: "black",
+                    fontSize: "13px",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#ffe082"
+                      : state.isFocused
+                      ? "#ffe08299"
+                      : "#FFB74D",
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    padding: "4px 8px",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                  }),
+                  dropdownIndicator: (base) => ({
+                    ...base,
+                    color: "black",
+                    fontSize: "20px",
+                    padding: 0,
+                  }),
+                }}
+                placeholder="Block Section/Yard"
+                closeMenuOnSelect={false}
+              />
+              {renderError("missionBlock")}
             </div>
-            {/* If not Corridor Block, show reason box (compact) */}
-           {formData.corridorTypeSelection &&
+
+            {/* Always Scrollable Line/Road List */}
+            <div
+              className="w-full flex flex-col gap-1 mt-1 pr-1 mb-1"
+              style={{
+                // maxHeight: "110px",
+                overflowY: "auto",
+                borderRadius: "6px",
+              }}
+            >
+              {blockSectionValue.map((block: string) => {
+                const isYard = block.includes("-YD");
+                const lineOrRoadOptions = isYard
+                  ? getAllRoadsForYard(block).map((road: string) => ({
+                      value: road,
+                      label: road,
+                    }))
+                  : (lineData[block as keyof typeof lineData] || []).map(
+                      (line: string) => ({
+                        value: line,
+                        label: line,
+                      })
+                    );
+
+                const sectionEntry =
+                  (formData.processedLineSections || []).find(
+                    (s: any) => s.block === block
+                  ) || {};
+
+                return (
+                  <div
+                    key={block}
+                    className="flex flex-row items-center gap-2 w-full"
+                  >
+                    <Select
+                      isMulti
+                      name={`lineOrRoad-${block}`}
+                      options={lineOrRoadOptions}
+                      required
+                      value={(() => {
+                        const section = formData.processedLineSections?.find(
+                          (s) => s.block === block
+                        );
+                        const selectedValues: {
+                          value: string;
+                          label: string;
+                        }[] = [];
+
+                        if (isYard) {
+                          // For yards, use road and otherRoads
+                          if (section?.road) {
+                            selectedValues.push({
+                              value: section.road,
+                              label: section.road,
+                            });
+                          }
+                          if (section?.otherRoads) {
+                            const otherRoadList = section.otherRoads
+                              .split(",")
+                              .map((road) => road.trim())
+                              .filter(Boolean);
+                            selectedValues.push(
+                              ...otherRoadList.map((road) => ({
+                                value: road,
+                                label: road,
+                              }))
+                            );
+                          }
+                        } else {
+                          // For non-yards, use lineName and otherLines (existing logic)
+                          if (section?.lineName) {
+                            selectedValues.push({
+                              value: section.lineName,
+                              label: section.lineName,
+                            });
+                          }
+                          if (section?.otherLines) {
+                            const otherLineList = section.otherLines
+                              .split(",")
+                              .map((line) => line.trim())
+                              .filter(Boolean);
+                            selectedValues.push(
+                              ...otherLineList.map((line) => ({
+                                value: line,
+                                label: line,
+                              }))
+                            );
+                          }
+                        }
+
+                        return selectedValues;
+                      })()}
+                      onChange={(selected) => {
+                        const values = selected
+                          ? selected.map((opt: any) => opt.value)
+                          : [];
+                        if (isYard) {
+                          // For yards, join the selected values with comma
+                          handleRoadSelection(block, values.join(","));
+                        } else {
+                          handleLineNameSelection(block, values);
+                        }
+                      }}
+                      classNamePrefix="react-select"
+                      menuPortalTarget={
+                        typeof window !== "undefined" ? document.body : null
+                      }
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          backgroundColor: "#FFB74D",
+                          borderColor: "black",
+                          borderWidth: 2,
+                          borderRadius: 6,
+                          minHeight: "32px",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          boxShadow: "none",
+                          padding: "0 2px",
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        menuPortal: (base) => ({
+                          ...base,
+                          zIndex: 9999,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isSelected
+                            ? "#ffe082"
+                            : state.isFocused
+                            ? "#ffe08299"
+                            : "#FFB74D",
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                          padding: "4px 8px",
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }),
+                        dropdownIndicator: (base) => ({
+                          ...base,
+                          color: "black",
+                          fontSize: "20px",
+                          padding: 0,
+                        }),
+                      }}
+                      placeholder={isYard ? "Road(s)" : "Line(s)/Road(s)"}
+                      closeMenuOnSelect={false}
+                    />
+                    {renderError(`${block}.lineName`)}
+                    {renderError(`${block}.road`)}
+                    {renderError(`${block}.stream`)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Corridor and Preferred Slot section (horizontal, compact, responsive) */}
+          <div className="flex flex-row flex-wrap items-center w-full ">
+            <div
+              className="flex flex-row items-center"
+              style={{
+                background: "#f00",
+                border: "2px solid black",
+                borderRight: 0,
+                borderRadius: "6px 0 0 6px",
+                minWidth: 140,
+                maxWidth: 180,
+              }}
+            >
+              <span className="text-white font-bold px-2 py-1 text-[13px]">
+                Corridor for this section
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center"
+              style={{
+                background: "#f00",
+                border: "2px solid black",
+                borderLeft: 0,
+                borderRight: 0,
+                minWidth: 60,
+                maxWidth: 80,
+              }}
+            >
+              <span className="text-white font-bold px-2 py-1 text-[13px]">
+                {corridorTime?.from || "--:--"}
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center"
+              style={{
+                background: "#f00",
+                border: "2px solid black",
+                borderLeft: 0,
+                borderRight: 0,
+                minWidth: 30,
+                maxWidth: 40,
+                justifyContent: "center",
+              }}
+            >
+              <span className="text-white font-bold px-2 py-1 text-[13px]">
+                TO
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center"
+              style={{
+                background: "#f00",
+                border: "2px solid black",
+                borderLeft: 0,
+                borderRadius: "0 6px 6px 0",
+                minWidth: 60,
+                maxWidth: 80,
+              }}
+            >
+              <span className="text-white font-bold px-2 py-1 text-[13px]">
+                {corridorTime?.to || "--:--"}
+              </span>
+            </div>
+          </div>
+          {/* Preferred Slot row (styled to match corridor row, boxy, bold, high-contrast) */}
+          <div
+            className="flex flex-row w-full bg-[#F4A460] flex-wrap items-center gap-0 pr-2 mt-1 border-2 border-black "
+            style={{ height: "36px" }}
+          >
+            <div
+              className="flex flex-row items-center justify-center"
+              style={{
+                padding: "0 4px",
+              }}
+            >
+              <span className="text-black font-bold px-3 py-1 text-[13px]">
+                Preferred Slot
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center justify-center"
+              style={{
+                background: "#F4A460",
+                minWidth: 50,
+                maxWidth: 70,
+                height: "32px",
+                padding: "0 2px",
+              }}
+            >
+              <select
+                name="demandTimeFromHour"
+                value={
+                  formData.demandTimeFrom
+                    ? formData.demandTimeFrom.split(":")[0]
+                    : ""
+                }
+                onChange={(e) => {
+                  const hour = e.target.value;
+                  const min = formData.demandTimeFrom
+                    ? formData.demandTimeFrom.split(":")[1]
+                    : "00";
+                  handleInputChange({
+                    target: { name: "demandTimeFrom", value: `${hour}:${min}` },
+                  } as any);
+                }}
+                className="bg-[#F4A460] border-0 text-black font-extrabold text-[16px] px-1 py-1 w-[40px] text-center focus:outline-none appearance-none"
+                style={{ minWidth: 40 }}
+                required
+              >
+                <option value="">--</option>
+                {[...Array(24).keys()].map((h) => (
+                  <option key={h} value={h.toString().padStart(2, "0")}>
+                    {h.toString().padStart(2, "0")}
+                  </option>
+                ))}
+              </select>
+              <span className="text-black font-extrabold text-[16px]">:</span>
+              <select
+                name="demandTimeFromMin"
+                value={
+                  formData.demandTimeFrom
+                    ? formData.demandTimeFrom.split(":")[1]
+                    : ""
+                }
+                onChange={(e) => {
+                  const min = e.target.value;
+                  const hour = formData.demandTimeFrom
+                    ? formData.demandTimeFrom.split(":")[0]
+                    : "00";
+                  handleInputChange({
+                    target: { name: "demandTimeFrom", value: `${hour}:${min}` },
+                  } as any);
+                }}
+                className="bg-[#F4A460] border-0 text-black font-extrabold text-[16px] px-1 py-1 w-[40px] text-center focus:outline-none appearance-none"
+                style={{ minWidth: 40 }}
+                required
+              >
+                <option value="">--</option>
+                {[...Array(12).keys()].map((m) => (
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
+                    {(m * 5).toString().padStart(2, "0")}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div
+              className="flex flex-row items-center justify-center"
+              style={{
+                background: "#F4A460",
+                minWidth: 30,
+                maxWidth: 40,
+                height: "32px",
+                padding: "0 2px",
+              }}
+            >
+              <span className="text-black font-extrabold px-2 py-1 text-[15px]">
+                TO
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center justify-center"
+              style={{
+                background: "#F4A460",
+                minWidth: 50,
+                maxWidth: 70,
+                height: "32px",
+                padding: "0 4px",
+              }}
+            >
+              <select
+                name="demandTimeToHour"
+                value={
+                  formData.demandTimeTo
+                    ? formData.demandTimeTo.split(":")[0]
+                    : ""
+                }
+                onChange={(e) => {
+                  const hour = e.target.value;
+                  const min = formData.demandTimeTo
+                    ? formData.demandTimeTo.split(":")[1]
+                    : "00";
+                  handleInputChange({
+                    target: { name: "demandTimeTo", value: `${hour}:${min}` },
+                  } as any);
+                }}
+                className="bg-[#F4A460] border-0 text-black font-extrabold text-[16px] px-1 py-1 w-[40px] text-center focus:outline-none appearance-none"
+                style={{ minWidth: 40 }}
+                required
+              >
+                <option value="">--</option>
+                {[...Array(24).keys()].map((h) => (
+                  <option key={h} value={h.toString().padStart(2, "0")}>
+                    {h.toString().padStart(2, "0")}
+                  </option>
+                ))}
+              </select>
+              <span className="text-black font-extrabold text-[16px]">:</span>
+              <select
+                name="demandTimeToMin"
+                value={
+                  formData.demandTimeTo
+                    ? formData.demandTimeTo.split(":")[1]
+                    : ""
+                }
+                onChange={(e) => {
+                  const min = e.target.value;
+                  const hour = formData.demandTimeTo
+                    ? formData.demandTimeTo.split(":")[0]
+                    : "00";
+                  handleInputChange({
+                    target: { name: "demandTimeTo", value: `${hour}:${min}` },
+                  } as any);
+                }}
+                className="bg-[#F4A460] border-0 text-black font-extrabold text-[16px] px-1 py-1 w-[40px] text-center focus:outline-none appearance-none"
+                style={{ minWidth: 40 }}
+                required
+              >
+                <option value="">--</option>
+                {[...Array(12).keys()].map((m) => (
+                  <option key={m} value={(m * 5).toString().padStart(2, "0")}>
+                    {(m * 5).toString().padStart(2, "0")}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {/* Site Location From/To fields */}
+          <div
+            className="flex flex-row items-center gap-2 w-full mt-2 mb-2"
+            style={{
+              background: "#f3e6ff",
+              padding: "3px 0",
+              borderRadius: "8px",
+              marginTop: "8px",
+              marginBottom: "8px",
+            }}
+          >
+            <label
+              className="font-bold text-black mr-2"
+              style={{ minWidth: 100, fontSize: "13px", paddingLeft: "12px" }}
+            >
+              Site
+              <br />
+              Location
+            </label>
+            <input
+              type="text"
+              name="workLocationFrom"
+              value={formData.workLocationFrom || ""}
+              onChange={handleInputChange}
+              placeholder="From"
+              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
+              style={{ minWidth: 80, maxWidth: 120 }}
+              required
+            />
+            <input
+              type="text"
+              name="workLocationTo"
+              value={formData.workLocationTo || ""}
+              onChange={handleInputChange}
+              placeholder="To"
+              className="border-2 rounded px-2 py-1 text-[13px] text-black font-normal"
+              style={{ minWidth: 80, maxWidth: 120 }}
+              required
+            />
+          </div>
+          {/* Duration and Type of Block row, full width, equal size, compact */}
+          <div className="flex flex-row flex-wrap items-center gap-1 w-full mt-1 ">
+            <div
+              className="flex flex-row items-center justify-center flex-1"
+              style={{
+                background: "#90ee90",
+                border: "2px solid black",
+                borderRadius: "6px",
+                minWidth: 100,
+              }}
+            >
+              <span className="text-black font-bold text-[12px] text-center w-full bg-green-300 rounded-md px-2 py-1 shadow-sm">
+                <span className="block">Duration:</span>
+                <span className="block">
+                  {getDurationFromTimes(
+                    formData.demandTimeFrom || "",
+                    formData.demandTimeTo || ""
+                  ) || "Hours"}
+                </span>
+              </span>
+            </div>
+            <div
+              className="flex flex-row items-center justify-center flex-1"
+              style={{
+                background: "#FFC266",
+                border: "2px solid black",
+                borderRadius: "6px",
+                minWidth: 100,
+              }}
+            >
+              <span className="text-black font-bold px-1 py-0.5 text-[12px] text-center w-full">
+                Type of Block
+              </span>
+              <select
+                name="corridorTypeSelection"
+                value={formData.corridorTypeSelection || ""}
+                onChange={handleInputChange}
+                className="bg-[#FFC266] border-0 text-black font-bold text-[12px] px-1 py-0.5 focus:outline-none w-full"
+                style={{
+                  minWidth: 50,
+                  height: 24,
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right",
+                  backgroundSize: "1.2rem",
+                }}
+                required
+                disabled={shouldForceUrgentBlock} // Optional: disable dropdown entirely
+              >
+                <option value="" disabled={!shouldForceUrgentBlock}>
+                  Select
+                </option>
+                <option
+                  value="Corridor Block"
+                  disabled={shouldForceUrgentBlock}
+                >
+                  Corridor Block
+                </option>
+                <option
+                  value="Non-Corridor Block"
+                  disabled={shouldForceUrgentBlock}
+                >
+                  Non-Corridor Block
+                </option>
+                {shouldForceUrgentBlock && (
+                  <option value="Urgent Block">Urgent Block</option>
+                )}
+              </select>
+              {renderError("corridorTypeSelection")}
+            </div>
+          </div>
+          {/* If not Corridor Block, show reason box (compact) */}
+          {formData.corridorTypeSelection &&
             !["Corridor Block", "Corridor"].includes(
               formData.corridorTypeSelection
             ) && (
-              <div className="w-full">
+              <div className="w-full mt-1">
                 <textarea
                   name="nonCorridorReason"
                   value={formData.nonCorridorReason || ""}
                   onChange={handleInputChange}
                   placeholder="Reasons for asking Block outside Corridor or Emergency Block"
-                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-600"
+                  className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[13px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
                   style={{
                     minHeight: "32px",
+                    fontSize: "13px",
                     marginTop: 0,
                     marginBottom: 0,
                   }}
@@ -2391,656 +2877,252 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 {renderError("nonCorridorReason")}
               </div>
             )}
-            {/* Major Section Dropdown - compact, no label */}
-            <div className="flex flex-row items-center gap-4 w-full ">
-              <select
-                id="major-section"
-                name="selectedSection"
-                value={formData.selectedSection || ""}
-                onChange={handleInputChange}
-                className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#e6f7c6] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b6e6c6] min-w-[240px] max-w-[320px]"
-                aria-required="true"
-                aria-label="Select major section"
-                required
-                
+          {/* Type of Work and Activity dropdowns, compact style with heading as placeholder */}
+          <div className="w-full flex flex-col gap-1 mt-1">
+            <div className="flex flex-row w-full gap-0">
+              <div
+                className="flex-1 flex items-center"
                 style={{
+                  background: "#b6f7c6",
+                  border: "2px solid black",
+                  borderRight: 0,
+                  height: 28,
+                }}
+              >
+                <span className="text-black font-bold px-1 text-[13px]">
+                  Type of Work
+                </span>
+              </div>
+              <div
+                className="flex-1"
+                style={{
+                  background: "#b6f7c6",
+                  // border: " solid black",
+                  borderLeft: 0,
+                  height: 28,
+                  borderRadius: 20,
+                }}
+              >
+                <select
+                  name="workType"
+                  value={formData.workType || ""}
+                  onChange={handleInputChange}
+                  className="w-full h-full  text-black font-bold text-[13px] border-2 px-2 py-0.5 focus:outline-none"
+                  style={{
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 0.5rem center",
+                    backgroundSize: "1.2rem",
+                  }}
+                  required
+                >
+                  <option value="" disabled>
+                    Type of Work
+                  </option>
+                  {workTypeOptions.map((type: string) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                {renderError("workType")}
+              </div>
+            </div>
+            <div className="flex flex-row w-full gap-0">
+              <div
+                className="flex-1 flex items-center"
+                style={{
+                  background: "#b6f7c6",
+                  border: "2px solid black",
+                  borderRight: 0,
+                  height: 28,
+                }}
+              >
+                <span className="text-black font-bold px-1 text-[13px]">
+                  Activity
+                </span>
+              </div>
+              <div
+                className="flex-1"
+                style={{
+                  background: "#b6f7c6",
+                  // border: " solid black",
+                  borderLeft: 0,
+                  height: 28,
+                }}
+              >
+                <select
+                  name="activity"
+                  value={formData.activity || ""}
+                  onChange={handleInputChange}
+                  className="w-full h-full  text-black font-bold text-[13px] border-2 px-2 py-0.5 focus:outline-none"
+                  style={{
+                    appearance: "none",
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 0.5rem center",
+                    backgroundSize: "1.2rem",
+                  }}
+                  required
+                >
+                  <option value="" disabled>
+                    Activity
+                  </option>
+                  {activityOptions.map((activity: string) => (
+                    <option key={activity} value={activity}>
+                      {activity}
+                    </option>
+                  ))}
+                </select>
+                {renderError("activity")}
+              </div>
+            </div>
+          </div>
+          {/* Fresh Caution Section */}
+          <div className="w-full mt-2">
+            <div className="flex items-center mb-1">
+              <span className="text-black font-bold text-[13px]">
+                Whether Fresh Caution will be imposed after block
+              </span>
+              <select
+                name="freshCautionRequired"
+                value={formData.freshCautionRequired ? "Y" : "N"}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    freshCautionRequired: e.target.value === "Y",
+                  })
+                }
+                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
+                style={{
+                  width: 50,
+                  height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
                 }}
               >
-                <option value="" disabled>
-                  Select Major Section
-                </option>
-                {majorSectionOptions.map((section: string) => (
-                  <option key={section} value={section} className="text-[24px]">
-                    {section}
-                  </option>
-                ))}
+                <option value="N">N</option>
+                <option value="Y">Y</option>
               </select>
-              {errors.selectedSection && (
-                <span className="text-[20px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.selectedSection}
-                </span>
-              )}
+              {renderError("freshCautionRequired")}
             </div>
-            {/* Block Section/Yard Multi-select - max 2 selections */}
-            <div className="flex flex-row items-center gap-3 w-full mt-1">
-              <Select
-                isMulti
-                name="blockSection"
-                options={getFilteredOptions(formData.selectedSection, blockSectionValue).map((block: string) => ({
-                  value: block,
-                  label: block,
-                }))}
-                value={blockSectionValue.map((val: string) => ({
-                  value: val,
-                  label: val,
-                }))}
-                onChange={(selected) => {
-                  const values = selected ? selected.map((opt: any) => opt.value) : [];
-                  if (values.length <= 2) {
-                    setBlockSectionValue(values);
-                    setFormData((prev) => ({
-                      ...prev,
-                      missionBlock: values.join(","),
-                      processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
-                    }));
-                  }
-                }}
-                classNamePrefix="react-select"
-                styles={{
-                  control: (base) => ({
-                    ...base,
-                    backgroundColor: "#ffe6b3",
-                    borderColor: "black",
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    minHeight: "44px",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    boxShadow: "none",
-                    padding: "0 1px",
-                  }),
-                  menu: (base) => ({ ...base, zIndex: 9999 }),
-                  multiValue: (base) => ({
-                    ...base,
-                    backgroundColor: "#f6fff6",
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    border: "1.5px solid #b6e6c6",
-                    borderRadius: 8,
-                    marginRight: 4,
-                  }),
-                  multiValueLabel: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                    padding: "2px 8px",
-                  }),
-                  multiValueRemove: (base) => ({
-                    ...base,
-                    color: "#e07a5f",
-                    ":hover": {
-                      backgroundColor: "#f6fff6",
-                      color: "#b91c1c",
-                    },
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? "#ffe082"
-                      : state.isFocused
-                        ? "#ffe08299"
-                        : "#ffe6b3",
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "24px",
-                    padding: "4px 8px",
-                  }),
-                  placeholder: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "22px",
-                  }),
-                  dropdownIndicator: (base) => ({
-                    ...base,
-                    color: "black",
-                    fontSize: "24px",
-                    padding: 0,
-                  }),
-                }}
-                placeholder="Select up to 2 Block Sections/Yards"
-                closeMenuOnSelect={false}
-                isOptionDisabled={() => blockSectionValue.length >= 2}
-              />
-              {errors.missionBlock && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-1 block">
-                  {errors.missionBlock}
-                </span>
-              )}
-            </div>
-            {/* Lines/Roads Multi-select for each selected block section/yard */}
-            {blockSectionValue.map((block: string, idx: number) => {
-              const isYard = block.includes("-YD");
-              const lineOrRoadOptions = isYard
-                ? getAllRoadsForYard(block).map((road: string) => ({
-                  value: road,
-                  label: road,
-                }))
-                : (lineData[block as keyof typeof lineData] || []).map(
-                  (line: string) => ({
-                    value: line,
-                    label: line,
-                  })
-                );
-              const sectionEntry: any =
-                (formData.processedLineSections || []).find(
-                  (s: any) => s.block === block
-                ) || {};
-              return (
-                <div key={block} className="flex flex-col gap-1 w-full">
-                  <span className="text-[24px] font-bold text-black mb-1">Select {isYard ? 'Road(s)' : 'Line(s)'} for <span className="text-[#3a506b]">{block}</span></span>
-                  <div className="flex flex-row items-center gap-3 w-full">
-                    <Select
-                      isMulti
-                      name={`lineOrRoad-${block}`}
-                      options={lineOrRoadOptions}
-                      value={(() => {
-                        const selectedValues: { value: string; label: string }[] = [];
-                        if (isYard) {
-                          if (sectionEntry && typeof sectionEntry.road === 'string' && sectionEntry.road) {
-                            selectedValues.push({ value: sectionEntry.road, label: sectionEntry.road });
-                          }
-                          if (sectionEntry && typeof sectionEntry.otherRoads === 'string' && sectionEntry.otherRoads) {
-                            const otherRoadList = sectionEntry.otherRoads
-                              .split(",")
-                              .map((road: string) => road.trim())
-                              .filter(Boolean);
-                            selectedValues.push(
-                              ...otherRoadList.map((road: string) => ({ value: road, label: road }))
-                            );
-                          }
-                        } else {
-                          if (sectionEntry && typeof sectionEntry.lineName === 'string' && sectionEntry.lineName) {
-                            selectedValues.push({ value: sectionEntry.lineName, label: sectionEntry.lineName });
-                          }
-                          if (sectionEntry && typeof sectionEntry.otherLines === 'string' && sectionEntry.otherLines) {
-                            const otherLineList = sectionEntry.otherLines
-                              .split(",")
-                              .map((line: string) => line.trim())
-                              .filter(Boolean);
-                            selectedValues.push(
-                              ...otherLineList.map((line: string) => ({ value: line, label: line }))
-                            );
-                          }
-                        }
-                        return selectedValues;
-                      })()}
-                      onChange={(selected) => {
-                        const values = selected ? selected.map((opt: any) => opt.value) : [];
-                        if (isYard) {
-                          handleRoadSelection(block, values.join(","));
-                        } else {
-                          handleLineNameSelection(block, values);
-                        }
-                      }}
-                      classNamePrefix="react-select"
-                      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          backgroundColor: "#e6f7fa",
-                          borderColor: "black",
-                          borderWidth: 2,
-                          borderRadius: 12,
-                          minHeight: "44px",
-                          fontWeight: "bold",
-                          fontSize: "24px",
-                          boxShadow: "none",
-                          padding: "0 2px",
-                        }),
-                        menu: (base) => ({ ...base, zIndex: 9999 }),
-                        multiValue: (base) => ({
-                          ...base,
-                          backgroundColor: isYard ? "#e6f7fa" : "#f6fff6",
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "22px",
-                          border: "1.5px solid #b6e6c6",
-                          borderRadius: 8,
-                          marginRight: 4,
-                        }),
-                        multiValueLabel: (base) => ({
-                          ...base,
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "24px",
-                          padding: "2px 8px",
-                        }),
-                        multiValueRemove: (base) => ({
-                          ...base,
-                          color: "#e07a5f",
-                          ":hover": {
-                            backgroundColor: "#f6fff6",
-                            color: "#b91c1c",
-                          },
-                        }),
-                        option: (base, state) => ({
-                          ...base,
-                          backgroundColor: state.isSelected
-                            ? "#b6e6f7"
-                            : state.isFocused
-                              ? "#b6e6f799"
-                              : "#e6f7fa",
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "22px",
-                          padding: "4px 8px",
-                        }),
-                        placeholder: (base) => ({
-                          ...base,
-                          color: "black",
-                          fontWeight: "bold",
-                          fontSize: "24px",
-                        }),
-                        dropdownIndicator: (base) => ({
-                          ...base,
-                          color: "black",
-                          fontSize: "24px",
-                          padding: 0,
-                        }),
-                      }}
-                      placeholder={isYard ? "Select Road(s)" : "Select Line(s)"}
-                      closeMenuOnSelect={false}
-                    />
-                    {renderError(`${block}.lineName`)}
-                    {renderError(`${block}.road`)}
-                    {renderError(`${block}.stream`)}
-                  </div>
-                </div>
-              );
-            })}
-            {/* Corridor for this section info bar (only once, after all lines/roads selects) */}
-            <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
-              <span className="text-[26px] font-bold text-black text-center mr-4">
-                Corridor for this section
-              </span>
-              <span className="text-[24px] font-bold text-black text-center">
-                {corridorTime?.from || '--:--'} 
-                  <span className="mx-2">
-                    TO
-                  </span> 
-                {corridorTime?.to || '--:--'}
-              </span>
-            </div>
-            {/* Preferred Slot and Site Location grouped in a box - ALIGNED, PROFESSIONAL, NO OVERFLOW, SINGLE LINE */}
-            <div className="w-full mt-1 mb-4 p-6 rounded-2xl border-4 border-[#b6e6c6] bg-gradient-to-br from-[#f7f7a1] to-[#f0f0c0] flex flex-col gap-4 shadow-xl min-w-0 hover:shadow-2xl transition-shadow duration-300">
-              {/* Preferred Slot label */}
-              {/* Time selectors and duration row - always single line, scrollable if needed */}
-              <div className="flex flex-col flex-nowrap items-center w-full overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-gradient-to-b from-[#fffbe9] to-[#fff7d6]">
-                <span className="text-black font-bold text-[24px] mb-1 tracking-wide" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
-                <div className="flex flex-row flex-wrap items-center justify-center gap-2 px-3 py-2 text-2xl">
-                  <select
-                    name="demandTimeFromHour"
-                    value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : ""}
-                    onChange={(e) => {
-                      const hour = e.target.value;
-                      const min = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : "00";
-                      handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
-                    }}
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    required
-                  >
-                    <option value="">--</option>
-                    {[...Array(24).keys()].map((h) => (
-                      <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                  <span className="text-[#2c3e50] font-bold text-[20px]">:</span>
-                  <select
-                    name="demandTimeFromMin"
-                    value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : ""}
-                    onChange={(e) => {
-                      const min = e.target.value;
-                      const hour = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : "00";
-                      handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
-                    }}
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    required
-                  >
-                    <option value="">--</option>
-                    {[...Array(12).keys()].map((m) => (
-                      <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                  <span className="text-[#2c3e50] font-bold text-[24px] px-2">TO</span>
-                  <select
-                    name="demandTimeToHour"
-                    value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : ""}
-                    onChange={(e) => {
-                      const hour = e.target.value;
-                      const min = formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : "00";
-                      handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
-                    }}
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    required
-                  >
-                    <option value="">--</option>
-                    {[...Array(24).keys()].map((h) => (
-                      <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                  <span className="text-[#2c3e50] font-bold text-[20px]">:</span>
-                  <select
-                    name="demandTimeToMin"
-                    value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : ""}
-                    onChange={(e) => {
-                      const min = e.target.value;
-                      const hour = formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : "00";
-                      handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
-                    }}
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    required
-                  >
-                    <option value="">--</option>
-                    {[...Array(12).keys()].map((m) => (
-                      <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
-                    ))}
-                  </select>
-                </div>
-                <span className="text-[#2c3e50] font-bold text-[24px] mb-1 tracking-wide">Duration</span>
-                <span className="bg-white border-2 border-[#2c3e50] rounded-lg px-6 py-2 text-2xl font-bold text-[#2c3e50] min-w-[120px] text-center shadow-md hover:shadow-lg transition-shadow duration-200">
-                  {getDurationFromTimes(formData.demandTimeFrom || '', formData.demandTimeTo || '') || '--'}
-                </span>
-              </div>
-              {/* Site Location row */}
-              <div className="flex flex-row items-center gap-4 w-full pl-1">
-                <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
-                  <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Site Location</span>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    <input
-                      type="text" 
-                      name="workLocationFrom"
-                      value={formData.workLocationFrom || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.length === 4) {
-                          handleInputChange({
-                            target: {
-                              name: "workLocationFrom",
-                              value: value + "/"
-                            }
-                          } as React.ChangeEvent<HTMLInputElement>);
-                        } else {
-                          handleInputChange(e);
-                        }
-                      }}
-                      maxLength={7}
-                      placeholder="From"
-                      className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                      required
-                    />
-                    <span className="font-bold text-[#2c3e50] text-[24px]">to</span>
-                    <input
-                      type="text"
-                      name="workLocationTo"
-                      value={formData.workLocationTo || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value.length === 4) {
-                          handleInputChange({
-                            target: {
-                              name: "workLocationTo",
-                              value: value + "/"
-                            }
-                          } as React.ChangeEvent<HTMLInputElement>);
-                        } else {
-                          handleInputChange(e);
-                        }
-                      }}
-                      maxLength={7}
-                      placeholder="To"
-                      className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* ───── Fresh Caution ───── */}
+{formData.freshCautionRequired && (
+  <div className="flex flex-col gap-2 mt-2">
+    {formData.freshCautions.map((caution, idx) => (
+      <div
+        key={idx}
+        className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+        style={{ fontSize: "13px", fontWeight: "bold" }}
+      >
+        {/* ◼︎ Direction / Road */}
+        <input
+          list={`adjacentLinesList-${idx}`}
+          value={caution.adjacentLinesAffected}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "adjacentLinesAffected",
+              e.target.value
+            )
+          }
+          placeholder="UP/DN/SL/Road No."
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
+        />
+        <datalist id={`adjacentLinesList-${idx}`}>
+          {blockSectionValue.flatMap(block => {
+            const isYard = block.includes("-YD");
+            return isYard
+              ? getAllRoadsForYard(block).map(r => (
+                  <option key={r} value={r} />
+                ))
+              : (lineData[block as keyof typeof lineData] || []).map(l => (
+                  <option key={l} value={l} />
+                ));
+          })}
+        </datalist>
 
-          {/* Type of Work and Activity - horizontal, pastel green */}
-          <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
-            {/* Type of Work dropdown */}
-            <div className="flex-1 pr-2 border-r-2 border-slate-400">
-              <label htmlFor="workType" className="block text-[24px] text-nowrap font-bold text-black mb-2">Type of Work</label>
-              <select
-                id="workType"
-                name="workType"
-                value={formData.workType || ""}
-                onChange={handleInputChange}
-                className="h-full w-full border-2 border-[#b7cbe8] rounded-xl px-4 pr-8 py-3 text-[24px] font-bold bg-white text-[#3a506b]  focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
-                aria-required="true"
-                style={{
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 8px center",
-                  backgroundSize: "1.2rem",
-                }}
-              >
-                <option value="" disabled >
-                  Select Type of Work
-                  
-                </option>
-                {workTypeOptions.map((type: string) => (
-                  <option key={type} value={type} className="text-[24px]">
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {errors.workType && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.workType}
-                </span>
-              )}
-            </div>
-            {/* Activity dropdown */}
-            <div className="flex-1 pl-2">
-              <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-2">Activity</label>
-              <select
-                id="activity"
-                name="activity"
-                value={formData.activity || ""}
-                onChange={handleInputChange}
-                className="h-full w-full border-2 border-[#b7cbe8] rounded-xl px-4 pr-8 py-3 text-[24px] font-bold bg-white text-[#3a506b] shadow focus:outline-none focus:ring-2 focus:ring-[#b7cbe8] appearance-none"
-                aria-required="true"
-                style={{
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 8px center",
-                  backgroundSize: "1.2rem",
-                }}
-              >
-                <option value="" disabled>
-                  {formData.workType ? 'Select Activity' : 'Select Type of Work first'}
-                </option>
-                {activityOptions.map((activity: string) => (
-                  <option key={activity} value={activity} className="text-[24px]">
-                    {activity}
-                  </option>
-                ))}
-                <option value="others" className="text-[24px]">Others</option>
-              </select>
-              {formData.activity === "others" && (
-                <input
-                  type="text"
-                  className="w-full border-2 border-[#b7cbe8] rounded-xl px-4 py-3 text-[24px] font-medium bg-white text-[#3a506b] shadow mt-4 focus:outline-none focus:ring-2 focus:ring-[#b7cbe8]"
-                  placeholder="Enter custom activity"
-                  value={customActivity}
-                  onChange={(e) => setCustomActivity(e.target.value)}
-                  required
-                />
-              )}
-              {errors.activity && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.activity}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 border-2 border-[#b6e6c6] shadow rounded-2xl px-4 py-2 bg-white">
-            {/* Fresh Caution Section */}
-            <div className="w-full mt-2 bg-fuchsia-100 rounded-2xl ">
-              <div className="flex justify-between items-center mb-1 bg-fuchsia-300  rounded-2xl  px-2">
-                <span className="text-black font-bold text-[24px] ">
-                  Fresh Caution Needed?
-                </span>
-                <select
-                  name="freshCautionRequired"
-                  value={formData.freshCautionRequired ? "Y" : "N"}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      freshCautionRequired: e.target.value === "Y",
-                    })
-                  }
-                  className="ml-2 pr-8 border-2  border-black rounded 
-                  px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
-                  style={{
-                    appearance: "none",
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundSize: "1.2rem",
-                  }}
-                >
-                  <option value="N">N</option>
-                  <option value="Y">Y</option>
-                </select>
-                {renderError("freshCautionRequired")}
-              </div>
-              {/* ───── Fresh Caution ───── */}
-              {formData.freshCautionRequired && (
-                <div className="flex flex-col gap-2 mt-2 pb-2">
-                  {formData.freshCautions.map((caution, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
-                      style={{ fontSize: "24px", fontWeight: "bold" }}
-                    >
-                      {/* ◼︎ Direction / Road */}
-                      <input
-                        list={`adjacentLinesList-${idx}`}
-                        value={caution.adjacentLinesAffected}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "adjacentLinesAffected",
-                            e.target.value
-                          )
-                        }
-                        placeholder="UP/DN/SL/Road No."
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
-                      />
-                      <datalist id={`adjacentLinesList-${idx}`}>
-                        {blockSectionValue.flatMap(block => {
-                          const isYard = block.includes("-YD");
-                          return isYard
-                            ? getAllRoadsForYard(block).map(r => (
-                              <option key={r} value={r} />
-                            ))
-                            : (lineData[block as keyof typeof lineData] || []).map(l => (
-                              <option key={l} value={l} />
-                            ));
-                        })}
-                      </datalist>
+        {/* ◼︎ KM From / To */}
+        <input
+          value={caution.freshCautionLocationFrom}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionLocationFrom",
+              e.target.value
+            )
+          }
+          placeholder="KM"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
+        <span className="px-1">to</span>
+        <input
+          value={caution.freshCautionLocationTo}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionLocationTo",
+              e.target.value
+            )
+          }
+          placeholder="KM"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
 
-                      {/* ◼︎ KM From / To */}
-                      <input
-                        value={caution.freshCautionLocationFrom}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionLocationFrom",
-                            e.target.value
-                          )
-                        }
-                        placeholder="KM"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                      />
-                      <span className="px-1 text-2xl text-black">to</span>
-                      <input
-                        value={caution.freshCautionLocationTo}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionLocationTo",
-                            e.target.value
-                          )
-                        }
-                        placeholder="KM"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                      />
+        {/* ◼︎ Speed */}
+        <input
+          type="number"
+          value={caution.freshCautionSpeed}
+          onChange={e =>
+            handleFreshCautionChange(
+              idx,
+              "freshCautionSpeed",
+              e.target.value
+            )
+          }
+          placeholder="Speed"
+          required
+          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+        />
 
-                      {/* ◼︎ Speed */}
-                      <input
-                        type="number"
-                        value={caution.freshCautionSpeed}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionSpeed",
-                            e.target.value
-                          )
-                        }
-                        placeholder="Speed"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
-                      />
+        {/* ◼︎ Remove */}
+        {formData.freshCautions.length > 1 && (
+          <button
+            type="button"
+            onClick={() => removeFreshCaution(idx)}
+            className="px-2 py-1 text-xs bg-red-600 text-white rounded"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+    ))}
 
-                      {/* ◼︎ Remove */}
-                      {formData.freshCautions.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeFreshCaution(idx)}
-                          className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* ➕ Add Button */}
-                  <button
-                    type="button"
-                    onClick={addFreshCaution}
-                    className="self-center px-2 py-1  bg-green-600 text-white rounded text-2xl font-semibold"
-                  >
-                    + Add Fresh Caution
-                </button>
-              </div>
-            )}
+    {/* ➕ Add Button */}
+    <button
+      type="button"
+      onClick={addFreshCaution}
+      className="self-start px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold"
+    >
+      + Add Fresh Caution
+    </button>
+  </div>
+)}
 
           </div>
-
 
           {/* Power Block Section */}
-          <div className="w-full mt-2 bg-indigo-200 rounded-2xl">
-            <div className="flex justify-between items-center mb-1 bg-indigo-400  rounded-2xl  px-2">
-              <span className="text-black font-bold text-[24px]">
-                Power Block Needed?
+          <div className="w-full mt-2">
+            <div className="flex items-center mb-1">
+              <span className="text-black font-bold text-[13px]">
+                Whether Power Block also needed:
               </span>
               <select
                 name="powerBlockRequired"
@@ -3051,11 +3133,12 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     powerBlockRequired: e.target.value === "Y",
                   })
                 }
-                className="ml-2 pr-8 border-2  border-black  
-                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
+                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
+                  width: 50,
+                  height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -3066,64 +3149,100 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </select>
               {renderError("powerBlockRequired")}
             </div>
-            {/* ───── Power Block ───── */}
+
             {formData.powerBlockRequired && (
-              <div className="flex flex-col gap-2 mt-2 pb-2">
-                <div className="flex flex-row flex-wrap gap-1">
-                  <input
-                    type="number"
-                    name="powerBlockKmFrom"
-                    value={formData.powerBlockKmFrom || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="flex-1 border-2  border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <span className="text-black font-bold text-2xl">
-                    to
-                  </span>
-                  <input
-                    type="number"
-                    name="powerBlockKmTo"
-                    value={formData.powerBlockKmTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <input
-                    type="text"
-                    name="powerBlockRoad"
-                    value={formData.powerBlockRoad || ""}
-                    onChange={handleInputChange}
-                    placeholder="Road No."
-                    required
-                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                </div>
-                <div className="flex flex-row flex-wrap gap-1">
-                  <span className="text-black font-bold text-2xl">
-                    Requirements:
-                  </span>
-                  <textarea
-                    name="powerBlockRequirements"
-                    value={formData.powerBlockRequirements || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter power block requirements"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
-                    style={{ minHeight: "32px" }}
-                  />
-                </div>
+              <div
+                className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+                style={{ fontSize: "13px", fontWeight: "bold" }}
+              >
+                <input
+                  name="powerBlockKmFrom"
+                  value={formData.powerBlockKmFrom || ""}
+                  onChange={handleInputChange}
+                  placeholder="KM"
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                />
+                <span className="px-1">to</span>
+                <input
+                  name="powerBlockKmTo"
+                  value={formData.powerBlockKmTo || ""}
+                  onChange={handleInputChange}
+                  placeholder="KM"
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                />
+                <input
+                  name="powerBlockRoad"
+                  value={formData.powerBlockRoad || ""}
+                  onChange={handleInputChange}
+                  placeholder="UP/DN/Road No."
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-[13px]"
+                />
               </div>
             )}
+            {formData.powerBlockRequired && (
+              <>
+                {" "}
+                <div className="col-span-1">
+                  <label className="block text-xs font-medium text-black mb-1">
+                    Assign Disconnection To{" "}
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    name="powerBlockDisconnectionAssignTo"
+                    value={formData.powerBlockDisconnectionAssignTo || ""}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        powerBlockDisconnectionAssignTo: e.target.value,
+                      }))
+                    }
+                    className="input gov-input"
+                    required
+                    style={{
+                      color: "black",
+                      borderColor: errors.powerBlockDisconnectionAssignTo
+                        ? "#dc2626"
+                        : "#45526c",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select Depo
+                    </option>
+                    {selectedMajorSection &&
+                    session?.user.department &&
+                    depot[selectedMajorSection] &&
+                    depot[selectedMajorSection]["TRD"] ? (
+                      depot[selectedMajorSection]["TRD"].map(
+                        (depotOption: string, index) => (
+                          <option key={index} value={depotOption}>
+                            {depotOption}
+                          </option>
+                        )
+                      )
+                    ) : (
+                      <option value="" disabled>
+                        Select Major Section first
+                      </option>
+                    )}
+                  </select>
+                  {errors.powerBlockDisconnectionAssignTo && (
+                    <span className="text-xs text-red-700 font-medium mt-1 block">
+                      {errors.powerBlockDisconnectionAssignTo}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
-
           {/* S&T Disconnection Section */}
-          <div className="w-full mt-2 bg-teal-200 rounded-2xl">
-            <div className="flex justify-between items-center mb-1 bg-teal-400 rounded-2xl  px-2">
-              <span className="text-black font-bold text-[24px]">
-                S&T Disconnection Needed?
+          <div className="w-full mt-2">
+            <div className="flex items-center mb-1">
+              <span className="text-black font-bold text-[13px]">
+                Whether S&T Disconnection also required:
               </span>
               <select
                 name="sntDisconnectionRequired"
@@ -3134,11 +3253,12 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     sntDisconnectionRequired: e.target.value === "Y",
                   })
                 }
-                className="ml-2 pr-8 border-2  border-black rounded 
-                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
+                className="ml-2 border-2 border-black rounded px-2 py-0.5 text-[13px] font-bold bg-white text-black placeholder-black"
                 style={{
+                  width: 50,
+                  height: 24,
                   appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right 0.5rem center",
                   backgroundSize: "1.2rem",
@@ -3149,228 +3269,204 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </select>
               {renderError("sntDisconnectionRequired")}
             </div>
-            {/* ───── S&T Disconnection ───── */}
             {formData.sntDisconnectionRequired && (
-              <div className="flex flex-col items-center gap-2 mt-2 pb-2">
-                <div className="flex flex-row flex-wrap gap-1">
-                  {/* <span className="text-black font-bold text-2xl">
-                    Line From:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionLineFrom"
-                    value={formData.sntDisconnectionLineFrom || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <span className="text-black font-bold text-2xl">
-                    Line To:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionLineTo"
-                    value={formData.sntDisconnectionLineTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  /> */}
-
-              <div className="flex flex-col min-[424px]:flex-row w-full space-x-2">
-            <div className="bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2 mb-2">
-              <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
-                Point No.
-              </label>
-              <div className="flex flex-col gap-1">
-                {(formData.sntDisconnectionPointNo?.split(",") || [""]).map((point, index, arr) => (
-                  <div
-                    className="flex items-center gap-1 relative group"
-                    key={index}
-                  >
-                    <input
-                      type="text"
-                      value={point}
-                      onChange={e => {
-                        const points = [...(formData.sntDisconnectionPointNo?.split(",") || [])];
-                        points[index] = e.target.value;
-                        handleInputChange({
-                          target: {
-                            name: "sntDisconnectionPointNo",
-                            value: points.filter((p) => p.trim() !== "").join(","),
-                          }
-                        } as React.ChangeEvent<HTMLInputElement>);
-                      }}
-                      placeholder={`Point No. ${index + 1}`}
-                      required
-                      className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-40 text-2xl "
-                    />
-                    {arr.length > 1 && (
-                      <button
-                        type="button"
-                        aria-label="Remove point"
-                        onClick={() => {
-                          const points = formData.sntDisconnectionPointNo?.split(",") || [];
-                          const updated = points.filter((_, i) => i !== index);
-                          handleInputChange({
-                            target: {
-                              name: "sntDisconnectionPointNo",
-                              value: updated.join(","),
-                            }
-                          } as React.ChangeEvent<HTMLInputElement>);
-                        }}
-                        className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
-                        style={{ lineHeight: 0 }}
-                      >
-                        <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                          <circle cx="10" cy="10" r="10" fill="#fff" />
-                          <path d="M6 6l8 8M14 6l-8 8" stroke="#b71c1c" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {/* Only show Add Point if less than 2 non-empty items */}
-                {(formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "").length || 0) < 2 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const points = formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "") || [];
-                      points.push("");
-                      handleInputChange({
-                        target: {
-                          name: "sntDisconnectionPointNo",
-                          value: points.join(","),
-                        }
-                      } as React.ChangeEvent<HTMLInputElement>);
-                    }}
-                    className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  >
-                    <svg width="18" height="18" fill="none" viewBox="0 0 20 20">
-                      <circle cx="10" cy="10" r="10" fill="#fff" />
-                      <path d="M10 5v10M5 10h10" stroke="#166534" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    Add Point
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className=" w-full min-w-20 max-w-full min-[424px]:max-w-[230px]">
-                  <span className="text-black font-bold text-2xl">
-                    Signal No.:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionSignalNo"
-                    value={formData.sntDisconnectionSignalNo || ""}
-                    onChange={handleInputChange}
-                    placeholder="Signal No."
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
-                  />
-                  </div>
-                </div>
-                </div>
-                <div className="flex flex-row flex-wrap gap-1 w-full">
-                  <span className="text-black font-bold text-2xl">
-                    Requirements:
-                  </span>
-                  <textarea
-                    name="sntDisconnectionRequirements"
-                    value={formData.sntDisconnectionRequirements || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter S&T disconnection requirements"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
-                    style={{ minHeight: "32px" }}
-                  />
-                </div>
-                <div className="flex flex-row flex-wrap gap-1 w-full">
-                  <span className="text-black font-bold text-2xl">
-                    Assign To:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionAssignTo"
-                    value={formData.sntDisconnectionAssignTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="Name"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
-                  />
-                </div>
+              <div
+                className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+                style={{ fontSize: "13px", fontWeight: "bold" }}
+              >
+                <input
+                  name="sntDisconnectionLineFrom"
+                  value={formData.sntDisconnectionLineFrom || ""}
+                  onChange={handleInputChange}
+                  placeholder="KM"
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                />
+                <span className="px-1">to</span>
+                <input
+                  name="sntDisconnectionLineTo"
+                  value={formData.sntDisconnectionLineTo || ""}
+                  onChange={handleInputChange}
+                  placeholder="KM"
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-[13px]"
+                />
+                <input
+                  name="sntDisconnectionPointNo"
+                  value={formData.sntDisconnectionPointNo || ""}
+                  onChange={handleInputChange}
+                  placeholder="Point No."
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-16 text-[13px]"
+                />
+                <input
+                  name="sntDisconnectionSignalNo"
+                  value={formData.sntDisconnectionSignalNo || ""}
+                  onChange={handleInputChange}
+                  placeholder="Signal No."
+                  required
+                  className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-16 text-[13px]"
+                />
               </div>
             )}
           </div>
-          </div>
-
-          {/* Remarks */}
-          <div className="flex flex-row flex-wrap gap-1">
-            <span className="text-black font-bold text-[24px]">
-              Remarks:
-            </span>
+          {formData.sntDisconnectionRequired && (
+            <div className="col-span-1">
+              <label className="block text-xs font-medium text-black mb-1">
+                Assign Disconnection To <span className="text-red-600">*</span>
+              </label>
+              <select
+                name="selectedDepo"
+                value={formData.selectedDepo}
+                onChange={handleInputChange}
+                className="input gov-input"
+                required
+                style={{
+                  color: "black",
+                  borderColor: errors.sntDisconnectionAssignTo
+                    ? "#dc2626"
+                    : "#45526c",
+                  fontSize: "14px",
+                }}
+              >
+                <option value="" disabled>
+                  Select Depo
+                </option>
+                {selectedMajorSection &&
+                session?.user.department &&
+                depot[selectedMajorSection] &&
+                depot[selectedMajorSection]["S&T"] ? (
+                  depot[selectedMajorSection]["S&T"].map(
+                    (depotOption: string, index) => (
+                      <option key={index} value={depotOption}>
+                        {depotOption}
+                      </option>
+                    )
+                  )
+                ) : (
+                  <option value="" disabled>
+                    Select Major Section first
+                  </option>
+                )}
+              </select>
+              {errors.sntDisconnectionAssignTo && (
+                <span className="text-xs text-red-700 font-medium mt-1 block">
+                  {errors.sntDisconnectionAssignTo}
+                </span>
+              )}
+            </div>
+          )}
+          {/* Remarks and Action Buttons */}
+          <div className="w-full mt-2 flex flex-col gap-2">
             <textarea
               name="remarks"
               value={formData.remarks || ""}
               onChange={handleInputChange}
-              placeholder="Enter any additional remarks"
-              rows={1}
-              className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-[24px]"
+              placeholder="Remarks, if any"
+              className="w-full bg-[#f7d6f7] border-2 border-black rounded px-2 py-2 text-[16px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-black"
+              style={{ minHeight: "36px", fontSize: "16px" }}
             />
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-center mt-8 gap-4">
-            <button
-              type="button"
-              onClick={() => { window.location.href = "/dashboard"; }}
-              className="w-full rounded-2xl bg-[#99f61f] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              className="w-full rounded-2xl bg-[#e3e3e3] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
-              onClick={() => {
-                if (reviewMode) {
-                  setReviewMode(false);
-                } else {
-                  router.back();
-                }
-              }}
-            >
-              Back
-            </button>
-
-            {showReviewModal && (
-              <ReviewBlockRequestModal
-                isOpen={showReviewModal}
-                onClose={() => setShowReviewModal(false)}
-                onConfirm={() => {
-                  setReviewMode(true);
-                  setShowReviewModal(false);
-                  // Programmatically submit the form
-                  const form = document.querySelector('form');
-                  if (form) form.requestSubmit();
+            <div className="flex flex-row items-center gap-2 mt-2">
+              <button
+                type="button"
+                className="flex items-center gap-1 bg-lime-300 border-2 border-black rounded px-3 py-2 text-lg font-bold text-black hover:bg-lime-200"
+                onClick={() => router.push("/dashboard")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 32 32"
+                  stroke="black"
+                  strokeWidth={2}
+                  className="w-6 h-6"
+                >
+                  <rect
+                    x="6"
+                    y="12"
+                    width="20"
+                    height="12"
+                    rx="2"
+                    fill="#fffbe9"
+                    stroke="black"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M4 14L16 4L28 14"
+                    stroke="black"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                </svg>
+                Home
+              </button>
+              <button
+                type="button"
+                className="flex items-center gap-1 bg-[#dbe6fa] border-2 border-black rounded px-3 py-2 text-lg font-bold text-black hover:bg-[#c7d6f7]"
+                onClick={() => {
+                  if (reviewMode) {
+                    setReviewMode(false); // Exit review mode, keep data
+                  } else {
+                    router.back();
+                  }
                 }}
-                formData={formData}
-                blockSectionValue={blockSectionValue}
-                processedLineSections={processedLineSections}
-                selectedActivities={selectedActivities}
-                customActivity={customActivity}
-                formSubmitting={formSubmitting}
-              />
-            )}
-                  {reviewMode ? (
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="black"
+                  viewBox="0 0 24 24"
+                  className="w-6 h-6"
+                >
+                  <circle cx="12" cy="12" r="12" fill="#222" />
+                  <path
+                    d="M14 8l-4 4 4 4"
+                    stroke="#fff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Back
+              </button>
+
+{showPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/20">
+    <div className="bg-white p-4 rounded shadow-lg w-[90%] max-w-sm text-center border border-gray-300">
+     <h2 className="text-lg font-semibold mb-2 text-black">Pending Block</h2>
+      <p className="text-sm text-gray-700 mb-4">
+        You already have a sanctioned block pending availing.
+      </p>
+      <div className="flex justify-center gap-3">
+        <button
+          onClick={() => setShowPopup(false)}
+          className="bg-gray-300 text-black px-4 py-1 rounded hover:bg-gray-400"
+        >
+          OK
+        </button>
+        <button
+          onClick={() => {
+            window.open(popupLink, "_blank");
+            setShowPopup(false);
+          }}
+          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          Go to Avail Page
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+              
+              {reviewMode ? (
                 <button
                   type="submit"
-                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-2xl font-extrabold text-white hover:bg-[#e6aee0] ${
+                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-sm font-extrabold text-white hover:bg-[#e6aee0] ${
                     formSubmitting ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={formSubmitting}
                   style={{
-
+                    width: "150px",
+                    height: "70px",
                     borderRadius: "50%",
                     letterSpacing: "1px",
                     border: "none",
@@ -3389,9 +3485,10 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                   {formSubmitting ? "SUBMITTING..." : "SUBMIT"}
                 </button>
               )}
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
