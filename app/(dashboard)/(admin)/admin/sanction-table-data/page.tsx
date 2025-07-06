@@ -834,14 +834,14 @@ export default function GenerateReportPage() {
           </div>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <button
-              className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-full px-6 py-2 text-[24px] font-bold text-black"
+              className="flex items-center gap-2 bg-[#cfd4ff] border-2 border-black rounded-[50%] px-8 py-2 text-[24px] font-bold text-black"
               onClick={() => router.back()}
             >
-              <span className="text-2xl">⬅️</span> Back
+              Back
             </button>
             <Link href="/drm">
-              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-full px-6 py-2 text-lg font-bold text-black">
-                <span className="text-2xl">🏠</span> Home
+              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-[50%] px-8 py-2 text-lg font-bold text-black">
+                Home
               </button>
             </Link>
           </div>

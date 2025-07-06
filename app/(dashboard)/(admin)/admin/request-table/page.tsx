@@ -455,7 +455,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative">
+    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative flex flex-col  items-center">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
@@ -601,7 +601,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
               {/* Dept Dropdown */}
               <div className="relative inline-block">
                 <select
-                  className="bg-[#00B4D8] border-2 border-[#00B4D8] px-2 py-1 rounded text-[24px] font-semibold cursor-pointer focus:outline-none appearance-none pr-6 text-white min-w-[80px]"
+                  className="bg-[#00B4D8] border-2 border-[#00B4D8] px-2 py-1 rounded-full text-[24px] font-semibold cursor-pointer focus:outline-none appearance-none pr-6 text-white min-w-[80px]"
                   value={pendingSummaryFilters.dept}
                   onChange={handlePendingDeptChange}
                 >
@@ -617,7 +617,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
               {/* Click to View Button (moved here) */}
               <div className="flex-grow flex justify-center">
                 <button
-                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded text-[24px] font-bold text-white hover:bg-[#48CAE4] shadow transition "
+                  className="bg-[#00B4D8] border-2 border-[#0077B6] px-6 py-2 rounded-[50%] text-[24px] font-bold text-white hover:bg-[#48CAE4] shadow transition "
                   onClick={handleApplySummaryFilters}
                 >
                   Click to View
@@ -727,7 +727,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
         </h3>
                 <button
           onClick={() => handleDownloadExcel(summaryFilteredRequests)}
-          className="w-fit bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-lg border-2 border-[#FF6B6B] font-bold text-[24px] text-[#5D3587] shadow transition"
+          className="w-fit bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-[50%] border-2 border-[#FF6B6B] font-bold text-[24px] text-[#5D3587] shadow transition"
         >
           Download
         </button>
@@ -737,19 +737,19 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
       </div>
 
       
-
-      {/* Sticky Action Bar at Bottom */}
-      <div className=" w-full bg-white border-t-2 border-[#A084E8] py-4 flex flex-col justify-center items-center gap-8 z-50 ">
-      <Link href="/admin/revise-block" >
-            <button className="w-fit px-10 rounded-2xl bg-[#ffd180] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
+      <Link href="/admin/revise-block"  className="mb-8">
+            <button className="w-fit px-10 rounded-full bg-[#ffd180] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
               REVISE THE BLOCK FOR THE DAY
             </button>
           </Link>
-          <Link href="/admin/sanction-table-data" >
-            <button className="w-fit px-10 rounded-2xl bg-[#c7c7f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
+          <Link href="/admin/sanction-table-data"  className="mb-8">
+            <button className="w-fit px-10 rounded-full bg-[#c7c7f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
               BLOCK SUMMARY REPORT
             </button>
           </Link>
+
+      {/* Sticky Action Bar at Bottom */}
+      <div className=" w-full bg-white border-t-2 border-[#A084E8] py-4 flex flex-col justify-center items-center gap-8 z-50 ">
         {/* <Link
           href="/dashboard"
           className="w-fit bg-[#90EE90] hover:bg-[#B6FFB6] px-12 py-3 rounded-lg border-2 border-[#00B894] font-bold text-[24px] text-[#0077B6] shadow transition flex items-center justify-center"
@@ -761,7 +761,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
             const { signOut } = await import("next-auth/react");
             await signOut({ redirect: true, callbackUrl: "/auth/login" });
           }}
-          className="w-fit bg-[#FFB74D] border border-black px-10 py-1.5 rounded text-2xl font-bold text-black"
+          className="w-fit bg-[#FFB74D] border border-black px-10 py-1.5 rounded-[50%] text-2xl font-bold text-black"
         >
           Logout
         </button>
