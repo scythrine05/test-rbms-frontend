@@ -659,10 +659,34 @@ export default function CreateBlockRequestPage() {
   // const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
-  const majorSectionOptions =
-    userLocation && MajorSection[userLocation as keyof typeof MajorSection]
-      ? MajorSection[userLocation as keyof typeof MajorSection]
-      : [];
+  // const majorSectionOptions =
+  //   userLocation && MajorSection[userLocation as keyof typeof MajorSection]
+  //     ? MajorSection[userLocation as keyof typeof MajorSection]
+  //     : [];
+
+  // const selectedDepo = "AJJE";   //temprory fix we need to change it
+
+const userDepot = session?.user.depot;      
+const userDept = session?.user.department??""; 
+
+const locationSections = 
+  userLocation && MajorSection[userLocation as keyof typeof MajorSection] 
+    ? MajorSection[userLocation as keyof typeof MajorSection] 
+    : [];
+
+const majorSectionOptions = userDepot === "OVERALL"
+  ? locationSections 
+  : locationSections.filter(section => {
+      const depotData :any= depot[section as keyof typeof depot];
+      if (!depotData) return false;
+
+  
+      if (!(userDept in depotData)) return false;
+      
+   
+      return depotData[userDept].includes(userDepot);
+    });
+
   const selectedMajorSection = formData.selectedSection;
   const blockSectionOptions =
     selectedMajorSection &&
