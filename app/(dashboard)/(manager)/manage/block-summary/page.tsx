@@ -585,7 +585,7 @@ const formatDisplayDate = (dateStr: string) => {
         {/* Submit Button */}
         <div className="w-full flex justify-center mb-2">
           <button
-            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-lg shadow border border-[#00b347] text-[24px]"
+            className="bg-[#7be09b] hover:bg-[#5bc07b] text-white font-bold px-8 py-2 rounded-[50%] shadow border border-[#00b347] text-[24px]"
             onClick={handleSubmit(onSubmit)}
             disabled={loading}
           >
@@ -902,11 +902,7 @@ const formatDisplayDate = (dateStr: string) => {
               Back
             </button>
             </Link>
-            <Link href="/dashboard">
-              <button className="flex items-center gap-2 bg-[#a0d815] border-2 border-black rounded-[50%] px-8 py-2 text-lg font-bold text-black">
-                Home
-              </button>
-            </Link>
+            
           </div>
         </div>
       </div>
