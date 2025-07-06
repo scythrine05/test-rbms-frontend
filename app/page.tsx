@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUserRedirect } from "./utils/routeHandler";
 import { useSession } from "next-auth/react";
 
 /**
@@ -16,12 +17,13 @@ export default function Home() {
   const { status, data: session } = useSession();
 
   useEffect(() => {
-    // Log session informatio
+    // Log session information
     // Handle redirection based on authentication status
     if (status === "authenticated") {
-      window.location.href = "/dashboard";
+      const handleRedirect = useUserRedirect(session?.user);
+      handleRedirect();
     } else if (status === "unauthenticated") {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
     }
     // We don't redirect when status is "loading" - wait for it to resolve
   }, [status, router, session]);

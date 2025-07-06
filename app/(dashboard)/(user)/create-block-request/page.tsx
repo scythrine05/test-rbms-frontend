@@ -2680,12 +2680,12 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </span>
             </div>
             {/* Preferred Slot and Site Location grouped in a box - ALIGNED, PROFESSIONAL, NO OVERFLOW, SINGLE LINE */}
-            <div className="w-full mt-1 mb-4 p-6 rounded-2xl border-4 border-[#b6e6c6] bg-[#f7f7a1] flex flex-col gap-4 shadow-lg min-w-0">
+            <div className="w-full mt-1 mb-4 p-6 rounded-2xl border-4 border-[#b6e6c6] bg-gradient-to-br from-[#f7f7a1] to-[#f0f0c0] flex flex-col gap-4 shadow-xl min-w-0 hover:shadow-2xl transition-shadow duration-300">
               {/* Preferred Slot label */}
               {/* Time selectors and duration row - always single line, scrollable if needed */}
-              <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-[#fffbe9]">
-              <span className="text-black font-bold text-[24px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
-                <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0 text-2xl" >
+              <div className="flex flex-col flex-nowrap items-center w-full overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-gradient-to-b from-[#fffbe9] to-[#fff7d6]">
+                <span className="text-black font-bold text-[24px] mb-1 tracking-wide" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
+                <div className="flex flex-row flex-wrap items-center justify-center gap-2 px-3 py-2 text-2xl">
                   <select
                     name="demandTimeFromHour"
                     value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : ""}
@@ -2694,7 +2694,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const min = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : "00";
                       handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
+                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     required
                   >
                     <option value="">--</option>
@@ -2702,7 +2702,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
                     ))}
                   </select>
-                  <span className="text-black font-bold text-[16px] px-0.5">:</span>
+                  <span className="text-[#2c3e50] font-bold text-[20px]">:</span>
                   <select
                     name="demandTimeFromMin"
                     value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : ""}
@@ -2711,7 +2711,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const hour = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : "00";
                       handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
+                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     required
                   >
                     <option value="">--</option>
@@ -2719,7 +2719,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
                     ))}
                   </select>
-                  <span className="text-black font-bold text-[24px] px-1">TO</span>
+                  <span className="text-[#2c3e50] font-bold text-[24px] px-2">TO</span>
                   <select
                     name="demandTimeToHour"
                     value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : ""}
@@ -2728,7 +2728,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const min = formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : "00";
                       handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
+                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     required
                   >
                     <option value="">--</option>
@@ -2736,7 +2736,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
                     ))}
                   </select>
-                  <span className="text-black font-bold text-[16px] px-0.5">:</span>
+                  <span className="text-[#2c3e50] font-bold text-[20px]">:</span>
                   <select
                     name="demandTimeToMin"
                     value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : ""}
@@ -2745,7 +2745,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const hour = formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : "00";
                       handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
+                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db] appearance-none text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     required
                   >
                     <option value="">--</option>
@@ -2754,35 +2754,36 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     ))}
                   </select>
                 </div>
-                <span className="bg-[#fffbe9] border-2 border-black rounded-lg px-4 py-1 text-2xl font-bold text-black min-w-[70px] text-center flex-shrink-0 ml-2" style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="text-[#2c3e50] font-bold text-[24px] mb-1 tracking-wide">Duration</span>
+                <span className="bg-white border-2 border-[#2c3e50] rounded-lg px-6 py-2 text-2xl font-bold text-[#2c3e50] min-w-[120px] text-center shadow-md hover:shadow-lg transition-shadow duration-200">
                   {getDurationFromTimes(formData.demandTimeFrom || '', formData.demandTimeTo || '') || '--'}
                 </span>
               </div>
               {/* Site Location row */}
               <div className="flex flex-row items-center gap-4 w-full pl-1">
-                <div className="flex flex-col items-center bg-[#fffbe9] border-2 border-[#b7cbe8] rounded-xl px-3 py-4 space-y-4 min-w-0 gap-x-2 w-full" >
-                  <span className="font-bold text-black text-[24px] leading-none mr-2 whitespace-nowrap">Site Location</span>
-                  <div>
+                <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
+                  <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Site Location</span>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
                     <input
                       type="text"
                       name="workLocationFrom"
                       value={formData.workLocationFrom || ""}
                       onChange={handleInputChange}
                       placeholder="From"
-                      className="border-2 border-[#b7cbe8] rounded-lg px-2 py-1 text-[24px] font-bold text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                       required
                     />
-                    <span className="font-bold text-black text-[24px] mx-1">to</span>
+                    <span className="font-bold text-[#2c3e50] text-[24px]">to</span>
                     <input
                       type="text"
                       name="workLocationTo"
                       value={formData.workLocationTo || ""}
                       onChange={handleInputChange}
                       placeholder="To"
-                      className="border-2 border-[#b7cbe8] rounded-lg px-2 py-1 text-[24px] font-bold text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                       required
                     />
-                </div>
+                  </div>
                 </div>
               </div>
             </div>
