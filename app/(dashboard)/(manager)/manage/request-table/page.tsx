@@ -603,7 +603,7 @@
 //       </div>
 // <div className="mx-2 overflow-x-auto">
 //   <div className="max-h-[60vh] overflow-y-auto border-2 border-black rounded-lg bg-white">
-//     <table className="w-full text-black text-sm relative">
+//     <table className="w-full text-black text-2xl relative">
 //       <thead>
 //         <tr className="bg-[#E8F4F8] text-black">
 //           <th className="border-2 border-black p-1">Date</th>
@@ -904,6 +904,7 @@ export default function ManagerRequestTablePage() {
 
   // Filter requests based on selected filters
   let filteredRequests = data?.data?.requests || [];
+  let filteredRequestsNoChange = data?.data?.requests || [];
 
   if (selectedSections.length > 0) {
     filteredRequests = filteredRequests.filter((r) =>
@@ -922,7 +923,11 @@ export default function ManagerRequestTablePage() {
       blockType.includes(r.corridorType)
     );
   }
-
+  // Calculate pending with me count
+  const pendingWithMeCountNoChange = filteredRequestsNoChange.filter(
+    (r: UserRequest) => r.status === "PENDING" && r.managerAcceptance === false
+  ).length;
+  
   // Calculate pending with me count
   const pendingWithMeCount = filteredRequests.filter(
     (r: UserRequest) => r.status === "PENDING" && r.managerAcceptance === false
@@ -1046,14 +1051,14 @@ export default function ManagerRequestTablePage() {
     
     {/* Content */}
     <div className="text-center text-[26px] text-[#B22222] pt-3 font-semibold">
-      Total: <span className="text-[32px]">{pendingWithMeCount}</span>
+      Total: <span className="text-[32px]">{pendingWithMeCountNoChange}</span>
     </div>
     
     {/* Button */}
     <div className="flex justify-center py-4">
       <Link 
         href="/manage/pending-requests" 
-        className="mx-auto w-fit flex items-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FF8989] text-white font-bold px-8 py-3 mb-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-[22px]"
+        className="mx-auto w-fit flex items-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FF8989] text-white font-bold px-8 py-3 mb-6 rounded-[50%] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-[22px]"
       >
         Click To View
       </Link>
@@ -1078,14 +1083,14 @@ export default function ManagerRequestTablePage() {
     <div className="px-6 py-4 bg-[#F0E6FF] border-b-2 border-[#B57CF6]">
       <div className="flex flex-wrap gap-3 items-center justify-between bg-[#E8E0FF] p-3 rounded-lg border-2 border-[#B57CF6]">
         {/* Date Range */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <input
             type="date"
             value={customDateRange.start}
             onChange={(e) =>
               setCustomDateRange((r) => ({ ...r, start: e.target.value }))
             }
-            className="p-2 border-2 border-[#B57CF6] text-black bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-sm"
+            className="p-2 border-2 border-[#B57CF6] text-black bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-2xl"
           />
           <span className="px-1 text-black font-medium">to</span>
           <input
@@ -1094,14 +1099,14 @@ export default function ManagerRequestTablePage() {
             onChange={(e) =>
               setCustomDateRange((r) => ({ ...r, end: e.target.value }))
             }
-            className="p-2 border-2 border-[#B57CF6] text-black bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-sm"
+            className="p-2 border-2 border-[#B57CF6] text-black bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-2xl"
           />
         </div>
 
         {/* Section Dropdown */}
 
         
-        <div className="relative">
+        <div className="relative text-2xl">
           <button
             onClick={() => setSectionDropdownOpen((v) => !v)}
             className="bg-[#D6C2FF] px-4 py-2 rounded-lg border-2 border-[#B57CF6] font-semibold text-black flex items-center gap-2 hover:bg-[#C9B2FF] transition"
@@ -1136,7 +1141,7 @@ export default function ManagerRequestTablePage() {
         </div>
 
         {/* SSE Dropdown */}
-        <div className="relative">
+        <div className="relative text-2xl">
           <button
             onClick={() => setSseDropdownOpen((v) => !v)}
             className="bg-[#D6C2FF] px-4 py-2 rounded-lg border-2 border-[#B57CF6] font-semibold text-black flex items-center gap-2 hover:bg-[#C9B2FF] transition"
@@ -1171,7 +1176,7 @@ export default function ManagerRequestTablePage() {
         </div>
 
         {/* Block Type Dropdown */}
-        <div className="relative">
+        <div className="relative text-2xl">
           <button
             onClick={() => setBlockTypeDropdownOpen((v) => !v)}
             className="bg-[#E6D6FF] px-4 py-2 rounded-lg border-2 border-[#B57CF6] font-semibold text-black flex items-center gap-2 hover:bg-[#D9C4FF] transition"
@@ -1207,9 +1212,9 @@ export default function ManagerRequestTablePage() {
 
         <button
           onClick={() => setFiltersApplied(true)}
-          className="bg-[#B57CF6] px-6 py-2 rounded-lg border-2 border-[#8E44AD] font-bold text-white hover:bg-[#A56CE6] transition shadow-md"
+          className="text-2xl mx-auto bg-[#B57CF6] px-6 py-2 rounded-[50%] border-2 border-[#8E44AD] font-bold text-white hover:bg-[#A56CE6] transition shadow-md"
         >
-          Enter
+          click to view
         </button>
       </div>
     </div>
@@ -1217,7 +1222,7 @@ export default function ManagerRequestTablePage() {
     {/* Requests Table */}
     {filtersApplied&&(
 
- <div className="px-6 py-4">
+ <div className="px-6 py-4 text-2xl">
       <div className="overflow-x-auto">
         <div className="max-h-[695px] min-h-[100px] overflow-y-auto border-2 border-[#B57CF6] rounded-lg bg-white shadow-inner">
           <table className="w-full text-black relative">
@@ -1298,16 +1303,16 @@ export default function ManagerRequestTablePage() {
 
       {/* Footer Instructions */}
       <div className="text-center mt-4 space-y-2">
-        <p className="text-sm text-gray-700">
+        <p className="text-2xl text-gray-700">
           Click ID to see details of a Block.
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-2xl text-gray-700">
           For printing the complete table, click to download in{" "}
           <span className="font-bold text-[#B57CF6]">.xlsx format</span>
         </p>
         <button
           onClick={handleDownloadExcel}
-          className="mt-3 bg-[#B57CF6] hover:bg-[#9B59B6] px-6 py-2 rounded-lg border-2 border-[#8E44AD] font-bold text-white transition shadow-md"
+          className="mt-3 bg-[#B57CF6] hover:bg-[#9B59B6] px-6 py-2 rounded-[50%] border-2 border-[#8E44AD] font-bold text-white transition shadow-md"
         >
           Download
         </button>
@@ -1325,7 +1330,7 @@ export default function ManagerRequestTablePage() {
   
 
 <Link href="/manage/block-summary">
-  <button className="w-fit px-16 rounded-2xl bg-[#ffd180] border-2 border-black py-6 text-2xl font-extrabold text-black text-center shadow-lg hover:scale-105 transition min-w-[320px]">
+  <button className="w-fit px-16 rounded-full bg-[#ffd180] border-2 border-black py-6 text-2xl font-extrabold text-black text-center shadow-lg hover:scale-105 transition min-w-[320px]">
     GENERATE REPORT
   </button>
 </Link>
@@ -1334,7 +1339,7 @@ export default function ManagerRequestTablePage() {
       const { signOut } = await import("next-auth/react");
       await signOut({ redirect: true, callbackUrl: "/auth/login" });
     }}
-    className="w-fit bg-[#FFB74D] border border-black px-10 py-1.5 rounded text-2xl font-bold text-black mt-4"
+    className="w-fit bg-[#FFB74D] border border-black px-10 py-1.5 rounded-[50%] text-2xl font-bold text-black mt-4"
   >
     Logout
   </button>

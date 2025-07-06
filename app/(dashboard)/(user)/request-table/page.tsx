@@ -32,6 +32,7 @@ import { userRequestService } from "@/app/service/api/user-request";
 import { WeeklySwitcher } from "@/app/components/ui/WeeklySwitcher";
 import { managerService } from "@/app/service/api/manager";
 import dayjs from "dayjs";
+import formatTime from "@/app/utils/formatTime";
 
 // Components
 const Pagination = ({
@@ -75,25 +76,7 @@ const formatDate = (dateString: string) => {
   }
 };
 
-// Helper function to safely extract HH:mm from ISO string without timezone conversion
-const formatTime = (dateString: string): string => {
-  if (!dateString) return "Invalid time";
 
-  try {
-    // Handle both full ISO strings and time-only strings
-    const timePart = dateString.includes("T")
-      ? dateString.split("T")[1]
-      : dateString;
-
-    // Extract just the hours and minutes
-    const [hours, minutes] = timePart.split(":");
-    return `${hours.padStart(2, "0")}:${(minutes || "00")
-      .padStart(2, "0")
-      .substring(0, 2)}`;
-  } catch {
-    return "Invalid time";
-  }
-};
 
 // Helper function to format time periods with duration
 const formatTimePeriod = (fromTime: string, toTime: string): string => {
@@ -818,13 +801,13 @@ const handleDownload = () => {
                     Demanded
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
-                     Offered Time
+                     Offered
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
                     Status
                   </th>
                   <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">
-                    Accept Sanctioned Timing?
+                    Accept Offered Timing?
                   </th>
                 </tr>
               </thead>
@@ -1137,7 +1120,7 @@ const handleDownload = () => {
                       endDate: newDate > prev.endDate ? newDate : prev.endDate,
                     }));
                   }}
-                  className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"
+                  className="w-fit bg-[#B2F3F5] border-2 border-red-500 text-black pl-2 -pr-10 py-1 rounded text-2xl"
                   max={format(customDateRange.endDate, "yyyy-MM-dd")}
                 />
               </div>
@@ -1157,13 +1140,13 @@ const handleDownload = () => {
                         newDate < prev.startDate ? newDate : prev.startDate,
                     }));
                   }}
-                  className="bg-[#B2F3F5] border-2 border-red-500 text-black px-2 py-1 rounded text-sm"
+                  className="w-fit bg-[#B2F3F5] border-2 border-red-500 text-black py-1 -pr-10 rounded text-2xl"
                   min={format(customDateRange.startDate, "yyyy-MM-dd")}
                 />
               </div>
 
-              <div className="w-60 text-center mt-2">
-                <h3 className="bg-[#E6E6FA] text-black text-[24px] font-medium px-3 py-1 rounded">
+              <div className="w-fit text-center mt-2">
+                <h3 className="bg-[#E6E6FA] text-black text-[12px] font-medium px-3 py-1 rounded">
                   For printing the summary,
                   <br />
                   click Download
@@ -1183,19 +1166,21 @@ const handleDownload = () => {
           <div className="flex justify-center gap-3 mb-2">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold"
-              style={{ color: "black",fontSize:"24px" }}
+              className="text-center w-full max-w-60 rounded-[50%] bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+
+              
             >
-              <span className="text-xl">🏠</span> Home
+               Home
             </Link>
             <button
               onClick={() => window.history.back()}
-              className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold"
-              style={{ color: "black",fontSize:"24px" }}
+              className="text-center w-full max-w-60 rounded-[50%] bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+
+              
             >
-              <span className="text-xl">⬅️</span> Back
+               Back
             </button>
-            {/* <Link href="/logout" className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black">
+            {/* <Link href="/logout" className="bg-[#FFB74D] border border-black px-6 py-1.5 max-w-6 rounded-[50%] text-lg font-bold text-black">
               Logout
             </Link> */}
             <button
@@ -1203,8 +1188,9 @@ const handleDownload = () => {
                 const { signOut } = await import("next-auth/react");
                 await signOut({ redirect: true, callbackUrl: "/auth/login" });
               }}
-              className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-lg font-bold text-black"
-              style={{ color: "black",fontSize:"24px" }}
+              className="text-center w-full max-w-60 rounded-[50%] bg-emerald-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+
+              
             >
               Logout
             </button>

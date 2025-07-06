@@ -478,20 +478,20 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
           <div className="text-center text-[26px] text-[#B22222] pt-3 font-semibold">
             Total Pending: <span className="text-[32px]">{TotalRequests}</span>
           </div>
-          <div className="flex justify-center items-center gap-8 py-4 px-4">
-            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
+          <div className="flex  justify-center items-center  gap-2 py-4 px-4">
+            <div className="flex items-center justify-between w-40 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-2 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>ENGG</span>
               <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
                 {ENGGRequest}
               </span>
             </div>
-            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between w-40 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-2 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>S&T</span>
               <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
                 {SandTRequest}
               </span>
             </div>
-            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between w-40 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-2 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>TRD</span>
               <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
                 {TRDRequest}

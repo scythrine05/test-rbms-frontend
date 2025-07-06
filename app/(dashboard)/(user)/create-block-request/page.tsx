@@ -3443,13 +3443,13 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             <button
               type="button"
               onClick={() => { window.location.href = "/dashboard"; }}
-              className="w-full rounded-[50%] bg-[#99f61f] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
+              className="w-full rounded-[50%] max-w-72 bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
             >
               Home
             </button>
             <button
               type="button"
-              className="w-full rounded-[50%] bg-[#e3e3e3] text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
+              className="w-full rounded-[50%] max-w-72 bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"
               onClick={() => {
                 if (reviewMode) {
                   setReviewMode(false);
@@ -3483,7 +3483,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                   {reviewMode ? (
                 <button
                   type="submit"
-                  className={`bg-[#eeb8f7] border-2 border-black rounded-full px-6 py-2 text-2xl font-extrabold text-white hover:bg-[#e6aee0] ${
+                  className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
                     formSubmitting ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={formSubmitting}
@@ -3499,8 +3499,8 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               ) : (
                 <button
                   type="submit"
-                  className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] px-6 py-2 text-lg font-extrabold text-white hover:bg-[#e6aee0] ${
-                    formSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
+                    formSubmitting ? "brightness-95 cursor-not-allowed" : ""
                   }`}
                   disabled={formSubmitting}
                 >

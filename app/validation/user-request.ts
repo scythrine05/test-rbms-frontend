@@ -42,6 +42,8 @@ export const userRequestSchema = z.object({
     sntDisconnectionRequired: z.boolean().nullable().optional(),
     sntDisconnectionRequirements: z.array(z.string().optional()).optional(),  // present in both
     powerBlockRequirements: z.array(z.string().optional()).optional(),  // present in both
+    powerBlockDisconnectionAssignTo: z.string().optional(),
+    sntDisconnectionAssignTo: z.string().optional(),
     sigResponse: z.string().optional(),
     ohDisconnection: z.string().optional(),
     oheDisconnection: z.string().optional(),

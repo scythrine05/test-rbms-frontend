@@ -7,6 +7,7 @@ import { extractTimeFromDatetime } from "@/app/lib/helper";
 import { useSession } from "next-auth/react";
 import dayjs from "dayjs";
 import { useDeleteUserRequest } from "@/app/service/mutation/user-request";
+import formatTime from "@/app/utils/formatTime";
 
 export default function EditRequestsPage() {
     const router = useRouter();
@@ -139,7 +140,7 @@ export default function EditRequestsPage() {
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[8%]">ID</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[25%]">Block Section</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[15%]">Line/Road</th>
-                                        <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Duration</th>
+                                        <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Demand</th>
                                         <th className="border border-black px-2 py-1 whitespace-nowrap w-[10%]">Edit/Cancel</th>
                                     </tr>
                                 </thead>
@@ -171,10 +172,9 @@ export default function EditRequestsPage() {
                                                     {request.processedLineSections?.map((section: any) => section.lineName || section.road).join(", ") || "-"}
                                                 </td>
                                                 <td className="border border-black px-2 py-1 whitespace-nowrap text-center text-black">
-                                                    {getDuration(
-                                                        extractTimeFromDatetime(request.demandTimeFrom || ""),
-                                                        extractTimeFromDatetime(request.demandTimeTo || "")
-                                                    )}
+                                                    
+                                                    {formatTime(request.demandTimeFrom)} -{" "}
+                                                    {formatTime(request.demandTimeTo)}
                                                 </td>
                                                 <td className="border border-black px-2 py-1 text-center whitespace-nowrap text-black">
                                                     {isEditable(request.date) ? (
@@ -207,15 +207,15 @@ export default function EditRequestsPage() {
                         <div className="flex justify-center gap-3 mb-2">
                             <button
                                 onClick={() => router.push('/dashboard')}
-                                className="flex items-center gap-1 bg-lime-300 border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black",fontSize: "24px"}}
+              className="text-center w-full max-w-60 rounded-[50%] bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
                             >
-                                <span className="text-xl">🏠</span> Home
+                                 Home
                             </button>
                             <button
                                 onClick={() => window.history.back()}
-                                className="flex items-center gap-1 bg-[#E6E6FA] border border-black px-4 py-1.5 rounded text-lg font-bold" style={{color:"black",fontSize: "24px"}}
+              className="text-center w-full max-w-60 rounded-[50%] bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
                             >
-                                <span className="text-xl">⬅️</span> Back
+                                 Back
                             </button>
                             {/* <button
                                 onClick={() => router.push('/auth/logout')}
@@ -228,7 +228,7 @@ export default function EditRequestsPage() {
                                     const { signOut } = await import('next-auth/react');
                                     await signOut({ redirect: true, callbackUrl: '/auth/login' });
                                 }}
-                                className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded text-[24px] font-bold text-black"
+              className="text-center w-full max-w-60 rounded-[50%] bg-emerald-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
                             >
                                 Logout
                             </button>
