@@ -1131,7 +1131,7 @@ export default function ManagerRequestTablePage() {
       {/* View Block Details Button */}
 
       {/* Pending Requests Section */}
-      <div className="mx-4 mt-6">
+      {/* <div className="mx-4 mt-6">
         <div className="bg-[#f69697] grid grid-cols-3 gap-0 border-2 border-black">
           <div className="p-3 text-black font-bold border-r-2 border-black text-[20px]">
             REQUESTS PENDING WITH ME
@@ -1148,7 +1148,32 @@ export default function ManagerRequestTablePage() {
       </span>
     </Link>
         </div>
+      </div> */}
+      <div className="mx-4 mt-6">
+  <div className="bg-[#f69697] border-2 border-black rounded-xl overflow-hidden">
+    {/* Top Row - Title */}
+    <div className="p-3 text-black font-bold text-center text-[20px] border-b-2 border-black">
+      PENDING WITH ME
+    </div>
+    
+    {/* Bottom Row - Content */}
+    <div className="flex justify-between items-center p-3">
+      {/* Left Side - Count with Nos */}
+      <div className="bg-white px-4 py-1 rounded-full border-2 border-black hover:bg-gray-100 font-bold mr-4 text-black"
+>
+        {pendingWithMeCount} Nos
       </div>
+      
+      {/* Right Side - Button */}
+      <Link
+        href="/manage/pending-requests"
+        className="bg-white px-4 py-1 rounded-full border-2 border-black hover:bg-gray-100 font-bold mr-4 text-black"
+      >
+        Click to View
+      </Link>
+    </div>
+  </div>
+</div>
       {/* <div className="w-full flex justify-center mt-4">
         <button className="bg-[#FFF86B] px-8 py-2 rounded-full border-4 border-[#13529e] text-lg font-bold text-[#13529e] shadow-md hover:bg-[#B57CF6] hover:text-white transition-colors">
           View Block Details
@@ -1160,7 +1185,7 @@ export default function ManagerRequestTablePage() {
     className="bg-[#B57CF6] text-white text-center p-2 border-2 border-black rounded-none"
     style={{ marginTop: "16px",fontSize: "24px" }}
   >
-    View Block Details
+    View Summary of Sanctioned Blocks
   </div>
 </div>
       {/* Filters Row: All filters in a single row */}
@@ -1439,7 +1464,7 @@ export default function ManagerRequestTablePage() {
             </thead>
             <tbody className="h-[300px] overflow-auto">
               {filtersApplied?
-             (filteredRequests.map((request: UserRequest, index: number) => {
+             (filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).map((request: UserRequest, index: number) => {
                 const status = getDisplayStatus(request);
                 // Determine background color based on index (even or odd)
                 const rowBgColor =
@@ -1497,6 +1522,17 @@ export default function ManagerRequestTablePage() {
           </table>
         </div>
       </div>
+
+
+
+<div className="w-full flex flex-col items-center gap-5 mt-6 px-2 max-w-md">
+  <a 
+    href="/manage/block-summary" 
+    className="inline-block px-10 py-6 rounded-2xl bg-[#aee6f7] border border-black text-xl font-extrabold text-black text-center shadow hover:scale-105 transition whitespace-nowrap"
+  >
+    GENERATE REPORT
+  </a>
+</div>
 
       <div className="text-center mt-2">
         <h3
