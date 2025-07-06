@@ -3,6 +3,7 @@ import { authService } from "../api/auth";
 import { LoginInput } from "@/app/validation/auth";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { handleUserRedirect } from "@/app/utils/routeHandler";
 
 const handleAuthSuccess = async (data: any) => {
   try {
@@ -16,6 +17,9 @@ const handleAuthSuccess = async (data: any) => {
     if (result?.error) {
       throw new Error(result.error);
     }
+
+    // Handle redirection based on user role
+    handleUserRedirect(data.data.user);
 
     // Return the user data for handling redirect in the component
     return data.data.user;
