@@ -435,6 +435,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
     summaryFilteredRequests = summaryFilteredRequests.filter((r) => r.selectedLine === activeSummaryFilters.line);
   }
 
+  let sanctionedRequests = summaryFilteredRequests.filter((r) => r.isSanctioned);
   if (isLoading) {
     return (
       <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
@@ -454,7 +455,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 pb-32 relative">
+    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
         <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
@@ -470,42 +471,44 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
 
       {/* Requests Pending With Me CTA */}
       <div className="flex justify-center mt-8 mb-6">
-        <div className="w-full max-w-2xl rounded-2xl border-4 border-[#FFB3B3] bg-[#FFF0F0] shadow-lg p-0">
-          <div className="text-[24px] font-bold text-[#B22222] text-center py-3 tracking-wide">
+        <div className="w-full max-w-2xl rounded-2xl border-4 border-[#FF6B6B] bg-gradient-to-b from-[#FFF0F0] to-[#FFE5E5] shadow-xl p-0 transform hover:scale-[1.02] transition-all duration-300">
+          <div className="text-[28px] font-bold text-[#B22222] text-center py-4 tracking-wide border-b-2 border-[#FFB3B3]">
             REQUESTS PENDING WITH ME
           </div>
-          <div className=" text-center text-[24px] text-[#B22222] pb-2">
-            Total {TotalRequests} NOS 
+          <div className="text-center text-[26px] text-[#B22222] pt-3 font-semibold">
+            Total Pending: <span className="text-[32px]">{TotalRequests}</span>
           </div>
-          <div className="flex justify-center items-center gap-6 py-4">
-            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
+          <div className="flex justify-center items-center gap-8 py-4 px-4">
+            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>ENGG</span>
-              <span className="bg-white rounded-full px-2 py-2 aspect-square">{ENGGRequest}</span>
+              <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
+                {ENGGRequest}
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
+            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>S&T</span>
-              <span className="bg-white rounded-full px-2 py-2 aspect-square">{SandTRequest}</span>
+              <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
+                {SandTRequest}
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
+            <div className="flex items-center justify-between w-48 bg-gradient-to-r from-[#FFB3B3] to-[#FFD5D5] text-[#B22222] font-bold p-4 rounded-xl border-2 border-[#FF6B6B] text-[22px] shadow-md hover:shadow-lg transition-all">
               <span>TRD</span>
-              <span className="bg-white rounded-full px-2 py-2 aspect-square">{TRDRequest}</span>
+              <span className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[24px] shadow-inner border-2 border-[#FFB3B3]">
+                {TRDRequest}
+              </span>
             </div>
-            
-            
-            
           </div>
-      <div className="mx-auto w-fit flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 mb-4 rounded border-2 border-[#FF6B6B] text-[20px]">
+          <Link href="/admin/optimise-table" className="mx-auto w-fit flex items-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FF8989] text-white font-bold px-8 py-3 mb-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-[22px]">
             Click To View
-        </div>
+          </Link>
         </div>
       </div>
-
 
       {/* View Summary of Upcoming Blocks CTA */}
       <div className="flex justify-center mb-8">
         <div className="w-full max-w-4xl rounded-2xl border-4 border-[#00B4D8] bg-[#CAF0F8] shadow-lg p-0">
           <div className="text-[24px] font-bold text-[#0077B6] text-center py-3 tracking-wide">
-            View Summary of Upcoming Blocks
+            View Summary of Sanctioned Blocks
           </div>
           <div className="px-6 pb-4">
             {/* Filters Row: All filters in a single row */}
@@ -518,14 +521,18 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
                 <input
                   type="date"
                   value={pendingSummaryFilters.start}
-                  onChange={(e) => handlePendingDateChange('start', e.target.value)}
+                  onChange={(e) =>
+                    handlePendingDateChange("start", e.target.value)
+                  }
                   className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-[24px]"
                 />
                 <span className="px-1 text-black text-[24px]">to</span>
                 <input
                   type="date"
                   value={pendingSummaryFilters.end}
-                  onChange={(e) => handlePendingDateChange('end', e.target.value)}
+                  onChange={(e) =>
+                    handlePendingDateChange("end", e.target.value)
+                  }
                   className="p-1 border border-[#00B4D8] text-black bg-white w-28 focus:outline-none focus:ring-2 focus:ring-[#B57CF6] text-[24px]"
                 />
               </div>
@@ -547,8 +554,12 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
                       >
                         <input
                           type="checkbox"
-                          checked={pendingSummaryFilters.blockType.includes(opt.value)}
-                          onChange={() => handlePendingBlockTypeChange(opt.value)}
+                          checked={pendingSummaryFilters.blockType.includes(
+                            opt.value
+                          )}
+                          onChange={() =>
+                            handlePendingBlockTypeChange(opt.value)
+                          }
                           className="mr-2 accent-[#B57CF6]"
                         />
                         {opt.label}
@@ -575,7 +586,9 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
                       >
                         <input
                           type="checkbox"
-                          checked={pendingSummaryFilters.section.includes(section)}
+                          checked={pendingSummaryFilters.section.includes(
+                            section
+                          )}
                           onChange={() => handlePendingSectionChange(section)}
                           className="mr-2 accent-[#B57CF6]"
                         />
@@ -614,19 +627,21 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
             {/* Table only shows after clicking Click to View */}
             {showTable && (
               <div className="mx-2 overflow-x-auto">
-                <div className="max-h-[60vh] overflow-y-auto border-2 border-[#00B4D8] rounded-lg bg-white">
+                <div className="max-h-[1000px] overflow-y-auto border-2 border-[#00B4D8] rounded-lg bg-white">
                   <table className="w-full text-black text-[24px] relative">
                     <thead>
                       <tr className="bg-[#e49edd] text-black">
                         <th className="border-2 border-black p-1">Date</th>
                         <th className="border-2 border-black p-1">ID</th>
-                        <th className="border-2 border-black p-1">Block Section</th>
+                        <th className="border-2 border-black p-1">
+                          Block Section
+                        </th>
                         <th className="border-2 border-black p-1">Demanded</th>
                         <th className="border-2 border-black p-1">Offered</th>
-                        <th className="border-2 border-black p-1">Block Type</th>
                         <th className="border-2 border-black p-1">
-                          Line/Road
+                          Block Type
                         </th>
+                        <th className="border-2 border-black p-1">Line/Road</th>
                         <th className="border-2 border-black p-1">Activity</th>
                         <th className="border-2 border-black p-1 sticky right-0 z-10 bg-[#e49edd]">
                           Status
@@ -634,98 +649,123 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {summaryFilteredRequests.map((request: UserRequest, idx: number) => {
-                        const status = getStatusDisplay(request);
-                        return (
-                          <tr
-                            key={request.id}
-                            className={idx % 2 === 0 ? "bg-[#FFC0CB]" : "bg-white"}
-                          >
-                            <td className="border border-black p-1 text-center">
-                              {dayjs(request.date).format("DD-MM-YY")}
-                            </td>
-                            <td className="border border-black p-1 text-center">
-                              <Link
-                                href={`/admin/optimise-table?id=${request.id}`}
-                                className="text-[#13529e] hover:underline font-semibold"
-                              >
-                                {request.divisionId || request.id}
-                              </Link>
-                            </td>
-                            <td className="border border-black p-1">
-                              {request.missionBlock}
-                            </td>
-                            <td className="border border-black p-1">
-                              {formatTime(request.demandTimeFrom)} -{" "}
-                              {formatTime(request.demandTimeTo)}
-                            </td>
-                            <td className="border border-black p-1">
-                              {`${formatTime(
-                                request.sanctionedTimeFrom || request.optimizeTimeFrom
-                              )} - ${formatTime(
-                                request.sanctionedTimeTo || request.optimizeTimeTo
-                              )}`}
-                            </td>
-                            <td className="border border-black p-1">
-                              {request.corridorType}
-                            </td>
-                            <td className="border border-black p-1 text-center">
-                              {request.processedLineSections?.[0]?.lineName ||
-                                request.processedLineSections?.[0]?.road ||
-                                "N/A"}
-                            </td>
-                            <td className="border border-black p-1">
-                              {request.activity}
-                            </td>
-                            <td
-                              className="border border-black p-1 sticky right-0 z-10 text-center font-bold"
-                              style={status.style}
+                      {sanctionedRequests.map(
+                        (request: UserRequest, idx: number) => {
+                          const status = getStatusDisplay(request);
+                          return (
+                            <tr
+                              key={request.id}
+                              className={
+                                idx % 2 === 0 ? "bg-[#FFC0CB]" : "bg-white"
+                              }
                             >
-                              <span className="w-full block text-base">
-                                {status.label}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              <td className="border border-black p-1 text-center">
+                                {dayjs(request.date).format("DD-MM-YY")}
+                              </td>
+                              <td className="border border-black p-1 text-center">
+                                <Link
+                                  href={`/admin/optimise-table?id=${request.id}`}
+                                  className="text-[#13529e] hover:underline font-semibold"
+                                >
+                                  {request.divisionId || request.id}
+                                </Link>
+                              </td>
+                              <td className="border border-black p-1">
+                                {request.missionBlock}
+                              </td>
+                              <td className="border border-black p-1">
+                                {formatTime(request.demandTimeFrom)} -{" "}
+                                {formatTime(request.demandTimeTo)}
+                              </td>
+                              <td className="border border-black p-1">
+                                {`${formatTime(
+                                  request.sanctionedTimeFrom ||
+                                    request.optimizeTimeFrom
+                                )} - ${formatTime(
+                                  request.sanctionedTimeTo ||
+                                    request.optimizeTimeTo
+                                )}`}
+                              </td>
+                              <td className="border border-black p-1">
+                                {request.corridorType}
+                              </td>
+                              <td className="border border-black p-1 text-center">
+                                {request.processedLineSections?.[0]?.lineName ||
+                                  request.processedLineSections?.[0]?.road ||
+                                  "N/A"}
+                              </td>
+                              <td className="border border-black p-1">
+                                {request.activity}
+                              </td>
+                              <td
+                                className="border border-black p-1 sticky right-0 z-10 text-center font-bold"
+                                style={status.style}
+                              >
+                                <span className="w-full block text-base">
+                                  {status.label}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
             )}
+            {/* Info Texts */}
+      <div className="text-center mt-1 mb-3">
+        <h3 className="inline-flex py-1 px-6 rounded-full text-black text-base font-medium text-[14px]">
+          Click ID to see details of a Block.
+        </h3>
+        <h3 className="rounded-full pb-2 px-4 text-black text-[14px] font-medium">
+          For printing the complete table, click to download in{" "}
+          <span className="font-bold text-[#00B4D8] text-[14px]">
+            .xlsx format
+          </span>
+        </h3>
+                <button
+          onClick={() => handleDownloadExcel(summaryFilteredRequests)}
+          className="w-fit bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-lg border-2 border-[#FF6B6B] font-bold text-[24px] text-[#5D3587] shadow transition"
+        >
+          Download
+        </button>
+      </div>
           </div>
         </div>
       </div>
 
-      {/* Info Texts */}
-      <div className="text-center mt-1 mb-32">
-        <h3
-          className="inline-flex bg-[#cfd4ff] py-1 px-6 rounded-full text-black text-base font-medium mb-2 text-[24px]"
-        >
-          Click ID to see details of a Block.
-        </h3>
-        <h3
-          className="bg-[#cfd4ff] rounded-full py-2 px-4 text-black text-[24px] font-medium"
-        >
-          For printing the complete table, click to download in{' '}
-          <span className="font-bold text-[#00B4D8] text-[24px]">.xlsx format</span>
-        </h3>
-      </div>
+      
 
       {/* Sticky Action Bar at Bottom */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t-2 border-[#A084E8] py-4 flex justify-center gap-8 z-50 shadow-xl">
-        <button
-          onClick={() => handleDownloadExcel(summaryFilteredRequests)}
-          className="bg-[#FFA07A] hover:bg-[#FFBFAE] px-12 py-3 rounded-lg border-2 border-[#FF6B6B] font-bold text-[24px] text-[#5D3587] shadow transition"
-        >
-          Download
-        </button>
-        <Link
+      <div className=" w-full bg-white border-t-2 border-[#A084E8] py-4 flex flex-col justify-center items-center gap-8 z-50 ">
+      <Link href="/admin/revise-block" >
+            <button className="w-fit px-10 rounded-2xl bg-[#ffd180] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
+              REVISE THE BLOCK FOR THE DAY
+            </button>
+          </Link>
+          <Link href="/admin/sanction-table-data" >
+            <button className="w-fit px-10 rounded-2xl bg-[#c7c7f7] border border-black py-6 text-2xl font-extrabold text-black text-center shadow hover:scale-105 transition">
+              BLOCK SUMMARY REPORT
+            </button>
+          </Link>
+        {/* <Link
           href="/dashboard"
-          className="bg-[#90EE90] hover:bg-[#B6FFB6] px-12 py-3 rounded-lg border-2 border-[#00B894] font-bold text-[24px] text-[#0077B6] shadow transition flex items-center justify-center"
+          className="w-fit bg-[#90EE90] hover:bg-[#B6FFB6] px-12 py-3 rounded-lg border-2 border-[#00B894] font-bold text-[24px] text-[#0077B6] shadow transition flex items-center justify-center"
         >
           Home
-        </Link>
+        </Link> */}
+        <button
+          onClick={async () => {
+            const { signOut } = await import("next-auth/react");
+            await signOut({ redirect: true, callbackUrl: "/auth/login" });
+          }}
+          className="w-fit bg-[#FFB74D] border border-black px-10 py-1.5 rounded text-2xl font-bold text-black"
+        >
+          Logout
+        </button>
+
       </div>
     </div>
   );
