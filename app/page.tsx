@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUserRedirect } from "./utils/routeHandler";
 import { useSession } from "next-auth/react";
+import { handleUserRedirect } from "./utils/routeHandler";
 
 /**
  * Home Page - Root route
@@ -20,8 +20,7 @@ export default function Home() {
     // Log session information
     // Handle redirection based on authentication status
     if (status === "authenticated") {
-      const handleRedirect = useUserRedirect(session?.user);
-      handleRedirect();
+      handleUserRedirect(session?.user);
     } else if (status === "unauthenticated") {
       router.push("/auth/login");
     }

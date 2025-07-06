@@ -2,10 +2,9 @@ import { useMutation } from "@tanstack/react-query";
 import { authService } from "../api/auth";
 import { LoginInput } from "@/app/validation/auth";
 import { useRouter } from "next/navigation";
-import { useUserRedirect } from "@/app/utils/routeHandler";
 import { signIn } from "next-auth/react";
 
-const handleAuthSuccess = async (data: any, router: any) => {
+const handleAuthSuccess = async (data: any) => {
   try {
     const result = await signIn("credentials", {
       redirect: false,
@@ -17,8 +16,9 @@ const handleAuthSuccess = async (data: any, router: any) => {
     if (result?.error) {
       throw new Error(result.error);
     }
-    const handleRedirect = useUserRedirect(data.data.user);
-     handleRedirect();
+
+    // Return the user data for handling redirect in the component
+    return data.data.user;
   } catch (error) {
     console.error("Login error:", error);
     throw error;
@@ -30,7 +30,18 @@ export const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginInput) => authService.login(data),
-    onSuccess: async (data) => handleAuthSuccess(data, router),
+    onSuccess: async (data) => {
+      const user = await handleAuthSuccess(data);
+      
+      // Handle redirection based on user role
+      if (user.role === "BRANCH_OFFICER" && user.email === "b@mail.com") {
+        router.push("/manage/request-table");
+      } else if (user.role === "ADMIN") {
+        router.push("/admin/request-table");
+      } else {
+        router.push("/dashboard");
+      }
+    },
   });
 
   return {
@@ -57,7 +68,7 @@ export const usePhoneAuth = () => {
       otp: string;
       otpId: string;
     }) => authService.verifyOtp(phone, otp, otpId),
-    onSuccess: async (data) => handleAuthSuccess(data, router),
+    onSuccess: async (data) => handleAuthSuccess(data),
   });
 
   return {
