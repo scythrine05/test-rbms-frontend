@@ -2668,7 +2668,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             })}
             {/* Corridor for this section info bar (only once, after all lines/roads selects) */}
             <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
-              <span className="text-[24px] font-bold text-black text-center mr-4">
+              <span className="text-[26px] font-bold text-black text-center mr-4">
                 Corridor for this section
               </span>
               <span className="text-[24px] font-bold text-black text-center">
@@ -2685,7 +2685,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               {/* Time selectors and duration row - always single line, scrollable if needed */}
               <div className="flex flex-col flex-nowrap items-center w-full  overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-[#fffbe9]">
               <span className="text-black font-bold text-[24px] mb-1" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
-                <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0" style={{ fontSize: '16px' }}>
+                <div className="flex flex-row items-center  gap-x-1 px-2 py-1 min-w-0 text-2xl" >
                   <select
                     name="demandTimeFromHour"
                     value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : ""}
@@ -2694,7 +2694,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const min = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : "00";
                       handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-[16px] px-1 py-0.5 h-8 rounded-lg focus:outline-none appearance-none text-center min-w-[36px]"
+                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
                     required
                   >
                     <option value="">--</option>
@@ -2711,7 +2711,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const hour = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : "00";
                       handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-[16px] px-1 py-0.5 h-8 rounded-lg focus:outline-none appearance-none text-center min-w-[36px]"
+                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
                     required
                   >
                     <option value="">--</option>
@@ -2728,7 +2728,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const min = formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : "00";
                       handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-[16px] px-1 py-0.5 h-8 rounded-lg focus:outline-none appearance-none text-center min-w-[36px]"
+                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
                     required
                   >
                     <option value="">--</option>
@@ -2745,7 +2745,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       const hour = formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : "00";
                       handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
                     }}
-                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-[16px] px-1 py-0.5 h-8 rounded-lg focus:outline-none appearance-none text-center min-w-[36px]"
+                    className="bg-[#fffbe9] border-2 border-black text-black font-bold text-2xl px-1 py-1 rounded-lg focus:outline-none appearance-none text-center "
                     required
                   >
                     <option value="">--</option>
@@ -2754,7 +2754,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     ))}
                   </select>
                 </div>
-                <span className="bg-[#fffbe9] border-2 border-black rounded-xl px-4 py-1 text-[16px] font-bold text-black min-w-[70px] text-center flex-shrink-0 ml-2" style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="bg-[#fffbe9] border-2 border-black rounded-lg px-4 py-1 text-2xl font-bold text-black min-w-[70px] text-center flex-shrink-0 ml-2" style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {getDurationFromTimes(formData.demandTimeFrom || '', formData.demandTimeTo || '') || '--'}
                 </span>
               </div>
@@ -2769,7 +2769,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       value={formData.workLocationFrom || ""}
                       onChange={handleInputChange}
                       placeholder="From"
-                      className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      className="border-2 border-[#b7cbe8] rounded-lg px-2 py-1 text-[24px] font-bold text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
                       required
                     />
                     <span className="font-bold text-black text-[24px] mx-1">to</span>
@@ -2779,7 +2779,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       value={formData.workLocationTo || ""}
                       onChange={handleInputChange}
                       placeholder="To"
-                      className="border-2 border-black rounded-lg px-2 py-1 text-[20px] font-bold bg-white text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
+                      className="border-2 border-[#b7cbe8] rounded-lg px-2 py-1 text-[24px] font-bold text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-purple-300 min-w-[70px] max-w-[100px] text-center"
                       required
                     />
                 </div>
@@ -2789,10 +2789,10 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
           </div>
 
           {/* Type of Work and Activity - horizontal, pastel green */}
-          <div className="w-full flex flex-row gap-8 items-center bg-[#e6f7c6] rounded-2xl p-6 mb-8 border-2 border-[#b6e6c6] shadow">
+          <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
             {/* Type of Work dropdown */}
-            <div className="flex-1">
-              <label htmlFor="workType" className="block text-[24px] font-bold text-black mb-2">Type of Work</label>
+            <div className="flex-1 pr-2 border-r-2 border-slate-400">
+              <label htmlFor="workType" className="block text-[24px] text-nowrap font-bold text-black mb-2">Type of Work</label>
               <select
                 id="workType"
                 name="workType"
@@ -2819,13 +2819,13 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 ))}
               </select>
               {errors.workType && (
-                <span className="text-[18px] text-[#e07a5f] font-medium mt-2 block">
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
                   {errors.workType}
                 </span>
               )}
             </div>
             {/* Activity dropdown */}
-            <div className="flex-1">
+            <div className="flex-1 pl-2">
               <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-2">Activity</label>
               <select
                 id="activity"
@@ -2850,7 +2850,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                     {activity}
                   </option>
                 ))}
-                <option value="others" className="text-[18px]">Others</option>
+                <option value="others" className="text-[24px]">Others</option>
               </select>
               {formData.activity === "others" && (
                 <input

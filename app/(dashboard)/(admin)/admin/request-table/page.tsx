@@ -179,10 +179,40 @@ export default function AdminRequestTablePage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // ignore time
   const allRequests = data?.data?.requests || [];
-  const pendingWithMeCount = allRequests.filter((r: UserRequest) => {
+  // console.log(allRequests);
+
+const TotalRequests = allRequests.filter((r: UserRequest) => {
     if (r.status !== "APPROVED" || r.isSanctioned) return false;
     if (!r.date) return false;
-    if (pendingDept && r.selectedDepartment !== pendingDept) return false;
+    if (pendingDept ) return false;
+    const reqDate = new Date(r.date);
+    reqDate.setHours(0, 0, 0, 0);
+    return reqDate > today;
+  }).length;
+
+  const ENGGRequest = allRequests.filter((r: UserRequest) => {
+    if (r.status !== "APPROVED" || r.isSanctioned) return false;
+    if (!r.date) return false;
+    if ( r.selectedDepartment !== "ENGG") return false;
+    const reqDate = new Date(r.date);
+    reqDate.setHours(0, 0, 0, 0);
+    return reqDate > today;
+  }).length;
+
+
+  const SandTRequest = allRequests.filter((r: UserRequest) => {
+    if (r.status !== "APPROVED" || r.isSanctioned) return false;
+    if (!r.date) return false;
+    if ( r.selectedDepartment !== "S&T") return false;
+    const reqDate = new Date(r.date);
+    reqDate.setHours(0, 0, 0, 0);
+    return reqDate > today;
+  }).length;
+
+  const TRDRequest = allRequests.filter((r: UserRequest) => {
+    if (r.status !== "APPROVED" || r.isSanctioned) return false;
+    if (!r.date) return false;
+    if ( r.selectedDepartment !== "TRD") return false;
     const reqDate = new Date(r.date);
     reqDate.setHours(0, 0, 0, 0);
     return reqDate > today;
@@ -444,38 +474,32 @@ export default function AdminRequestTablePage() {
           <div className="text-[24px] font-bold text-[#B22222] text-center py-3 tracking-wide">
             REQUESTS PENDING WITH ME
           </div>
-          <div className="italic text-center text-[24px] text-[#B22222] pb-2">
-            (Click to view and optimise)
+          <div className=" text-center text-[24px] text-[#B22222] pb-2">
+            Total {TotalRequests} NOS 
           </div>
           <div className="flex justify-center items-center gap-6 py-4">
             <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
-              <span>Nos.</span>
-              <span>{pendingWithMeCount}</span>
+              <span>ENGG</span>
+              <span className="bg-white rounded-full px-2 py-2 aspect-square">{ENGGRequest}</span>
             </div>
-            <Link
-              href="/admin/optimise-table"
-              className="bg-[#FFF0F0] border-2 border-[#FF6B6B] px-8 py-2 rounded text-[24px] font-bold text-[#B22222] hover:bg-[#FFD6D6] shadow transition"
-            >
-              Click to View
-            </Link>
-            <div className="relative">
-              <select
-                className="bg-[#FFB3B3] border-2 border-[#FF6B6B] px-3 py-2 rounded text-md font-semibold cursor-pointer focus:outline-none appearance-none pr-6 text-[#B22222]"
-                value={pendingDept}
-                onChange={e => setPendingDept(e.target.value)}
-              >
-                <option value="">DEPT</option>
-                <option value="ENGG">ENGG</option>
-                <option value="S&T">S&T</option>
-                <option value="TRD">TRD</option>
-              </select>
-              <div className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-[#B22222] text-xs">
-                ▼
-              </div>
+            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
+              <span>S&T</span>
+              <span className="bg-white rounded-full px-2 py-2 aspect-square">{SandTRequest}</span>
             </div>
+            <div className="flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 rounded border-2 border-[#FF6B6B] text-[20px]">
+              <span>TRD</span>
+              <span className="bg-white rounded-full px-2 py-2 aspect-square">{TRDRequest}</span>
+            </div>
+            
+            
+            
           </div>
+      <div className="mx-auto w-fit flex items-center gap-2 bg-[#FFB3B3] text-[#B22222] font-bold px-6 py-2 mb-4 rounded border-2 border-[#FF6B6B] text-[20px]">
+            Click To View
+        </div>
         </div>
       </div>
+
 
       {/* View Summary of Upcoming Blocks CTA */}
       <div className="flex justify-center mb-8">
