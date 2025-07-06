@@ -2765,10 +2765,23 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                   <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Site Location</span>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <input
-                      type="text"
+                      type="text" 
                       name="workLocationFrom"
                       value={formData.workLocationFrom || ""}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length === 4) {
+                          handleInputChange({
+                            target: {
+                              name: "workLocationFrom",
+                              value: value + "/"
+                            }
+                          } as React.ChangeEvent<HTMLInputElement>);
+                        } else {
+                          handleInputChange(e);
+                        }
+                      }}
+                      maxLength={7}
                       placeholder="From"
                       className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                       required
@@ -2778,7 +2791,20 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                       type="text"
                       name="workLocationTo"
                       value={formData.workLocationTo || ""}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length === 4) {
+                          handleInputChange({
+                            target: {
+                              name: "workLocationTo",
+                              value: value + "/"
+                            }
+                          } as React.ChangeEvent<HTMLInputElement>);
+                        } else {
+                          handleInputChange(e);
+                        }
+                      }}
+                      maxLength={7}
                       placeholder="To"
                       className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                       required
