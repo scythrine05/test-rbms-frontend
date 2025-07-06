@@ -1029,7 +1029,7 @@ export default function ManagerRequestTablePage() {
     <div className="min-h-screen bg-[#FFFDF5]">
       {/* Top Yellow Bar */}
       <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-        <span className="text-[24px] font-bold text-[#B57CF6] tracking-widest">
+        <span className="text-[9vw] min-[430px]:text-4xl font-bold text-[#B57CF6] tracking-widest">
           RBMS-MAS-DIVN
         </span>
       </div>
@@ -1043,9 +1043,9 @@ export default function ManagerRequestTablePage() {
 <div className="mx-4">
   
 <div className="flex justify-center mt-8 mb-6">
-  <div className="w-full max-w-2xl rounded-2xl border-4 border-[#FF6B6B] bg-gradient-to-b from-[#FFF0F0] to-[#FFE5E5] shadow-xl p-0 transform hover:scale-[1.02] transition-all duration-300">
+  <div className="w-full max-w-2xl rounded-2xl  bg-[#FFE5E5] shadow p-0 transform hover:scale-[1.02] transition-all duration-300">
     {/* Header */}
-    <div className="text-[28px] font-bold text-[#B22222] text-center py-4 tracking-wide border-b-2 border-[#FFB3B3]">
+    <div className="text-[28px] bg-[#FF8989] rounded-2xl font-bold text-black text-center py-3 tracking-wide ">
       REQUEST WITH ME
     </div>
     
@@ -1058,7 +1058,7 @@ export default function ManagerRequestTablePage() {
     <div className="flex justify-center py-4">
       <Link 
         href="/manage/pending-requests" 
-        className="mx-auto w-fit flex items-center gap-2 bg-gradient-to-r from-[#FF6B6B] to-[#FF8989] text-white font-bold px-8 py-3 mb-6 rounded-[50%] shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-[22px]"
+        className="mx-auto w-fit flex items-center gap-2 bg-[#FF8989] text-white font-bold px-8 py-3 mb-6 rounded-[50%] shadow hover:shadow-xl hover:scale-105 transition-all duration-300 text-[22px]"
       >
         Click To View
       </Link>
@@ -1072,16 +1072,16 @@ export default function ManagerRequestTablePage() {
         </button>
       </div> */}
 <div className="mx-4">
-<div className="flex justify-center mb-8 mt-2">
-  <div className="w-full max-w-6xl rounded-xl border-4 border-[#B57CF6] bg-[#F8F0FF] shadow-lg p-0">
+<div className="flex justify-center mb-8 mt-2 bg-[#E8E0FF] rounded-2xl">
+  <div className="w-full max-w-6xl rounded-t-2xl rounded-b-xl   p-0">
     {/* Header */}
-    <div className="bg-[#B57CF6] text-white text-center p-3 rounded-t-lg">
+    <div className="bg-[#B57CF6] text-white text-center p-3 rounded-xl">
       <h1 className="text-2xl font-bold tracking-wide">View Summary of Sanctioned Blocks</h1>
     </div>
     
     {/* Filters Section */}
-    <div className="px-6 py-4 bg-[#F0E6FF] border-b-2 border-[#B57CF6]">
-      <div className="flex flex-wrap gap-3 items-center justify-between bg-[#E8E0FF] p-3 rounded-lg border-2 border-[#B57CF6]">
+    <div className="px-6 py-4 ">
+      <div className="flex flex-wrap gap-3 items-center justify-between bg-[#F8F0FF] p-3 rounded-lg border-2 border-[#B57CF6]">
         {/* Date Range */}
         <div className="flex flex-col items-center gap-2">
           <input

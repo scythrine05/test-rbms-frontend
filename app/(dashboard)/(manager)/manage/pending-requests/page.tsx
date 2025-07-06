@@ -500,7 +500,7 @@ export default function PendingRequestsPage() {
     // Format helpers
     const formatDate = (dateString: string) => {
         try {
-            return format(new Date(dateString), "dd-MM-yyyy");
+            return format(new Date(dateString), "dd-MM-yy");
         } catch {
             return "Invalid date";
         }
@@ -611,7 +611,7 @@ export default function PendingRequestsPage() {
         <div className="min-h-screen bg-[#FFFDF5]">
             {/* Top Yellow Bar */}
             <div className="w-full bg-[#FFF86B] py-2 flex flex-col items-center">
-                <span className="text-4xl font-bold text-[#B57CF6] tracking-widest">RBMS-MAS-DIVN</span>
+                <span className="text-[9vw] min-[430px]:text-4xl  font-bold text-[#B57CF6] tracking-widest">RBMS-MAS-DIVN</span>
             </div>
 
             {/* Main Title on Light Blue */}
@@ -726,10 +726,10 @@ export default function PendingRequestsPage() {
 
             {/* Action Buttons */}
             <div className="mx-4 mt-6 mb-8 flex justify-center gap-4">
-                <button  onClick={handleDownloadExcel} className="bg-[#FFA07A] px-8 py-2 rounded-lg border-2 border-black font-bold">
+                <button  onClick={handleDownloadExcel} className="bg-[#FFA07A] px-8 py-2 rounded-[50%] border-2 border-black font-bold">
                     Download
                 </button>
-                <Link href="/manage/request-table" className="bg-[#90EE90] px-8 py-2 rounded-lg border-2 border-black font-bold">
+                <Link href="/manage/request-table" className="bg-[#90EE90] px-8 py-2 rounded-[50%] border-2 border-black font-bold">
                     Back
                 </Link>
             </div>
