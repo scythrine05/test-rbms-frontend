@@ -642,14 +642,14 @@ export default function PendingRequestsPage() {
                             disabled={bulkAcceptRequests.isPending}
                             className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
                         >
-                            {bulkAcceptRequests.isPending ? "Processing..." : `Approve Selected (${selectedRequests.size})`}
+                            {bulkAcceptRequests.isPending ? "Processing..." : `Forward (${selectedRequests.size})`}
                         </button>
                         <button
                             onClick={handleBulkReject}
                             disabled={bulkRejectRequests.isPending}
                             className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                         >
-                            {bulkRejectRequests.isPending ? "Processing..." : `Reject Selected (${selectedRequests.size})`}
+                            {bulkRejectRequests.isPending ? "Processing..." : `Return (${selectedRequests.size})`}
                         </button>
                     </div>
                 )}
