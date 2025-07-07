@@ -1135,7 +1135,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
         demandTimeTo:   formatTimeToDatetime(formData.date || "", formData.demandTimeTo || ""),
         processedLineSections: processedSections,
         adminAcceptance: false,
-        selectedDepo: formData.selectedDepo,
+        selectedDepo: formData.sntDisconnectionAssignTo || "", // Change as session?.user.depot
       };
 
       // ─── 7. Submit to backend ────────────────────────────────────────────
