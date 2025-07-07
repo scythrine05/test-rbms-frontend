@@ -699,7 +699,9 @@ const handleDownload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative pb-32">
+    <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative ">
+
+      
 
       {rejectRemarkPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -1094,8 +1096,10 @@ const handleDownload = () => {
       </div>
       )
       }
+
+
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2">
+      <div className="bg-[#FFFDF5] pb-2">
         <div className=" text-center">
           <h3 style={{ background: "#E6E6FA", color: "black" ,fontSize:"24px"}}>
             Customised Summary
@@ -1105,7 +1109,7 @@ const handleDownload = () => {
         <div className="max-w-[1366px] mx-auto px-2">
           <div className="flex justify-center items-center gap-4 mb-4  py-3 w-full rounded-lg">
             <div className="flex items-center gap-4 flex-wrap justify-center">
-                    <div className="flex items-center gap-4"> {/* Added this container */}
+                    <div className="flex items-center gap-1"> {/* Added this container */}
 
               <div className="flex flex-col">
                 <label className="text-[24px] font-medium mb-1 text-black">
