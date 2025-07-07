@@ -2259,7 +2259,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
               </button>
               <div className="mt-6">
                 <button
-                  className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-lg px-4 py-2 text-[24px] font-bold text-black"
+                  className="flex items-center gap-2 bg-lime-300 border-2 border-black rounded-[50%] px-4 py-2 text-[24px] font-bold text-black"
                   onClick={() => router.push("/dashboard")}
                 >
                   <svg
@@ -2291,7 +2291,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 </button>
               </div>
               <button
-                className="w-full rounded-2xl bg-[#f69697] text-white font-bold text-[24px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
+                className="w-full rounded-[50%] bg-[#f69697] text-white font-bold text-[24px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
                 onClick={() => signOut()}
               >
                 CLOSE THE APP AND LOGOUT
