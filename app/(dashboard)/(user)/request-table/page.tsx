@@ -1105,6 +1105,8 @@ const handleDownload = () => {
         <div className="max-w-[1366px] mx-auto px-2">
           <div className="flex justify-center items-center gap-4 mb-4  py-3 w-full rounded-lg">
             <div className="flex items-center gap-4 flex-wrap justify-center">
+                    <div className="flex items-center gap-4"> {/* Added this container */}
+
               <div className="flex flex-col">
                 <label className="text-[24px] font-medium mb-1 text-black">
                   From Date
@@ -1144,8 +1146,9 @@ const handleDownload = () => {
                   min={format(customDateRange.startDate, "yyyy-MM-dd")}
                 />
               </div>
+              </div>
 
-              <div className="w-fit text-center mt-2">
+              {/* <div className="w-fit text-center mt-2">
                 <h3 className="bg-[#E6E6FA] text-black text-[12px] font-medium px-3 py-1 rounded">
                   For printing the summary,
                   <br />
@@ -1158,7 +1161,24 @@ const handleDownload = () => {
                 className="mt-1 bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-[24px] font-bold text-black hover:bg-[#FFA726]"
               >
                 Download XLSX
-              </button>
+              </button> */}
+
+              <div className="flex flex-col items-center gap-1"> {/* Changed to column layout */}
+  <div className="w-full text-center">
+    <h3 className="bg-[#E6E6FA] text-black text-[18px] font-medium px-3 py-1 rounded mb-1">
+      For printing the summary,
+      <br />
+      click Download
+    </h3>
+  </div>
+
+  <button
+    onClick={handleDownload}
+    className="bg-[#FFB74D] border border-black px-6 py-1.5 rounded-full text-[24px] font-bold text-black hover:bg-[#FFA726]"
+  >
+    Download XLSX
+  </button>
+</div>
             </div>
           </div>
 
