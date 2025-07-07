@@ -1331,7 +1331,7 @@ export default function ManagerRequestTablePage() {
 
 <Link href="/manage/block-summary">
   <button className="w-fit px-16 rounded-full bg-[#ffd180] border-2 border-black py-6 text-2xl font-extrabold text-black text-center shadow-lg hover:scale-105 transition min-w-[320px]">
-    GENERATE REPORT
+    GENERATE REPORTS
   </button>
 </Link>
   <button
