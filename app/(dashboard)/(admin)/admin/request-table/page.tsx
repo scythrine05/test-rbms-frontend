@@ -470,7 +470,7 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
       </div>
 
       {/* Requests Pending With Me CTA */}
-      <div className="flex justify-center mt-8 mb-6 px-2">
+      <div className="flex justify-center mt-8 mb-6">
   <div className="w-full max-w-2xl rounded-2xl border-4 border-[#FF6B6B] bg-gradient-to-b from-[#FFF0F0] to-[#FFE5E5] shadow-xl p-0 transform hover:scale-[1.02] transition-all duration-300">
     <div className="text-[28px] font-bold text-[#B22222] text-center py-4 tracking-wide border-b-2 border-[#FFB3B3]">
       REQUESTS PENDING WITH ME
@@ -507,16 +507,16 @@ const TotalRequests = allRequests.filter((r: UserRequest) => {
 
 
       {/* View Summary of Upcoming Blocks CTA */}
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center mb-8 w-full">
         <div className="w-full max-w-4xl rounded-2xl border-4 border-[#00B4D8] bg-[#CAF0F8] shadow-lg p-0">
           <div className="text-[24px] font-bold text-[#0077B6] text-center py-3 tracking-wide">
             View Summary of Sanctioned Blocks
           </div>
-          <div className="px-6 pb-4">
+          <div className="px-2 pb-4">
             {/* Filters Row: All filters in a single row */}
             <div className="flex flex-wrap gap-2 items-center justify-between bg-[#D6F3FF] p-2 rounded-md border border-[#00B4D8] mb-2">
               {/* Date Range */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center flex-wrap gap-1">
                 <span className="bg-[#E6E6FA] px-2 py-1 border border-[#00B4D8] font-bold text-black rounded-l-md text-[24px]">
                   date
                 </span>
