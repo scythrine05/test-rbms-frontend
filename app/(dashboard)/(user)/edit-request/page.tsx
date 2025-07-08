@@ -132,7 +132,7 @@ export default function EditRequestsPage() {
                         <div className="text-[24px] font-bold text-black text-center py-2">MY UPCOMING BLOCK REQUESTS</div>
                         <div className="italic text-center text-[24px] text-black pb-2">(Click ID to edit or cancel)</div>
                         {/* Table */}
-                        <div className="overflow-x-auto rounded-xl mx-2 mb-2">
+                        <div className="  max-h-[430px] min-h-[100px] overflow-x-auto rounded-xl mx-2 mb-2">
                             <table className="w-full border border-black rounded-xl overflow-hidden text-[24px]">
                                 <thead>
                                     <tr className="bg-[#D6F3FF] text-black">
@@ -205,14 +205,14 @@ export default function EditRequestsPage() {
                 <div className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5] pb-2 z-10">
                     <div className="max-w-[1366px] mx-auto px-2">
                         <div className="flex justify-center gap-3 mb-2">
-                            <button
+                            {/* <button
                                 onClick={() => router.push('/dashboard')}
               className="text-center w-full max-w-60 rounded-[50%] bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
                             >
                                  Home
-                            </button>
+                            </button> */}
                             <button
-                                onClick={() => window.history.back()}
+                                onClick={() => (window.location.href = '/dashboard')}
               className="text-center w-full max-w-60 rounded-[50%] bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
                             >
                                  Back

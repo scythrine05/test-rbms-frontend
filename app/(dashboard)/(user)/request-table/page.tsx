@@ -1188,14 +1188,14 @@ const handleDownload = () => {
 
           {/* Footer Buttons */}
           <div className="flex justify-center gap-3 mb-2">
-            <Link
+            {/* <Link
               href="/dashboard"
               className="text-center w-full max-w-60 rounded-[50%] bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
 
               
             >
                Home
-            </Link>
+            </Link> */}
             <button
               onClick={() => window.history.back()}
               className="text-center w-full max-w-60 rounded-[50%] bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"

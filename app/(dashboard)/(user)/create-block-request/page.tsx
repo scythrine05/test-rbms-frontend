@@ -2291,7 +2291,7 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
                 </button>
               </div>
               <button
-                className="w-full rounded-[50%] bg-[#f69697] text-white font-bold text-[24px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
+                className="w-full   rounded-full bg-[#f69697] text-white font-bold text-[24px] py-4 tracking-wider border border-[#d43b1a] hover:bg-[#ff7c6a] transition"
                 onClick={() => signOut()}
               >
                 CLOSE THE APP AND LOGOUT
@@ -3202,31 +3202,6 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
             {formData.sntDisconnectionRequired && (
               <div className="flex flex-col items-center gap-2 mt-2 pb-2">
                 <div className="flex flex-row flex-wrap gap-1 w-full">
-                  {/* <span className="text-black font-bold text-2xl">
-                    Line From:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionLineFrom"
-                    value={formData.sntDisconnectionLineFrom || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <span className="text-black font-bold text-2xl">
-                    Line To:
-                  </span>
-                  <input
-                    type="text"
-                    name="sntDisconnectionLineTo"
-                    value={formData.sntDisconnectionLineTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  /> */}
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
   {/* Point No. Section */}
   <div className="w-full bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2">
@@ -3440,13 +3415,13 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
 
           {/* Submit Button */}
           <div className="flex justify-center mt-8 gap-4">
-            <button
+            {/* <button
               type="button"
               onClick={() => { window.location.href = "/dashboard"; }}
               className="w-full rounded-[50%] max-w-72 bg-violet-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#baffc9] transition"
             >
               Home
-            </button>
+            </button> */}
             <button
               type="button"
               className="w-full rounded-[50%] max-w-72 bg-cyan-200 text-black font-bold text-[24px] py-4 tracking-wider border border-[#b7b7d1] hover:bg-[#f0eaff] transition"

@@ -804,182 +804,234 @@ const handleDeleteSection = (indexToRemove: number) => {
                   </td>
                 </tr>
                 <tr>
-                  <td className=" font-semibold p-1.5 text-gray-900">
-                    PB Required
-                  </td>
-                  <td className="bg-white p-1.5" colSpan={3}>
-                    <div className="flex gap-4 justify-center">
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="true"
-                          checked={formData.powerBlockRequired === true}
-                          onChange={handleRadioChange}
-                        />
-                        <span className="font-semibold text-gray-900">YES</span>
-                      </label>
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="radio"
-                          name="powerBlockRequired"
-                          value="false"
-                          checked={formData.powerBlockRequired === false}
-                          onChange={handleRadioChange}
-                        />
-                        <span className="font-semibold text-gray-900">NO</span>
-                      </label>
-                    </div>
-                    {formData.powerBlockRequired && (
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            name="powerBlockRequirements"
-                            value="Gears Required"
-                            checked={
-                              formData.powerBlockRequirements?.includes(
-                                "Gears Required"
-                              ) || false
-                            }
-                            onChange={handleCheckboxChange}
-                            className="border border-gray-800 rounded"
-                          />
-                          <span className="font-semibold text-gray-900">
-                            Gears Required
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            name="powerBlockRequirements"
-                            value="Staff Required"
-                            checked={
-                              formData.powerBlockRequirements?.includes(
-                                "Staff Required"
-                              ) || false
-                            }
-                            onChange={handleCheckboxChange}
-                            className="border border-gray-800 rounded"
-                          />
-                          <span className="font-semibold text-gray-900">
-                            Staff Required
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900">
-                            Elementary Section:
-                          </span>
-                          <input
-                            type="text"
-                            name="elementarySection"
-                            value={formData.elementarySection || ""}
-                            onChange={handleInputChange}
-                            className="p-1 border border-gray-800 rounded bg-white" style={{color:"black"}}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+  <td className="font-semibold p-1.5 text-gray-900">
+    PB Required
+  </td>
+  <td className="bg-white p-1.5" colSpan={3}>
+    <div className="flex gap-4 justify-center">
+      <label className="flex items-center gap-1">
+        <input
+          type="radio"
+          name="powerBlockRequired"
+          value="true"
+          checked={formData.powerBlockRequired === true}
+          onChange={handleRadioChange}
+        />
+        <span className="font-semibold text-gray-900">YES</span>
+      </label>
+      <label className="flex items-center gap-1">
+        <input
+          type="radio"
+          name="powerBlockRequired"
+          value="false"
+          checked={formData.powerBlockRequired === false}
+          onChange={handleRadioChange}
+        />
+        <span className="font-semibold text-gray-900">NO</span>
+      </label>
+    </div>
+    
+    {formData.powerBlockRequired && (
+      <div className="w-full mt-2 bg-indigo-200 rounded-2xl">
+        <div className="flex flex-col gap-2 mt-2 pb-2 p-2">
+          <div className="flex flex-row flex-wrap gap-1 items-center">
+            <input
+              type="number"
+              name="powerBlockKmFrom"
+              value={formData.powerBlockKmFrom || ""}
+              onChange={handleInputChange}
+              placeholder="KM From"
+              required
+              className="flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-20 text-lg"
+            />
+            <span className="text-black font-bold text-lg">to</span>
+            <input
+              type="number"
+              name="powerBlockKmTo"
+              value={formData.powerBlockKmTo || ""}
+              onChange={handleInputChange}
+              placeholder="KM To"
+              required
+              className="flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-20 text-lg"
+            />
+            <input
+              type="text"
+              name="powerBlockRoad"
+              value={formData.powerBlockRoad || ""}
+              onChange={handleInputChange}
+              placeholder="Road No."
+              required
+              className="flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-24 text-lg"
+            />
+          </div>
+          
+          {/* <div className="w-full">
+            <span className="text-black font-bold text-lg">Assign To</span>
+            <select
+              name="powerBlockDisconnectionAssignTo"
+              value={formData.powerBlockDisconnectionAssignTo || ""}
+              onChange={(e) => setFormData({
+                ...formData,
+                powerBlockDisconnectionAssignTo: e.target.value
+              })}
+              className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black py-1 px-1 w-full text-lg"
+              required
+            >
+              <option value="" disabled>Select Depo</option>
+              {depot[formData.selectedSection]?.["TRD"]?.map((depotOption, index) => (
+                <option key={index} value={depotOption}>
+                  {depotOption}
+                </option>
+              ))}
+            </select>
+          </div> */}
+        </div>
+      </div>
+    )}
+  </td>
+</tr>
 
-                <tr>
-                  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
-                    S&T Disconnection Required
-                  </td>
-                  <td className="bg-purple-200 p-1.5" colSpan={3}>
-                    <div className="flex gap-4 justify-center">
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="radio"
-                          name="sntDisconnectionRequired"
-                          value="true"
-                          checked={formData.sntDisconnectionRequired === true}
-                          onChange={handleRadioChange}
-                        />
-                        <span className="font-semibold text-gray-900">YES</span>
-                      </label>
-                      <label className="flex items-center gap-1">
-                        <input
-                          type="radio"
-                          name="sntDisconnectionRequired"
-                          value="false"
-                          checked={formData.sntDisconnectionRequired === false}
-                          onChange={handleRadioChange}
-                        />
-                        <span className="font-semibold text-gray-900">NO</span>
-                      </label>
-                    </div>
-                    {formData.sntDisconnectionRequired && (
-                      <div className="mt-2 space-y-3">
-                        <div className="flex flex-wrap gap-4 justify-center">
-                          <label className="flex items-center gap-1">
-                            <input
-                              type="checkbox"
-                              name="sntDisconnectionRequirements"
-                              value="Gears Required"
-                              checked={
-                                formData.sntDisconnectionRequirements?.includes(
-                                  "Gears Required"
-                                ) || false
-                              }
-                              onChange={handleCheckboxChange}
-                              className="w-4 h-4 border border-gray-800 rounded accent-blue-600"
-                            />
-                            <span className="font-semibold text-gray-900">
-                              Gears Required
-                            </span>
-                          </label>
-                          <label className="flex items-center gap-1">
-                            <input
-                              type="checkbox"
-                              name="sntDisconnectionRequirements"
-                              value="Staff Required"
-                              checked={
-                                formData.sntDisconnectionRequirements?.includes(
-                                  "Staff Required"
-                                ) || false
-                              }
-                              onChange={handleCheckboxChange}
-                              className="w-4 h-4 border border-gray-800 rounded accent-blue-600"
-                            />
-                            <span className="font-semibold text-gray-900">
-                              Staff Required
-                            </span>
-                          </label>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold text-gray-900">
-                              Line From:
-                            </span>
-                            <input
-                              type="text"
-                              name="sntDisconnectionLineFrom"
-                              value={formData.sntDisconnectionLineFrom || ""}
-                              onChange={handleInputChange}
-                              className="w-full p-1.5 border border-gray-800 rounded bg-white" style={{color:"black"}}
-                              placeholder="Enter starting point"
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold text-gray-900">
-                              Line To:
-                            </span>
-                            <input
-                              type="text"
-                              name="sntDisconnectionLineTo"
-                              value={formData.sntDisconnectionLineTo || ""}
-                              onChange={handleInputChange}
-                              className="w-full p-1.5 border border-gray-800 rounded bg-white" style={{color:"black"}}
-                              placeholder="Enter ending point"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+ <tr>
+  <td className="bg-purple-200 font-semibold p-1.5 text-gray-900">
+    S&T Required
+  </td>
+  <td className="bg-purple-200 p-1.5" colSpan={3}>
+    <div className="flex gap-4 justify-center">
+      <label className="flex items-center gap-1">
+        <input
+          type="radio"
+          name="sntDisconnectionRequired"
+          value="true"
+          checked={formData.sntDisconnectionRequired === true}
+          onChange={handleRadioChange}
+        />
+        <span className="font-semibold text-gray-900">YES</span>
+      </label>
+      <label className="flex items-center gap-1">
+        <input
+          type="radio"
+          name="sntDisconnectionRequired"
+          value="false"
+          checked={formData.sntDisconnectionRequired === false}
+          onChange={handleRadioChange}
+        />
+        <span className="font-semibold text-gray-900">NO</span>
+      </label>
+    </div>
+
+    {formData.sntDisconnectionRequired && (
+      <div className="mt-4 p-2 rounded bg-white space-y-4">
+   
+     
+
+        <div>
+          <span className="block text-lg font-bold text-black mb-2">Points</span>
+          {formData.sntDisconnectionRequirements?.map((point, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={point}
+                onChange={(e) => {
+                  const newPoints = [...formData.sntDisconnectionRequirements];
+                  newPoints[index] = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    sntDisconnectionRequirements: newPoints
+                  }));
+                }}
+                placeholder={`Point ${index + 1}`}
+                className="border border-gray-500 rounded p-1 w-full text-black"
+              />
+              {formData.sntDisconnectionRequirements.length > 1 && (
+                <button
+                  type="button"
+                  className="text-red-600 font-bold"
+                  onClick={() => {
+                    const newPoints = formData.sntDisconnectionRequirements
+                      .filter((_, i) => i !== index);
+                    setFormData(prev => ({
+                      ...prev,
+                      sntDisconnectionRequirements: newPoints
+                    }));
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            className="text-blue-600 text-sm mt-1"
+            onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                sntDisconnectionRequirements: [
+                  ...(prev.sntDisconnectionRequirements || []),
+                  ""
+                ]
+              }));
+            }}
+          >
+            + Add Point
+          </button>
+        </div>
+
+        {/* Signals - using sntDisconnectionSignalNo data */}
+        <div>
+          <span className="block text-lg font-bold text-black mb-2">Signals</span>
+          {(formData.sntDisconnectionSignalNo?.split(',') || ['']).map((signal : any, index :any, arr:any) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={signal}
+                onChange={(e) => {
+                  const newSignals = [...arr];
+                  newSignals[index] = e.target.value;
+                  setFormData(prev => ({
+                    ...prev,
+                    sntDisconnectionSignalNo: newSignals.join(',')
+                  }));
+                }}
+                placeholder={`Signal ${index + 1}`}
+                className="border border-gray-500 rounded p-1 w-full text-black"
+              />
+              {arr.length > 1 && (
+                <button
+                  type="button"
+                  className="text-red-600 font-bold"
+                  onClick={() => {
+                    const newSignals = arr.filter((_: any, i: any) => i !== index);
+                    setFormData(prev => ({
+                      ...prev,
+                      sntDisconnectionSignalNo: newSignals.join(',')
+                    }));
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            className="text-blue-600 text-sm mt-1"
+            onClick={() => {
+              const currentSignals = formData.sntDisconnectionSignalNo?.split(',') || [''];
+              setFormData(prev => ({
+                ...prev,
+                sntDisconnectionSignalNo: [...currentSignals, ''].join(',')
+              }));
+            }}
+          >
+            + Add Signal
+          </button>
+        </div>
+      </div>
+    )}
+  </td>
+</tr>
+
               </tbody>
             </table>
 
@@ -997,19 +1049,20 @@ const handleDeleteSection = (indexToRemove: number) => {
 
           <div className="flex justify-between gap-2 mt-4">
             <button
-              className="flex items-center gap-1 bg-lavender border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900"style={{color:"black"}}
-              onClick={() => (window.location.href = "/dashboard")}
+              className="flex items-center gap-1 bg-lavender border-2 border-gray-800 rounded-[50%] px-4 py-2 text-lg font-bold text-gray-900"style={{color:"black"}}
+              onClick={() => (window.location.href = "/edit-request")}
             >
               Back
-            </button>
+            </button>  
+          <button
+  className="flex items-center gap-1 bg-lime-300 border-2 border-gray-800 rounded-[50%] px-6 py-2 text-lg font-bold text-gray-900 hover:bg-lime-400 transition-colors"
+  style={{ color: "black" }}
+  onClick={() => (window.location.href = "/dashboard")}
+>
+  Home
+</button>
             <button
-              className="flex items-center gap-1 bg-lime-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900" style={{color:"black"}}
-              onClick={() => (window.location.href = "/dashboard")}
-            >
-              Home
-            </button>
-            <button
-              className="flex items-center gap-1 bg-orange-300 border-2 border-gray-800 rounded-lg px-4 py-2 text-lg font-bold text-gray-900" style={{color:"black"}}
+              className="flex items-center gap-1 bg-orange-300 border-2 border-gray-800 rounded-[50%] px-4 py-2 text-lg font-bold text-gray-900" style={{color:"black"}}
               onClick={() => (window.location.href = "/auth/logout")}
             >
               Logout
