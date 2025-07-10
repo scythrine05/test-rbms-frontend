@@ -35,11 +35,13 @@ export function useDeleteUserRequest() {
  */
 export function useUpdateOtherRequest() {
     return useMutation({
-        mutationFn: ({ id, accept, disconnectionRequestRejectRemarks }: { 
+        mutationFn: ({ id, accept, disconnectionRequestRejectRemarks,userDepartement,mobileView }: { 
             id: string; 
             accept: boolean; 
             disconnectionRequestRejectRemarks?: string;
+            userDepartement?:string;
+              mobileView?: string;
         }) =>
-            userRequestService.updateOtherRequest(id, accept, disconnectionRequestRejectRemarks),
+            userRequestService.updateOtherRequest(id, accept, disconnectionRequestRejectRemarks,userDepartement,mobileView),
     });
 }

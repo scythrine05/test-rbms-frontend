@@ -373,17 +373,25 @@ export default function RequestTablePage() {
   const userName = session?.user?.name || "User";
   const userRole = session?.user?.role || "USER";
   const selectedDepo = session?.user?.depot || "";
+  const userDepartement=session?.user?.department||""
 
   const [rejectRemarkPopup, setRejectRemarkPopup] = useState(false);
   const [rejectRemarks, setRejectRemarks] = useState("");
   const [rejectReqId, setRejectReqId] = useState("");
-
+const [rejectReason, setRejectReason] = useState("");
+const [showRejectReasonPopup, setShowRejectReasonPopup] = useState(false);
+const [requestToReject, setRequestToReject] = useState<{
+  id: string;
+  userDepartement: string;
+  mobileView: string;
+} | null>(null);
   const { data: otherRequestsData, refetch } = useGetOtherRequests(
     selectedDepo,
     currentPage,
     pageSize,
     formattedStartDate,
-    formattedEndDate
+    formattedEndDate,
+    userDepartement,
   );
   // Map frontend roles to backend roles
   const getBackendRole = (role: string) => {
@@ -395,12 +403,14 @@ export default function RequestTablePage() {
     }
   };
 
-  const handleStatusUpdate = (id: string, accept: boolean) => {
+  const handleStatusUpdate = (id: string, accept: boolean,userDepartement:string,mobileView:string) => {
     if (accept) {
       updateOtherRequest(
         {
           id,
           accept,
+          userDepartement,
+          mobileView
         },
         {
           onSuccess: () => {
@@ -410,11 +420,38 @@ export default function RequestTablePage() {
         }
       );
     } else {
-      // If rejecting, show the dialog to enter remarks
-      setSelectedRequestId(id);
-      setShowRejectDialog(true);
+    setRequestToReject({ id, userDepartement, mobileView });
+    setShowRejectReasonPopup(true);
     }
   };
+
+
+
+  const handleConfirmReject = () => {
+  if (!requestToReject || !rejectReason.trim()) return;
+  
+  updateOtherRequest(
+    {
+      id: requestToReject.id,
+      accept: false,
+      userDepartement: requestToReject.userDepartement,
+      mobileView: requestToReject.mobileView,
+      disconnectionRequestRejectRemarks: rejectReason // Make sure your API accepts this field
+    },
+    {
+      onSuccess: () => {
+        refetch();
+        setShowRejectReasonPopup(false);
+        setRejectReason("");
+        setRequestToReject(null);
+        toast.success("Request rejected successfully");
+      },
+      onError: () => {
+        toast.error("Failed to reject request");
+      }
+    }
+  );
+};
   // Fetch requests data
   const { data, isLoading, error } = useQuery({
     queryKey: [
@@ -701,7 +738,39 @@ const handleDownload = () => {
   return (
     <div className="min-h-screen bg-[#FFFDF5] max-w-[1366px] mx-auto px-2 relative ">
 
-      
+      {showRejectReasonPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md border border-gray-300">
+      <h2 className="text-lg font-bold mb-2 text-black">Reason for Rejection</h2>
+      <textarea
+        className="w-full border border-gray-400 rounded p-2 mb-4 text-black"
+        rows={3}
+        value={rejectReason}
+        onChange={(e) => setRejectReason(e.target.value)}
+        placeholder="Please specify the reason for rejection..."
+        autoFocus
+      />
+      <div className="flex justify-end gap-2">
+        <button
+          className="px-4 py-1 rounded bg-gray-200 text-black font-semibold"
+          onClick={() => {
+            setShowRejectReasonPopup(false);
+            setRejectReason("");
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          className="px-4 py-1 rounded bg-red-600 text-white font-semibold"
+          disabled={!rejectReason.trim() || isMutating}
+          onClick={handleConfirmReject}
+        >
+          {isMutating ? "Rejecting..." : "Confirm Reject"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {rejectRemarkPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -876,19 +945,73 @@ const handleDownload = () => {
                         </>
                       ) : (
                         <>
-                        {
-                          request.userResponse !== null ? 
-                          (
-                          <div className="px-2 py-1 bg-yellow-100 text-yellow-800 mx-auto">
-                            {request.userResponse}
-                          </div>
-                          )
-                          :
-                          (
-                            <span className="text-gray-500">Pending with Dept controller</span>
-                          )
-                        }
-                        </>
+                        
+  {(() => {
+    if (request.managerAcceptance === false&&request.remarkByManager===null ) {
+      return <span className="text-gray-500">with Dept controller</span>;
+    } 
+
+    else if (request.managerAcceptance === false&&request.remarkByManager!==null) {
+      return <span className="text-gray-500">return to applicant by Dept controller</span>;
+    }
+    else if (request.managerAcceptance === true && request.sigActionsNeeded === false&&request.sigResponse===""&&request.oheResponse===""&&request.trdActionsNeeded===false&&request.DisconnAcceptance!=="ACCEPTED"&&request.sntDisconnectionRequired===true&&request.powerBlockRequired===true) {
+      return <span className="text-gray-500">with s&t dsiconnection and with trd disconnection</span>;
+    } 
+      
+    else if (request.managerAcceptance === true && request.sigActionsNeeded === false&&request.sigResponse===""&&request.sntDisconnectionRequired===true) {
+      return <span className="text-gray-500">with s&t for disconnection</span>;
+    }
+    else if (request.managerAcceptance === true &&request.oheResponse===""&&request.trdActionsNeeded===false&&request.powerBlockRequired===true) {
+      return <span className="text-gray-500">with trd for disconnection</span>;
+    }
+    
+    else if (request.managerAcceptance === true &&request.sigActionsNeeded === true&&request.isSanctioned===false&&request.optimizeStatus===false) {
+      return <span className="text-green-500">with optg</span>;
+    }
+
+
+     else if (request.managerAcceptance === true &&request.trdActionsNeeded === true&&request.isSanctioned===false&&request.optimizeStatus===false) {
+      return <span className="text-green-500">with optg</span>;
+    }
+
+     else if (request.managerAcceptance === true &&request.trdActionsNeeded === true&&request.sigActionsNeeded === true&&request.isSanctioned===false&&request.optimizeStatus===false) {
+      return <span className="text-green-500">with optg</span>;
+    }
+
+
+
+
+ else if (request.managerAcceptance === true && request.sigActionsNeeded === false&&request.sigResponse!==""&&request.sntDisconnectionRequired===true) {
+      return <span className="text-gray-500">return to applicant by s&t</span>;
+    }
+
+
+
+ else if (request.managerAcceptance === false && request.sigActionsNeeded === false&&request.sigResponse!==""&&request.sntDisconnectionRequired===true) {
+      return <span className="text-gray-500">return to applicant by s&t</span>;
+    }
+
+    else if (request.managerAcceptance === true &&request.oheResponse!==""&&request.trdActionsNeeded===false&&request.powerBlockRequired===true) {
+      return <span className="text-gray-500">return to applicant by s&t</span>;
+    }
+
+
+      else if (request.managerAcceptance === false &&request.oheResponse!==""&&request.trdActionsNeeded===false&&request.powerBlockRequired===true) {
+      return <span className="text-gray-500">return to applicant by s&t</span>;
+    }
+
+     else if (request.managerAcceptance === false && request.sigActionsNeeded === false&&request.sigResponse!==""&&request.oheResponse!==""&&request.trdActionsNeeded===false) {
+      return <span className="text-gray-500">{request.sigActionsNeeded === false&&request.sigResponse!==""?"return to applicant by s&t":"return to applicant by trd"}</span>;
+    }
+    else if(request.adminRequestStatus==="REJECTED"){
+      return <span className="text-green-500">return to applicant by optg</span>;
+    }
+    //   else if(request.userResponse!=="ACCEPTED"&&request.userResponse!==""){
+    //   return <span className="text-red-400">return to optg by remarks</span>;
+    // }
+  })()}
+</>
+                        
                       )}
                     </td>
                   </tr>
@@ -1021,7 +1144,7 @@ const handleDownload = () => {
                           <div className="flex gap-2 justify-center">
                             <button
                               onClick={() =>
-                                handleStatusUpdate(request.id, true)
+                                handleStatusUpdate(request.id, true,userDepartement,"mobileView")
                               }
                               disabled={isMutating}
                               className="px-3 py-1 bg-green-50 hover:bg-green-100 text-green-700 text-xs rounded-md border border-green-200 flex items-center transition-colors"
@@ -1041,7 +1164,7 @@ const handleDownload = () => {
                             </button>
                             <button
                               onClick={() =>
-                                handleStatusUpdate(request.id, false)
+                                handleStatusUpdate(request.id, false,userDepartement,"mobileView")
                               }
                               disabled={isMutating}
                               className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 text-xs rounded-md border border-red-200 flex items-center transition-colors"

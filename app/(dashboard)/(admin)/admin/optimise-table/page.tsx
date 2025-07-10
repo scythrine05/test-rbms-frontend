@@ -2060,15 +2060,100 @@ const pendingRequests = (data?.data?.requests || []).filter((request: UserReques
 
 console.log("pendingRequests.length", pendingRequests.length);
   // Group and sort
-  const urgentRequests = pendingRequests
-    .filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY")
+  // const urgentRequests = pendingRequests
+  //   .filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY")
+  //   .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // const corridorRequestsFiltered = pendingRequests
+  //   .filter((r: UserRequest) => r.corridorType === "Corridor" || r.corridorType === "Corridor Block")
+  //   .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // const nonCorridorRequestsFiltered = pendingRequests
+  //   .filter((r: UserRequest) => r.corridorType === "Outside Corridor" || r.corridorType === "Non-Corridor Block")
+  //   .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+
+const urgentRequests = pendingRequests
+    .filter((r: UserRequest) => {
+        // First check if it's an urgent request
+        const isUrgent = r.corridorType === "Urgent Block" || r.workType === "EMERGENCY";
+        if (!isUrgent) return false;
+
+        // Handle cases where both flags are true
+        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+            return r.trdActionsNeeded && r.sigActionsNeeded;
+        }
+
+        // Handle powerBlockRequired case
+        if (r.powerBlockRequired) {
+            return r.trdActionsNeeded;
+        }
+
+        // Handle sntDisconnectionRequired case
+        if (r.sntDisconnectionRequired) {
+            return r.sigActionsNeeded;
+        }
+
+        // If neither special flag is true, just return the urgent status
+        return true;
+    })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const corridorRequestsFiltered = pendingRequests
-    .filter((r: UserRequest) => r.corridorType === "Corridor" || r.corridorType === "Corridor Block")
+
+
+
+const corridorRequestsFiltered = pendingRequests
+    .filter((r: UserRequest) => {
+        // First check if it's an urgent request
+        const isCorridor = r.corridorType === "Corridor" ||r.corridorType === "Corridor Block";
+        if (!isCorridor) return false;
+
+        // Handle cases where both flags are true
+        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+            return r.trdActionsNeeded && r.sigActionsNeeded;
+        }
+
+        // Handle powerBlockRequired case
+        if (r.powerBlockRequired) {
+            return r.trdActionsNeeded;
+        }
+
+        // Handle sntDisconnectionRequired case
+        if (r.sntDisconnectionRequired) {
+            return r.sigActionsNeeded;
+        }
+
+        // If neither special flag is true, just return the urgent status
+        return true;
+    })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const nonCorridorRequestsFiltered = pendingRequests
-    .filter((r: UserRequest) => r.corridorType === "Outside Corridor" || r.corridorType === "Non-Corridor Block")
+
+
+
+
+const nonCorridorRequestsFiltered = pendingRequests
+    .filter((r: UserRequest) => {
+        // First check if it's an urgent request
+        const isNoncorridor = r.corridorType === "Outside Corridor" ||r.corridorType === "Non-Corridor Block";
+        if (!isNoncorridor) return false;
+
+        // Handle cases where both flags are true
+        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+            return r.trdActionsNeeded && r.sigActionsNeeded;
+        }
+
+        // Handle powerBlockRequired case
+        if (r.powerBlockRequired) {
+            return r.trdActionsNeeded;
+        }
+
+        // Handle sntDisconnectionRequired case
+        if (r.sntDisconnectionRequired) {
+            return r.sigActionsNeeded;
+        }
+
+        // If neither special flag is true, just return the urgent status
+        return true;
+    })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
 
   const [isOptimizeDialogOpen, setIsOptimizeDialogOpen] = useState(false);
   const [isUrgentRequests, setIsUrgentRequests] = useState<boolean>(false);

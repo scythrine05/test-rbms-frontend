@@ -102,13 +102,15 @@ export const userRequestService = {
     page: number = 1,
     limit: number = 10,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    userDepartement?:string
   ): Promise<RequestResponse> => {
     const queryParams = new URLSearchParams();
     queryParams.append('page', page.toString());
     queryParams.append('limit', limit.toString());
     if (startDate) queryParams.append('startDate', startDate);
     if (endDate) queryParams.append('endDate', endDate);
+    if (userDepartement) queryParams.append('userDepartement', userDepartement);
 
     const response = await axiosInstance.get<RequestResponse>(
       `/api/user-request/other/${selectedDepo}?${queryParams.toString()}`
@@ -124,22 +126,54 @@ export const userRequestService = {
    * @param disconnectionRequestRejectRemarks - Remarks for rejection (required when rejecting)
    * @returns Promise with the response
    */
-  updateOtherRequest: async (
-    id: string,
-    accept: boolean,
-    disconnectionRequestRejectRemarks?: string
-  ): Promise<UserRequestResponse> => {
-    const url = `/api/user-request/other/${id}?accept=${accept}`;
+  // updateOtherRequest: async (
+  //   id: string,
+  //   accept: boolean,
+  //   disconnectionRequestRejectRemarks?: string
+  // ): Promise<UserRequestResponse> => {
+  //   const url = `/api/user-request/other/${id}?accept=${accept}`;
 
-    // If rejecting, include the rejection remarks in the request body
-    const body =
-      !accept && disconnectionRequestRejectRemarks
-        ? { disconnectionRequestRejectRemarks }
-        : undefined;
+  //   // If rejecting, include the rejection remarks in the request body
+  //   const body =
+  //     !accept && disconnectionRequestRejectRemarks
+  //       ? { disconnectionRequestRejectRemarks }
+  //       : undefined;
 
-    const response = await axiosInstance.put<UserRequestResponse>(url, body);
-    return response.data;
-  },
+  //   const response = await axiosInstance.put<UserRequestResponse>(url, body);
+  //   return response.data;
+  // },
+
+
+updateOtherRequest: async (
+  id: string,
+  accept: boolean,
+  disconnectionRequestRejectRemarks?: string,
+  userDepartement?: string,
+  mobileView?: string
+): Promise<UserRequestResponse> => {
+  const url = `/api/user-request/other/${id}?accept=${accept}`;
+
+  // Prepare request body based on parameters
+  const body: any = {};
+  
+  if (!accept && disconnectionRequestRejectRemarks) {
+    body.disconnectionRequestRejectRemarks = disconnectionRequestRejectRemarks;
+  }
+  
+  if (userDepartement) {
+    body.userDepartement = userDepartement;
+  }
+
+  if (mobileView) {
+    body.mobileView = mobileView;
+  }
+
+  const response = await axiosInstance.put<UserRequestResponse>(
+    url, 
+    Object.keys(body).length > 0 ? body : undefined
+  );
+  return response.data;
+},
 
   /**
    * Get user requests with pagination and date filtering
