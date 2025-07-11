@@ -796,6 +796,28 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
     return targetDate >= currentWeekMonday && targetDate <= currentWeekSunday;
   };
 
+//new change
+const isDateInWeekAfterNext = (dateString: string): boolean => {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const targetDate = new Date(dateString + "T00:00:00Z");
+  targetDate.setUTCHours(0, 0, 0, 0);
+
+  const nextWeekSunday = new Date(today);
+  nextWeekSunday.setUTCDate(today.getUTCDate() + (7 - today.getUTCDay() + 7));
+
+  const weekAfterNextMonday = new Date(nextWeekSunday);
+  weekAfterNextMonday.setUTCDate(nextWeekSunday.getUTCDate() + 1);
+
+  const weekAfterNextSunday = new Date(weekAfterNextMonday);
+  weekAfterNextSunday.setUTCDate(weekAfterNextMonday.getUTCDate() + 6);
+
+  return targetDate >= weekAfterNextMonday && targetDate <= weekAfterNextSunday;
+};
+
+
+
   const isWithinNextTwoDays = (dateString: string): boolean => {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -837,38 +859,72 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
     return (dayOfWeek === 4 && hour >= 22) || dayOfWeek > 4;
   };
 
+  // const getCorridorTypeRestrictions = (
+  //   dateString: string
+  // ): {
+  //   urgentOnly: boolean;
+  //   urgentAllowed: boolean;
+  //   message: string;
+  // } => {
+  //   if (!dateString) {
+  //     return { urgentOnly: false, urgentAllowed: false, message: "" };
+  //   }
+
+  //   const isUrgentTimeframe = isWithinNextTwoDays(dateString);
+
+  //   const isNextWeek = isDateInNextWeek(dateString);
+
+  //   const pastThursdayCutoff = isPastThursdayCutoff();
+
+  //   const urgentAllowed = isUrgentTimeframe;
+
+  //   const urgentOnly = isUrgentTimeframe || (isNextWeek && pastThursdayCutoff);
+
+  //   let message = "";
+  //   if (isUrgentTimeframe) {
+  //     message =
+  //       "Dates within today and next 2 days must be Urgent Block requests.";
+  //   } else if (isNextWeek && pastThursdayCutoff) {
+  //     message =
+  //       "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+  //   }
+
+  //   return { urgentOnly, urgentAllowed, message };
+  // };
+
+
   const getCorridorTypeRestrictions = (
-    dateString: string
-  ): {
-    urgentOnly: boolean;
-    urgentAllowed: boolean;
-    message: string;
-  } => {
-    if (!dateString) {
-      return { urgentOnly: false, urgentAllowed: false, message: "" };
-    }
+  dateString: string
+): {
+  urgentOnly: boolean;
+  urgentAllowed: boolean;
+  message: string;
+} => {
+  if (!dateString) {
+    return { urgentOnly: false, urgentAllowed: false, message: "" };
+  }
 
-    const isUrgentTimeframe = isWithinNextTwoDays(dateString);
+  const isUrgentTimeframe = isWithinNextTwoDays(dateString);
+  const isNextWeek = isDateInNextWeek(dateString);
+  const isWeekAfterNext = isDateInWeekAfterNext(dateString); // NEW
+  const pastThursdayCutoff = isPastThursdayCutoff();
 
-    const isNextWeek = isDateInNextWeek(dateString);
+  const urgentAllowed = isUrgentTimeframe;
+  // Only apply cutoff to Week 2 (week after next)
+  const urgentOnly = isUrgentTimeframe || 
+    (isWeekAfterNext && pastThursdayCutoff);
 
-    const pastThursdayCutoff = isPastThursdayCutoff();
+  let message = "";
+  if (isUrgentTimeframe) {
+    message = "Dates within today and next 2 days must be Urgent Block requests.";
+  } else if (isWeekAfterNext && pastThursdayCutoff) {
+    message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+  }
 
-    const urgentAllowed = isUrgentTimeframe;
+  return { urgentOnly, urgentAllowed, message };
+};
 
-    const urgentOnly = isUrgentTimeframe || (isNextWeek && pastThursdayCutoff);
 
-    let message = "";
-    if (isUrgentTimeframe) {
-      message =
-        "Dates within today and next 2 days must be Urgent Block requests.";
-    } else if (isNextWeek && pastThursdayCutoff) {
-      message =
-        "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
-    }
-
-    return { urgentOnly, urgentAllowed, message };
-  };
 
   const isBlockedCurrentWeekDate = (dateString: string): boolean => {
     const today = new Date();
