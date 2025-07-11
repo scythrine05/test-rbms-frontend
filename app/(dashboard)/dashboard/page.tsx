@@ -7,7 +7,8 @@ import UserQuickLinks from "@/app/(dashboard)/(user)/quick-links/component";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { FaHome } from "react-icons/fa";
-
+import { useQuery } from "@tanstack/react-query";
+import { userRequestService } from "@/app/service/api/user-request";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession({
@@ -16,6 +17,19 @@ export default function DashboardPage() {
       window.location.href = "/auth/login";
     },
   });
+
+
+ const { data: requestsData } = useQuery({
+    queryKey: ["user-requests"],
+    queryFn: () => userRequestService.getUserRequests(1, 10), // First page, 10 items
+    enabled: !!session?.user, // Only fetch when user is authenticated
+  });
+
+const hasInProgressBlock =requestsData?.data?.requests?.find(
+  (request:any) => request.overAllStatus?.toLowerCase() === "inprogress"
+);
+
+
   if (status === "loading") {
     return <Loader name="dashboard" />;
   }
@@ -57,6 +71,16 @@ export default function DashboardPage() {
           <a href="/edit-request" className="w-full rounded-full bg-[#aee6f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">EDIT/CANCEL PREVIOUS BLOCK REQUESTS</a>
           <a href="/request-table" className="w-full rounded-full bg-[#c7c7f7] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">SUMMARY OF MY BLOCK REQUESTS</a>
           <a href={`https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=MAS-GDR`} className="w-full rounded-full bg-[#a6f7a6] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">AVAIL BLOCK AT SITE</a>
+
+{hasInProgressBlock && (
+  <a
+    href=""
+    className="w-full rounded-full bg-[#f69697] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition"
+  >
+    Block under progress
+  </a>
+)}
+
 
           <a href="/generate-reports" className="w-full rounded-full bg-[#ffd180] border border-black py-6 text-xl font-extrabold text-black text-center shadow hover:scale-105 transition">GENERATE REPORTS</a>
         </div>

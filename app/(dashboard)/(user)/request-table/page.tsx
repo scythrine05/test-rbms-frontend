@@ -945,8 +945,8 @@ const handleDownload = () => {
                         </>
                       ) : (
                         <>
-                        
-  {(() => {
+                         <span className="text-gray-500">{request.overAllStatus}</span>
+  {/* {(() => {
     if (request.managerAcceptance === false&&request.remarkByManager===null ) {
       return <span className="text-gray-500">with Dept controller</span>;
     } 
@@ -1009,7 +1009,7 @@ const handleDownload = () => {
     //   else if(request.userResponse!=="ACCEPTED"&&request.userResponse!==""){
     //   return <span className="text-red-400">return to optg by remarks</span>;
     // }
-  })()}
+  })()} */}
 </>
                         
                       )}
