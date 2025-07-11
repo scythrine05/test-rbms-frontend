@@ -25,9 +25,11 @@ export default function DashboardPage() {
     enabled: !!session?.user, // Only fetch when user is authenticated
   });
 
-const hasInProgressBlock =requestsData?.data?.requests?.find(
-  (request:any) => request.overAllStatus?.toLowerCase() === "inprogress"
+const hasInProgressBlock = requestsData?.data?.requests?.find(
+  (request: any) =>
+    ["inprogress", "in-progress"].includes(request.overAllStatus?.toLowerCase())
 );
+
 
 
   if (status === "loading") {
