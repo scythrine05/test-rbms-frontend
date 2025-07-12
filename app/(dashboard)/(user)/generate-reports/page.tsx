@@ -15,11 +15,11 @@ import { toast } from "react-hot-toast";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useGenerateReport } from "@/app/service/query/hq";
 import { MajorSection } from "@/app/lib/store";
 import { useSession } from "next-auth/react";
 import { managerService, UserRequest } from "@/app/service/api/manager";
 import { useQuery } from "@tanstack/react-query";
+import { useUserGenerateReport } from "@/app/service/query/user-generate-report";
 
 interface OptionType {
   value: string;
@@ -121,6 +121,7 @@ export default function GenerateReportPage() {
     majorSections: [] as string[],
     department: ["Engineering"],
     blockType: ["All"],
+    userId: session?.user?.id || "",
   });
 
   // Get user's location and set up major section options
@@ -148,7 +149,7 @@ export default function GenerateReportPage() {
     isLoading,
     error,
     refetch,
-  } = useGenerateReport(queryParams);
+  } = useUserGenerateReport(queryParams);
 
   // Watch for query results and loading state
   useEffect(() => {
@@ -260,6 +261,7 @@ export default function GenerateReportPage() {
         majorSections: selectedMajorSections,
         department: selectedDepartments,
         blockType: selectedBlockTypes,
+        userId: session?.user?.id || "",
       });
 
       // Trigger the query - react-query will handle the loading state
@@ -463,18 +465,18 @@ export default function GenerateReportPage() {
                         {/* {summary.Department || summary.Section || ""} */}
                         MAS-GDR
                       </td>
-                  <td
-  className="border-2 border-black px-2 py-1 text-center"
-  style={{ color: "black" }}
->
-  {(summary.Demanded / 17).toFixed(2)}
-</td>
-<td
-  className="border-2 border-black px-2 py-1 text-center"
-  style={{ color: "black" }}
->
-  {(summary.Approved / 17).toFixed(2)}
-</td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {(summary.Demanded ).toFixed(2)}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {(summary.Approved ).toFixed(2)}
+                      </td>
                       <td
                         className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
@@ -511,28 +513,28 @@ export default function GenerateReportPage() {
                   <>
                     <tr className="bg-[#ff914d] text-white font-bold">
                       <td className="border-2 border-black px-2 py-1 text-center">Total</td>
-                <td
-  className="border-2 border-black px-2 py-1 text-center"
-  style={{ color: "black" }}
->
-  {(
-    pastBlockSummary.reduce(
-      (sum, item) => sum + (item.Demanded || 0),
-      0
-    ) / 17
-  ).toFixed(2)}
-</td>
-<td
-  className="border-2 border-black px-2 py-1 text-center"
-  style={{ color: "black" }}
->
-  {(
-    pastBlockSummary.reduce(
-      (sum, item) => sum + (item.Approved || 0),
-      0
-    ) / 17
-  ).toFixed(2)}
-</td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {(
+                          pastBlockSummary.reduce(
+                            (sum, item) => sum + (item.Demanded || 0),
+                            0
+                          ) 
+                        ).toFixed(2)}
+                      </td>
+                      <td
+                        className="border-2 border-black px-2 py-1 text-center"
+                        style={{ color: "black" }}
+                      >
+                        {(
+                          pastBlockSummary.reduce(
+                            (sum, item) => sum + (item.Approved || 0),
+                            0
+                          ) 
+                        ).toFixed(2)}
+                      </td>
                       <td
                         className="border-2 border-black px-2 py-1 text-center"
                         style={{ color: "black" }}
