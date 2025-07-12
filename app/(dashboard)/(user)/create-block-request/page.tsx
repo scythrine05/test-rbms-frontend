@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { useQuery } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
-import roadData from '../../../../public/roadData.json';
+import roadData from "../../../../public/roadData.json";
 
 type Department = "TRD" | "S&T" | "ENGG";
 
@@ -94,8 +94,8 @@ const selectStyles = {
     backgroundColor: state.isSelected
       ? "#e0e7ef"
       : state.isFocused
-        ? "#f3f4f6"
-        : "white",
+      ? "#f3f4f6"
+      : "white",
     fontSize: "12px",
     padding: "4px 8px",
     "&:hover": {
@@ -128,16 +128,16 @@ const getSelectStyles = (hasError: boolean) => {
       borderColor: hasError
         ? "#dc2626"
         : state.isFocused
-          ? "#2461aa"
-          : "#45526c",
+        ? "#2461aa"
+        : "#45526c",
       borderWidth: hasError ? "2px" : "1px",
       borderRadius: "4px",
       padding: "2px",
       boxShadow: hasError
         ? "0 0 0 1px rgba(220, 38, 38, 0.2)"
         : state.isFocused
-          ? "0 0 0 1px rgba(37, 99, 176, 0.1)"
-          : "none",
+        ? "0 0 0 1px rgba(37, 99, 176, 0.1)"
+        : "none",
       fontSize: "14px",
       minHeight: "36px",
       "&:hover": {
@@ -310,7 +310,7 @@ function ReviewBlockRequestModal({
                   <div>
                     <b>Requirements:</b>{" "}
                     {formData.powerBlockRequirements &&
-                      formData.powerBlockRequirements.length > 0
+                    formData.powerBlockRequirements.length > 0
                       ? formData.powerBlockRequirements.join(", ")
                       : "-"}
                   </div>
@@ -336,7 +336,7 @@ function ReviewBlockRequestModal({
                   <div>
                     <b>Requirements:</b>{" "}
                     {formData.sntDisconnectionRequirements &&
-                      formData.sntDisconnectionRequirements.length > 0
+                    formData.sntDisconnectionRequirements.length > 0
                       ? formData.sntDisconnectionRequirements.join(", ")
                       : "-"}
                   </div>
@@ -399,8 +399,8 @@ const otherAffectedSelectStyles = {
     backgroundColor: state.isSelected
       ? "#e0e7ef"
       : state.isFocused
-        ? "#e5e7eb"
-        : "white",
+      ? "#e5e7eb"
+      : "white",
     fontSize: "13px",
     padding: "6px 10px",
     fontWeight: state.isSelected ? "bold" : "normal",
@@ -470,7 +470,6 @@ function getDurationFromTimes(from: string, to: string) {
 type FormDataValue = string | number | boolean | null | string[];
 
 interface FormData {
-
   freshCautions: {
     adjacentLinesAffected: string;
     freshCautionLocationFrom: string;
@@ -498,10 +497,10 @@ interface FormData {
   workType: string;
   activity: string;
   corridorTypeSelection:
-  | "Corridor"
-  | "Outside Corridor"
-  | "Urgent Block"
-  | null;
+    | "Corridor"
+    | "Outside Corridor"
+    | "Urgent Block"
+    | null;
   corridorType: "Corridor" | "Outside Corridor" | "Urgent Block" | null;
   selectedStream: string;
   selectedRoad: string;
@@ -555,7 +554,6 @@ export default function CreateBlockRequestPage() {
   const router = useRouter();
 
   const initialFormData: FormData = {
-
     date: "",
     demandTimeFrom: "",
     demandTimeTo: "",
@@ -621,9 +619,9 @@ export default function CreateBlockRequestPage() {
         adjacentLinesAffected: "",
         freshCautionLocationFrom: "",
         freshCautionLocationTo: "",
-        freshCautionSpeed: ""
-      }
-    ]
+        freshCautionSpeed: "",
+      },
+    ],
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -669,31 +667,30 @@ export default function CreateBlockRequestPage() {
 
   // const selectedDepo = "AJJE";   //temprory fix we need to change it
 
-const userDepot = session?.user.depot;      
-const userDept = session?.user.department??""; 
+  const userDepot = session?.user.depot;
+  const userDept = session?.user.department ?? "";
 
-const locationSections = 
-  userLocation && MajorSection[userLocation as keyof typeof MajorSection] 
-    ? MajorSection[userLocation as keyof typeof MajorSection] 
-    : [];
+  const locationSections =
+    userLocation && MajorSection[userLocation as keyof typeof MajorSection]
+      ? MajorSection[userLocation as keyof typeof MajorSection]
+      : [];
 
-const majorSectionOptions = userDepot === "OVERALL"
-  ? locationSections 
-  : locationSections.filter(section => {
-      const depotData :any= depot[section as keyof typeof depot];
-      if (!depotData) return false;
+  const majorSectionOptions =
+    userDepot === "OVERALL"
+      ? locationSections
+      : locationSections.filter((section) => {
+          const depotData: any = depot[section as keyof typeof depot];
+          if (!depotData) return false;
 
-  
-      if (!(userDept in depotData)) return false;
-      
-   
-      return depotData[userDept].includes(userDepot);
-    });
+          if (!(userDept in depotData)) return false;
+
+          return depotData[userDept].includes(userDepot);
+        });
 
   const selectedMajorSection = formData.selectedSection;
   const blockSectionOptions =
     selectedMajorSection &&
-      blockSection[selectedMajorSection as keyof typeof blockSection]
+    blockSection[selectedMajorSection as keyof typeof blockSection]
       ? blockSection[selectedMajorSection as keyof typeof blockSection]
       : [];
   const userDepartment = session?.user.department;
@@ -712,66 +709,68 @@ const majorSectionOptions = userDepot === "OVERALL"
     label: block,
   }));
 
-
-
-// Utility functions to map between block sections and yards
-const getYardsFromBlockSection = (block: string): string[] => {
-  if (!block.includes('-')) return [];
-  const parts = block.split('-');
-  // Handle cases like "MASS-BBQ" (2 parts) and "MAS-BBQ" (2 parts)
-  if (parts.length === 2) {
-    const [from, to] = parts;
-    return [`${from}-YD`, `${to}-YD`];
-  }
-  // Handle cases like "VPY-KOK-TNP" (3 parts)
-  return parts.map(part => `${part}-YD`);
-};
-
-const getBlockSectionsFromYard = (yard: string, majorSection: string): string[] => {
-  if (!yard.includes('-YD')) return [];
-  const station = yard.replace('-YD', '');
-  
-  // Get all block sections for the major section
-  const allBlocks = blockSection[majorSection as keyof typeof blockSection] || [];
-  
-  // Find block sections that include this station
-  return allBlocks.filter(block => 
-    block.includes('-') && 
-    (block.startsWith(`${station}-`) || block.endsWith(`-${station}`))
-  );
-};
-
-
-
-const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]) => {
-  if (blockSectionValue.length === 0) {
-    return blockSectionOptions;
-  }
-
-  const relatedOptions = new Set<string>();
-
-  blockSectionValue.forEach(selected => {
-    if (selected.endsWith('-YD')) {
-      // Selected a yard - show its related blocks
-      const blocks = getBlockSectionsFromYard(selected, formData.selectedSection);
-      blocks.forEach(block => relatedOptions.add(block));
-    } else {
-      // Selected a block - show its related yards
-      const yards = getYardsFromBlockSection(selected);
-      yards.forEach(yard => relatedOptions.add(yard));
+  // Utility functions to map between block sections and yards
+  const getYardsFromBlockSection = (block: string): string[] => {
+    if (!block.includes("-")) return [];
+    const parts = block.split("-");
+    // Handle cases like "MASS-BBQ" (2 parts) and "MAS-BBQ" (2 parts)
+    if (parts.length === 2) {
+      const [from, to] = parts;
+      return [`${from}-YD`, `${to}-YD`];
     }
-    
-    // Always keep the selected values
-    relatedOptions.add(selected);
-  });
+    // Handle cases like "VPY-KOK-TNP" (3 parts)
+    return parts.map((part) => `${part}-YD`);
+  };
 
-  return blockSectionOptions.filter(option => relatedOptions.has(option));
-};
+  const getBlockSectionsFromYard = (
+    yard: string,
+    majorSection: string
+  ): string[] => {
+    if (!yard.includes("-YD")) return [];
+    const station = yard.replace("-YD", "");
 
+    // Get all block sections for the major section
+    const allBlocks =
+      blockSection[majorSection as keyof typeof blockSection] || [];
 
+    // Find block sections that include this station
+    return allBlocks.filter(
+      (block) =>
+        block.includes("-") &&
+        (block.startsWith(`${station}-`) || block.endsWith(`-${station}`))
+    );
+  };
 
+  const getFilteredOptions = (
+    selectedSection: string,
+    blockSectionValue: string[]
+  ) => {
+    if (blockSectionValue.length === 0) {
+      return blockSectionOptions;
+    }
 
+    const relatedOptions = new Set<string>();
 
+    blockSectionValue.forEach((selected) => {
+      if (selected.endsWith("-YD")) {
+        // Selected a yard - show its related blocks
+        const blocks = getBlockSectionsFromYard(
+          selected,
+          formData.selectedSection
+        );
+        blocks.forEach((block) => relatedOptions.add(block));
+      } else {
+        // Selected a block - show its related yards
+        const yards = getYardsFromBlockSection(selected);
+        yards.forEach((yard) => relatedOptions.add(yard));
+      }
+
+      // Always keep the selected values
+      relatedOptions.add(selected);
+    });
+
+    return blockSectionOptions.filter((option) => relatedOptions.has(option));
+  };
 
   const getTomorrowDateString = () => {
     const tomorrow = new Date();
@@ -799,27 +798,27 @@ const getFilteredOptions = (selectedSection: string, blockSectionValue: string[]
     return targetDate >= currentWeekMonday && targetDate <= currentWeekSunday;
   };
 
-//new change
-const isDateInWeekAfterNext = (dateString: string): boolean => {
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  //new change
+  const isDateInWeekAfterNext = (dateString: string): boolean => {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
-  const targetDate = new Date(dateString + "T00:00:00Z");
-  targetDate.setUTCHours(0, 0, 0, 0);
+    const targetDate = new Date(dateString + "T00:00:00Z");
+    targetDate.setUTCHours(0, 0, 0, 0);
 
-  const nextWeekSunday = new Date(today);
-  nextWeekSunday.setUTCDate(today.getUTCDate() + (7 - today.getUTCDay() + 7));
+    const nextWeekSunday = new Date(today);
+    nextWeekSunday.setUTCDate(today.getUTCDate() + (7 - today.getUTCDay() + 7));
 
-  const weekAfterNextMonday = new Date(nextWeekSunday);
-  weekAfterNextMonday.setUTCDate(nextWeekSunday.getUTCDate() + 1);
+    const weekAfterNextMonday = new Date(nextWeekSunday);
+    weekAfterNextMonday.setUTCDate(nextWeekSunday.getUTCDate() + 1);
 
-  const weekAfterNextSunday = new Date(weekAfterNextMonday);
-  weekAfterNextSunday.setUTCDate(weekAfterNextMonday.getUTCDate() + 6);
+    const weekAfterNextSunday = new Date(weekAfterNextMonday);
+    weekAfterNextSunday.setUTCDate(weekAfterNextMonday.getUTCDate() + 6);
 
-  return targetDate >= weekAfterNextMonday && targetDate <= weekAfterNextSunday;
-};
-
-
+    return (
+      targetDate >= weekAfterNextMonday && targetDate <= weekAfterNextSunday
+    );
+  };
 
   const isWithinNextTwoDays = (dateString: string): boolean => {
     const today = new Date();
@@ -895,34 +894,40 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
   //   return { urgentOnly, urgentAllowed, message };
   // };
 
-
-  const getCorridorTypeRestrictions = (dateString: string): {
+  const getCorridorTypeRestrictions = (
+    dateString: string
+  ): {
     urgentOnly: boolean;
     urgentAllowed: boolean;
     message: string;
     corridorTypeAllowed: boolean;
   } => {
     if (!dateString) {
-      return { urgentOnly: false, urgentAllowed: false, message: "", corridorTypeAllowed: false };
+      return {
+        urgentOnly: false,
+        urgentAllowed: false,
+        message: "",
+        corridorTypeAllowed: false,
+      };
     }
 
     const isUrgentTimeframe = isWithinNextTwoDays(dateString);
     const isNextWeek = isDateInNextWeek(dateString);
     const pastThursdayCutoff = isPastThursdayCutoff();
     const urgentAllowed = isUrgentTimeframe;
-    const urgentOnly = isUrgentTimeframe ;
+    const urgentOnly = isUrgentTimeframe;
     const corridorTypeAllowed = !(isNextWeek && pastThursdayCutoff);
     let message = "";
     if (isUrgentTimeframe) {
-      message = "Dates within today and next 2 days must be Urgent Block requests.";
+      message =
+        "Dates within today and next 2 days must be Urgent Block requests.";
     } else if (isNextWeek && pastThursdayCutoff) {
-      message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+      message =
+        "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
     }
 
     return { urgentOnly, urgentAllowed, message, corridorTypeAllowed };
   };
-
-
 
   const isBlockedCurrentWeekDate = (dateString: string): boolean => {
     const today = new Date();
@@ -991,10 +996,10 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       return newData as FormData;
     });
     setErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[name];
-        return updated;
-      });
+      const updated = { ...prev };
+      delete updated[name];
+      return updated;
+    });
   };
 
   const getStreamDataSafely = (
@@ -1078,17 +1083,12 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
   // Add reviewMode state
   const [reviewMode, setReviewMode] = useState(false);
 
-
-
-
-
-
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("level entry")
+    console.log("level entry");
 
     console.log("errors", errors);
-    if(Object.keys(errors).length > 0){
+    if (Object.keys(errors).length > 0) {
       toast.error(`Please check ${Object.keys(errors)[0]}`);
       return;
     }
@@ -1103,12 +1103,14 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
     setFormError(null);
     setFormSubmitting(true);
     setFormError(null);
-    console.log("level 0 passed")
+    console.log("level 0 passed");
 
     try {
       // ─── 2. Fetch existing requests and run block check ──────────────────
       const existing = await userRequestService.getUserRequests(1, 100);
-      const requests: any[] = Array.isArray(existing?.data.requests) ? existing.data.requests : [];
+      const requests: any[] = Array.isArray(existing?.data.requests)
+        ? existing.data.requests
+        : [];
       const now = Date.now();
 
       let hasUnavailedSanctionedBlock = false;
@@ -1116,9 +1118,9 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       for (let i = 0; i < requests.length; i++) {
         const req = requests[i];
         if (
-          req?.isSanctioned === true &&         // sanctioned
-          req?.availedResponse === null &&      // not availed
-          req?.sanctionedTimeFrom               // has date
+          req?.isSanctioned === true && // sanctioned
+          req?.availedResponse === null && // not availed
+          req?.sanctionedTimeFrom // has date
         ) {
           const sanctionMs = new Date(req.sanctionedTimeFrom).getTime();
           if (!Number.isNaN(sanctionMs) && now >= sanctionMs) {
@@ -1128,17 +1130,19 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           }
         }
       }
-      console.log("level 1 passed")
+      console.log("level 1 passed");
 
       if (hasUnavailedSanctionedBlock && !proceedAnyway) {
-        const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
+        const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${
+          session?.user?.phone
+        }&section=${formData.missionBlock || "MAS-GDR"}`;
         setPopupLink(link);
         setShowPopup(true);
         setFormSubmitting(false);
         return;
       }
 
-      console.log("level 2 passed")
+      console.log("level 2 passed");
       // ─── 3. Client‑side validation ───────────────────────────────────────
       const validation = handleFormValidation();
       if (!validation.isValid) {
@@ -1148,7 +1152,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
         setFormSubmitting(false);
         return;
       }
-      console.log("level 3 passed")
+      console.log("level 3 passed");
 
       // ─── 4. Prepare processedLineSections ────────────────────────────────
       const validSecs = (formData.processedLineSections || []).filter((s) =>
@@ -1158,21 +1162,21 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       const processedSections = validSecs.map((s) =>
         s.type === "yard"
           ? {
-            ...s,
-            lineName: s.lineName || "",
-            otherLines: s.otherLines || "",
-            stream: s.stream || "",
-            road: s.road || "",
-            otherRoads: s.otherRoads || "",
-          }
+              ...s,
+              lineName: s.lineName || "",
+              otherLines: s.otherLines || "",
+              stream: s.stream || "",
+              road: s.road || "",
+              otherRoads: s.otherRoads || "",
+            }
           : {
-            ...s,
-            lineName: s.lineName || "",
-            otherLines: s.otherLines || "",
-            stream: "",
-            road: "",
-            otherRoads: "",
-          }
+              ...s,
+              lineName: s.lineName || "",
+              otherLines: s.otherLines || "",
+              stream: "",
+              road: "",
+              otherRoads: "",
+            }
       );
 
       // ─── 5. Flatten first fresh‑caution (backend still expects single set)
@@ -1190,17 +1194,45 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
         sntDisconnectionRequired: formData.sntDisconnectionRequired ?? false,
         powerBlockRequired: formData.powerBlockRequired ?? false,
         freshCautionRequired: formData.freshCautionRequired ?? false,
-        sntDisconnectionRequirements: formData.sntDisconnectionRequired ? [formData.sntDisconnectionPointNo.toString(),formData.sntDisconnectionSignalNo.toString()] : [],
+        sntDisconnectionRequirements: formData.sntDisconnectionRequired
+          ? [
+              formData.sntDisconnectionPointNo.toString(),
+              formData.sntDisconnectionSignalNo.toString(),
+            ]
+          : [],
         sntDisconnectionAssignTo: formData.sntDisconnectionAssignTo || "",
-        powerBlockRequirements: formData.powerBlockRequired ? [formData.powerBlockKmFrom.toString(), formData.powerBlockKmTo.toString(), formData.powerBlockRoad.toString()] : [],
-        powerBlockDisconnectionAssignTo: formData.powerBlockDisconnectionAssignTo || "",
-        adjacentLinesAffected: formData.freshCautions.map(c => c.adjacentLinesAffected).filter(Boolean).join(","),
-        freshCautionLocationFrom: formData.freshCautions.map(c => c.freshCautionLocationFrom).filter(Boolean).join(","),
-        freshCautionLocationTo: formData.freshCautions.map(c => c.freshCautionLocationTo).filter(Boolean).join(","),
-        freshCautionSpeed: Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
+        powerBlockRequirements: formData.powerBlockRequired
+          ? [
+              formData.powerBlockKmFrom.toString(),
+              formData.powerBlockKmTo.toString(),
+              formData.powerBlockRoad.toString(),
+            ]
+          : [],
+        powerBlockDisconnectionAssignTo:
+          formData.powerBlockDisconnectionAssignTo || "",
+        adjacentLinesAffected: formData.freshCautions
+          .map((c) => c.adjacentLinesAffected)
+          .filter(Boolean)
+          .join(","),
+        freshCautionLocationFrom: formData.freshCautions
+          .map((c) => c.freshCautionLocationFrom)
+          .filter(Boolean)
+          .join(","),
+        freshCautionLocationTo: formData.freshCautions
+          .map((c) => c.freshCautionLocationTo)
+          .filter(Boolean)
+          .join(","),
+        freshCautionSpeed:
+          Number(formData.freshCautions[0]?.freshCautionSpeed) || 0,
         date: formatDateToISO(formData.date || ""),
-        demandTimeFrom: formatTimeToDatetime(formData.date || "", formData.demandTimeFrom || ""),
-        demandTimeTo:   formatTimeToDatetime(formData.date || "", formData.demandTimeTo || ""),
+        demandTimeFrom: formatTimeToDatetime(
+          formData.date || "",
+          formData.demandTimeFrom || ""
+        ),
+        demandTimeTo: formatTimeToDatetime(
+          formData.date || "",
+          formData.demandTimeTo || ""
+        ),
         processedLineSections: processedSections,
         adminAcceptance: false,
         selectedDepo: formData.sntDisconnectionAssignTo || "", // Change as session?.user.depot
@@ -1216,8 +1248,14 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           id: response.data?.divisionId || response.data?.id,
           blockSection: submitData.missionBlock || "-",
           lineOrRoad:
-            submitData.processedLineSections?.map((s) => s.lineName || s.road).join(", ") || "-",
-          duration: getDurationFromTimes(formData.demandTimeFrom || "", formData.demandTimeTo || "") || "-",
+            submitData.processedLineSections
+              ?.map((s) => s.lineName || s.road)
+              .join(", ") || "-",
+          duration:
+            getDurationFromTimes(
+              formData.demandTimeFrom || "",
+              formData.demandTimeTo || ""
+            ) || "-",
         });
 
         // Reset form + UI
@@ -1238,8 +1276,6 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       setFormSubmitting(false);
     }
   };
-
-
 
   // Refactor handleSubmit to work with reviewMode
   //   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -1419,7 +1455,6 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       }
     }
 
-
     // Power Block validations
     if (formData.powerBlockRequired) {
       if (!formData.powerBlockKmFrom)
@@ -1464,7 +1499,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
     field: K,
     value: FormData["freshCautions"][number][K]
   ) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const updated = [...prev.freshCautions];
       updated[index] = { ...updated[index], [field]: value };
       return { ...prev, freshCautions: updated };
@@ -1472,7 +1507,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
   };
 
   const addFreshCaution = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       freshCautions: [
         ...prev.freshCautions,
@@ -1487,25 +1522,28 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
   };
 
   const removeFreshCaution = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       freshCautions: prev.freshCautions.filter((_, i) => i !== index),
     }));
   };
 
   const getInputClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   const getSelectClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-green-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg font-bold bg-white focus:outline-none focus:ring-2 focus:ring-green-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   const getTextareaClassName = (fieldName: string) => {
-    return `w-full border-2 rounded-lg px-4 py-2 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
-      }`;
+    return `w-full border-2 rounded-lg px-4 py-2 text-lg bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 text-black placeholder-black text-xs px-2 py-1 ${
+      errors[fieldName] ? "border-red-600 ring-2 ring-red-300" : "border-black"
+    }`;
   };
 
   useEffect(() => {
@@ -1526,10 +1564,12 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
   // Handle date change and corridor type selection logic
   useEffect(() => {
-    setErrors((prev: any) => Object.keys(prev).reduce((newErrors, key) => {
-      if (key !== "date") newErrors[key] = prev[key];
-      return newErrors;
-    }, {} as Record<string, any>));
+    setErrors((prev: any) =>
+      Object.keys(prev).reduce((newErrors, key) => {
+        if (key !== "date") newErrors[key] = prev[key];
+        return newErrors;
+      }, {} as Record<string, any>)
+    );
 
     if (!formData.date) {
       console.log("No date selected");
@@ -1538,7 +1578,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       setFormData({ ...formData, corridorTypeSelection: null });
     } else {
       // Get corridor type restrictions based on selected date
-      const { urgentOnly, urgentAllowed, corridorTypeAllowed, message } = getCorridorTypeRestrictions(formData.date);
+      const { urgentOnly, urgentAllowed, corridorTypeAllowed, message } =
+        getCorridorTypeRestrictions(formData.date);
 
       if (urgentOnly) {
         // If urgent block is required, disable other options and set to Urgent
@@ -1549,8 +1590,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           ...formData,
           corridorTypeSelection: "Urgent Block",
         });
-      }
-      else if (!corridorTypeAllowed) {
+      } else if (!corridorTypeAllowed) {
         // If corridor type is not allowed, disable other options and set to null
         console.log("PPPPPPcorridorTypeAllowed", corridorTypeAllowed);
         setIsDisabled(true);
@@ -1560,15 +1600,17 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           corridorTypeSelection: null,
         });
         console.log("setting error", corridorTypeAllowed);
-        setErrors((prev: any) => ({ ...prev, date: 'Not a valid date' }));
-      }
-      else {
+        setErrors((prev: any) => ({ ...prev, date: "Not a valid date" }));
+      } else {
         // Otherwise, normal options are available
         console.log("PPPPPPurgentAllowed", urgentAllowed);
         setIsDisabled(false);
         setValidCorridorType(true);
         // If user had Urgent Block selected but it's not allowed, reset selection
-        if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
+        if (
+          formData.corridorTypeSelection === "Urgent Block" &&
+          !urgentAllowed
+        ) {
           setFormData({
             ...formData,
             corridorTypeSelection: null,
@@ -2347,93 +2389,122 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
     <div className="min-h-screen flex flex-col items-center justify-start bg-[#f7fafc] py-0">
       {/* Header */}
       <div className="w-full bg-[#fff9b2] py-6 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[9vw] min-[430px]:text-4xl font-extrabold tracking-widest" style={{ color: '#b07be0', letterSpacing: '0.08em', fontFamily: 'Arial Black, Arial, sans-serif' }}>RBMS-MAS-DIVN</span>
+        <span
+          className="text-[9vw] min-[430px]:text-4xl font-extrabold tracking-widest"
+          style={{
+            color: "#b07be0",
+            letterSpacing: "0.08em",
+            fontFamily: "Arial Black, Arial, sans-serif",
+          }}
+        >
+          RBMS-MAS-DIVN
+        </span>
       </div>
       {/* Sub-header */}
       <div className="w-full bg-[#d6f7c6] py-4 flex flex-col items-center border-b-2 border-black">
-        <span className="text-[24px] font-bold text-black" style={{ letterSpacing: '0.04em' }}>
-          {reviewMode ? "Review/Edit the Block Request Before Submission" : "Enter New Block Request"}
+        <span
+          className="text-[24px] font-bold text-black"
+          style={{ letterSpacing: "0.04em" }}
+        >
+          {reviewMode
+            ? "Review/Edit the Block Request Before Submission"
+            : "Enter New Block Request"}
         </span>
       </div>
       {/* Form Card */}
-      <div className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4  border-black rounded-3xl shadow-xl mx-3" style={{ minWidth: 350 }}>
+      <div
+        className="w-full max-w-3xl mt-0 p-6 bg-[#c6e6f7] border-4  border-black rounded-3xl shadow-xl mx-3"
+        style={{ minWidth: 350 }}
+      >
         <form onSubmit={handleFormSubmit} className="space-y-10">
           <div className="grid grid-cols-1 gap-y-8 mb-8">
             {/* Date of Block */}
             <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
-              <label className="text-[24px] font-bold text-black min-w-[180px]" htmlFor="date-of-block">
+              <label
+                className="text-[24px] font-bold text-black min-w-[180px]"
+                htmlFor="date-of-block"
+              >
                 Date of Block
               </label>
-                <div className="flex flex-row items-center gap-2 w-full">
-                  <input
-                    id="date-of-block"
-                    type="date"
-                    name="date"
-                    value={formData.date || ""}
-                    onChange={handleInputChange}
-                    className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#f7f7a1] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b07be0] min-w-[180px] max-w-[240px]"
-                    aria-required="true"
-                    aria-label="Select date of block"
-                    style={{ boxShadow: '2px 2px 6px #bbb' }}
-                    min={getMinDateString()}
-                    max={(() => {
-                      const today = new Date();
-                      today.setDate(today.getDate() + 30);
-                      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-                    })()}
-                    placeholder="Select date"
-                    required
-                  />
+              <div className="flex flex-row items-center gap-2 w-full">
+                <input
+                  id="date-of-block"
+                  type="date"
+                  name="date"
+                  value={formData.date || ""}
+                  onChange={handleInputChange}
+                  className="border-2 border-black rounded-xl px-8 py-4 text-[24px] font-bold bg-[#f7f7a1] text-black shadow-md focus:outline-none focus:ring-2 focus:ring-[#b07be0] min-w-[180px] max-w-[240px]"
+                  aria-required="true"
+                  aria-label="Select date of block"
+                  style={{ boxShadow: "2px 2px 6px #bbb" }}
+                  min={getMinDateString()}
+                  max={(() => {
+                    const today = new Date();
+                    today.setDate(today.getDate() + 30);
+                    return `${today.getFullYear()}-${String(
+                      today.getMonth() + 1
+                    ).padStart(2, "0")}-${String(today.getDate()).padStart(
+                      2,
+                      "0"
+                    )}`;
+                  })()}
+                  placeholder="Select date"
+                  required
+                />
                 {/* Type of Block - compact, right of date */}
                 {formData.date && (
                   <div className="flex flex-row items-center gap-2 ml-2">
-                  {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
-                  {validCorridorType ? (
-                    isDisabled ? (
-                      <span className="px-5 py-2 rounded-lg bg-[#f7a1a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">
-                        U
-                      </span>
-                    ) : (
-                      <div className="flex flex-row gap-2">
-                        <button
-                          type="button"
-                          className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
-                            formData.corridorTypeSelection === 'Corridor'
-                              ? 'bg-[#e6f7c6] border-black text-black'
-                              : 'bg-white border-[#b6e6c6] text-[#888]'
-                          }`}
-                          onClick={() =>
-                            handleInputChange({
-                              target: { name: 'corridorTypeSelection', value: 'Corridor' },
-                            } as any)
-                          }
-                        >
-                          C
-                        </button>
-                        <button
-                          type="button"
-                          className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
-                            formData.corridorTypeSelection === 'Outside Corridor'
-                              ? 'bg-[#ffe082] border-black text-black'
-                              : 'bg-white border-[#ffe082] text-[#888]'
-                          }`}
-                          onClick={() =>
-                            handleInputChange({
-                              target: {
-                                name: 'corridorTypeSelection',
-                                value: 'Outside Corridor',
-                              },
-                            } as any)
-                          }
-                        >
-                          NC
-                        </button>
-                      </div>
-                    )
-                  ) : null}
+                    {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
+                    {validCorridorType ? (
+                      isDisabled ? (
+                        <span className="px-5 py-2 rounded-lg bg-[#f7a1a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">
+                          U
+                        </span>
+                      ) : (
+                        <div className="flex flex-row gap-2">
+                          <button
+                            type="button"
+                            className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
+                              formData.corridorTypeSelection === "Corridor"
+                                ? "bg-[#e6f7c6] border-black text-black"
+                                : "bg-white border-[#b6e6c6] text-[#888]"
+                            }`}
+                            onClick={() =>
+                              handleInputChange({
+                                target: {
+                                  name: "corridorTypeSelection",
+                                  value: "Corridor",
+                                },
+                              } as any)
+                            }
+                          >
+                            C
+                          </button>
+                          <button
+                            type="button"
+                            className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
+                              formData.corridorTypeSelection ===
+                              "Outside Corridor"
+                                ? "bg-[#ffe082] border-black text-black"
+                                : "bg-white border-[#ffe082] text-[#888]"
+                            }`}
+                            onClick={() =>
+                              handleInputChange({
+                                target: {
+                                  name: "corridorTypeSelection",
+                                  value: "Outside Corridor",
+                                },
+                              } as any)
+                            }
+                          >
+                            NC
+                          </button>
+                        </div>
+                      )
+                    ) : null}
                   </div>
                 )}
-                </div>
+              </div>
               {errors.date && (
                 <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
                   {errors.date}
@@ -2441,22 +2512,23 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               )}
             </div>
             {/* If not Corridor Block, show reason box (compact) */}
-           {formData.corridorTypeSelection &&
-            !["Corridor Block", "Corridor"].includes(
-              formData.corridorTypeSelection
-            ) && (
-              <div className="w-full">
-                <input 
-                type="text" 
-                name="nonCorridorReason" 
-                value={formData.nonCorridorReason || ""} 
-                onChange={handleInputChange} placeholder="Reasons for asking outside Corridor or Emergency Block" 
-                className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-600" 
-                required 
-                />
-                {renderError("nonCorridorReason")}
-              </div>
-            )}
+            {formData.corridorTypeSelection &&
+              !["Corridor Block", "Corridor"].includes(
+                formData.corridorTypeSelection
+              ) && (
+                <div className="w-full">
+                  <input
+                    type="text"
+                    name="nonCorridorReason"
+                    value={formData.nonCorridorReason || ""}
+                    onChange={handleInputChange}
+                    placeholder="Reasons for asking outside Corridor or Emergency Block"
+                    className="w-full bg-white border-2 border-black rounded px-2 py-1 text-[24px] font-bold text-black focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-gray-600"
+                    required
+                  />
+                  {renderError("nonCorridorReason")}
+                </div>
+              )}
             {/* Major Section Dropdown - compact, no label */}
             <div className="flex flex-row items-center gap-4 w-full ">
               <select
@@ -2468,7 +2540,6 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 aria-required="true"
                 aria-label="Select major section"
                 required
-                
                 style={{
                   appearance: "none",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
@@ -2497,7 +2568,10 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               <Select
                 isMulti
                 name="blockSection"
-                options={getFilteredOptions(formData.selectedSection, blockSectionValue).map((block: string) => ({
+                options={getFilteredOptions(
+                  formData.selectedSection,
+                  blockSectionValue
+                ).map((block: string) => ({
                   value: block,
                   label: block,
                 }))}
@@ -2506,13 +2580,17 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                   label: val,
                 }))}
                 onChange={(selected) => {
-                  const values = selected ? selected.map((opt: any) => opt.value) : [];
+                  const values = selected
+                    ? selected.map((opt: any) => opt.value)
+                    : [];
                   if (values.length <= 2) {
                     setBlockSectionValue(values);
                     setFormData((prev) => ({
                       ...prev,
                       missionBlock: values.join(","),
-                      processedLineSections: (prev.processedLineSections || []).filter((s: any) => values.includes(s.block)),
+                      processedLineSections: (
+                        prev.processedLineSections || []
+                      ).filter((s: any) => values.includes(s.block)),
                     }));
                   }
                 }}
@@ -2561,8 +2639,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                     backgroundColor: state.isSelected
                       ? "#ffe082"
                       : state.isFocused
-                        ? "#ffe08299"
-                        : "#ffe6b3",
+                      ? "#ffe08299"
+                      : "#ffe6b3",
                     color: "black",
                     fontWeight: "bold",
                     fontSize: "24px",
@@ -2597,60 +2675,96 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               const isYard = block.includes("-YD");
               const lineOrRoadOptions = isYard
                 ? getAllRoadsForYard(block).map((road: string) => ({
-                  value: road,
-                  label: road,
-                }))
+                    value: road,
+                    label: road,
+                  }))
                 : (lineData[block as keyof typeof lineData] || []).map(
-                  (line: string) => ({
-                    value: line,
-                    label: line,
-                  })
-                );
+                    (line: string) => ({
+                      value: line,
+                      label: line,
+                    })
+                  );
               const sectionEntry: any =
                 (formData.processedLineSections || []).find(
                   (s: any) => s.block === block
                 ) || {};
               return (
                 <div key={block} className="flex flex-col gap-1 w-full">
-                  <span className="text-[24px] font-bold text-black mb-1">Select {isYard ? 'Road(s)' : 'Line(s)'} for <span className="text-[#3a506b]">{block}</span></span>
+                  <span className="text-[24px] font-bold text-black mb-1">
+                    Select {isYard ? "Road(s)" : "Line(s)"} for{" "}
+                    <span className="text-[#3a506b]">{block}</span>
+                  </span>
                   <div className="flex flex-row items-center gap-3 w-full">
                     <Select
                       isMulti
                       name={`lineOrRoad-${block}`}
                       options={lineOrRoadOptions}
                       value={(() => {
-                        const selectedValues: { value: string; label: string }[] = [];
+                        const selectedValues: {
+                          value: string;
+                          label: string;
+                        }[] = [];
                         if (isYard) {
-                          if (sectionEntry && typeof sectionEntry.road === 'string' && sectionEntry.road) {
-                            selectedValues.push({ value: sectionEntry.road, label: sectionEntry.road });
+                          if (
+                            sectionEntry &&
+                            typeof sectionEntry.road === "string" &&
+                            sectionEntry.road
+                          ) {
+                            selectedValues.push({
+                              value: sectionEntry.road,
+                              label: sectionEntry.road,
+                            });
                           }
-                          if (sectionEntry && typeof sectionEntry.otherRoads === 'string' && sectionEntry.otherRoads) {
+                          if (
+                            sectionEntry &&
+                            typeof sectionEntry.otherRoads === "string" &&
+                            sectionEntry.otherRoads
+                          ) {
                             const otherRoadList = sectionEntry.otherRoads
                               .split(",")
                               .map((road: string) => road.trim())
                               .filter(Boolean);
                             selectedValues.push(
-                              ...otherRoadList.map((road: string) => ({ value: road, label: road }))
+                              ...otherRoadList.map((road: string) => ({
+                                value: road,
+                                label: road,
+                              }))
                             );
                           }
                         } else {
-                          if (sectionEntry && typeof sectionEntry.lineName === 'string' && sectionEntry.lineName) {
-                            selectedValues.push({ value: sectionEntry.lineName, label: sectionEntry.lineName });
+                          if (
+                            sectionEntry &&
+                            typeof sectionEntry.lineName === "string" &&
+                            sectionEntry.lineName
+                          ) {
+                            selectedValues.push({
+                              value: sectionEntry.lineName,
+                              label: sectionEntry.lineName,
+                            });
                           }
-                          if (sectionEntry && typeof sectionEntry.otherLines === 'string' && sectionEntry.otherLines) {
+                          if (
+                            sectionEntry &&
+                            typeof sectionEntry.otherLines === "string" &&
+                            sectionEntry.otherLines
+                          ) {
                             const otherLineList = sectionEntry.otherLines
                               .split(",")
                               .map((line: string) => line.trim())
                               .filter(Boolean);
                             selectedValues.push(
-                              ...otherLineList.map((line: string) => ({ value: line, label: line }))
+                              ...otherLineList.map((line: string) => ({
+                                value: line,
+                                label: line,
+                              }))
                             );
                           }
                         }
                         return selectedValues;
                       })()}
                       onChange={(selected) => {
-                        const values = selected ? selected.map((opt: any) => opt.value) : [];
+                        const values = selected
+                          ? selected.map((opt: any) => opt.value)
+                          : [];
                         if (isYard) {
                           handleRoadSelection(block, values.join(","));
                         } else {
@@ -2658,7 +2772,9 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                         }
                       }}
                       classNamePrefix="react-select"
-                      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+                      menuPortalTarget={
+                        typeof window !== "undefined" ? document.body : null
+                      }
                       styles={{
                         control: (base) => ({
                           ...base,
@@ -2703,8 +2819,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                           backgroundColor: state.isSelected
                             ? "#b6e6f7"
                             : state.isFocused
-                              ? "#b6e6f799"
-                              : "#e6f7fa",
+                            ? "#b6e6f799"
+                            : "#e6f7fa",
                           color: "black",
                           fontWeight: "bold",
                           fontSize: "22px",
@@ -2735,16 +2851,17 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               );
             })}
             {/* Corridor for this section info bar (only once, after all lines/roads selects) */}
-            <div className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0" style={{ boxSizing: 'border-box' }}>
+            <div
+              className="w-full mt-3 mb-2 px-4 py-2 rounded-lg border-2 border-[#e07a5f] bg-[#ffd6d6] flex flex-col items-center justify-center shadow-sm whitespace-nowrap overflow-x-auto min-w-0"
+              style={{ boxSizing: "border-box" }}
+            >
               <span className="text-[26px] font-bold text-black text-center mr-4">
                 Corridor for this section
               </span>
               <span className="text-[24px] font-bold text-black text-center">
-                {corridorTime?.from || '--:--'} 
-                  <span className="mx-2">
-                    TO
-                  </span> 
-                {corridorTime?.to || '--:--'}
+                {corridorTime?.from || "--:--"}
+                <span className="mx-2">TO</span>
+                {corridorTime?.to || "--:--"}
               </span>
             </div>
             {/* Preferred Slot and Site Location grouped in a box - ALIGNED, PROFESSIONAL, NO OVERFLOW, SINGLE LINE */}
@@ -2752,95 +2869,168 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               {/* Preferred Slot label */}
               {/* Time selectors and duration row - always single line, scrollable if needed */}
               <div className="flex flex-col flex-nowrap items-center w-full overflow-x-auto py-4 space-y-4 border-2 border-[#b7cbe8] rounded-2xl bg-gradient-to-b from-[#fffbe9] to-[#fff7d6]">
-                <span className="text-black font-bold text-[24px] mb-1 tracking-wide" style={{ lineHeight: '1', marginLeft: '4px' }}>Preferred Slot</span>
+                <span
+                  className="text-black font-bold text-[24px] mb-1 tracking-wide"
+                  style={{ lineHeight: "1", marginLeft: "4px" }}
+                >
+                  Preferred Slot
+                </span>
                 <div className="flex flex-row flex-wrap items-center justify-center gap-2 px-3 py-2 text-2xl">
-                  <div 
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db]  shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200">
+                  <div className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db]  shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200">
                     <select
                       name="demandTimeFromHour"
-                      value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : ""}
+                      value={
+                        formData.demandTimeFrom
+                          ? formData.demandTimeFrom.split(":")[0]
+                          : ""
+                      }
                       onChange={(e) => {
                         const hour = e.target.value;
-                        const min = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : "00";
-                        handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
+                        const min = formData.demandTimeFrom
+                          ? formData.demandTimeFrom.split(":")[1]
+                          : "00";
+                        handleInputChange({
+                          target: {
+                            name: "demandTimeFrom",
+                            value: `${hour}:${min}`,
+                          },
+                        } as any);
                       }}
                       className="appearance-none text-center"
                       required
                     >
                       <option value="">--</option>
                       {[...Array(24).keys()].map((h) => (
-                        <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
+                        <option key={h} value={h.toString().padStart(2, "0")}>
+                          {h.toString().padStart(2, "0")}
+                        </option>
                       ))}
                     </select>
-                    <span className="text-[#2c3e50] font-bold text-[24px]">:</span>
+                    <span className="text-[#2c3e50] font-bold text-[24px]">
+                      :
+                    </span>
                     <select
                       name="demandTimeFromMin"
-                      value={formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[1] : ""}
+                      value={
+                        formData.demandTimeFrom
+                          ? formData.demandTimeFrom.split(":")[1]
+                          : ""
+                      }
                       onChange={(e) => {
                         const min = e.target.value;
-                        const hour = formData.demandTimeFrom ? formData.demandTimeFrom.split(":")[0] : "00";
-                        handleInputChange({ target: { name: "demandTimeFrom", value: `${hour}:${min}` } } as any);
+                        const hour = formData.demandTimeFrom
+                          ? formData.demandTimeFrom.split(":")[0]
+                          : "00";
+                        handleInputChange({
+                          target: {
+                            name: "demandTimeFrom",
+                            value: `${hour}:${min}`,
+                          },
+                        } as any);
                       }}
                       className="appearance-none text-center"
                       required
                     >
                       <option value="">--</option>
                       {[...Array(12).keys()].map((m) => (
-                        <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
+                        <option
+                          key={m}
+                          value={(m * 5).toString().padStart(2, "0")}
+                        >
+                          {(m * 5).toString().padStart(2, "0")}
+                        </option>
                       ))}
                     </select>
                   </div>
-                    <span className="text-[#2c3e50] font-bold text-[24px] px-2">TO</span>
-                  <div 
-                    className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db]  text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200">
-                    
+                  <span className="text-[#2c3e50] font-bold text-[24px] px-2">
+                    TO
+                  </span>
+                  <div className="bg-white border-2 border-[#2c3e50] text-[#2c3e50] font-bold text-2xl px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3498db]  text-center shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200">
                     <select
                       name="demandTimeToHour"
-                      value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : ""}
+                      value={
+                        formData.demandTimeTo
+                          ? formData.demandTimeTo.split(":")[0]
+                          : ""
+                      }
                       onChange={(e) => {
                         const hour = e.target.value;
-                        const min = formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : "00";
-                        handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
+                        const min = formData.demandTimeTo
+                          ? formData.demandTimeTo.split(":")[1]
+                          : "00";
+                        handleInputChange({
+                          target: {
+                            name: "demandTimeTo",
+                            value: `${hour}:${min}`,
+                          },
+                        } as any);
                       }}
                       className="appearance-none text-center"
                       required
                     >
                       <option value="">--</option>
                       {[...Array(24).keys()].map((h) => (
-                        <option key={h} value={h.toString().padStart(2, "0")}>{h.toString().padStart(2, "0")}</option>
+                        <option key={h} value={h.toString().padStart(2, "0")}>
+                          {h.toString().padStart(2, "0")}
+                        </option>
                       ))}
                     </select>
-                    <span className="text-[#2c3e50] font-bold text-[24px]">:</span>
+                    <span className="text-[#2c3e50] font-bold text-[24px]">
+                      :
+                    </span>
                     <select
                       name="demandTimeToMin"
-                      value={formData.demandTimeTo ? formData.demandTimeTo.split(":")[1] : ""}
+                      value={
+                        formData.demandTimeTo
+                          ? formData.demandTimeTo.split(":")[1]
+                          : ""
+                      }
                       onChange={(e) => {
                         const min = e.target.value;
-                        const hour = formData.demandTimeTo ? formData.demandTimeTo.split(":")[0] : "00";
-                        handleInputChange({ target: { name: "demandTimeTo", value: `${hour}:${min}` } } as any);
+                        const hour = formData.demandTimeTo
+                          ? formData.demandTimeTo.split(":")[0]
+                          : "00";
+                        handleInputChange({
+                          target: {
+                            name: "demandTimeTo",
+                            value: `${hour}:${min}`,
+                          },
+                        } as any);
                       }}
                       className="appearance-none text-center"
                       required
                     >
                       <option value="">--</option>
                       {[...Array(12).keys()].map((m) => (
-                        <option key={m} value={(m * 5).toString().padStart(2, "0")}>{(m * 5).toString().padStart(2, "0")}</option>
+                        <option
+                          key={m}
+                          value={(m * 5).toString().padStart(2, "0")}
+                        >
+                          {(m * 5).toString().padStart(2, "0")}
+                        </option>
                       ))}
                     </select>
-                  </div>  
+                  </div>
                 </div>
-                <span className="text-[#2c3e50] font-bold text-[24px] mb-1 tracking-wide">Duration</span>
+                <span className="text-[#2c3e50] font-bold text-[24px] mb-1 tracking-wide">
+                  Duration
+                </span>
                 <span className="bg-white border-2 border-[#2c3e50] rounded-lg px-6 py-2 text-2xl font-bold text-[#2c3e50] min-w-[120px] text-center shadow-md hover:shadow-lg transition-shadow duration-200">
-                  {getDurationFromTimes(formData.demandTimeFrom || '', formData.demandTimeTo || '') || '--'}
+                  {getDurationFromTimes(
+                    formData.demandTimeFrom || "",
+                    formData.demandTimeTo || ""
+                  ) || "--"}
                 </span>
               </div>
               {/* Site Location row */}
               <div className="flex flex-row items-center gap-4 w-full pl-1">
                 <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
-                  <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Site Location</span>
+                  <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">
+                    Site Location
+                  </span>
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     <input
-                      type="text" 
+                      type="text"
                       name="workLocationFrom"
                       value={formData.workLocationFrom || ""}
                       onChange={(e) => {
@@ -2849,8 +3039,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                           handleInputChange({
                             target: {
                               name: "workLocationFrom",
-                              value: value + "/"
-                            }
+                              value: value + "/",
+                            },
                           } as React.ChangeEvent<HTMLInputElement>);
                         } else {
                           handleInputChange(e);
@@ -2861,7 +3051,9 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                       className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                       required
                     />
-                    <span className="font-bold text-[#2c3e50] text-[24px]">to</span>
+                    <span className="font-bold text-[#2c3e50] text-[24px]">
+                      to
+                    </span>
                     <input
                       type="text"
                       name="workLocationTo"
@@ -2872,8 +3064,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                           handleInputChange({
                             target: {
                               name: "workLocationTo",
-                              value: value + "/"
-                            }
+                              value: value + "/",
+                            },
                           } as React.ChangeEvent<HTMLInputElement>);
                         } else {
                           handleInputChange(e);
@@ -2890,12 +3082,13 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
             </div>
           </div>
 
-
           {/*  TODO:    remove "!" should be only for snt */}
-          {userDepartment === "S&T" &&
+          {userDepartment === "S&T" && (
             <div className="flex flex-row items-center gap-4 w-full pl-1">
               <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
-                <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Route</span>
+                <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">
+                  Route
+                </span>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <input
                     type="text"
@@ -2906,7 +3099,9 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                     className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     required
                   />
-                  <span className="font-bold text-[#2c3e50] text-[24px]">to</span>
+                  <span className="font-bold text-[#2c3e50] text-[24px]">
+                    to
+                  </span>
                   <input
                     type="text"
                     name="routeTo"
@@ -2919,43 +3114,51 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 </div>
               </div>
             </div>
-          }
-
+          )}
 
           {/*  TODO:    remove "!" should be only for trd */}
-          { userDepartment === "TRD" &&   
-          <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
-            {/* Type of Work dropdown */}
-            <div className="flex-1 pr-2 ">
-              <label htmlFor="elementarySection" className="block text-[24px] text-nowrap font-bold text-black mb-2">Elementary Section</label>
-              <input
-                    id="elementarySection"
-                    name="elementarySection"
-                    value={formData.elementarySection || ""}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Elementary Section"
-                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    aria-label="Route from location"
-                  />
-              {errors.elementarySection && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.elementarySection}
-                </span>
-              )}
+
+          {userDepartment === "TRD" && (
+            <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
+              {/* Type of Work dropdown */}
+              <div className="flex-1 pr-2 ">
+                <label
+                  htmlFor="elementarySection"
+                  className="block text-[24px] text-nowrap font-bold text-black mb-2"
+                >
+                  Elementary Section
+                </label>
+                <input
+                  id="elementarySection"
+                  name="elementarySection"
+                  value={formData.elementarySection || ""}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Elementary Section"
+                  className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                  aria-label="Route from location"
+                />
+                {errors.elementarySection && (
+                  <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
+                    {errors.elementarySection}
+                  </span>
+                )}
+              </div>
+              {/* Activity dropdown */}
             </div>
-            {/* Activity dropdown */}
-          </div>
-
-          }
-
-
+          )}
+          
 
           {/* Type of Work and Activity - horizontal, pastel green */}
           <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
             {/* Type of Work dropdown */}
             <div className="flex-1 pr-2 border-r-2 border-slate-400">
-              <label htmlFor="workType" className="block text-[24px] text-nowrap font-bold text-black mb-2">Type of Work</label>
+              <label
+                htmlFor="workType"
+                className="block text-[24px] text-nowrap font-bold text-black mb-2"
+              >
+                Type of Work
+              </label>
               <select
                 id="workType"
                 name="workType"
@@ -2972,9 +3175,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 }}
                 required
               >
-                <option value="" disabled >
+                <option value="" disabled>
                   Select Type of Work
-                  
                 </option>
                 {workTypeOptions.map((type: string) => (
                   <option key={type} value={type} className="text-[24px]">
@@ -2990,7 +3192,12 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
             </div>
             {/* Activity dropdown */}
             <div className="flex-1 pl-2">
-              <label htmlFor="activity" className="block text-[24px] font-bold text-black mb-2">Activity</label>
+              <label
+                htmlFor="activity"
+                className="block text-[24px] font-bold text-black mb-2"
+              >
+                Activity
+              </label>
               <select
                 id="activity"
                 name="activity"
@@ -3008,14 +3215,22 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 required
               >
                 <option value="" disabled>
-                  {formData.workType ? 'Select Activity' : 'Select Type of Work first'}
+                  {formData.workType
+                    ? "Select Activity"
+                    : "Select Type of Work first"}
                 </option>
                 {activityOptions.map((activity: string) => (
-                  <option key={activity} value={activity} className="text-[24px]">
+                  <option
+                    key={activity}
+                    value={activity}
+                    className="text-[24px]"
+                  >
                     {activity}
                   </option>
                 ))}
-                <option value="others" className="text-[24px]">Others</option>
+                <option value="others" className="text-[24px]">
+                  Others
+                </option>
               </select>
               {formData.activity === "others" && (
                 <input
@@ -3034,497 +3249,628 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 border-2 border-[#b6e6c6] shadow rounded-2xl px-4 py-2 bg-white">
-            {/* Fresh Caution Section */}
-            <div className="w-full mt-2 bg-fuchsia-100 rounded-2xl ">
-              <div className="flex justify-between items-center mb-1 bg-fuchsia-300  rounded-2xl  px-2">
-                <span className="text-black font-bold text-[24px] ">
-                  Fresh Caution Needed?
-                </span>
-                <select
-                  name="freshCautionRequired"
-                  value={formData.freshCautionRequired ? "Y" : "N"}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      freshCautionRequired: e.target.value === "Y",
-                    })
-                  }
-                  className="ml-2 pr-8 border-2  border-black rounded 
-                  px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
-                  style={{
-                    appearance: "none",
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundSize: "1.2rem",
-                  }}
+
+          {userDepartment === "TRD" && (
+            <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
+              {/* Type of Work dropdown */}
+              <div className="flex-1 pr-2 ">
+                <label
+                  htmlFor="repercussions"
+                  className="block text-[24px] text-nowrap font-bold text-black mb-2"
                 >
-                  <option value="N">N</option>
-                  <option value="Y">Y</option>
-                </select>
-                {renderError("freshCautionRequired")}
-              </div>
-              {/* ───── Fresh Caution ───── */}
-              {formData.freshCautionRequired && (
-                <div className="flex flex-col gap-2 mt-2 pb-2">
-                  {formData.freshCautions.map((caution, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
-                      style={{ fontSize: "24px", fontWeight: "bold" }}
-                    >
-                      {/* ◼︎ Direction / Road */}
-                      <input
-                        list={`adjacentLinesList-${idx}`}
-                        value={caution.adjacentLinesAffected}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "adjacentLinesAffected",
-                            e.target.value
-                          )
-                        }
-                        placeholder="UP/DN/SL/Road No."
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
-                      />
-                      <datalist id={`adjacentLinesList-${idx}`}>
-                        {blockSectionValue.flatMap(block => {
-                          const isYard = block.includes("-YD");
-                          return isYard
-                            ? getAllRoadsForYard(block).map(r => (
-                              <option key={r} value={r} />
-                            ))
-                            : (lineData[block as keyof typeof lineData] || []).map(l => (
-                              <option key={l} value={l} />
-                            ));
-                        })}
-                      </datalist>
-
-                      {/* ◼︎ KM From / To */}
-                      <input
-                        value={caution.freshCautionLocationFrom}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionLocationFrom",
-                            e.target.value
-                          )
-                        }
-                        placeholder="KM"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                      />
-                      <span className="px-1 text-2xl text-black">to</span>
-                      <input
-                        value={caution.freshCautionLocationTo}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionLocationTo",
-                            e.target.value
-                          )
-                        }
-                        placeholder="KM"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                      />
-
-                      {/* ◼︎ Speed */}
-                      <input
-                        type="number"
-                        value={caution.freshCautionSpeed}
-                        onChange={e =>
-                          handleFreshCautionChange(
-                            idx,
-                            "freshCautionSpeed",
-                            e.target.value
-                          )
-                        }
-                        placeholder="Speed"
-                        required
-                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
-                      />
-
-                      {/* ◼︎ Remove */}
-                      {formData.freshCautions.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeFreshCaution(idx)}
-                          className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* ➕ Add Button */}
-                  <button
-                    type="button"
-                    onClick={addFreshCaution}
-                    className="self-center px-2 py-1  bg-green-600 text-white rounded text-2xl font-semibold"
-                  >
-                    + Add Fresh Caution
-                </button>
-              </div>
-            )}
-
-          </div>
-
-
-          {/* Power Block Section */}
-          <div className="w-full mt-2 bg-indigo-200 rounded-2xl">
-            <div className="flex justify-between items-center mb-1 bg-indigo-400  rounded-2xl  px-2">
-              <span className="text-black font-bold text-[24px]">
-                Power Block Needed?
-              </span>
-              <select
-                name="powerBlockRequired"
-                value={formData.powerBlockRequired ? "Y" : "N"}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    powerBlockRequired: e.target.value === "Y",
-                  })
-                }
-                className="ml-2 pr-8 border-2  border-black  
-                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
-                style={{
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "1.2rem",
-                }}
-              >
-                <option value="N">N</option>
-                <option value="Y">Y</option>
-              </select>
-              {renderError("powerBlockRequired")}
-            </div>
-            {/* ───── Power Block ───── */}
-            {formData.powerBlockRequired && (
-              <div className="flex flex-col gap-2 mt-2 pb-2">
-                <div className="flex flex-row flex-wrap gap-1">
-                  <input
-                    type="number"
-                    name="powerBlockKmFrom"
-                    value={formData.powerBlockKmFrom || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className="flex-1 border-2  border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <span className="text-black font-bold text-2xl">
-                    to
+                  Coaching Repercussions
+                </label>
+                <input
+                  id="repercussions"
+                  name="repercussions"
+                  value={formData.repercussions || ""}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Coaching Repercussions"
+                  className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                  aria-label="Route from location"
+                />
+                {errors.repercussions && (
+                  <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
+                    {errors.repercussions}
                   </span>
-                  <input
-                    type="number"
-                    name="powerBlockKmTo"
-                    value={formData.powerBlockKmTo || ""}
-                    onChange={handleInputChange}
-                    placeholder="KM"
-                    required
-                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                  <input
-                    type="text"
-                    name="powerBlockRoad"
-                    value={formData.powerBlockRoad || ""}
-                    onChange={handleInputChange}
-                    placeholder="Road No."
-                    required
-                    className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
-                  />
-                </div>
-               <div className="col-span-1">
-                <span className="text-black font-bold text-2xl">Assign To</span>
-                  
+                )}
+              </div>
+              {/* Activity dropdown */}
+            </div>
+          )}
+
+
+          {userDepartment !== "TRD" && (
+            <div className="flex flex-col gap-2 border-2 border-[#b6e6c6] shadow rounded-2xl px-4 py-2 bg-white">
+              {/* Fresh Caution Section */}
+              <div className="w-full mt-2 bg-fuchsia-100 rounded-2xl ">
+                <div className="flex justify-between items-center mb-1 bg-fuchsia-300  rounded-2xl  px-2">
+                  <span className="text-black font-bold text-[24px] ">
+                    Fresh Caution Needed?
+                  </span>
                   <select
-                    name="powerBlockDisconnectionAssignTo"
-                    value={formData.powerBlockDisconnectionAssignTo || ""}
+                    name="freshCautionRequired"
+                    value={formData.freshCautionRequired ? "Y" : "N"}
                     onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        powerBlockDisconnectionAssignTo: e.target.value,
-                      }))
+                      setFormData({
+                        ...formData,
+                        freshCautionRequired: e.target.value === "Y",
+                      })
                     }
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black py-2 px-1 w-full text-2xl"
-                    required
+                    className="ml-2 pr-8 border-2  border-black rounded 
+                  px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
                     style={{
-                      color: "black",
-                      borderColor: errors.powerBlockDisconnectionAssignTo
-                        ? "#dc2626"
-                        : "#45526c",
+                      appearance: "none",
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 0.5rem center",
+                      backgroundSize: "1.2rem",
                     }}
                   >
-                    <option value="" disabled>
-                      Select Depo
-                    </option>
-                    {selectedMajorSection &&
-                    session?.user.department &&
-                    depot[selectedMajorSection] &&
-                    depot[selectedMajorSection]["TRD"] ? (
-                      depot[selectedMajorSection]["TRD"].map(
-                        (depotOption: string, index) => (
-                          <option key={index} value={depotOption}>
-                            {depotOption}
-                          </option>
-                        )
-                      )
-                    ) : (
-                      <option value="" disabled>
-                        Select Major Section first
-                      </option>
-                    )}
+                    <option value="N">N</option>
+                    <option value="Y">Y</option>
                   </select>
-                  {errors.powerBlockDisconnectionAssignTo && (
-                    <span className="text-xs text-red-700 font-medium mt-1 block">
-                      {errors.powerBlockDisconnectionAssignTo}
-                    </span>
-                  )}
+                  {renderError("freshCautionRequired")}
                 </div>
+                {/* ───── Fresh Caution ───── */}
+                {/* {false && ( */}
+
+                {formData.freshCautionRequired && (
+                  <div className="flex flex-col gap-2 mt-2 pb-2">
+                    {formData.freshCautions.map((caution, idx) => (
+                      <div
+                        key={idx}
+                        className="flex flex-row flex-wrap gap-1 bg-[#fffbe9] border-2 border-[#b71c1c] rounded items-center p-1"
+                        style={{ fontSize: "24px", fontWeight: "bold" }}
+                      >
+                        {/* ◼︎ Direction / Road */}
+                        <input
+                          list={`adjacentLinesList-${idx}`}
+                          value={caution.adjacentLinesAffected}
+                          onChange={(e) =>
+                            handleFreshCautionChange(
+                              idx,
+                              "adjacentLinesAffected",
+                              e.target.value
+                            )
+                          }
+                          placeholder="UP/DN/SL/Road No."
+                          required
+                          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-28 text-2xl"
+                        />
+                        <datalist id={`adjacentLinesList-${idx}`}>
+                          {blockSectionValue.flatMap((block) => {
+                            const isYard = block.includes("-YD");
+                            return isYard
+                              ? getAllRoadsForYard(block).map((r) => (
+                                  <option key={r} value={r} />
+                                ))
+                              : (
+                                  lineData[block as keyof typeof lineData] || []
+                                ).map((l) => <option key={l} value={l} />);
+                          })}
+                        </datalist>
+
+                        {/* ◼︎ KM From / To */}
+                        <input
+                          value={caution.freshCautionLocationFrom}
+                          onChange={(e) =>
+                            handleFreshCautionChange(
+                              idx,
+                              "freshCautionLocationFrom",
+                              e.target.value
+                            )
+                          }
+                          placeholder="KM"
+                          required
+                          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                        />
+                        <span className="px-1 text-2xl text-black">to</span>
+                        <input
+                          value={caution.freshCautionLocationTo}
+                          onChange={(e) =>
+                            handleFreshCautionChange(
+                              idx,
+                              "freshCautionLocationTo",
+                              e.target.value
+                            )
+                          }
+                          placeholder="KM"
+                          required
+                          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                        />
+
+                        {/* ◼︎ Speed */}
+                        <input
+                          type="number"
+                          value={caution.freshCautionSpeed}
+                          onChange={(e) =>
+                            handleFreshCautionChange(
+                              idx,
+                              "freshCautionSpeed",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Speed"
+                          required
+                          className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 flex-1 text-2xl"
+                        />
+
+                        {/* ◼︎ Remove */}
+                        {formData.freshCautions.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeFreshCaution(idx)}
+                            className="px-2 py-1 text-2xl bg-red-600 text-white rounded"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* ➕ Add Button */}
+                    <button
+                      type="button"
+                      onClick={addFreshCaution}
+                      className="self-center px-2 py-1  bg-green-600 text-white rounded text-2xl font-semibold"
+                    >
+                      + Add Fresh Caution
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* S&T Disconnection Section */}
-          <div className="w-full mt-2 bg-teal-200 rounded-2xl">
-            <div className="flex justify-between items-center mb-1 bg-teal-400 rounded-2xl  px-2">
-              <span className="text-black font-bold text-[24px]">
-                S&T Disconnection Needed?
-              </span>
-              <select
-                name="sntDisconnectionRequired"
-                value={formData.sntDisconnectionRequired ? "Y" : "N"}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sntDisconnectionRequired: e.target.value === "Y",
-                  })
-                }
-                className="ml-2 pr-8 border-2  border-black rounded 
-                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
-                style={{
-                  appearance: "none",
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "1.2rem",
-                }}
-              >
-                <option value="N">N</option>
-                <option value="Y">Y</option>
-              </select>
-              {renderError("sntDisconnectionRequired")}
-            </div>
-            {/* ───── S&T Disconnection ───── */}
-            {formData.sntDisconnectionRequired && (
-              <div className="flex flex-col items-center gap-2 mt-2 pb-2">
-                <div className="flex flex-row flex-wrap gap-1 w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-  {/* Point No. Section */}
-  <div className="w-full bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2">
-    <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
-      Point No.
-    </label>
-    <div className="flex flex-col gap-1">
-      {(formData.sntDisconnectionPointNo?.split(",") || [""]).map((point, index, arr) => (
-        <div className="flex items-center gap-1 relative group" key={index}>
-          <input
-            type="text"
-            value={point}
-            onChange={e => {
-              const points = [...(formData.sntDisconnectionPointNo?.split(",") || [])];
-              points[index] = e.target.value;
-              handleInputChange({
-                target: {
-                  name: "sntDisconnectionPointNo",
-                  value: points.filter((p) => p.trim() !== "").join(","),
-                }
-              } as React.ChangeEvent<HTMLInputElement>);
-            }}
-            placeholder={`Point No. ${index + 1}`}
-            required
-            className="w-full border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 text-2xl"
-          />
-          {arr.length > 1 && (
-            <button
-              type="button"
-              aria-label="Remove point"
-              onClick={() => {
-                const points = formData.sntDisconnectionPointNo?.split(",") || [];
-                const updated = points.filter((_, i) => i !== index);
-                handleInputChange({
-                  target: {
-                    name: "sntDisconnectionPointNo",
-                    value: updated.join(","),
-                  }
-                } as React.ChangeEvent<HTMLInputElement>);
-              }}
-              className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
-              style={{ lineHeight: 0 }}
-            >
-              <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                <circle cx="10" cy="10" r="10" fill="#fff" />
-                <path d="M6 6l8 8M14 6l-8 8" stroke="#b71c1c" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
-        </div>
-      ))}
-      {(formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "").length || 0) < 2 && (
-        <button
-          type="button"
-          onClick={() => {
-            const points = formData.sntDisconnectionPointNo?.split(",").filter(p => p.trim() !== "") || [];
-            points.push("");
-            handleInputChange({
-              target: {
-                name: "sntDisconnectionPointNo",
-                value: points.join(","),
-              }
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
-        >
-          <svg width="18" height="18" fill="none" viewBox="0 0 20 20">
-            <circle cx="10" cy="10" r="10" fill="#fff" />
-            <path d="M10 5v10M5 10h10" stroke="#166534" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          Add Point
-        </button>
-      )}
-    </div>
-  </div>
-
-  {/* Signal No. Section */}
-  <div className="w-full bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2">
-    <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
-      Signal No.
-    </label>
-    <div className="flex flex-col gap-1">
-      {(formData.sntDisconnectionSignalNo?.split(",") || [""]).map((point, index, arr) => (
-        <div className="flex items-center gap-1 relative group" key={index}>
-          <input
-            type="text"
-            value={point}
-            onChange={e => {
-              const points = [...(formData.sntDisconnectionSignalNo?.split(",") || [])];
-              points[index] = e.target.value;
-              handleInputChange({
-                target: {
-                  name: "sntDisconnectionSignalNo",
-                  value: points.filter((p) => p.trim() !== "").join(","),
-                }
-              } as React.ChangeEvent<HTMLInputElement>);
-            }}
-            placeholder={`Signal No. ${index + 1}`}
-            required
-            className="w-full border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 text-2xl"
-          />
-          {arr.length > 1 && (
-            <button
-              type="button"
-              aria-label="Remove point"
-              onClick={() => {
-                const points = formData.sntDisconnectionSignalNo?.split(",") || [];
-                const updated = points.filter((_, i) => i !== index);
-                handleInputChange({
-                  target: {
-                    name: "sntDisconnectionSignalNo",
-                    value: updated.join(","),
-                  }
-                } as React.ChangeEvent<HTMLInputElement>);
-              }}
-              className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
-              style={{ lineHeight: 0 }}
-            >
-              <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                <circle cx="10" cy="10" r="10" fill="#fff" />
-                <path d="M6 6l8 8M14 6l-8 8" stroke="#b71c1c" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
-        </div>
-      ))}
-      {(formData.sntDisconnectionSignalNo?.split(",").filter(p => p.trim() !== "").length || 0) < 2 && (
-        <button
-          type="button"
-          onClick={() => {
-            const points = formData.sntDisconnectionSignalNo?.split(",").filter(p => p.trim() !== "") || [];
-            points.push("");
-            handleInputChange({
-              target: {
-                name: "sntDisconnectionSignalNo",
-                value: points.join(","),
-              }
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
-        >
-          <svg width="18" height="18" fill="none" viewBox="0 0 20 20">
-            <circle cx="10" cy="10" r="10" fill="#fff" />
-            <path d="M10 5v10M5 10h10" stroke="#166534" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          Add Signal
-        </button>
-      )}
-    </div>
-  </div>
-</div>
-
-                </div>
-                
-                <div className="flex flex-row flex-wrap gap-1 w-full">
-                  <span className="text-black font-bold text-2xl">
-                    Assign To:
+              {/* Power Block Section */}
+              <div className="w-full mt-2 bg-indigo-200 rounded-2xl">
+                <div className="flex justify-between items-center mb-1 bg-indigo-400  rounded-2xl  px-2">
+                  <span className="text-black font-bold text-[24px]">
+                    Power Block Needed?
                   </span>
                   <select
-                    name="sntDisconnectionAssignTo"
-                    value={formData.sntDisconnectionAssignTo}
-                    onChange={handleInputChange}
-                    required
-                    className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
+                    name="powerBlockRequired"
+                    value={formData.powerBlockRequired ? "Y" : "N"}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        powerBlockRequired: e.target.value === "Y",
+                      })
+                    }
+                    className="ml-2 pr-8 border-2  border-black  
+                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
+                    style={{
+                      appearance: "none",
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 0.5rem center",
+                      backgroundSize: "1.2rem",
+                    }}
                   >
-                    <option value="" disabled>
-                  Select Depo
-                </option>
-                {selectedMajorSection &&
-                session?.user.department &&
-                depot[selectedMajorSection] &&
-                depot[selectedMajorSection]["S&T"] ? (
-                  depot[selectedMajorSection]["S&T"].map(
-                    (depotOption: string, index) => (
-                      <option key={index} value={depotOption}>
-                        {depotOption}
-                      </option>
-                    )
-                  )
-                ) : (
-                  <option value="" disabled>
-                    Select Major Section first
-                  </option>
-                )}
+                    <option value="N">N</option>
+                    <option value="Y">Y</option>
                   </select>
-                  {errors.sntDisconnectionAssignTo && (
-                <span className="text-xs text-red-700 font-medium mt-1 block">
-                  {errors.sntDisconnectionAssignTo}
-                </span>
-              )}
+                  {renderError("powerBlockRequired")}
                 </div>
+                {/* ───── Power Block ───── */}
+                {formData.powerBlockRequired && (
+                  <div className="flex flex-col gap-2 mt-2 pb-2">
+                    <div className="flex flex-row flex-wrap gap-1">
+                      <input
+                        type="number"
+                        name="powerBlockKmFrom"
+                        value={formData.powerBlockKmFrom || ""}
+                        onChange={handleInputChange}
+                        placeholder="KM"
+                        required
+                        className="flex-1 border-2  border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                      />
+                      <span className="text-black font-bold text-2xl">to</span>
+                      <input
+                        type="number"
+                        name="powerBlockKmTo"
+                        value={formData.powerBlockKmTo || ""}
+                        onChange={handleInputChange}
+                        placeholder="KM"
+                        required
+                        className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                      />
+                      <input
+                        type="text"
+                        name="powerBlockRoad"
+                        value={formData.powerBlockRoad || ""}
+                        onChange={handleInputChange}
+                        placeholder="Road No."
+                        required
+                        className=" flex-1 border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-12 text-2xl"
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <span className="text-black font-bold text-2xl">
+                        Assign To
+                      </span>
+
+                      <select
+                        name="powerBlockDisconnectionAssignTo"
+                        value={formData.powerBlockDisconnectionAssignTo || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            powerBlockDisconnectionAssignTo: e.target.value,
+                          }))
+                        }
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black py-2 px-1 w-full text-2xl"
+                        required
+                        style={{
+                          color: "black",
+                          borderColor: errors.powerBlockDisconnectionAssignTo
+                            ? "#dc2626"
+                            : "#45526c",
+                        }}
+                      >
+                        <option value="" disabled>
+                          Select Depo
+                        </option>
+                        {selectedMajorSection &&
+                        session?.user.department &&
+                        depot[selectedMajorSection] &&
+                        depot[selectedMajorSection]["TRD"] ? (
+                          depot[selectedMajorSection]["TRD"].map(
+                            (depotOption: string, index) => (
+                              <option key={index} value={depotOption}>
+                                {depotOption}
+                              </option>
+                            )
+                          )
+                        ) : (
+                          <option value="" disabled>
+                            Select Major Section first
+                          </option>
+                        )}
+                      </select>
+                      {errors.powerBlockDisconnectionAssignTo && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.powerBlockDisconnectionAssignTo}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          </div>
+
+              {/* S&T Disconnection Section */}
+              <div className="w-full mt-2 bg-teal-200 rounded-2xl">
+                <div className="flex justify-between items-center mb-1 bg-teal-400 rounded-2xl  px-2">
+                  <span className="text-black font-bold text-[24px]">
+                    S&T Disconnection Needed?
+                  </span>
+                  <select
+                    name="sntDisconnectionRequired"
+                    value={formData.sntDisconnectionRequired ? "Y" : "N"}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        sntDisconnectionRequired: e.target.value === "Y",
+                      })
+                    }
+                    className="ml-2 pr-8 border-2  border-black rounded 
+                px-1 my-3 text-2xl font-bold bg-white text-black placeholder-black"
+                    style={{
+                      appearance: "none",
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23000' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 0.5rem center",
+                      backgroundSize: "1.2rem",
+                    }}
+                  >
+                    <option value="N">N</option>
+                    <option value="Y">Y</option>
+                  </select>
+                  {renderError("sntDisconnectionRequired")}
+                </div>
+                {/* ───── S&T Disconnection ───── */}
+                {formData.sntDisconnectionRequired && (
+                  <div className="flex flex-col items-center gap-2 mt-2 pb-2">
+                    <div className="flex flex-row flex-wrap gap-1 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                        {/* Point No. Section */}
+                        <div className="w-full bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2">
+                          <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
+                            Point No.
+                          </label>
+                          <div className="flex flex-col gap-1">
+                            {(
+                              formData.sntDisconnectionPointNo?.split(",") || [
+                                "",
+                              ]
+                            ).map((point, index, arr) => (
+                              <div
+                                className="flex items-center gap-1 relative group"
+                                key={index}
+                              >
+                                <input
+                                  type="text"
+                                  value={point}
+                                  onChange={(e) => {
+                                    const points = [
+                                      ...(formData.sntDisconnectionPointNo?.split(
+                                        ","
+                                      ) || []),
+                                    ];
+                                    points[index] = e.target.value;
+                                    handleInputChange({
+                                      target: {
+                                        name: "sntDisconnectionPointNo",
+                                        value: points
+                                          .filter((p) => p.trim() !== "")
+                                          .join(","),
+                                      },
+                                    } as React.ChangeEvent<HTMLInputElement>);
+                                  }}
+                                  placeholder={`Point No. ${index + 1}`}
+                                  required
+                                  className="w-full border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 text-2xl"
+                                />
+                                {arr.length > 1 && (
+                                  <button
+                                    type="button"
+                                    aria-label="Remove point"
+                                    onClick={() => {
+                                      const points =
+                                        formData.sntDisconnectionPointNo?.split(
+                                          ","
+                                        ) || [];
+                                      const updated = points.filter(
+                                        (_, i) => i !== index
+                                      );
+                                      handleInputChange({
+                                        target: {
+                                          name: "sntDisconnectionPointNo",
+                                          value: updated.join(","),
+                                        },
+                                      } as React.ChangeEvent<HTMLInputElement>);
+                                    }}
+                                    className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    style={{ lineHeight: 0 }}
+                                  >
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      fill="none"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <circle
+                                        cx="10"
+                                        cy="10"
+                                        r="10"
+                                        fill="#fff"
+                                      />
+                                      <path
+                                        d="M6 6l8 8M14 6l-8 8"
+                                        stroke="#b71c1c"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            {(formData.sntDisconnectionPointNo
+                              ?.split(",")
+                              .filter((p) => p.trim() !== "").length || 0) <
+                              2 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const points =
+                                    formData.sntDisconnectionPointNo
+                                      ?.split(",")
+                                      .filter((p) => p.trim() !== "") || [];
+                                  points.push("");
+                                  handleInputChange({
+                                    target: {
+                                      name: "sntDisconnectionPointNo",
+                                      value: points.join(","),
+                                    },
+                                  } as React.ChangeEvent<HTMLInputElement>);
+                                }}
+                                className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
+                              >
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  fill="none"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <circle cx="10" cy="10" r="10" fill="#fff" />
+                                  <path
+                                    d="M10 5v10M5 10h10"
+                                    stroke="#166534"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                Add Point
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Signal No. Section */}
+                        <div className="w-full bg-[#f8fafc] border border-[#b71c1c] rounded-lg p-2">
+                          <label className="text-black font-bold text-2xl mb-3 flex items-center gap-2">
+                            Signal No.
+                          </label>
+                          <div className="flex flex-col gap-1">
+                            {(
+                              formData.sntDisconnectionSignalNo?.split(",") || [
+                                "",
+                              ]
+                            ).map((point, index, arr) => (
+                              <div
+                                className="flex items-center gap-1 relative group"
+                                key={index}
+                              >
+                                <input
+                                  type="text"
+                                  value={point}
+                                  onChange={(e) => {
+                                    const points = [
+                                      ...(formData.sntDisconnectionSignalNo?.split(
+                                        ","
+                                      ) || []),
+                                    ];
+                                    points[index] = e.target.value;
+                                    handleInputChange({
+                                      target: {
+                                        name: "sntDisconnectionSignalNo",
+                                        value: points
+                                          .filter((p) => p.trim() !== "")
+                                          .join(","),
+                                      },
+                                    } as React.ChangeEvent<HTMLInputElement>);
+                                  }}
+                                  placeholder={`Signal No. ${index + 1}`}
+                                  required
+                                  className="w-full border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 text-2xl"
+                                />
+                                {arr.length > 1 && (
+                                  <button
+                                    type="button"
+                                    aria-label="Remove point"
+                                    onClick={() => {
+                                      const points =
+                                        formData.sntDisconnectionSignalNo?.split(
+                                          ","
+                                        ) || [];
+                                      const updated = points.filter(
+                                        (_, i) => i !== index
+                                      );
+                                      handleInputChange({
+                                        target: {
+                                          name: "sntDisconnectionSignalNo",
+                                          value: updated.join(","),
+                                        },
+                                      } as React.ChangeEvent<HTMLInputElement>);
+                                    }}
+                                    className="text-red-600 hover:text-white hover:bg-red-600 rounded-full p-1 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                    style={{ lineHeight: 0 }}
+                                  >
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      fill="none"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <circle
+                                        cx="10"
+                                        cy="10"
+                                        r="10"
+                                        fill="#fff"
+                                      />
+                                      <path
+                                        d="M6 6l8 8M14 6l-8 8"
+                                        stroke="#b71c1c"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            {(formData.sntDisconnectionSignalNo
+                              ?.split(",")
+                              .filter((p) => p.trim() !== "").length || 0) <
+                              2 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const points =
+                                    formData.sntDisconnectionSignalNo
+                                      ?.split(",")
+                                      .filter((p) => p.trim() !== "") || [];
+                                  points.push("");
+                                  handleInputChange({
+                                    target: {
+                                      name: "sntDisconnectionSignalNo",
+                                      value: points.join(","),
+                                    },
+                                  } as React.ChangeEvent<HTMLInputElement>);
+                                }}
+                                className="flex items-center gap-1 mt-2 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-base font-semibold rounded shadow hover:from-green-700 hover:to-green-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-400"
+                              >
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  fill="none"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <circle cx="10" cy="10" r="10" fill="#fff" />
+                                  <path
+                                    d="M10 5v10M5 10h10"
+                                    stroke="#166534"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                                Add Signal
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row flex-wrap gap-1 w-full">
+                      <span className="text-black font-bold text-2xl">
+                        Assign To:
+                      </span>
+                      <select
+                        name="sntDisconnectionAssignTo"
+                        value={formData.sntDisconnectionAssignTo}
+                        onChange={handleInputChange}
+                        required
+                        className="border-2 border-[#b71c1c] bg-[#fffbe9] text-black placeholder-black px-1 w-full text-2xl"
+                      >
+                        <option value="" disabled>
+                          Select Depo
+                        </option>
+                        {selectedMajorSection &&
+                        session?.user.department &&
+                        depot[selectedMajorSection] &&
+                        depot[selectedMajorSection]["S&T"] ? (
+                          depot[selectedMajorSection]["S&T"].map(
+                            (depotOption: string, index) => (
+                              <option key={index} value={depotOption}>
+                                {depotOption}
+                              </option>
+                            )
+                          )
+                        ) : (
+                          <option value="" disabled>
+                            Select Major Section first
+                          </option>
+                        )}
+                      </select>
+                      {errors.sntDisconnectionAssignTo && (
+                        <span className="text-xs text-red-700 font-medium mt-1 block">
+                          {errors.sntDisconnectionAssignTo}
+                        </span>
+                      )}
+
+                      {/* {false && ( */}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Remarks */}
           <div className="flex flex-row flex-wrap gap-1">
-            <span className="text-black font-bold text-[24px]">
-              Remarks:
-            </span>
+            <span className="text-black font-bold text-[24px]">Remarks:</span>
             <textarea
               name="remarks"
               value={formData.remarks || ""}
@@ -3558,39 +3904,43 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               Back
             </button>
             {showPopup && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/20">
-              <div className="bg-white p-4 rounded shadow-lg w-[90%] max-w-sm text-center border border-gray-300">
-              <h2 className="text-lg font-semibold mb-2 text-black">Pending Block</h2>
-                <p className="text-sm text-gray-700 mb-4">
-                  You already have a sanctioned block pending availing.
-                </p>
-                <div className="flex justify-center gap-3">
-                  <button
-                    onClick={() => {
-                      setShowPopup(false);
-                      setProceedAnyway(true);
-                      // Re-trigger the submit or logic
-                      // handleFormSubmit; // Call the same handler again
-                    }}
+              <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/20">
+                <div className="bg-white p-4 rounded shadow-lg w-[90%] max-w-sm text-center border border-gray-300">
+                  <h2 className="text-lg font-semibold mb-2 text-black">
+                    Availed Status Not Entered
+                  </h2>
+                  <p className="text-sm text-gray-700 mb-4">
+                    You already have a sanctioned block for which availing is pending.
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => {
+                        setShowPopup(false);
+                        setProceedAnyway(true);
+                        // Re-trigger the submit or logic
+                        // handleFormSubmit; // Call the same handler again
+                      }}
                       className="bg-gray-300 text-black px-4 py-1 rounded hover:bg-gray-400"
-                  >
-                    Proceed 
-                  </button>
-                  <button
-                    onClick={() => {
-                      window.open(popupLink, "_blank");
-                      setShowPopup(false);
-                    }}
-                    className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-                  >
-                    Go to Avail Page
-                  </button>
+                    >
+                      Proceed
+                    </button>
+                    <button
+                      onClick={() => {
+                        window.open(popupLink, "_blank");
+                        setShowPopup(false);
+                      }}
+                      className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                    >
+                      Go to Avail Page
+                    </button>
+                  </div>
+                  <div className="text-sm text-orange-700 mt-4">
+                    Proceed is available only because the Rolling Block
+                    Authorization app is under construction.{" "}
+                  </div>
                 </div>
-                <div className="text-sm text-orange-700 mt-4">
-                  Proceed is available only because the Rolling Block Authorization app is under construction.                </div>
               </div>
-            </div>
-          )}
+            )}
 
             {showReviewModal && (
               <ReviewBlockRequestModal
@@ -3600,7 +3950,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                   setReviewMode(true);
                   setShowReviewModal(false);
                   // Programmatically submit the form
-                  const form = document.querySelector('form');
+                  const form = document.querySelector("form");
                   if (form) form.requestSubmit();
                 }}
                 formData={formData}
@@ -3611,34 +3961,33 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 formSubmitting={formSubmitting}
               />
             )}
-                  {reviewMode ? (
-                <button
-                  type="submit"
-                  className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
-                    formSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={formSubmitting}
-                  style={{
-
-                    borderRadius: "50%",
-                    letterSpacing: "1px",
-                    border: "none",
-                  }}
-                >
-                  {formSubmitting ? "SUBMITTING..." : "CLICK TO CONFIRM"}
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
-                    formSubmitting ? "brightness-95 cursor-not-allowed" : ""
-                  }`}
-                  disabled={formSubmitting}
-                >
-                  {formSubmitting ? "SUBMITTING..." : "SUBMIT"}
-                </button>
-              )}
-              <ToastContainer />
+            {reviewMode ? (
+              <button
+                type="submit"
+                className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
+                  formSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={formSubmitting}
+                style={{
+                  borderRadius: "50%",
+                  letterSpacing: "1px",
+                  border: "none",
+                }}
+              >
+                {formSubmitting ? "SUBMITTING..." : "CLICK TO CONFIRM"}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className={`w-full bg-[#eeb8f7] border-2 border-black rounded-[50%] max-w-72 px-6 py-2 text-lg font-extrabold text-white hover:brightness-90 ${
+                  formSubmitting ? "brightness-95 cursor-not-allowed" : ""
+                }`}
+                disabled={formSubmitting}
+              >
+                {formSubmitting ? "SUBMITTING..." : "SUBMIT"}
+              </button>
+            )}
+            <ToastContainer />
           </div>
         </form>
       </div>
