@@ -2912,6 +2912,86 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
             </div>
           </div>
 
+
+          {/*  TODO:    remove "!" should be only for snt */}
+          {userDepartment === "S&T" &&
+            <div className="flex flex-row items-center gap-4 w-full pl-1">
+              <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
+                <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">Route</span>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <input
+                    type="text"
+                    name="routeFrom"
+                    value={formData.routeFrom || ""}
+                    onChange={handleInputChange}
+                    placeholder="From"
+                    className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                    required
+                  />
+                  <span className="font-bold text-[#2c3e50] text-[24px]">to</span>
+                  <input
+                    type="text"
+                    name="routeTo"
+                    value={formData.routeTo || ""}
+                    onChange={handleInputChange}
+                    placeholder="To"
+                    className="border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          }
+
+
+          {/*  TODO:    remove "!" should be only for trd */}
+          { userDepartment === "TRD" &&   
+          <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
+            {/* Type of Work dropdown */}
+            <div className="flex-1 pr-2 border-r-2 border-slate-400">
+              <label htmlFor="elementarySection" className="block text-[24px] text-nowrap font-bold text-black mb-2">Elementary Section</label>
+              <input
+                    id="elementarySection"
+                    name="elementarySection"
+                    value={formData.elementarySection || ""}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Elementary Section"
+                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                    aria-label="Route from location"
+                  />
+              {errors.elementarySection && (
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
+                  {errors.elementarySection}
+                </span>
+              )}
+            </div>
+            {/* Activity dropdown */}
+            <div className="flex-1 pl-2">
+              <label htmlFor="trdWorkLocation" className="block text-[24px] font-bold text-black mb-2">Work Location</label>
+              <input
+                    id="trdWorkLocation"
+                    name="trdWorkLocation"
+                    value={formData.trdWorkLocation || ""}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Work Location"
+                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                    aria-label="Route to location"
+                  />
+
+              {errors.trdWorkLocation && (
+                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
+                  {errors.trdWorkLocation}
+                </span>
+              )}
+            </div>
+          </div>
+
+          }
+
+
+
           {/* Type of Work and Activity - horizontal, pastel green */}
           <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
             {/* Type of Work dropdown */}
