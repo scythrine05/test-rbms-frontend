@@ -2024,7 +2024,7 @@ export default function OptimiseTablePage() {
     },
     { minDate: null, maxDate: null }
   );
-  console.log(minDate, maxDate);
+  // console.log(minDate, maxDate);
   // const [selectedDate, setSelectedDate] = useState<Date>(minDate);
   const [selectedDate, setSelectedDate] = useState<Date>(
     startOfWeek(currentWeekStart, { weekStartsOn: 1 })
@@ -2058,7 +2058,7 @@ const pendingRequests = (data?.data?.requests || []).filter((request: UserReques
   return reqDate >= today;
 });
 
-console.log("pendingRequests.length", pendingRequests.length);
+// console.log("pendingRequests.length", pendingRequests.length);
   // Group and sort
   // const urgentRequests = pendingRequests
   //   .filter((r: UserRequest) => r.corridorType === "Urgent Block" || r.workType === "EMERGENCY")
@@ -2273,13 +2273,11 @@ const nonCorridorRequestsFiltered = pendingRequests
     }
   };
 
-  const handleSendUrgentRequests = async () => {
+  const handleSendUrgentRequests = async (requests : UserRequest[]) => {
     try {
       const UrgentRequestsData =
-        data?.data?.requests
-          ?.filter(
+        requests?.filter(
             (request: UserRequest) =>
-              request.corridorType === "Urgent Block" &&
               request.optimizeTimeFrom != null &&
               request.optimizeTimeTo != null
           )
@@ -2309,14 +2307,12 @@ const nonCorridorRequestsFiltered = pendingRequests
     }
   };
 
-  const handleSendNonUrgentRequests = async () => {
+  const handleSendNonUrgentRequests = async (requests : UserRequest[]) => {
     try {
       // Only send the required fields for each non-urgent request
       const nonUrgentRequestsData =
-        data?.data?.requests
-          ?.filter(
+        requests?.filter(
             (request: UserRequest) =>
-              request.corridorType !== "Urgent Block" &&
               request.optimizeTimeFrom != null &&
               request.optimizeTimeTo != null
           )
@@ -2390,12 +2386,13 @@ const nonCorridorRequestsFiltered = pendingRequests
   };
 
   const handleOptimize = async () => {
-    if (!data?.data?.requests) return;
 
+    const preData = isUrgentRequests ? urgentRequestDate : [...corridorRequestsFiltered, ...  nonCorridorRequestsFiltered]
+    if (!preData) return;
     try {
       // Preprocess the requests
       //const preprocessedRequests = await flattenRecords(data.data.requests);
-      const requestsToOptimize = data.data.requests.filter(
+      const requestsToOptimize = preData.filter(
         (request: UserRequest) => {
           const requestDate = format(parseISO(request.date), "yyyy-MM-dd");
           const selected = format(selectedDate, "yyyy-MM-dd");
@@ -2677,6 +2674,12 @@ const nonCorridorRequestsFiltered = pendingRequests
               Optimise
             </button>
           </div>
+          <DaySwitcher
+            currentDate={selectedDate}
+            onDateChange={(newDate) => setSelectedDate(newDate)}
+            minDate={startOfWeek(currentWeekStart, { weekStartsOn: 1 })}
+            maxDate={addDays(weekStart, 7)}
+          />
           <div className="overflow-x-auto max-h-[70vh] overflow-y-auto rounded-lg border border-gray-300 shadow-sm mt-4">
             <table className="w-full border-collapse text-black bg-white">
               <thead className={`sticky top-0 ${showRejectionModal ? "z-0" : "z-10"} bg-gray-100 shadow`}>
@@ -2694,12 +2697,12 @@ const nonCorridorRequestsFiltered = pendingRequests
                 </tr>
               </thead>
               <tbody>
-                {urgentRequests.length === 0 && (
+                {urgentRequestDate.length === 0 && (
                   <tr>
                     <td colSpan={11} className="border border-black p-2 text-[24px] text-left">No requests found.</td>
                   </tr>
                 )}
-                {urgentRequests.map((request: UserRequest) => (
+                {urgentRequestDate.map((request: UserRequest) => (
                   <tr key={`request-${request.id}-${request.date}`} className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo ? "bg-green-50" : ""}`}>
                     <td className="border border-black p-2 text-[24px]">{dayjs(request.date).format("DD-MM-YY")}</td>
                     <td className="border border-black p-2 text-[24px]">{request.selectedDepartment}</td>
@@ -2712,7 +2715,9 @@ const nonCorridorRequestsFiltered = pendingRequests
                     <td className="border border-black p-2 text-[24px]">{request.activity}</td>
                     <td className="border border-black p-2 text-[24px]">
                       <div className="flex gap-2">
-                        {editingId === request.id ? (
+                        {request.optimizeStatus === false ? (
+                          <span>Not Yet Optimized</span>
+                        ) : editingId === request.id ? (
                           <>
                             <button
                               onClick={() => handleUpdateClick(request.id)}
@@ -2755,24 +2760,18 @@ const nonCorridorRequestsFiltered = pendingRequests
                               className="px-2 py-1 text-[24px] bg-green-600 text-white border border-black rounded"
                               onClick={
                                 () => {
-                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
-                                    handleSendUrgentRequests();
-                                  } else {
-                                    handleSendNonUrgentRequests();
-                                  }
+                                    handleSendUrgentRequests([request]);
                                 }
                               }
                             >
                               Sanction
                             </button>
-                            {shouldShowRejectButton(request) && (
                               <button
                                 className="px-2 py-1 text-[24px] bg-gray-300 text-black border border-black rounded"
-                                onClick={() => setModifyReturnOpenId(request.id)}
+                                onClick={() => handleEditClick(request)}
                               >
                                 Modify/Return
                               </button>
-                            )}
                           </>
                         )}
                       </div>
@@ -2932,7 +2931,9 @@ const nonCorridorRequestsFiltered = pendingRequests
 
                     <td className="border border-black p-2 text-[24px]">
                       <div className="flex gap-2">
-                        {editingId === request.id ? (
+                       {request.optimizeStatus === false ? (
+                          <span>Not Yet Optimized</span>
+                        ) : editingId === request.id ? (
                           <>
                             <button
                               onClick={() => handleUpdateClick(request.id)}
@@ -2975,24 +2976,18 @@ const nonCorridorRequestsFiltered = pendingRequests
                               className="px-2 py-1 text-[24px] bg-green-600 text-white border border-black rounded"
                               onClick={
                                 () => {
-                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
-                                    handleSendUrgentRequests();
-                                  } else {
-                                    handleSendNonUrgentRequests();
-                                  }
+                                    handleSendNonUrgentRequests([request]);
                                 }
                               }
                             >
                               Sanction
                             </button>
-                            {shouldShowRejectButton(request) && (
                               <button
                                 className="px-2 py-1 text-[24px] bg-gray-300 text-black border border-black rounded"
-                                onClick={() => setModifyReturnOpenId(request.id)}
+                                onClick={() => handleEditClick(request)}
                               >
                                 Modify/Return
                               </button>
-                            )}
                           </>
                         )}
                       </div>
@@ -3133,7 +3128,9 @@ const nonCorridorRequestsFiltered = pendingRequests
 
                     <td className="border border-black p-2 text-[24px]">
                       <div className="flex gap-2">
-                        {editingId === request.id ? (
+                        {request.optimizeStatus === false ? (
+                          <span>Not Yet Optimized</span>
+                        ) : editingId === request.id ? (
                           <>
                             <button
                               onClick={() => handleUpdateClick(request.id)}
@@ -3176,24 +3173,18 @@ const nonCorridorRequestsFiltered = pendingRequests
                               className="px-2 py-1 text-[24px] bg-green-600 text-white border border-black rounded"
                               onClick={
                                 () => {
-                                  if (request.corridorType === "Urgent Block" || request.workType === "EMERGENCY") {
-                                    handleSendUrgentRequests();
-                                  } else {
-                                    handleSendNonUrgentRequests();
-                                  }
+                                    handleSendNonUrgentRequests([request]);
                                 }
                               }
                             >
                               Sanction
                             </button>
-                            {shouldShowRejectButton(request) && (
                               <button
                                 className="px-2 py-1 text-[24px] bg-gray-300 text-black border border-black rounded"
-                                onClick={() => setModifyReturnOpenId(request.id)}
+                                onClick={() => handleEditClick(request)}
                               >
                                 Modify/Return
                               </button>
-                            )}
                           </>
                         )}
                       </div>
