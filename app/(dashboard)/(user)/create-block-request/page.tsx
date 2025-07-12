@@ -658,6 +658,7 @@ export default function CreateBlockRequestPage() {
   });
   const [showPopup, setShowPopup] = useState(false);
   const [popupLink, setPopupLink] = useState("");
+  const [proceedAnyway, setProceedAnyway] = useState(false);
   // const selectedDepo = "AJJE";   //temprory fix we need to change it
   const mutation = useCreateUserRequest();
   const userLocation = session?.user.location;
@@ -989,6 +990,11 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
       return newData as FormData;
     });
+    setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
   };
 
   const getStreamDataSafely = (
@@ -1124,7 +1130,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
       }
       console.log("level 1 passed")
 
-      if (hasUnavailedSanctionedBlock) {
+      if (hasUnavailedSanctionedBlock && !proceedAnyway) {
         const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
         setPopupLink(link);
         setShowPopup(true);
@@ -2920,7 +2926,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           { userDepartment === "TRD" &&   
           <div className="w-full flex flex-row  items-center bg-[#e6f7c6] rounded-2xl p-3 mb-8 border-2 border-[#b6e6c6] shadow">
             {/* Type of Work dropdown */}
-            <div className="flex-1 pr-2 border-r-2 border-slate-400">
+            <div className="flex-1 pr-2 ">
               <label htmlFor="elementarySection" className="block text-[24px] text-nowrap font-bold text-black mb-2">Elementary Section</label>
               <input
                     id="elementarySection"
@@ -2929,7 +2935,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                     onChange={handleInputChange}
                     required
                     placeholder="Elementary Section"
-                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
+                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
                     aria-label="Route from location"
                   />
               {errors.elementarySection && (
@@ -2939,25 +2945,6 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
               )}
             </div>
             {/* Activity dropdown */}
-            <div className="flex-1 pl-2">
-              <label htmlFor="trdWorkLocation" className="block text-[24px] font-bold text-black mb-2">Work Location</label>
-              <input
-                    id="trdWorkLocation"
-                    name="trdWorkLocation"
-                    value={formData.trdWorkLocation || ""}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Work Location"
-                    className="w-full border-2 border-[#2c3e50] rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200"
-                    aria-label="Route to location"
-                  />
-
-              {errors.trdWorkLocation && (
-                <span className="text-[24px] text-[#e07a5f] font-medium mt-2 block">
-                  {errors.trdWorkLocation}
-                </span>
-              )}
-            </div>
           </div>
 
           }
@@ -3570,6 +3557,40 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
             >
               Back
             </button>
+            {showPopup && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/20">
+              <div className="bg-white p-4 rounded shadow-lg w-[90%] max-w-sm text-center border border-gray-300">
+              <h2 className="text-lg font-semibold mb-2 text-black">Pending Block</h2>
+                <p className="text-sm text-gray-700 mb-4">
+                  You already have a sanctioned block pending availing.
+                </p>
+                <div className="flex justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setShowPopup(false);
+                      setProceedAnyway(true);
+                      // Re-trigger the submit or logic
+                      // handleFormSubmit; // Call the same handler again
+                    }}
+                      className="bg-gray-300 text-black px-4 py-1 rounded hover:bg-gray-400"
+                  >
+                    Proceed 
+                  </button>
+                  <button
+                    onClick={() => {
+                      window.open(popupLink, "_blank");
+                      setShowPopup(false);
+                    }}
+                    className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                  >
+                    Go to Avail Page
+                  </button>
+                </div>
+                <div className="text-sm text-orange-700 mt-4">
+                  Proceed is available only because the Rolling Block Authorization app is under construction.                </div>
+              </div>
+            </div>
+          )}
 
             {showReviewModal && (
               <ReviewBlockRequestModal
