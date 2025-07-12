@@ -638,6 +638,7 @@ export default function CreateBlockRequestPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [blockSectionValue, setBlockSectionValue] = useState<string[]>([]);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [validCorridorType, setValidCorridorType] = useState(false);
   const [sntDisconnectionChecked, setSntDisconnectionChecked] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -893,36 +894,31 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
   // };
 
 
-  const getCorridorTypeRestrictions = (
-  dateString: string
-): {
-  urgentOnly: boolean;
-  urgentAllowed: boolean;
-  message: string;
-} => {
-  if (!dateString) {
-    return { urgentOnly: false, urgentAllowed: false, message: "" };
-  }
+  const getCorridorTypeRestrictions = (dateString: string): {
+    urgentOnly: boolean;
+    urgentAllowed: boolean;
+    message: string;
+    corridorTypeAllowed: boolean;
+  } => {
+    if (!dateString) {
+      return { urgentOnly: false, urgentAllowed: false, message: "", corridorTypeAllowed: false };
+    }
 
-  const isUrgentTimeframe = isWithinNextTwoDays(dateString);
-  const isNextWeek = isDateInNextWeek(dateString);
-  const isWeekAfterNext = isDateInWeekAfterNext(dateString); // NEW
-  const pastThursdayCutoff = isPastThursdayCutoff();
+    const isUrgentTimeframe = isWithinNextTwoDays(dateString);
+    const isNextWeek = isDateInNextWeek(dateString);
+    const pastThursdayCutoff = isPastThursdayCutoff();
+    const urgentAllowed = isUrgentTimeframe;
+    const urgentOnly = isUrgentTimeframe ;
+    const corridorTypeAllowed = !(isNextWeek && pastThursdayCutoff);
+    let message = "";
+    if (isUrgentTimeframe) {
+      message = "Dates within today and next 2 days must be Urgent Block requests.";
+    } else if (isNextWeek && pastThursdayCutoff) {
+      message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
+    }
 
-  const urgentAllowed = isUrgentTimeframe;
-  // Only apply cutoff to Week 2 (week after next)
-  const urgentOnly = isUrgentTimeframe || 
-    (isWeekAfterNext && pastThursdayCutoff);
-
-  let message = "";
-  if (isUrgentTimeframe) {
-    message = "Dates within today and next 2 days must be Urgent Block requests.";
-  } else if (isWeekAfterNext && pastThursdayCutoff) {
-    message = "Week 2 requests after Thursday 22:00 cutoff must be Urgent Block requests.";
-  }
-
-  return { urgentOnly, urgentAllowed, message };
-};
+    return { urgentOnly, urgentAllowed, message, corridorTypeAllowed };
+  };
 
 
 
@@ -1082,6 +1078,12 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // console.log("errors", errors);
+    // if(Object.keys(errors).length > 0){
+    //   toast.error(`Please check ${Object.keys(errors)[0]}`);
+    //   return;
+    // }
 
     // ─── 1. Review‑mode guard ──────────────────────────────────────────────
     if (!reviewMode) {
@@ -1385,8 +1387,8 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
     // Outside Corridor validations
     if (formData.corridorTypeSelection === "Outside Corridor") {
-      if (!formData.routeFrom) errors.routeFrom = "Route from is required";
-      if (!formData.routeTo) errors.routeTo = "Route to is required";
+      // if (!formData.routeFrom) errors.routeFrom = "Route from is required";
+      // if (!formData.routeTo) errors.routeTo = "Route to is required";
       if (!formData.nonCorridorReason)
         errors.nonCorridorReason = "Reason is required";
     }
@@ -1514,49 +1516,53 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
   // Handle date change and corridor type selection logic
   useEffect(() => {
+    setErrors((prev: any) => Object.keys(prev).reduce((newErrors, key) => {
+      if (key !== "date") newErrors[key] = prev[key];
+      return newErrors;
+    }, {} as Record<string, any>));
+
     if (!formData.date) {
+      console.log("No date selected");
       setIsDisabled(true);
-      setFormData({
-        ...formData,
-        corridorTypeSelection: null,
-      });
+      setValidCorridorType(true);
+      setFormData({ ...formData, corridorTypeSelection: null });
     } else {
-      // Calculate if the date is today, tomorrow, or day after tomorrow
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const targetDate = new Date(formData.date);
-      targetDate.setHours(0, 0, 0, 0);
-      const dayDiff = Math.floor(
-        (targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      if (dayDiff === 0 || dayDiff === 1 || dayDiff === 2) {
+      // Get corridor type restrictions based on selected date
+      const { urgentOnly, urgentAllowed, corridorTypeAllowed, message } = getCorridorTypeRestrictions(formData.date);
+
+      if (urgentOnly) {
+        // If urgent block is required, disable other options and set to Urgent
+        console.log("PPPPPPurgentOnly", urgentOnly);
         setIsDisabled(true);
+        setValidCorridorType(true);
         setFormData({
           ...formData,
           corridorTypeSelection: "Urgent Block",
         });
-      } else {
-        // Existing restrictions (keep as before)
-        const { urgentOnly, urgentAllowed } = getCorridorTypeRestrictions(
-          formData.date
-        );
-        if (urgentOnly) {
-          setIsDisabled(true);
+      }
+      else if (!corridorTypeAllowed) {
+        // If corridor type is not allowed, disable other options and set to null
+        console.log("PPPPPPcorridorTypeAllowed", corridorTypeAllowed);
+        setIsDisabled(true);
+        setValidCorridorType(false);
+        setFormData({
+          ...formData,
+          corridorTypeSelection: null,
+        });
+        console.log("setting error", corridorTypeAllowed);
+        setErrors((prev: any) => ({ ...prev, date: 'Not a valid date' }));
+      }
+      else {
+        // Otherwise, normal options are available
+        console.log("PPPPPPurgentAllowed", urgentAllowed);
+        setIsDisabled(false);
+        setValidCorridorType(true);
+        // If user had Urgent Block selected but it's not allowed, reset selection
+        if (formData.corridorTypeSelection === "Urgent Block" && !urgentAllowed) {
           setFormData({
             ...formData,
-            corridorTypeSelection: "Urgent Block",
+            corridorTypeSelection: null,
           });
-        } else {
-          setIsDisabled(false);
-          if (
-            formData.corridorTypeSelection === "Urgent Block" &&
-            !urgentAllowed
-          ) {
-            setFormData({
-              ...formData,
-              corridorTypeSelection: null,
-            });
-          }
         }
       }
     }
@@ -2404,28 +2410,49 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                 {formData.date && (
                   <div className="flex flex-row items-center gap-2 ml-2">
                   {/* <label className="text-[22px] font-bold text-black mr-2">Type:</label> */}
-                  {isDisabled ? (
-                    <span className="px-5 py-2 rounded-lg bg-[#f7a1a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">
-                      U
-                    </span>
-                  ) : (
-                    <div className="flex flex-row gap-2">
-                    <button
-                      type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Corridor' ? 'bg-[#e6f7c6] border-black text-black' : 'bg-white border-[#b6e6c6] text-[#888]'}`}
-                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Corridor' } } as any)}
-                    >
-                      C
-                    </button>
-                    <button
-                      type="button"
-                      className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${formData.corridorTypeSelection === 'Outside Corridor' ? 'bg-[#ffe082] border-black text-black' : 'bg-white border-[#ffe082] text-[#888]'}`}
-                      onClick={() => handleInputChange({ target: { name: 'corridorTypeSelection', value: 'Outside Corridor' } } as any)}
-                    >
-                      NC
-                    </button>
-                    </div>
-                  )}
+                  {validCorridorType ? (
+                    isDisabled ? (
+                      <span className="px-5 py-2 rounded-lg bg-[#f7a1a1] border-2 border-black text-[24px] font-extrabold text-black shadow-sm">
+                        U
+                      </span>
+                    ) : (
+                      <div className="flex flex-row gap-2">
+                        <button
+                          type="button"
+                          className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
+                            formData.corridorTypeSelection === 'Corridor'
+                              ? 'bg-[#e6f7c6] border-black text-black'
+                              : 'bg-white border-[#b6e6c6] text-[#888]'
+                          }`}
+                          onClick={() =>
+                            handleInputChange({
+                              target: { name: 'corridorTypeSelection', value: 'Corridor' },
+                            } as any)
+                          }
+                        >
+                          C
+                        </button>
+                        <button
+                          type="button"
+                          className={`px-5 py-2 rounded-lg border-2 text-[24px] font-extrabold shadow-sm focus:outline-none transition-all ${
+                            formData.corridorTypeSelection === 'Outside Corridor'
+                              ? 'bg-[#ffe082] border-black text-black'
+                              : 'bg-white border-[#ffe082] text-[#888]'
+                          }`}
+                          onClick={() =>
+                            handleInputChange({
+                              target: {
+                                name: 'corridorTypeSelection',
+                                value: 'Outside Corridor',
+                              },
+                            } as any)
+                          }
+                        >
+                          NC
+                        </button>
+                      </div>
+                    )
+                  ) : null}
                   </div>
                 )}
                 </div>
@@ -3538,6 +3565,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
                   {formSubmitting ? "SUBMITTING..." : "SUBMIT"}
                 </button>
               )}
+              <ToastContainer />
           </div>
         </form>
       </div>
