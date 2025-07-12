@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { useQuery } from "@tanstack/react-query";
 import { userRequestService } from "@/app/service/api/user-request";
+import roadData from '../../../../public/roadData.json';
 
 type Department = "TRD" | "S&T" | "ENGG";
 
@@ -1078,12 +1079,13 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("level entry")
 
-    // console.log("errors", errors);
-    // if(Object.keys(errors).length > 0){
-    //   toast.error(`Please check ${Object.keys(errors)[0]}`);
-    //   return;
-    // }
+    console.log("errors", errors);
+    if(Object.keys(errors).length > 0){
+      toast.error(`Please check ${Object.keys(errors)[0]}`);
+      return;
+    }
 
     // ─── 1. Review‑mode guard ──────────────────────────────────────────────
     if (!reviewMode) {
@@ -1095,6 +1097,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
     setFormError(null);
     setFormSubmitting(true);
     setFormError(null);
+    console.log("level 0 passed")
 
     try {
       // ─── 2. Fetch existing requests and run block check ──────────────────
@@ -1119,6 +1122,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
           }
         }
       }
+      console.log("level 1 passed")
 
       if (hasUnavailedSanctionedBlock) {
         const link = `https://mobile-bms.plattrtechstudio.com/?cugNumber=${session?.user?.phone}&section=${formData.missionBlock || "MAS-GDR"}`;
@@ -2082,39 +2086,7 @@ const isDateInWeekAfterNext = (dateString: string): boolean => {
 
     /* ---------- 2.  YARD / ROAD LOGIC (FOR BLOCKS WITH NO LINE) ---------- */
 
-    const roadTimeMap: Record<string, { from: string; to: string }> = {
-      "AJJ-RU-Up": { from: "01:30", to: "04:30" },
-      "AJJ-RU-Down": { from: "00:30", to: "03:30" },
-      "AJJ-RU-Both": { from: "01:30", to: "04:30" },
-
-      "MAS-AJJ-Up": { from: "00:05", to: "03:05" },
-      "MAS-AJJ-Down": { from: "00:30", to: "03:30" },
-      "MAS-AJJ-Both": { from: "00:05", to: "03:05" },
-
-      "AJJ-KPD-Up": { from: "21:15", to: "00:15" },
-      "AJJ-KPD-Down": { from: "11:00", to: "14:00" },
-      "AJJ-KPD-Both": { from: "21:15", to: "00:15" },
-
-      "KPD-JTJ-Up": { from: "22:30", to: "00:45" },
-      "KPD-JTJ-Down": { from: "12:45", to: "15:15" },
-      "KPD-JTJ-Both": { from: "22:30", to: "00:45" },
-
-      "AJJ-CGL-Up": { from: "01:00", to: "04:00" },
-      "AJJ-CGL-Down": { from: "01:00", to: "04:00" },
-      "AJJ-CGL-Both": { from: "01:00", to: "04:00" },
-
-      "MAS-GDR-Up": { from: "00:20", to: "03:20" },
-      "MAS-GDR-Down": { from: "23:30", to: "01:30" },
-      "MAS-GDR-Both": { from: "00:20", to: "03:20" },
-
-      "MSB-VM-Up": { from: "21:15", to: "00:15" },
-      "MSB-VM-Down": { from: "01:30", to: "04:30" },
-      "MSB-VM-Both": { from: "21:15", to: "00:15" },
-
-      "MSB-VLCY-Up": { from: "00:30", to: "03:30" },
-      "MSB-VLCY-Down": { from: "00:30", to: "03:30" },
-      "MSB-VLCY-Both": { from: "00:30", to: "03:30" },
-    };
+    const roadTimeMap: Record<string, { from: string; to: string }> = roadData;
 
     const roadPairs = blockSectionValue
       .map((block: string) => {
