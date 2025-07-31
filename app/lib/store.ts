@@ -1609,7 +1609,7 @@ export const depot: DepotStructure = {
 
   "SA-VRI": {
     'TRD': ["SA", "CHSM"],
-    'S&T': ["SA","VRI"],
+    'S&T': ["SA","VRI","SXT"],
     'ENGG': ["S-SA", "ATU", "CHSM","GS"]
   },
 
@@ -1621,7 +1621,7 @@ export const depot: DepotStructure = {
   
   "SA-KRR": {
     'TRD': ["SA", "NMKL", "KRR"],
-    'S&T': ["SA","KRR-W"],
+    'S&T': ["SA","KRR-W","SXT"],
     'ENGG': ["NMKL","GS"]
   },
 
