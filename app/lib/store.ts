@@ -1585,7 +1585,7 @@ export const depotOnLocation = {
 export const depot: DepotStructure = {
   "JTJ-ED": {
     'TRD': ["SA","ED","BQI","SLY"],
-    'S&T': ["MAP", "BQI","ED","SA"],
+    'S&T': ["MAP", "BQI","ED","SA","TPT"],
     'ENGG': ["TPT","BQI","N-SA","S-SA","ED","GS"]
   },
 
