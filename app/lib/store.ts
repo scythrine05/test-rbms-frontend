@@ -571,7 +571,7 @@ export const streamData = {
   "VRQ-YD": {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3","Rd 4","Rd 1A"],
     "both direction not affected": [],
   },
   "MYU-YD": {
@@ -589,7 +589,7 @@ export const streamData = {
   "LP-YD": {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction affected": ["Rd 1", "Rd 2","Rd 1A"],
     "both direction not affected": [],
   },
   "KLT-YD": {
@@ -601,7 +601,7 @@ export const streamData = {
   "PLI-YD": {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2"],
+    "both direction affected": ["Rd 1", "Rd 2","Rd 3"],
     "both direction not affected": [],
   },
   "PGN-YD": {
