@@ -1577,7 +1577,7 @@ export const location = {
 
 export const depotOnLocation = {
   "SA": [
-  "SA", "ED", "GS", "BQI", "SLY", "MAP", "TPT", "N/SA", "S/SA","TUP","CBE", "E/PTJ", "KMD", "PLI", "TP", "W/KRR","KRR", "KRR/E", "CHSM", "VRI", "S/SA", "ATU","MTDM", "N/SA","NMKL", "KRR","PTJ", "CBF",  "ONR", "E/PTJ"
+  "SA", "ED", "GS", "BQI", "SLY", "MAP", "TPT", "N-SA", "S-SA","TUP","CBE", "E-PTJ", "KMD", "PLI", "TP", "W-KRR","KRR", "KRR-E", "CHSM", "VRI", "S-SA", "ATU","MTDM", "N-SA","NMKL", "KRR","PTJ", "CBF",  "ONR", "E-PTJ"
   ]
 };
 
@@ -1586,42 +1586,42 @@ export const depot: DepotStructure = {
   "JTJ-ED": {
     'TRD': ["SA","ED","BQI","SLY"],
     'S&T': ["MAP", "BQI","ED","SA"],
-    'ENGG': ["TPT","BQI","N/SA","S/SA","ED","GS"]
+    'ENGG': ["TPT","BQI","N-SA","S-SA","ED","GS"]
   },
 
   "ED-PTJ": {
     'TRD': ["ED", "TUP", "PTJ"],
     'S&T': ["TUP", "PTJ", "CBE", "ED"],
-    'ENGG': ["ED","TUP","E/PTJ","CBE","GS"]
+    'ENGG': ["ED","TUP","E-PTJ","CBE","GS"]
   },
 
   "ED-TP": {
     'TRD': ["KMD", "PLI"],
-    'S&T': ["KRR/W", "KRR/E","ED"],
-    'ENGG': ["TP","W/KRR","GS"]
+    'S&T': ["KRR-W", "KRR-E","ED"],
+    'ENGG': ["TP","W-KRR","GS"]
   },
 
   "KRR-DG": {
     'TRD': ["KRR"],
-    'S&T': ["KRR/E"],
-    'ENGG': ["E/KRR","GS"]
+    'S&T': ["KRR-E"],
+    'ENGG': ["E-KRR","GS"]
   },
 
   "SA-VRI": {
     'TRD': ["SA", "CHSM"],
     'S&T': ["SA","VRI"],
-    'ENGG': ["S/SA", "ATU", "CHSM","GS"]
+    'ENGG': ["S-SA", "ATU", "CHSM","GS"]
   },
 
   "SA-MTDM": {
     'TRD': ["SA", "MTDM"],
     'S&T': ["SA"],
-    'ENGG': ["N/SA","GS"]
+    'ENGG': ["N-SA","GS"]
   },
   
   "SA-KRR": {
     'TRD': ["SA", "NMKL", "KRR"],
-    'S&T': ["SA","KRR/W"],
+    'S&T': ["SA","KRR-W"],
     'ENGG': ["NMKL","GS"]
   },
 
@@ -1639,7 +1639,7 @@ export const depot: DepotStructure = {
   "PTJ-CNV": {
     'TRD': ["PTJ"],
     'S&T': ["PTJ"],
-    'ENGG': ["E/PTJ","GS"]
+    'ENGG': ["E-PTJ","GS"]
   }
 };
 
