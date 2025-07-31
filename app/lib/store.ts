@@ -204,7 +204,7 @@ export let blockSection = {
     "KLT-PLI", "PLI-PGN", "PGN-EL", "EL-MTNL", 
     "MTNL-TP",
     "ED-YD", "CVD-YD", "PAS-YD", "URL-YD", "KMD-YD", "PGR-YD",
-    "MPLM-YD", "KRR-YD", "VRQ-YD", "MYU-YD", "LP-YD", "KLT-YD",
+    "MPLM-YD", "KRR-YD", "VRQ-YD","MMH-YD", "MYU-YD", "LP-YD", "KLT-YD",
     "PLI-YD", "PGN-YD", "EL-YD", "MTNL-YD", "TP-YD"
   ],
 'KRR-DG': [
