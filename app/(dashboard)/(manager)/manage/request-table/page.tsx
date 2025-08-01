@@ -961,7 +961,7 @@ export default function ManagerRequestTablePage() {
       ];
 
       // Map data to Excel rows
-      const rows = filteredRequests.map((request) => {
+      const rows = filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).map((request) => {
         // Function to get exact time as stored in DB
         const getExactTime = (dateString: string | null) => {
           if (!dateString) return "N/A";
@@ -1008,13 +1008,13 @@ export default function ManagerRequestTablePage() {
       alert("Failed to generate Excel file. Please check console for details.");
     }
   };
-  if (isLoading) {
-    return (
-      <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
-        <div className="text-center py-5">Loading approved requests...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen text-black bg-white p-3 border border-black flex items-center justify-center">
+  //       <div className="text-center py-5">Loading approved requests...</div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     router.push('/auth/login');
@@ -1242,7 +1242,16 @@ export default function ManagerRequestTablePage() {
               </tr>
             </thead>
 <tbody>
-  {filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).length > 0 ? (
+  {isLoading?
+  (
+    <tr>
+      <td colSpan={7} className="text-center py-4 border border-black">
+        Loading approved requests...
+      </td>
+    </tr>
+  ):
+  
+  (filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).length > 0 ? (
     filteredRequests
       .filter((request: UserRequest) => request.isSanctioned === true)
       .sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -1305,7 +1314,10 @@ export default function ManagerRequestTablePage() {
         </div>
       </td>
     </tr>
-  )}
+  ))
+  
+  }
+  
 </tbody>
           </table>
         </div>
