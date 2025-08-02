@@ -1235,7 +1235,9 @@ export default function CreateBlockRequestPage() {
         ),
         processedLineSections: processedSections,
         adminAcceptance: false,
-        selectedDepo: formData.sntDisconnectionAssignTo || "", // Change as session?.user.depot
+        // selectedDepo: formData.sntDisconnectionAssignTo || "", 
+        selectedDepo: userDepot || "", 
+
       };
 
       // ─── 7. Submit to backend ────────────────────────────────────────────
