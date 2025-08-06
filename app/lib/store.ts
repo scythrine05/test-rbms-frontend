@@ -195,7 +195,8 @@ export let blockSection = {
     "JTJ-YD", "TPT-YD", "DST-YD", "DPI-YD", "TNT-YD", "MAP-YD",
     "BQI-YD", "DSPT-YD", "MGSJ-YD", "SGE-YD", "ANU-YD", "CV-YD",
     "ED-YD", "TPM-YD", "PY-YD", "IGR-YD", "VZ-YD", "VNJ-YD",
-    "SUU-YD", "IGU-YD", "PLMD-YD", "CBF-YD", "CBE-YD", "PTJ-YD"
+    "SUU-YD", "IGU-YD", "PLMD-YD", "CBF-YD", "CBE-YD", "PTJ-YD",
+  "UKL-YD", "TUP-YD"
   ],
 'ED-TP': [
     "ED-CVD", "CVD-PAS", "PAS-URL", "URL-KMD", 
@@ -1249,6 +1250,7 @@ export let lineData = {
   "TPM-YD": ["UP", "DN"],
   "PY-YD": ["UP", "DN"],
   "IGR-YD": ["UP", "DN"],
+  "UKL-YD": ["UP", "DN"],
   "VZ-YD": ["UP", "DN"],
   "VNJ-YD": ["UP", "DN"],
   "SUU-YD": ["UP", "DN"],
