@@ -961,7 +961,7 @@ export default function ManagerRequestTablePage() {
       ];
 
       // Map data to Excel rows
-      const rows = filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).map((request) => {
+      const rows = filteredRequests.map((request) => {
         // Function to get exact time as stored in DB
         const getExactTime = (dateString: string | null) => {
           if (!dateString) return "N/A";
@@ -1242,19 +1242,18 @@ export default function ManagerRequestTablePage() {
               </tr>
             </thead>
 <tbody>
-  {isLoading?
-  (
+  {isLoading ? (
     <tr>
       <td colSpan={7} className="text-center py-4 border border-black">
         Loading approved requests...
       </td>
     </tr>
-  ):
-  
-  (filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).length > 0 ? (
+  ) : (
+    filteredRequests.filter((request: UserRequest) => request.isSanctioned === true).length > 0 ? (
     filteredRequests
       .filter((request: UserRequest) => request.isSanctioned === true)
-      .sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime())
+      .sort((a, b) => new Date(a.sanctionedTimeFrom || a.optimizeTimeFrom || a.demandTimeFrom).getTime() - new Date(b.sanctionedTimeFrom || b.optimizeTimeFrom || b.demandTimeTo).getTime())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((request: UserRequest, index: number) => {
         const status = getDisplayStatus(request);
         const rowBgColor = index % 2 === 0 ? "bg-[#F5EEFF]" : "bg-white";
@@ -1314,10 +1313,8 @@ export default function ManagerRequestTablePage() {
         </div>
       </td>
     </tr>
-  ))
-  
-  }
-  
+  )
+  )}
 </tbody>
           </table>
         </div>
