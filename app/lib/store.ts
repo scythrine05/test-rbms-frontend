@@ -209,7 +209,7 @@ export let blockSection = {
     "PLI-YD", "PGN-YD", "EL-YD", "MTNL-YD", "TP-YD"
   ],
 'KRR-DG': [
-    "KRR-VEI", "VEI-PALM", "PALM-EDU",
+    "KRR-VEI", "VEI-PALM", "PALM-EDU","EDU-DG",
     "KRR-YD", "VEI-YD", "PALM-YD", "EDU-YD"
   ],
 'SA-VRI': [
@@ -663,7 +663,7 @@ export const streamData = {
   "MPLI-YD": {
     "up direction affected": [],
     "down direction affected": [],
-    "both direction affected": ["Rd 1", "Rd 2", "Rd 3"],
+    "both direction affected": ["Rd 1", "Rd 2", "Rd 3","RD-4"],
     "both direction not affected": [],
   },
   "ETP-YD": {
