@@ -194,7 +194,7 @@ export let blockSection = {
     "CBF-CBE", "CBE-PTJ",
     "JTJ-YD", "TPT-YD", "DST-YD", "DPI-YD", "TNT-YD", "MAP-YD",
     "BQI-YD", "DSPT-YD", "MGSJ-YD", "SGE-YD", "ANU-YD", "CV-YD",
-    "ED-YD", "TPM-YD", "PY-YD", "IGR-YD", "VZ-YD", "VNJ-YD",
+    "ED-YD", "TPM-YD", "PY-YD", "IGR-YD", "VZ-YD", "VNJ-YD","SNO-YD",
     "SUU-YD", "IGU-YD", "PLMD-YD", "CBF-YD", "CBE-YD", "PTJ-YD",
   "UKL-YD", "TUP-YD"
   ],
@@ -1579,7 +1579,7 @@ export const location = {
 
 export const depotOnLocation = {
   "SA": [
-  "SA", "ED", "GS", "BQI", "SLY", "MAP", "TPT", "N-SA", "S-SA","TUP","CBE", "E-PTJ", "KMD", "PLI", "TP", "W-KRR","KRR", "KRR-E", "CHSM", "VRI", "S-SA", "ATU","MTDM", "N-SA","NMKL", "KRR","PTJ", "CBF",  "ONR", "E-PTJ"
+  "SA", "ED", "GS","BR-ED", "BQI", "SLY", "MAP", "TPT", "N-SA", "S-SA","TUP","CBE", "E-PTJ", "KMD", "PLI", "TP", "W-KRR","KRR", "KRR-E", "CHSM", "VRI", "S-SA", "ATU","MTDM", "N-SA","NMKL", "KRR","PTJ", "CBF",  "ONR", "E-PTJ"
   ]
 };
 
@@ -1588,60 +1588,60 @@ export const depot: DepotStructure = {
   "JTJ-ED": {
     'TRD': ["SA","ED","BQI","SLY"],
     'S&T': ["MAP", "BQI","ED","SA","TPT"],
-    'ENGG': ["TPT","BQI","N-SA","S-SA","ED","GS"]
+    'ENGG': ["TPT","BQI","N-SA","S-SA","ED","GS","BR-ED"]
   },
 
   "ED-PTJ": {
     'TRD': ["ED", "TUP", "PTJ"],
     'S&T': ["TUP", "PTJ", "CBE", "ED"],
-    'ENGG': ["ED","TUP","E-PTJ","CBE","GS"]
+    'ENGG': ["ED","TUP","E-PTJ","CBE","GS","BR-ED"]
   },
 
   "ED-TP": {
     'TRD': ["KMD", "PLI"],
     'S&T': ["KRR-W", "KRR-E","ED"],
-    'ENGG': ["TP","W-KRR","GS"]
+    'ENGG': ["TP","W-KRR","GS","BR-ED"]
   },
 
   "KRR-DG": {
     'TRD': ["KRR"],
     'S&T': ["KRR-E"],
-    'ENGG': ["E-KRR","GS"]
+    'ENGG': ["E-KRR","GS","BR-ED"]
   },
 
   "SA-VRI": {
     'TRD': ["SA", "CHSM"],
     'S&T': ["SA","VRI","SXT"],
-    'ENGG': ["S-SA", "ATU", "CHSM","GS"]
+    'ENGG': ["S-SA", "ATU", "CHSM","GS","BR-ED"]
   },
 
   "SA-MTDM": {
     'TRD': ["SA", "MTDM"],
     'S&T': ["SA"],
-    'ENGG': ["N-SA","GS"]
+    'ENGG': ["N-SA","GS","BR-ED"]
   },
   
   "SA-KRR": {
     'TRD': ["SA", "NMKL", "KRR"],
     'S&T': ["SA","KRR-W","SXT"],
-    'ENGG': ["NMKL","GS"]
+    'ENGG': ["NMKL","GS","BR-ED"]
   },
 
   "CBE-MTP": {
     'TRD': ["PTJ"],
     'S&T': ["CBE"],
-    'ENGG': ["CBF","GS"]
+    'ENGG': ["CBF","GS","BR-ED"]
   },
 
   "MTP-UAM": {
     'TRD': [],
     'S&T': ["CBE"],
-    'ENGG': ["ONR","GS"]
+    'ENGG': ["ONR","GS","BR-ED"]
   },
   "PTJ-CNV": {
     'TRD': ["PTJ"],
     'S&T': ["PTJ"],
-    'ENGG': ["E-PTJ","GS"]
+    'ENGG': ["E-PTJ","GS","BR-ED"]
   }
 };
 
