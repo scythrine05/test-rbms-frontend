@@ -304,7 +304,7 @@ useEffect(() => {
 
     if (reportData && reportData.data) {
 
-      setHydrated(true);
+      // setHydrated(true);
       // Safe access of nested properties with detailed logging
       console.log(
         "pastBlockSummary raw data:",
@@ -434,11 +434,11 @@ useEffect(() => {
     setValue("endDate", end);
   }
 
-  console.log("hydration check - searchParams:", hydrated)
-  if (!hydrated) {
+  // console.log("hydration check - searchParams:", hydrated)
+  // if (!hydrated) {
     handleSubmit(onSubmit)(); // ✅ only once
     // setHydrated(true);
-  }
+  // }
 
 }, [searchParams]);
 
