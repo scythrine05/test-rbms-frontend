@@ -190,7 +190,7 @@ export let blockSection = {
 'ED-PTJ': [
     "ED-TPM", "TPM-PY", "PY-IGR", "IGR-VZ", 
     "VZ-UKL", "UKL-TUP", "TUP-VNJ", "VNJ-SNO", 
-    "SNO-SUU", "SUU-IGU", "IGU-PLMD", "PLMD-CBF", 
+    "SNO-SUU", "SUU-IGU", "IGU-PLMD","IGU-PTJ", "PLMD-CBF", 
     "CBF-CBE", "CBE-PTJ",
     "JTJ-YD", "TPT-YD", "DST-YD", "DPI-YD", "TNT-YD", "MAP-YD",
     "BQI-YD", "DSPT-YD", "MGSJ-YD", "SGE-YD", "ANU-YD", "CV-YD",
