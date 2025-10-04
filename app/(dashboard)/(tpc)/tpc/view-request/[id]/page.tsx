@@ -10,9 +10,13 @@ import { userRequestService } from "@/app/service/api/user-request";
 import { toast, Toaster } from "react-hot-toast";
 import { format, parseISO } from "date-fns";
 
-export default function ViewRequestPage({ params }: { params: { id: string } }) {
-  const requestId = params.id;
+interface PageProps {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
 
+export default function ViewRequestPage({ params }: PageProps) {
+  const requestId = params.id;
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
