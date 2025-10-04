@@ -329,12 +329,6 @@ export default function TpcDashboard() {
                                 <h3 className="mt-2 text-lg font-medium text-gray-900">No Maintenance Requests</h3>
                                 <p className="mt-1 text-sm text-gray-500">There are no maintenance requests found for the selected time period.</p>
                                 <div className="mt-6">
-                                    <button
-                                        onClick={() => handleTabChange("24hrs")}
-                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                                    >
-                                        Try 24 Hour View
-                                    </button>
                                 </div>
                             </div>
                         );
