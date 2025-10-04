@@ -10,11 +10,8 @@ import { userRequestService } from "@/app/service/api/user-request";
 import { toast, Toaster } from "react-hot-toast";
 import { format, parseISO } from "date-fns";
 
-export default function ViewRequestPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
-  // Properly unwrap params using React.use() as required by Next.js 14+
-  // This ensures we're future-proof for upcoming Next.js versions
-  const resolvedParams = params instanceof Promise ? React.use(params) : params;
-  const requestId = resolvedParams.id;
+export default function ViewRequestPage({ params }: { params: { id: string } }) {
+  const requestId = params.id;
 
   const { data: session, status } = useSession({
     required: true,
