@@ -248,7 +248,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, onSubmit
                             </select>
                             {selectedManager && (
                                 <div className="mt-2 text-sm font-medium text-blue-600">
-                                    Selected manager's depot: {selectedManager.depot || "Not available"}
+                                    Selected manager depot: {selectedManager.depot || "Not available"}
                                 </div>
                             )}
                         </div>

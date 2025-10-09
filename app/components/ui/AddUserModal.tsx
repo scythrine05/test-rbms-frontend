@@ -231,7 +231,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit, users, departm
                             </select>
                             {selectedManager && (
                                 <div className="mt-2 text-sm font-medium text-blue-600">
-                                    Selected manager's depot: {selectedManager.depot || "Not available"}
+                                    Selected manager depot: {selectedManager.depot || "Not available"}
                                 </div>
                             )}
                         </div>
