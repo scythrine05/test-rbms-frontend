@@ -200,7 +200,7 @@ export default function ManageUsersTable() {
         )}
       </div>
 
-      <div className="max-7xl mx-auto mt-8 overflow-x-auto w-[90%] min-h-screen border-2 border-black rounded-xl">
+      <div className="max-7xl mx-auto mt-8 overflow-x-auto w-[90%] border-2 border-black rounded-xl">
         {isLoading ? (
           <div className="text-center py-8 text-2xl text-black font-bold">
             Loading SSE...
