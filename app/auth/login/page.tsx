@@ -23,7 +23,7 @@ export default function LoginPage() {
             <br />
             Management System
             <br />
-            <span className="text-2xl sm:text-3xl font-extrabold">(RBMS-SA-DIVN)</span>
+            <span className="text-2xl sm:text-3xl font-extrabold">(RBMS-TEST-DIVN)</span>
           </h1>
         </div>
       </div>
