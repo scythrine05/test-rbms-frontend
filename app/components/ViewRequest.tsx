@@ -39,6 +39,14 @@ export default function ViewRequest() {
     }
   };
 
+  const formatDateTime = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), "dd-MM-yyyy HH:mm");
+    } catch {
+      return "Invalid date";
+    }
+  };
+
   const formatTime = (dateString: string): string => {
     if (!dateString) return "Invalid time";
     try {
@@ -611,7 +619,7 @@ export default function ViewRequest() {
                       </span>
                     </td>
                     <td className="border border-gray-300 px-3 py-2">
-                      {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                      {approval.approvedAt ? formatDateTime(approval.approvedAt) : 'N/A'}
                     </td>
                     <td className="border border-gray-300 px-3 py-2">{approval.remarks || 'N/A'}</td>
                   </tr>
@@ -652,7 +660,7 @@ export default function ViewRequest() {
                       </span>
                     </td>
                     <td className="border border-gray-300 px-3 py-2">
-                      {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                      {approval.approvedAt ? formatDateTime(approval.approvedAt) : 'N/A'}
                     </td>
                     <td className="border border-gray-300 px-3 py-2">{approval.remarks || 'N/A'}</td>
                   </tr>
