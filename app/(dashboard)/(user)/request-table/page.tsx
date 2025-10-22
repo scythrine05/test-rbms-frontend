@@ -374,7 +374,7 @@ export default function RequestTablePage() {
   const userName = session?.user?.name || "User";
   const userRole = session?.user?.role || "USER";
   const selectedDepo = session?.user?.depot || "";
-  const userDepartement = session?.user?.department || ""
+  const userDepartment = session?.user?.department || ""
 
   const [rejectRemarkPopup, setRejectRemarkPopup] = useState(false);
   const [rejectRemarks, setRejectRemarks] = useState("");
@@ -383,7 +383,7 @@ export default function RequestTablePage() {
   const [showRejectReasonPopup, setShowRejectReasonPopup] = useState(false);
   const [requestToReject, setRequestToReject] = useState<{
     id: string;
-    userDepartement: string;
+    userDepartment: string;
     mobileView: string;
   } | null>(null);
 
@@ -391,7 +391,7 @@ export default function RequestTablePage() {
   const [showAcceptReasonPopup, setShowAcceptReasonPopup] = useState(false);
   const [requestToAccept, setRequestToAccept] = useState<{
     id: string;
-    userDepartement: string;
+    userDepartment: string;
     mobileView: string;
     requestDateStr: string;
     corridorType: string;
@@ -403,7 +403,7 @@ export default function RequestTablePage() {
     pageSize,
     formattedStartDate,
     formattedEndDate,
-    userDepartement,
+    userDepartment,
   );
 
   // Helper function to map user's depot to a major section
@@ -491,7 +491,7 @@ export default function RequestTablePage() {
   };
 
   // Get the major section for the current user's depot using the user's department
-  const userMajorSection = mapDepotToMajorSection(selectedDepo, userDepartement);
+  const userMajorSection = mapDepotToMajorSection(selectedDepo, userDepartment);
   console.log(`Session depot: "${session?.user?.depot}", department: "${session?.user?.department}", Mapped section: "${userMajorSection}"`);
 
   // Fetch sanctioned blocks data
@@ -512,13 +512,13 @@ export default function RequestTablePage() {
     }
   };
 
-  // const handleStatusUpdate = (id: string, accept: boolean,userDepartement:string,mobileView:string) => {
+  // const handleStatusUpdate = (id: string, accept: boolean,userDepartment:string,mobileView:string) => {
   //   if (accept) {
   //     updateOtherRequest(
   //       {
   //         id,
   //         accept,
-  //         userDepartement,
+  //         userDepartment,
   //         mobileView
   //       },
   //       {
@@ -529,7 +529,7 @@ export default function RequestTablePage() {
   //       }
   //     );
   //   } else {
-  //   setRequestToReject({ id, userDepartement, mobileView });
+  //   setRequestToReject({ id, userDepartment, mobileView });
   //   setShowRejectReasonPopup(true);
   //   }
   // };
@@ -538,7 +538,7 @@ export default function RequestTablePage() {
   const handleStatusUpdate = async (
     id: string,
     accept: boolean,
-    userDepartement: string,
+    userDepartment: string,
     mobileView: string,
     requestDateStr: string,
     corridorType: string
@@ -578,7 +578,7 @@ export default function RequestTablePage() {
       //   {
       //     id,
       //     accept,
-      //     userDepartement,
+      //     userDepartment,
       //     mobileView
       //   },
       //   {
@@ -587,11 +587,11 @@ export default function RequestTablePage() {
       //     },
       //   }
       // );
-      setRequestToAccept({ id, userDepartement, mobileView, requestDateStr, corridorType });
+      setRequestToAccept({ id, userDepartment, mobileView, requestDateStr, corridorType });
       setShowAcceptReasonPopup(true);
     } else {
       // For reject actions, just set up the rejection dialog
-      setRequestToReject({ id, userDepartement, mobileView });
+      setRequestToReject({ id, userDepartment, mobileView });
       setShowRejectReasonPopup(true);
     }
   };
@@ -603,7 +603,8 @@ export default function RequestTablePage() {
       {
         id: requestToReject.id,
         accept: false,
-        userDepartement: requestToReject.userDepartement,
+        userDepartment: requestToReject.userDepartment,
+        depot: selectedDepo,
         mobileView: requestToReject.mobileView,
         disconnectionRequestRejectRemarks: rejectReason // Make sure your API accepts this field
       },
@@ -628,7 +629,8 @@ export default function RequestTablePage() {
       {
         id: requestToAccept.id,
         accept: true,
-        userDepartement: requestToAccept.userDepartement,
+        userDepartment: requestToAccept.userDepartment,
+        depot: selectedDepo,
         mobileView: requestToAccept.mobileView,
         disconnectionRequestRejectRemarks: acceptReason // Make sure your API accepts this field
       },
@@ -1400,7 +1402,7 @@ export default function RequestTablePage() {
                           </div>
                         </td>
                         <td className="border border-black px-2 py-1 text-center whitespace-nowrap">
-                          {request.DisconnAcceptance === "ACCEPTED" ? (
+                          {request.status === "APPROVED" ? (
                             <>
                               {request.isSanctioned ? (
                                 request.userResponse === "ACCEPTED" ? (
@@ -1408,7 +1410,7 @@ export default function RequestTablePage() {
                                     Sanctioned and Accepted
                                   </div>
                                 ) : (<span className="bg-gray-100 p-2 text-gray-600 rounded">
-                                  {request.overAllStatus === "Sanctioned" ? "Sanctioned, Pending for Acceptance" : request.overAllStatus || "Pending"}
+                                  Sanctioned and Pending for Acceptance
                                 </span>)
                               ) : (
                                 <span className="text-gray-500 ">
@@ -1416,7 +1418,7 @@ export default function RequestTablePage() {
                                 </span>
                               )}
                             </>
-                          ) : request.DisconnAcceptance === "REJECTED" ? (
+                          ) : request.status === "REJECTED" ? (
                             <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
                               <svg
                                 className="w-3 h-3 mr-1"
@@ -1436,19 +1438,19 @@ export default function RequestTablePage() {
                               {/* For JE role, only show status without any buttons */}
                               {session?.user?.role === "JE" ? (
                                 <span className="bg-gray-100 p-2 text-gray-600 rounded">
-                                  {request.overAllStatus === "Sanctioned" ? "Sanctioned, Pending for Acceptance" : request.overAllStatus || "Pending"}
+                                  {request.overAllStatus || "Pending"}
                                 </span>
                               ) : (
                                 // For USER role, check conditions for showing buttons
-                                ((userDepartement === "SIG" || userDepartement === "S&T") && request.sigActionsNeeded === false && request.sntDisconnectionRequired) ||
-                                  (userDepartement === "TRD" && request.trdActionsNeeded === false && request.powerBlockRequired) ? (
+                                ((userDepartment === "S&T") && request.sntDisconnectionRequired && request.sntDisconnections?.[0]?.status === "PENDING") ||
+                                  (userDepartment === "TRD" && request.powerBlockRequired && request.trdDisconnections?.[0]?.status === "PENDING") ? (
                                   <div className="flex gap-2 justify-center">
                                     <button
                                       onClick={() =>
                                         handleStatusUpdate(
                                           request.id,
                                           true,
-                                          userDepartement,
+                                          userDepartment,
                                           "mobileView",
                                           request.date,
                                           request.corridorType
@@ -1475,7 +1477,7 @@ export default function RequestTablePage() {
                                         handleStatusUpdate(
                                           request.id,
                                           false,
-                                          userDepartement,
+                                          userDepartment,
                                           "mobileView",
                                           request.date,
                                           request.corridorType
@@ -1782,11 +1784,19 @@ function formatDuration(from: string, to: string) {
   try {
     const fromDate = new Date(from);
     const toDate = new Date(to);
-    const diffInMinutes = Math.round(
-      (toDate.getTime() - fromDate.getTime()) / (1000 * 60)
-    );
+
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) return "N/A";
+
+    let diffInMinutes = Math.round((toDate.getTime() - fromDate.getTime()) / (1000 * 60));
+
+    // Handle crossing midnight (next day)
+    if (diffInMinutes < 0) {
+      diffInMinutes += 24 * 60;
+    }
+
     const hours = Math.floor(diffInMinutes / 60);
     const minutes = diffInMinutes % 60;
+
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}`;
@@ -1794,3 +1804,4 @@ function formatDuration(from: string, to: string) {
     return "N/A";
   }
 }
+

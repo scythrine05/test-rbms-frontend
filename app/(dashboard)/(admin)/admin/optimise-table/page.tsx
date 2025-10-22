@@ -609,18 +609,23 @@ const urgentRequests = pendingRequests
             return r.trdActionsNeeded && r.sigActionsNeeded;
         }
 
-        // Handle powerBlockRequired case
-        if (r.powerBlockRequired) {
-            return r.trdActionsNeeded;
-        }
+      // Handle cases where both flags are true
+      if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+      }
 
-        // Handle sntDisconnectionRequired case
-        if (r.sntDisconnectionRequired) {
-            return r.sigActionsNeeded;
-        }
+      // Handle powerBlockRequired case
+      if (r.powerBlockRequired) {
+        return r.trdActionsNeeded || r.allTrdAcceptance;
+      }
 
-        // If neither special flag is true, just return the urgent status
-        return true;
+      // Handle sntDisconnectionRequired case
+      if (r.sntDisconnectionRequired) {
+        return r.sigActionsNeeded || r.allSntAcceptance;
+      }
+
+      // If neither special flag is true, just return the urgent status
+      return true;
     })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -637,18 +642,23 @@ const corridorRequestsFiltered = pendingRequests
             return r.trdActionsNeeded && r.sigActionsNeeded;
         }
 
-        // Handle powerBlockRequired case
-        if (r.powerBlockRequired) {
-            return r.trdActionsNeeded;
-        }
+      // Handle cases where both flags are true
+      if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+      }
 
-        // Handle sntDisconnectionRequired case
-        if (r.sntDisconnectionRequired) {
-            return r.sigActionsNeeded;
-        }
+      // Handle powerBlockRequired case
+      if (r.powerBlockRequired) {
+        return r.trdActionsNeeded || r.allTrdAcceptance;
+      }
 
-        // If neither special flag is true, just return the urgent status
-        return true;
+      // Handle sntDisconnectionRequired case
+      if (r.sntDisconnectionRequired) {
+        return r.sigActionsNeeded || r.allSntAcceptance;
+      }
+
+      // If neither special flag is true, just return the status
+      return true;
     })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -666,18 +676,23 @@ const nonCorridorRequestsFiltered = pendingRequests
             return r.trdActionsNeeded && r.sigActionsNeeded;
         }
 
-        // Handle powerBlockRequired case
-        if (r.powerBlockRequired) {
-            return r.trdActionsNeeded;
-        }
+      // Handle cases where both flags are true
+      if (r.powerBlockRequired && r.sntDisconnectionRequired) {
+        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+      }
 
-        // Handle sntDisconnectionRequired case
-        if (r.sntDisconnectionRequired) {
-            return r.sigActionsNeeded;
-        }
+      // Handle powerBlockRequired case
+      if (r.powerBlockRequired) {
+        return r.trdActionsNeeded || r.allTrdAcceptance;
+      }
 
-        // If neither special flag is true, just return the urgent status
-        return true;
+      // Handle sntDisconnectionRequired case
+      if (r.sntDisconnectionRequired) {
+        return r.sigActionsNeeded || r.allSntAcceptance;
+      }
+
+      // If neither special flag is true, just return the status
+      return true;
     })
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
