@@ -573,11 +573,10 @@ export default function OptimiseTablePage() {
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-const pendingRequests = (data?.data?.requests || []).filter((request: UserRequest) => {
+const pendingRequests = urgentRequestDate.filter((request: UserRequest) => {
   if (!request.status || request.status.toUpperCase() !== "APPROVED") return false;
   if (request.isSanctioned) return false;
   if (!request.date) return false;
-
   const reqDate = new Date(request.date);
   reqDate.setHours(0, 0, 0, 0);
 
@@ -598,30 +597,28 @@ const pendingRequests = (data?.data?.requests || []).filter((request: UserReques
   //   .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
-const urgentRequests = pendingRequests
+const urgentRequestsFiltered = pendingRequests
     .filter((r: UserRequest) => {
         // First check if it's an urgent request
         const isUrgent = r.corridorType === "Urgent Block" || r.workType === "EMERGENCY";
         if (!isUrgent) return false;
 
-        // Handle cases where both flags are true
-        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-            return r.trdActionsNeeded && r.sigActionsNeeded;
-        }
+        const allSntAcceptance = r.allSntAcceptance === "ACCEPTED";
+        const allTrdAcceptance = r.allTrdAcceptance === "ACCEPTED";
 
       // Handle cases where both flags are true
       if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+        return r.trdActionsNeeded && r.sigActionsNeeded || allTrdAcceptance && allSntAcceptance;
       }
 
       // Handle powerBlockRequired case
       if (r.powerBlockRequired) {
-        return r.trdActionsNeeded || r.allTrdAcceptance;
+        return r.trdActionsNeeded || allTrdAcceptance;
       }
 
       // Handle sntDisconnectionRequired case
       if (r.sntDisconnectionRequired) {
-        return r.sigActionsNeeded || r.allSntAcceptance;
+        return r.sigActionsNeeded || allSntAcceptance;
       }
 
       // If neither special flag is true, just return the urgent status
@@ -630,33 +627,29 @@ const urgentRequests = pendingRequests
     .sort((a: UserRequest, b: UserRequest) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
-
 const corridorRequestsFiltered = pendingRequests
     .filter((r: UserRequest) => {
         // First check if it's an urgent request
         const isCorridor = r.corridorType === "Corridor" ||r.corridorType === "Corridor Block";
         if (!isCorridor) return false;
 
-        // Handle cases where both flags are true
-        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-            return r.trdActionsNeeded && r.sigActionsNeeded;
-        }
+        const allSntAcceptance = r.allSntAcceptance === "ACCEPTED";
+        const allTrdAcceptance = r.allTrdAcceptance === "ACCEPTED";
 
       // Handle cases where both flags are true
       if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+        return r.trdActionsNeeded && r.sigActionsNeeded || allTrdAcceptance && allSntAcceptance;
       }
 
       // Handle powerBlockRequired case
       if (r.powerBlockRequired) {
-        return r.trdActionsNeeded || r.allTrdAcceptance;
+        return r.trdActionsNeeded || allTrdAcceptance;
       }
 
       // Handle sntDisconnectionRequired case
       if (r.sntDisconnectionRequired) {
-        return r.sigActionsNeeded || r.allSntAcceptance;
+        return r.sigActionsNeeded || allSntAcceptance;
       }
-
       // If neither special flag is true, just return the status
       return true;
     })
@@ -671,24 +664,22 @@ const nonCorridorRequestsFiltered = pendingRequests
         const isNoncorridor = r.corridorType === "Outside Corridor" ||r.corridorType === "Non-Corridor Block";
         if (!isNoncorridor) return false;
 
-        // Handle cases where both flags are true
-        if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-            return r.trdActionsNeeded && r.sigActionsNeeded;
-        }
+        const allSntAcceptance = r.allSntAcceptance === "ACCEPTED";
+        const allTrdAcceptance = r.allTrdAcceptance === "ACCEPTED";
 
       // Handle cases where both flags are true
       if (r.powerBlockRequired && r.sntDisconnectionRequired) {
-        return r.trdActionsNeeded && r.sigActionsNeeded || r.allTrdAcceptance && r.allSntAcceptance;
+        return r.trdActionsNeeded && r.sigActionsNeeded || allTrdAcceptance && allSntAcceptance;
       }
 
       // Handle powerBlockRequired case
       if (r.powerBlockRequired) {
-        return r.trdActionsNeeded || r.allTrdAcceptance;
+        return r.trdActionsNeeded || allTrdAcceptance;
       }
 
       // Handle sntDisconnectionRequired case
       if (r.sntDisconnectionRequired) {
-        return r.sigActionsNeeded || r.allSntAcceptance;
+        return r.sigActionsNeeded || allSntAcceptance;
       }
 
       // If neither special flag is true, just return the status
@@ -933,7 +924,7 @@ const nonCorridorRequestsFiltered = pendingRequests
 
   const handleOptimize = async () => {
 
-    const preData = isUrgentRequests ? urgentRequestDate : [...corridorRequestsFiltered, ...  nonCorridorRequestsFiltered]
+    const preData = isUrgentRequests ? urgentRequestsFiltered : [...corridorRequestsFiltered, ...  nonCorridorRequestsFiltered]
     if (!preData) return;
     try {
       // Preprocess the requests
@@ -1308,7 +1299,7 @@ const nonCorridorRequestsFiltered = pendingRequests
         </div>
 {isOptimizeDialogOpen && (() => {
   // Calculate the requests to be optimized for dialog preview
-  const preData = isUrgentRequests ? urgentRequestDate : [...corridorRequestsFiltered, ...nonCorridorRequestsFiltered];
+  const preData = isUrgentRequests ? urgentRequestsFiltered : [...corridorRequestsFiltered, ...nonCorridorRequestsFiltered];
   const requestsToOptimize = preData.filter(
     (request: UserRequest) => {
       const requestDate = format(parseISO(request.date), "yyyy-MM-dd");
@@ -1426,12 +1417,12 @@ const nonCorridorRequestsFiltered = pendingRequests
                 </tr>
               </thead>
               <tbody>
-                {urgentRequestDate.length === 0 && (
+                {urgentRequestsFiltered.length === 0 && (
                   <tr>
                     <td colSpan={12} className="border border-black p-2 text-[24px] text-left">No requests found.</td>
                   </tr>
                 )}
-                {urgentRequestDate.map((request: UserRequest) => (
+                {urgentRequestsFiltered.map((request: UserRequest) => (
                   <tr key={`request-${request.id}-${request.date}`} className={`hover:bg-blue-50 transition-colors ${request.optimizeTimeFrom && request.optimizeTimeTo ? "bg-green-50" : ""}`}>
                      <td className="border border-black p-2 text-[24px]">
                       {editingId === request.id ? (

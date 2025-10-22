@@ -100,6 +100,7 @@ export interface RequestItem {
   sanctionedRemarks: string | null;
   disconnectionRequestRejectRemarks: string | null;
   remarkByManager: string | null;
+  userResponse: string | null;
   sntDisconnections:
     | {
         depot: string;
