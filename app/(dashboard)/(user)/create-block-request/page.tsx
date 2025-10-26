@@ -3406,13 +3406,13 @@ export default function CreateBlockRequestPage() {
                 </span>
               </div>
               {/* Site Location row */}
-              <div className="flex flex-row items-center gap-4 w-full pl-1">
+              {/* <div className="flex flex-row items-center gap-4 w-full pl-1">
                 <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
                   <div className="flex flex-col items-center space-y-2">
                     <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">
                       Site Location
                     </span>
-                    {/* Display range information */}
+                    
                     {formData.selectedSection && blockSectionValue.length > 0 && userDepartment && (
                       <span className="text-sm text-[#666] font-medium bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                         {getSiteLocationRange(formData.selectedSection, blockSectionValue, userDepartment).displayText}
@@ -3475,7 +3475,82 @@ export default function CreateBlockRequestPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
+
+
+              {formData.selectedSection && blockSectionValue.length > 0 && userDepartment && 
+ !blockSectionValue[0].includes("-YD") && (
+  <div className="flex flex-row items-center gap-4 w-full pl-1">
+    <div className="flex flex-col items-center bg-gradient-to-b from-[#fffbe9] to-[#fff7d6] border-2 border-[#b7cbe8] rounded-xl px-4 py-5 space-y-4 w-full shadow-md hover:shadow-lg transition-shadow duration-200">
+      <div className="flex flex-col items-center space-y-2">
+        <span className="font-bold text-[#2c3e50] text-[24px] leading-none tracking-wide">
+          Site Location
+        </span>
+        
+        {formData.selectedSection && blockSectionValue.length > 0 && userDepartment && (
+          <span className="text-sm text-[#666] font-medium bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+            {getSiteLocationRange(formData.selectedSection, blockSectionValue, userDepartment).displayText}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-col items-center">
+          <input
+            type="text"
+            name="workLocationFrom"
+            value={formData.workLocationFrom || ""}
+            onChange={createSiteLocationChangeHandler(
+              'workLocationFrom', 
+              formData, 
+              handleInputChange,
+              formData.selectedSection,
+              blockSectionValue,
+              userDepartment || "",
+              userDepot
+            )}
+            maxLength={7}
+            placeholder="From"
+            className={`border-2 ${errors.workLocationFrom ? 'border-red-500' : 'border-[#2c3e50]'} rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200`}
+            required
+          />
+          <div className="h-8 mt-1 flex items-center justify-center">
+            <span className={`text-xs text-center max-w-[120px] leading-tight ${errors.workLocationFrom ? 'text-red-500' : 'text-transparent'}`}>
+              {errors.workLocationFrom || "No error"}
+            </span>
+          </div>
+        </div>
+        <span className="font-bold text-[#2c3e50] text-[24px] mb-10">
+          TO
+        </span>
+        <div className="flex flex-col items-center">
+          <input
+            type="text"
+            name="workLocationTo"
+            value={formData.workLocationTo || ""}
+            onChange={createSiteLocationChangeHandler(
+              'workLocationTo', 
+              formData, 
+              handleInputChange,
+              formData.selectedSection,
+              blockSectionValue,
+              userDepartment || "",
+              userDepot
+            )}
+            maxLength={7}
+            placeholder="To"
+            className={`border-2 ${errors.workLocationTo ? 'border-red-500' : 'border-[#2c3e50]'} rounded-lg px-3 py-2 text-[24px] font-bold text-[#2c3e50] placeholder-[#95a5a6] focus:outline-none focus:ring-2 focus:ring-[#3498db] w-[120px] text-center bg-white shadow-inner hover:bg-[#f8f9fa] transition-colors duration-200`}
+            required
+          />
+          <div className="h-8 mt-1 flex items-center justify-center">
+            <span className={`text-xs text-center max-w-[120px] leading-tight ${errors.workLocationTo ? 'text-red-500' : 'text-transparent'}`}>
+              {errors.workLocationTo || "No error"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
             </div>
           </div>
 
